@@ -46,6 +46,13 @@ public class GameData
 		get { return maxNumOfPlayers; }
 	}
 
+	private string nextLevelName;
+	public string NextLevelName
+	{
+		get { return nextLevelName; }
+		set { nextLevelName = value; }
+	}
+
     private static GameData instance;
     public static GameData GetInstance()
     {

@@ -46,11 +46,12 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\Backend.cs" />
-     <Compile Include="Assets\Scripts\Config.cs" />
-     <Compile Include="Assets\Scripts\GameData.cs" />
-     <Compile Include="Assets\Scripts\GameEventManager.cs" />
-     <Compile Include="Assets\Scripts\RebootSystem.cs" />
+     <Compile Include="Assets\Scripts\Config\Config.cs" />
+     <Compile Include="Assets\Scripts\Data\GameData.cs" />
+     <Compile Include="Assets\Scripts\Managers\GameEventManager.cs" />
+     <Compile Include="Assets\Scripts\Scenes\Backend.cs" />
+     <Compile Include="Assets\Scripts\Scenes\RebootSystem.cs" />
+     <Compile Include="Assets\Scripts\Scenes\StartInfo.cs" />
      <Compile Include="Assets\Scripts\Utils\CryptoPrefs.cs" />
      <Compile Include="Assets\Scripts\Utils\Gradient.cs" />
  <Reference Include="UnityEngine.UI">
