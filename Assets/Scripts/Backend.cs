@@ -184,9 +184,20 @@ public class Backend : MonoBehaviour
         else if (Config.Language == "EN")
             txtMenuGuide.GetComponent<Text>().text = "Backend | Check Account";
 
-
-    }
-
+		for (int i = 0; i < GameData.GetInstance().MaxNumOfPlayers; ++i)
+		{
+			int[] v = new int[7]{	GameData.GetInstance().zongShang[i], GameData.GetInstance().zongXia[i],
+									GameData.GetInstance().zongYa[i], GameData.GetInstance().zongYing[i],
+									GameData.GetInstance().zongTou[i], GameData.GetInstance().zongTui[i],
+									GameData.GetInstance().caiPiao[i]};
+			for (int j = 1; j <= 7; ++j)
+			{
+				Transform item = checkAccountMenu.transform.GetChild(i + 1).GetChild(j);
+				item.GetComponent<Text>().text = v[j - 1].ToString();
+			}
+		}
+	}
+	
     private void ItemOnClicked(int idx)
     {
         if (menusType == BackMenus.Main)
@@ -331,6 +342,6 @@ public class Backend : MonoBehaviour
 
     private void HandleCheckAccount(int idx)
     {
-
+		SetMenuEnable(BackMenus.Main);
     }
 }

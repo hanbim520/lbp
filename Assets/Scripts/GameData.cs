@@ -32,13 +32,19 @@ public class GameData
     public int danTaiBaoJi;
 
     // Account
-    public const int maxNumOfPlayers = 8;
     public int[] zongShang;
     public int[] zongXia;
     public int[] zongTou;
     public int[] zongTui;
     public int[] zongYa;
     public int[] zongYing;
+	public int[] caiPiao;
+
+	private const int maxNumOfPlayers = 8;
+	public int MaxNumOfPlayers
+	{
+		get { return maxNumOfPlayers; }
+	}
 
     private static GameData instance;
     public static GameData GetInstance()
@@ -89,6 +95,7 @@ public class GameData
             CryptoPrefs.SetInt("zongTui" + i, zongTui[i]);
             CryptoPrefs.SetInt("zongYa" + i, zongYa[i]);
             CryptoPrefs.SetInt("zongYing" + i, zongYing[i]);
+			CryptoPrefs.SetInt("caiPiao" + i, caiPiao[i]);
         }
         CryptoPrefs.Save();
     }
@@ -101,6 +108,7 @@ public class GameData
         zongTui = new int[maxNumOfPlayers];
         zongYa = new int[maxNumOfPlayers];
         zongYing = new int[maxNumOfPlayers];
+		caiPiao = new int[maxNumOfPlayers];
         for (int i = 0; i < maxNumOfPlayers; ++i)
         {
             zongShang[i] = 0;
@@ -109,6 +117,7 @@ public class GameData
             zongTui[i] = 0;
             zongYa[i] = 0;
             zongYing[i] = 0;
+			caiPiao[i] = 0;
         }
     }
 
@@ -147,6 +156,7 @@ public class GameData
                 zongTui[i] = CryptoPrefs.GetInt("zongTui" + i);
                 zongYa[i] = CryptoPrefs.GetInt("zongYa" + i);
                 zongYing[i] = CryptoPrefs.GetInt("zongYing" + i);
+				caiPiao[i] = CryptoPrefs.GetInt("caiPiao" + i);
             }
         }
     }
