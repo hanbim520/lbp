@@ -40,6 +40,14 @@ public class GameData
     public int[] zongYing;
 	public int[] caiPiao;
 
+    // Odds
+    public const float yanseOdds = 1.97f;
+    public const float shuangOdds = 1.97f;
+    public const float danOdds = 1.97f;
+    public const float daOdds = 1.97f;
+    public const float xiaoOdds = 1.97f;
+    public const float duOdds = 36.97f;
+
 	private const int maxNumOfPlayers = 8;
 	public int MaxNumOfPlayers
 	{
