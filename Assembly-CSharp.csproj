@@ -49,12 +49,15 @@
      <Compile Include="Assets\Scripts\Config\Config.cs" />
      <Compile Include="Assets\Scripts\Data\GameData.cs" />
      <Compile Include="Assets\Scripts\Managers\GameEventManager.cs" />
+     <Compile Include="Assets\Scripts\Network\UClient.cs" />
+     <Compile Include="Assets\Scripts\Network\UHost.cs" />
      <Compile Include="Assets\Scripts\Scenes\Backend.cs" />
      <Compile Include="Assets\Scripts\Scenes\MainLogic.cs" />
      <Compile Include="Assets\Scripts\Scenes\RebootSystem.cs" />
      <Compile Include="Assets\Scripts\Scenes\StartInfo.cs" />
      <Compile Include="Assets\Scripts\UIs\MainSceneUI.cs" />
      <Compile Include="Assets\Scripts\Utils\CryptoPrefs.cs" />
+     <Compile Include="Assets\Scripts\Utils\FlashObject.cs" />
      <Compile Include="Assets\Scripts\Utils\Gradient.cs" />
      <Compile Include="Assets\Scripts\Utils\LoadLevelAsync.cs" />
  <Reference Include="UnityEngine.UI">
