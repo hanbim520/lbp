@@ -1,11 +1,10 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/StartInfo.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Network/UClient.cs">
     <Files>
-      <File FileName="Assets/Scripts/StartInfo.cs" Line="6" Column="12" />
-      <File FileName="Assets/Scripts/Backend.cs" Line="323" Column="59" />
-      <File FileName="../DXBao/Assets/Scripts/Scenes/BackStage.cs" Line="322" Column="3" />
-      <File FileName="Assets/Scripts/GameData.cs" Line="53" Column="32" />
+      <File FileName="Assets/Scripts/Network/UClient.cs" Line="3" Column="26" />
+      <File FileName="Assets/Scripts/Network/UHost.cs" Line="8" Column="1" />
+      <File FileName="Assets/Scripts/NetworkDiscovery.cs" Line="78" Column="25" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

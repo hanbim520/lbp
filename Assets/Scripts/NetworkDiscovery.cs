@@ -62,7 +62,7 @@ public class NetworkDiscovery : MonoBehaviour
 
 	void Start()
 	{
-		print(Utils.GetIP());
+		print(Utils.GetIPv4());
 	}
 
 	public bool Initialize()

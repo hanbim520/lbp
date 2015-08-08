@@ -5,17 +5,14 @@ using System.Collections;
 public class UHost : MonoBehaviour
 {
 	public int port = 8888;
-	public string hostAddress = "127.0.0.1";
 
 	private int hostId;
-	private int reiliableChannelId;
-	private int unreliableChannelId;
 	private int broadcastKey = 1000;
 	private int broadcastVersion = 1;
 	private int broadcastSubversion = 1;
+	const int kMaxBroadcastMsgSize = 1024;
 
 	private byte[] msgOutBuffer = null;
-	private byte[] msgInBuffer = null;
 		
 	void Start()
 	{
@@ -33,44 +30,51 @@ public class UHost : MonoBehaviour
 		NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, bufferSize, out dataSize, out error);
 		switch (recData)
 		{
-		case NetworkEventType.Nothing:         //1
+		case NetworkEventType.Nothing:         
 			break;
-		case NetworkEventType.ConnectEvent:    //2
+		case NetworkEventType.ConnectEvent:    
+			HandleConnectEvent(connectionId, channelId);
 			break;
-		case NetworkEventType.DataEvent:       //3
+		case NetworkEventType.DataEvent:       
 			break;
-		case NetworkEventType.DisconnectEvent: //4
+		case NetworkEventType.DisconnectEvent: 
+			HandleDisconnectEvent();
 			break;
 		}
 	}
 
 	private void SetupServer()
 	{
+		// global config
+		GlobalConfig gconfig = new GlobalConfig();
+		gconfig.ReactorModel = ReactorModel.FixRateReactor;
+		gconfig.ThreadAwakeTimeout = 10;
+		NetworkTransport.Init(gconfig);
+
 		ConnectionConfig config = new ConnectionConfig();
-		reiliableChannelId  = config.AddChannel(QosType.Reliable);
-		unreliableChannelId = config.AddChannel(QosType.Unreliable);
+		config.AddChannel(QosType.ReliableSequenced);
+		config.AddChannel(QosType.UnreliableSequenced);
 		
 		HostTopology topology = new HostTopology(config, GameData.GetInstance().MaxNumOfPlayers);
 		hostId = NetworkTransport.AddHost(topology, port);
 
-		msgOutBuffer = Utils.StringToBytes();
+		msgOutBuffer = Utils.StringToBytes("");
 		byte err;
 		if (!NetworkTransport.StartBroadcastDiscovery(hostId, port, broadcastKey, broadcastVersion, broadcastSubversion, msgOutBuffer, msgOutBuffer.Length, 1000, out err))
 		{
 			Debug.LogError("NetworkDiscovery StartBroadcast failed err: " + err);
-			return false;
 		}
 	}
 
-	private void HandleBroadcast()
+	private void HandleConnectEvent(int connectionId, int channelId)
 	{
-		string clientAddress;
-		int port;
 		byte error;
-		NetworkTransport.GetBroadcastConnectionInfo(hostId, out clientAddress, out port, out error);
-		if (!string.IsNullOrEmpty(clientAddress))
-		{
+		byte[] buffer = Utils.StringToBytes("From chenxi server: Connect successfully.");
+		NetworkTransport.Send(hostId, connectionId, channelId, buffer, buffer.Length, out error);
+	}
 
-		}
+	private void HandleDisconnectEvent()
+	{
+
 	}
 }

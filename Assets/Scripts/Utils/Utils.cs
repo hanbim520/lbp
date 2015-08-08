@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Collections;
 
 public static class Utils
 {
@@ -18,30 +20,18 @@ public static class Utils
 		return new string(chars);
 	}
 
-	//http://answers.unity3d.com/questions/39394/send-an-email-c-error.html
-	//http://forum.unity3d.com/threads/get-ip-address.100109/
-	public static string GetIP()
+	public static string GetIPv4()
 	{
-		string userIp = "";
-		NetworkInterface[] adapters = NetworkInterface.GetAllNetworkInterfaces();
-		foreach (NetworkInterface adapter in adapters)
+		string ipv4 = "";
+		IPHostEntry hostInfo = Dns.GetHostByName(System.Net.Dns.GetHostName());
+		foreach(IPAddress ip in hostInfo.AddressList)
 		{
-			　　if (adapter.Supports(NetworkInterfaceComponent.IPv4))
-			　　{
-				　　　　UnicastIPAddressInformationCollection uniCast = adapter.GetIPProperties().UnicastAddresses;
-				　　　　if (uniCast.Count > 0)
-				　　　　{
-					　　　　　　foreach (UnicastIPAddressInformation uni in uniCast)
-					　　　　　　{
-						　　　　　　　　//得到IPv4的地址。 AddressFamily.InterNetwork指的是IPv4
-						　　　　　　　　if (uni.Address.AddressFamily == AddressFamily.InterNetwork)
-						　　　　　　　　{
-							　　　　　　　　　　userIp =uni.Address.ToString();
-						　　　　　　　　}
-					　　　　　　}
-				　　　　}
-			　　}
+			if (ip.AddressFamily == AddressFamily.InterNetwork)
+			{
+				ipv4 = ip.ToString();
+			}
 		}
-		return userIp;
+		return ipv4;
 	}
+
 }
