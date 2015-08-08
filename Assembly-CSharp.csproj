@@ -51,6 +51,7 @@
      <Compile Include="Assets\Scripts\Managers\GameEventManager.cs" />
      <Compile Include="Assets\Scripts\Network\UClient.cs" />
      <Compile Include="Assets\Scripts\Network\UHost.cs" />
+     <Compile Include="Assets\Scripts\NetworkDiscovery.cs" />
      <Compile Include="Assets\Scripts\Scenes\Backend.cs" />
      <Compile Include="Assets\Scripts\Scenes\MainLogic.cs" />
      <Compile Include="Assets\Scripts\Scenes\RebootSystem.cs" />
@@ -60,6 +61,7 @@
      <Compile Include="Assets\Scripts\Utils\FlashObject.cs" />
      <Compile Include="Assets\Scripts\Utils\Gradient.cs" />
      <Compile Include="Assets\Scripts\Utils\LoadLevelAsync.cs" />
+     <Compile Include="Assets\Scripts\Utils\Utils.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>D:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

@@ -1,10 +1,11 @@
 ﻿<Properties>
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Network\UHost.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Utils\Utils.cs">
     <Files>
-      <File FileName="Assets\Scripts\Utils\CryptoPrefs.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Network\UHost.cs" Line="31" Column="49" />
-      <File FileName="Assets\Scripts\Network\UClient.cs" Line="10" Column="14" />
+      <File FileName="Assets\Scripts\Network\UHost.cs" Line="47" Column="2" />
+      <File FileName="Assets\Scripts\Network\UClient.cs" Line="75" Column="42" />
+      <File FileName="Assets\Scripts\NetworkDiscovery.cs" Line="65" Column="23" />
+      <File FileName="Assets\Scripts\Utils\Utils.cs" Line="22" Column="59" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

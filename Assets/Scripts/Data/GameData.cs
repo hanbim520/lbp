@@ -1,24 +1,10 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameData
 {
-    /*
-     押分时间                                10-120（每次加5）
-		投币代分								1-1000
-		彩票代分
-		最小押分
-		单点限注                                1000-30000（每次加1000）
-		大小限红								1000-30000（每次加1000）
-		单双限红								1000-30000（每次加1000）
-		颜色限红                                1000-30000（每次加1000）
-		全台爆机分         
-		单台爆机分   
-		恢复出厂设置
-		保存退出
-不保存退出
-*/
-
     // Setting menu
     public int betTimeLimit;
     public int coinToScore;
@@ -48,6 +34,10 @@ public class GameData
     public const float xiaoOdds = 1.97f;
     public const float duOdds = 36.97f;
 
+	public string deviceId; // unique string
+	public int deviceIndex;	// 1, 2, 3...
+	public Dictionary<int, string> clientsId;
+
 	private const int maxNumOfPlayers = 8;
 	public int MaxNumOfPlayers
 	{
@@ -59,6 +49,18 @@ public class GameData
 	{
 		get { return nextLevelName; }
 		set { nextLevelName = value; }
+	}
+
+	private GameData()
+	{
+		deviceId = PlayerPrefs.GetString("deviceId", string.Empty);
+		if (deviceId == string.Empty)
+		{
+			deviceId = Guid.NewGuid().ToString();
+			PlayerPrefs.SetString("deviceId", deviceId);
+			PlayerPrefs.Save();
+		}
+		deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 	}
 
     private static GameData instance;
