@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
+using System.Collections.Generic;
 
 public class UHost : MonoBehaviour
 {
@@ -12,10 +13,18 @@ public class UHost : MonoBehaviour
 	private int broadcastSubversion = 1;
 	const int kMaxBroadcastMsgSize = 1024;
 
-	private byte[] msgOutBuffer = null;
-		
+	private int numOfConnecting = 0;
+	private Dictionary<int, int> allConnections = new Dictionary<int, int>();
+	private ServerLogic serverLogic;
+
+	public Dictionary<int, int> AllConnections
+	{
+		get { return allConnections; }
+	}
+
 	void Start()
 	{
+		serverLogic = GetComponent<ServerLogic>();
 		SetupServer();
 	}
 	
@@ -58,7 +67,66 @@ public class UHost : MonoBehaviour
 		HostTopology topology = new HostTopology(config, GameData.GetInstance().MaxNumOfPlayers);
 		hostId = NetworkTransport.AddHost(topology, port);
 
-		msgOutBuffer = Utils.StringToBytes("");
+		StartConnectClients();
+	}
+
+	private void HandleConnectEvent(int connectionId, int channelId)
+	{
+		Debug.Log("Connect event. connectionId: " + connectionId + ", channelId: " + channelId);
+		allConnections.Add(connectionId, channelId);
+		serverLogic.clientBets.Add(connectionId, 0);
+		++numOfConnecting;
+		if (numOfConnecting == GameData.GetInstance().MaxNumOfPlayers)
+		{
+			StopBroadcast();
+			GameEventManager.TriggerGameStart();
+		}
+	}
+
+	private void HandleDisconnectEvent(int connectionId)
+	{
+		Debug.Log("Disconnect event. connectionId: " + connectionId);
+		if (allConnections.ContainsKey(connectionId))
+			allConnections.Remove(connectionId);
+		if (serverLogic.clientBets.ContainsKey(connectionId))
+			serverLogic.clientBets.Remove(connectionId);
+		--numOfConnecting;
+		if (numOfConnecting < GameData.GetInstance().MaxNumOfPlayers)
+			StartBroadcast();
+	}
+
+	Timer timerConnectClients;
+	private void StartConnectClients()
+	{
+		StartBroadcast();
+		timerConnectClients = TimerManager.GetInstance().CreateTimer(GameData.GetInstance().ConnectClientsTime);
+		timerConnectClients.Tick += StopConnectClients;
+		timerConnectClients.Start();
+	}
+
+	private void StopConnectClients()
+	{
+		if (timerConnectClients.IsStarted())
+			timerConnectClients.Stop();
+		GameEventManager.TriggerGameStart();
+	}
+
+	public void SendToAll(string msg)
+	{
+		byte[] buffer = Utils.StringToBytes(msg);
+		int connectionId, channelId;
+		foreach (var client in allConnections)
+		{
+			connectionId = client.Key;
+			channelId = client.Value;
+			byte error;
+			NetworkTransport.Send(hostId, connectionId, channelId, buffer, buffer.Length, out error);
+		}
+	}
+
+	public void StartBroadcast()
+	{
+		byte[] msgOutBuffer = Utils.StringToBytes("");
 		byte err;
 		if (!NetworkTransport.StartBroadcastDiscovery(hostId, port, broadcastKey, broadcastVersion, broadcastSubversion, msgOutBuffer, msgOutBuffer.Length, 1000, out err))
 		{
@@ -66,15 +134,10 @@ public class UHost : MonoBehaviour
 		}
 	}
 
-	private void HandleConnectEvent(int connectionId, int channelId)
+	public void StopBroadcast()
 	{
-		byte error;
-		byte[] buffer = Utils.StringToBytes("From chenxi server: Connect successfully.");
-		NetworkTransport.Send(hostId, connectionId, channelId, buffer, buffer.Length, out error);
+		if (NetworkTransport.IsBroadcastDiscoveryRunning())
+			NetworkTransport.StopBroadcastDiscovery();
 	}
 
-	private void HandleDisconnectEvent(int connectionId)
-	{
-		Debug.Log("Disconnect event. connection Id: " + connectionId);
-	}
 }

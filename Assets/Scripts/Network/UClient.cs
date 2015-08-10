@@ -11,6 +11,7 @@ public class UClient : MonoBehaviour
 	private int broadcastVersion = 1;
 	private int broadcastSubversion = 1;
 	private const int kMaxBroadcastMsgSize = 1024;
+	private const float reconnServerInterval = 1.0f;
 	private ConnectionState connState = ConnectionState.Disconnected;
 
 	void Start()
@@ -90,7 +91,7 @@ public class UClient : MonoBehaviour
 		connectionId = NetworkTransport.Connect(hostId, serverAddress, port, 0, out connError);
 		if (connectionId <= 0)
 		{
-			yield return new WaitForSeconds(1.0f);
+			yield return new WaitForSeconds(reconnServerInterval);
 			StartCoroutine(ConnectServer(serverAddress, port));
 		}
 		yield return null;
@@ -104,5 +105,12 @@ public class UClient : MonoBehaviour
 	private void HandleDisconnectEvent()
 	{
 		connState = ConnectionState.Disconnected;
+	}
+
+	public void SendToServer(string msg)
+	{
+		byte[] buffer = Utils.StringToBytes(msg);
+		byte error;
+		NetworkTransport.Send(hostId, connectionId, channelId, buffer, buffer.Length, out error);
 	}
 }

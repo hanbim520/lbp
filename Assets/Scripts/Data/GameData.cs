@@ -26,7 +26,7 @@ public class GameData
     public int[] zongYing;
 	public int[] caiPiao;
 
-    // Odds
+	// Odds
     public const float yanseOdds = 1.97f;
     public const float shuangOdds = 1.97f;
     public const float danOdds = 1.97f;
@@ -37,6 +37,13 @@ public class GameData
 	public string deviceId; // unique string
 	public int deviceIndex;	// 1, 2, 3...
 	public Dictionary<int, string> clientsId;
+
+	// For host
+	private int connectClientsTime = 15;
+	public int ConnectClientsTime
+	{
+		get { return connectClientsTime; }
+	}
 
 	private const int maxNumOfPlayers = 8;
 	public int MaxNumOfPlayers

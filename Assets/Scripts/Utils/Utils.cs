@@ -23,7 +23,7 @@ public static class Utils
 	public static string GetIPv4()
 	{
 		string ipv4 = "";
-		IPHostEntry hostInfo = Dns.GetHostByName(System.Net.Dns.GetHostName());
+		IPHostEntry hostInfo = Dns.GetHostEntry(System.Net.Dns.GetHostName());
 		foreach(IPAddress ip in hostInfo.AddressList)
 		{
 			if (ip.AddressFamily == AddressFamily.InterNetwork)
