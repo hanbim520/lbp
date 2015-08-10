@@ -11,7 +11,7 @@ public class MainLogic : MonoBehaviour
     private float timeInterval = 0;
     private float longPressTime = 3;
     private bool bLoadBackend = false;
-	
+
 	void Start() 
     {
         RegisterListener();

@@ -38,7 +38,7 @@ public class UHost : MonoBehaviour
 		case NetworkEventType.DataEvent:       
 			break;
 		case NetworkEventType.DisconnectEvent: 
-			HandleDisconnectEvent();
+			HandleDisconnectEvent(connectionId);
 			break;
 		}
 	}
@@ -73,8 +73,8 @@ public class UHost : MonoBehaviour
 		NetworkTransport.Send(hostId, connectionId, channelId, buffer, buffer.Length, out error);
 	}
 
-	private void HandleDisconnectEvent()
+	private void HandleDisconnectEvent(int connectionId)
 	{
-
+		Debug.Log("Disconnect event. connection Id: " + connectionId);
 	}
 }

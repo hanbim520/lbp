@@ -11,7 +11,7 @@ public class UClient : MonoBehaviour
 	private int broadcastVersion = 1;
 	private int broadcastSubversion = 1;
 	private const int kMaxBroadcastMsgSize = 1024;
-	private ConnectionState state = ConnectionState.Disconnected;
+	private ConnectionState connState = ConnectionState.Disconnected;
 
 	void Start()
 	{
@@ -70,9 +70,9 @@ public class UClient : MonoBehaviour
 
 	private void HandleBroadcast()
 	{
-		if (state != ConnectionState.Disconnected)
+		if (connState != ConnectionState.Disconnected)
 			return;
-		state = ConnectionState.Connecting;
+		connState = ConnectionState.Connecting;
 
 		string serverAddress;
 		int port;
@@ -98,11 +98,11 @@ public class UClient : MonoBehaviour
 
 	private void HandleDataEvent(ref byte[] recBuffer)
 	{
-		print ("From server: " + Utils.BytesToString(recBuffer));
+		Debug.Log("From server: " + Utils.BytesToString(recBuffer));
 	}
 
 	private void HandleDisconnectEvent()
 	{
-		state = ConnectionState.Disconnected;
+		connState = ConnectionState.Disconnected;
 	}
 }
