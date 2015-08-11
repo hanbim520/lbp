@@ -10,6 +10,8 @@ public class UClient : MonoBehaviour
 	private int broadcastKey = 1000;
 	private int broadcastVersion = 1;
 	private int broadcastSubversion = 1;
+	private int reliableChannelId;
+	private int unreliableChannelId;
 	private const int kMaxBroadcastMsgSize = 1024;
 	private const float reconnServerInterval = 1.0f;
 	private ConnectionState connState = ConnectionState.Disconnected;
@@ -56,8 +58,8 @@ public class UClient : MonoBehaviour
 		
 		// build ourselves a config with a couple of channels
 		ConnectionConfig config = new ConnectionConfig();
-		config.AddChannel(QosType.ReliableSequenced);
-		config.AddChannel(QosType.UnreliableSequenced);
+		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
+		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
 		
 		// create a host topology from the config
 		HostTopology hostconfig = new HostTopology(config, 1);
@@ -111,6 +113,6 @@ public class UClient : MonoBehaviour
 	{
 		byte[] buffer = Utils.StringToBytes(msg);
 		byte error;
-		NetworkTransport.Send(hostId, connectionId, channelId, buffer, buffer.Length, out error);
+		NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
 	}
 }

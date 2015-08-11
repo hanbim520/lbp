@@ -11,11 +11,14 @@ public class UHost : MonoBehaviour
 	private int broadcastKey = 1000;
 	private int broadcastVersion = 1;
 	private int broadcastSubversion = 1;
-	const int kMaxBroadcastMsgSize = 1024;
+	private const int kMaxBroadcastMsgSize = 1024;
+	private int reliableChannelId;
+	private int unreliableChannelId;
 
 	private int numOfConnecting = 0;
 	private Dictionary<int, int> allConnections = new Dictionary<int, int>();
 	private ServerLogic serverLogic;
+	private Timer timerConnectClients;
 
 	public Dictionary<int, int> AllConnections
 	{
@@ -52,6 +55,7 @@ public class UHost : MonoBehaviour
 		}
 	}
 
+
 	private void SetupServer()
 	{
 		// global config
@@ -61,8 +65,8 @@ public class UHost : MonoBehaviour
 		NetworkTransport.Init(gconfig);
 
 		ConnectionConfig config = new ConnectionConfig();
-		config.AddChannel(QosType.ReliableSequenced);
-		config.AddChannel(QosType.UnreliableSequenced);
+		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
+		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
 		
 		HostTopology topology = new HostTopology(config, GameData.GetInstance().MaxNumOfPlayers);
 		hostId = NetworkTransport.AddHost(topology, port);
@@ -95,7 +99,7 @@ public class UHost : MonoBehaviour
 			StartBroadcast();
 	}
 
-	Timer timerConnectClients;
+
 	private void StartConnectClients()
 	{
 		StartBroadcast();
