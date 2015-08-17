@@ -10,6 +10,17 @@ public static class GameEventManager
     public static event GameEvent SRun, ERun;
     public static event GameEvent SShowResult, EShowResult;
     public static event GameEvent SCompensate, ECompensate;
+    public static event GameEvent OpenSerial, CloseSerial;
+
+	public static void TriggerOpenSerial()
+	{
+		if (OpenSerial != null) OpenSerial();
+	}
+
+	public static void TriggerCloseSerial()
+	{
+		if (CloseSerial != null) CloseSerial();
+	}
 
     public static void TriggerObtainInput()
     {

@@ -8,140 +8,152 @@ using System.Threading;
 
 public class SerialPortUtils : MonoBehaviour
 {
+	public string comName = "COM1";
+	public int baudRate = 9600;
+	public Parity parityBit = Parity.None;
+	public int dataBits = 8;
+	public StopBits stopBits = StopBits.One;
+
 	private SerialPort sp; 
-	private Queue<string> queueDataPool;
-	private Queue<string> queueWritePool;
-	private Thread tPort; 
-	private Thread tPortDeal;
+	private Queue<byte> queueReadPool = new Queue<byte>();
+	private Queue<string> queueWritePool = new Queue<string>();
+	private Thread readThread; 
+	private Thread dealThread;
 	private Thread writeThread;
+	private bool isReadThreadExit = false;
+	private bool isDealTheadExit = false;
+	private bool isWriteThreadExit = false;
 	private string strOutPool = string.Empty; 
-	string finalstring = string.Empty; 
-	string tempstring = string.Empty; 
+
+	private const int kWriteInterval = 10;
 
 	void Start() 
 	{ 
-		queueDataPool = new Queue<string>(); 
-		queueWritePool = new Queue<string>();
+		// 端口名称 波特率 奇偶校验位 数据位值 停止位
+		try
+		{
+			sp = new SerialPort(comName, baudRate, parityBit, dataBits, stopBits);
+			if (!sp.IsOpen)
+			{
+				sp.Open();
+				sp.DtrEnable = true;
+				sp.RtsEnable = true;
+			}
+		}
+		catch(Exception ex)
+		{
+			log = ex.ToString();
+		}
 
-		sp = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
-		if (!sp.IsOpen) 
-		{ 
-			sp.Open(); 
-		} 
-		tPort = new Thread(DealData); 
-		tPort.Start(); 
-		tPortDeal = new Thread(ReceiveData); 
-		tPortDeal.Start(); 
+		dealThread = new Thread(DealReceivedData); 
+		dealThread.Start(); 
+		readThread = new Thread(ReceiveData);
+		readThread.IsBackground = true;
+		readThread.Start(); 
 
 		writeThread = new Thread(WriteThreadFunc);
 		writeThread.Start();
-	} 
-	
-	void Update() 
-	{ 
-		if (tPortDeal != null)
+
+//		StartCoroutine(delay());
+		Timer t = TimerManager.GetInstance ().CreateTimer(1, TimerType.Loop);
+		t.Tick += delay;
+		t.Start();
+	}
+
+	void OnDestroy()
+	{
+		readThread.Abort();
+		isReadThreadExit = true;
+		isDealTheadExit = true;
+		isWriteThreadExit = true;
+
+		if (sp.IsOpen)
 		{
-			if (!tPortDeal.IsAlive) 
-			{ 
-				tPortDeal = new Thread(ReceiveData); 
-				tPortDeal.Start(); 
-			} 
-			if (!tPort.IsAlive) 
-			{ 
-				tPort = new Thread(DealData); 
-				tPort.Start(); 
-			} 
+			print ("close");
+			sp.DtrEnable = false;
+			sp.RtsEnable = false;
+			sp.Close();
 		}
-		if (writeThread != null)
-		{
-			if (!writeThread.IsAlive)
-			{
-				writeThread = new Thread(WriteThreadFunc);
-				writeThread.Start();
-			}
-		}
-	} 
+	}
 	
+
 	private void ReceiveData() 
 	{ 
 		try 
 		{ 
-			Byte[] buf = new Byte[1024]; 
-			string sbReadline2str = string.Empty; 
-			if (sp.IsOpen) 
-				sp.Read(buf, 0, buf.Length); 
-			if (buf.Length == 0) 
-			{ 
-				return; 
-			} 
-			if (buf != null) 
-			{ 
-				for (int i = 0; i < buf.Length; i++) 
-				{ 
-					sbReadline2str += string.Format("{0:X2}", buf[i]); 
-					queueDataPool.Enqueue(sbReadline2str); 
-				} 
-				print (sbReadline2str);
-			} 
+			while (!isReadThreadExit)
+			{
+				if (sp != null && sp.IsOpen)
+				{
+					byte buf = (byte)sp.ReadByte();
+					queueReadPool.Enqueue(buf);
+					print(buf);
+				}
+			}
 		} 
 		catch (Exception ex) 
 		{ 
+			log = ex.ToString ();
 			Debug.Log(ex); 
 		} 
 	} 
 
-	private void DealData() 
+	private void DealReceivedData() 
 	{ 
-		while (queueDataPool.Count != 0) 
-		{ 
-			for (int i = 0; i < queueDataPool.Count; i++) 
+		while (!isDealTheadExit)
+		{
+			if (queueReadPool.Count != 0) 
 			{ 
-				strOutPool+= queueDataPool.Dequeue(); 
-				if(strOutPool.Length==16) 
+				for (int i = 0; i < queueReadPool.Count; i++) 
 				{ 
-					Debug.Log(strOutPool); 
-					strOutPool=string.Empty; 
+					strOutPool+= queueReadPool.Dequeue(); 
+					if(strOutPool.Length==16) 
+					{ 
+						Debug.Log(strOutPool); 
+						strOutPool=string.Empty; 
+					} 
 				} 
 			} 
-			
-		} 
+		}
 	} 
 	
 	public void SendSerialPortData(string data) 
 	{ 
 		queueWritePool.Enqueue(data);
-		print("count:" + queueWritePool.Count);
-//		if(sp.IsOpen) 
-//		{ 
-//			sp.WriteLine(data); 
-//		} 
 	} 
 
 	private void WriteThreadFunc()
 	{
-		while (queueWritePool.Count != 0)
+		while (!isWriteThreadExit)
 		{
-			for (int i = 0; i < queueWritePool.Count; ++i)
+			Thread.Sleep(kWriteInterval);
+			if (queueWritePool.Count != 0)
 			{
-				string data = queueWritePool.Dequeue();
-				if (sp.IsOpen)
+				for (int i = 0; i < queueWritePool.Count; ++i)
 				{
-					sp.WriteLine(data); 
+					string data = queueWritePool.Dequeue();
+					if (sp.IsOpen)
+						sp.Write(data);
 				}
 			}
 		}
 	}
 
-	void OnDestroy()
-	{
-		sp.Close(); 
-	}
-
+	string log = "Hello";
 	void OnGUI()
 	{
 		if (GUI.Button(new Rect(10, 10, 200, 150), "Send"))
 		{
 			SendSerialPortData("Hello");
 		}
+
+		if (GUI.Button(new Rect(10, 300, 500, 450), log))
+		{}
+	}
+
+	void delay()
+	{
+		print ("send");
+		SendSerialPortData("Hello");
 	}
 }

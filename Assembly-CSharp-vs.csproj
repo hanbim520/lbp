@@ -66,6 +66,7 @@
      <Compile Include="Assets\Scripts\Utils\Gradient.cs" />
      <Compile Include="Assets\Scripts\Utils\LoadLevelAsync.cs" />
      <Compile Include="Assets\Scripts\Utils\SerialPortUtils.cs" />
+     <Compile Include="Assets\Scripts\Utils\SerialUtils.cs" />
      <Compile Include="Assets\Scripts\Utils\Utils.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>D:/Program Files/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
