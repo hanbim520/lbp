@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Threading;
 
@@ -25,8 +26,14 @@ public class SerialUtils : MonoBehaviour
 
 		//writeSerialPort0
 		byte[] data = new byte[]{3, 4, 5};
-		AndroidJavaObject sendMethord = jo.Call<AndroidJavaObject>("writeSerialPort0", data);
-		bool rev = AndroidJNIHelper.ConvertFromJNIArray<bool>(sendMethord.GetRawObject());
+
+		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
+		jvalue[] blah = new jvalue[1];
+		blah[0].l = pArr;
+		
+		IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "writeSerialPort0");
+		bool rev = AndroidJNI.CallBooleanMethod(jo.GetRawObject(), methodId, blah);
+
 		if (rev)
 		{
 			print("write ok");
@@ -37,19 +44,41 @@ public class SerialUtils : MonoBehaviour
 		}
 
 		AndroidJavaObject methord = jo.Call<AndroidJavaObject>("getBytes");
-		byte[] b = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(methord.GetRawObject());
-		if (b == null)
+		if (methord == null)
 		{
-			print("read failed");
+			print ("read methord is null");
 		}
-		else if (b.Length > 0)
+		else if (methord.GetRawObject() == IntPtr.Zero)
 		{
+			print ("read GetRawObject is null");
+		}
+		else
+		{
+			byte[] b = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(methord.GetRawObject());
 			print("read data:");
 			for (int i = 0; i < b.Length; ++i)
 			{
 				print(b[i]);
 			}
 		}
+	}
+
+	// Note: java side should be return boolean
+	private bool WriteData(byte[] data, string methodName)
+	{
+		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
+		jvalue[] blah = new jvalue[1];
+		blah[0].l = pArr;
+		
+		IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), methodName);
+		return AndroidJNI.CallBooleanMethod(jo.GetRawObject(), methodId, blah);
+	}
+
+	// Note: Java side should be return byte[]
+	private byte[] ReadData(string methodName)
+	{
+		AndroidJavaObject rev = jo.Call<AndroidJavaObject>("methodName");
+		return AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
 	}
 
     void OnDestroy()
