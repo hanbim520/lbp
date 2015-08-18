@@ -21,9 +21,30 @@ public class SerialUtils : MonoBehaviour
 
 	void Test()
 	{
-		byte[] b = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(AndroidJNIHelper.GetMethodID(jo.GetRawObject(), "getBytes"));
-		if (b.Length > 0)
+
+
+		//writeSerialPort0
+		byte[] data = new byte[]{3, 4, 5};
+		AndroidJavaObject sendMethord = jo.Call<AndroidJavaObject>("writeSerialPort0", data);
+		bool rev = AndroidJNIHelper.ConvertFromJNIArray<bool>(sendMethord.GetRawObject());
+		if (rev)
 		{
+			print("write ok");
+		}
+		else
+		{
+			print("can't write");
+		}
+
+		AndroidJavaObject methord = jo.Call<AndroidJavaObject>("getBytes");
+		byte[] b = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(methord.GetRawObject());
+		if (b == null)
+		{
+			print("read failed");
+		}
+		else if (b.Length > 0)
+		{
+			print("read data:");
 			for (int i = 0; i < b.Length; ++i)
 			{
 				print(b[i]);
