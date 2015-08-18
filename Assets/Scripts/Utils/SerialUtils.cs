@@ -43,7 +43,9 @@ public class SerialUtils : MonoBehaviour
 			print("can't write");
 		}
 
+		print ("1");
 		AndroidJavaObject methord = jo.Call<AndroidJavaObject>("getBytes");
+		print ("2");
 		if (methord == null)
 		{
 			print ("read methord is null");
@@ -54,6 +56,7 @@ public class SerialUtils : MonoBehaviour
 		}
 		else
 		{
+			print ("ConvertFromJNIArray. methord.GetRawObject(): " + methord.GetRawObject().ToString());
 			byte[] b = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(methord.GetRawObject());
 			print("read data:");
 			for (int i = 0; i < b.Length; ++i)
@@ -77,7 +80,7 @@ public class SerialUtils : MonoBehaviour
 	// Note: Java side should be return byte[]
 	private byte[] ReadData(string methodName)
 	{
-		AndroidJavaObject rev = jo.Call<AndroidJavaObject>("methodName");
+		AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
 		return AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
 	}
 
