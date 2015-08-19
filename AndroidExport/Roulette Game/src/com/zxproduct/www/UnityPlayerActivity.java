@@ -44,13 +44,6 @@ public class UnityPlayerActivity extends Activity
 
 		setContentView(mUnityPlayer);
 		mUnityPlayer.requestFocus();
-		
-		BufferStruct b1 = new BufferStruct();
-		b1.buffer = new byte[] {1, 2, 3};
-		BufferStruct b2 = new BufferStruct();
-		b2.buffer = new byte[] {4, 5, 6};
-		readSerialQueue0.offer(b1);
-		readSerialQueue0.offer(b2);
 	}
 
 	// Quit Unity
@@ -109,20 +102,24 @@ public class UnityPlayerActivity extends Activity
 	private SerialPort mSerialPort2 = null;
 	private SerialPort mSerialPort3 = null;
 	
-	private OutputStream mOutputStream0;
-	private OutputStream mOutputStream1;
-	private OutputStream mOutputStream2;
-	private OutputStream mOutputStream3;
-	private InputStream mInputStream0;
-	private InputStream mInputStream1;
-	private InputStream mInputStream2;
-	private InputStream mInputStream3;
-	private ReadThread mReadThread0;
-	private ReadThread mReadThread1;
-	private ReadThread mReadThread2;
-	private ReadThread mReadThread3;
-	private SendingThread mSendingThread0;
-	byte[] mBuffer;
+	private OutputStream mOutputStream0 = null;
+	private OutputStream mOutputStream1 = null;
+	private OutputStream mOutputStream2 = null;
+	private OutputStream mOutputStream3 = null;
+	private InputStream mInputStream0 = null;
+	private InputStream mInputStream1 = null;
+	private InputStream mInputStream2 = null;
+	private InputStream mInputStream3 = null;
+	private ReadThread0 mReadThread0;
+	private ReadThread1 mReadThread1;
+	private ReadThread2 mReadThread2;
+	private ReadThread3 mReadThread3;
+	private SendingThread mSendingThread = null;
+	private boolean isExit0 = true;
+	private boolean isExit1 = true;
+	private boolean isExit2 = true;
+	private boolean isExit3 = true;
+	private boolean isSendExit = true;
 	
 	private ConcurrentLinkedQueue<BufferStruct> readSerialQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 	private ConcurrentLinkedQueue<BufferStruct> readSerialQueue1 = new ConcurrentLinkedQueue<BufferStruct>();
@@ -138,27 +135,37 @@ public class UnityPlayerActivity extends Activity
 		public byte[] buffer;
 	}
 	
-	private class ReadThread extends Thread {
-		private InputStream inputStream;
-		
-		public ReadThread(InputStream inputStream)
+	private class ReadThread0 extends Thread 
+	{	
+		public ReadThread0()
 		{
-			this.inputStream = inputStream;
+			isExit0 = false;
 		}
-		
 		@Override
-		public void run() {
+		public void run()
+		{
 			super.run();
-			while(!isInterrupted()) {
-				int size;
-				try {
-					byte[] buffer = new byte[64];
-					if (inputStream == null) return;
-					size = inputStream.read(buffer);
-					if (size > 0) {
-//						onDataReceived(buffer, size);
+			while(!isExit0) 
+			{
+				try
+				{
+					if (mInputStream0 != null) 
+					{
+						byte[] buffer = new byte[128];
+						int size = mInputStream0.read(buffer);
+						if (size > 0)
+						{
+							synchronized(readSerialQueue0)
+							{
+								BufferStruct buf = new BufferStruct();
+								buf.buffer = buffer;
+								readSerialQueue0.offer(buf);
+							}
+						}
 					}
-				} catch (IOException e) {
+				}
+				catch (IOException e) 
+				{
 					e.printStackTrace();
 					return;
 				}
@@ -166,24 +173,37 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	private class SendingThread extends Thread {
-		private OutputStream outputStream;
-		
-		public SendingThread(OutputStream outputStream)
+	private class ReadThread1 extends Thread 
+	{	
+		public ReadThread1()
 		{
-			this.outputStream = outputStream;
+			isExit1 = false;
 		}
-		
 		@Override
-		public void run() {
-			while (!isInterrupted()) {
-				try {
-					if (outputStream != null) {
-						outputStream.write(mBuffer);
-					} else {
-						return;
+		public void run()
+		{
+			super.run();
+			while(!isExit1) 
+			{
+				try
+				{
+					if (mInputStream1 != null) 
+					{
+						byte[] buffer = new byte[128];
+						int size = mInputStream1.read(buffer);
+						if (size > 0)
+						{
+							synchronized(readSerialQueue1)
+							{
+								BufferStruct buf = new BufferStruct();
+								buf.buffer = buffer;
+								readSerialQueue1.offer(buf);
+							}
+						}
 					}
-				} catch (IOException e) {
+				}
+				catch (IOException e) 
+				{
 					e.printStackTrace();
 					return;
 				}
@@ -191,41 +211,166 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	public void openSerialPort(int idx, int baudrate)
-	{
-		try 
+	private class ReadThread2 extends Thread 
+	{	
+		public ReadThread2()
 		{
-			if (idx == 0)
+			isExit2 = false;
+		}
+		@Override
+		public void run()
+		{
+			super.run();
+			while(!isExit2) 
 			{
-				mSerialPort0 = new SerialPort(new File("/dev/ttyS0"), baudrate, 0);
-				mOutputStream0 = mSerialPort0.getOutputStream();
-				mInputStream0 = mSerialPort0.getInputStream();
-				
-				mReadThread0 = new ReadThread(mInputStream0);
-				mReadThread0.start();
-				mSendingThread0 = new SendingThread(mOutputStream0);
-				mSendingThread0.start();
-				
-				readSerialQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
+				try
+				{
+					if (mInputStream2 != null) 
+					{
+						byte[] buffer = new byte[128];
+						int size = mInputStream2.read(buffer);
+						if (size > 0)
+						{
+							synchronized(readSerialQueue2)
+							{
+								BufferStruct buf = new BufferStruct();
+								buf.buffer = buffer;
+								readSerialQueue2.offer(buf);
+							}
+						}
+					}
+				}
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+					return;
+				}
 			}
-			else if (idx == 1)
+		}
+	}
+	
+	private class ReadThread3 extends Thread 
+	{	
+		public ReadThread3()
+		{
+			isExit3 = false;
+		}
+		@Override
+		public void run()
+		{
+			super.run();
+			while(!isExit3) 
 			{
-				mSerialPort1 = new SerialPort(new File("/dev/ttyS1"), baudrate, 0);
-				
-				readSerialQueue1 = new ConcurrentLinkedQueue<BufferStruct>();
+				try
+				{
+					if (mInputStream3 != null) 
+					{
+						byte[] buffer = new byte[128];
+						int size = mInputStream3.read(buffer);
+						if (size > 0)
+						{
+							synchronized(readSerialQueue3)
+							{
+								BufferStruct buf = new BufferStruct();
+								buf.buffer = buffer;
+								readSerialQueue3.offer(buf);
+							}
+						}
+					}
+				}
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+					return;
+				}
 			}
-			else if (idx == 2)
+		}
+	}
+	
+	private class SendingThread extends Thread 
+	{
+		@Override
+		public void run()
+		{
+			super.run();
+			while (!isSendExit)
 			{
-				mSerialPort2 = new SerialPort(new File("/dev/ttyS2"), baudrate, 0);
-				
-				readSerialQueue2 = new ConcurrentLinkedQueue<BufferStruct>();
+				try
+				{
+					if (!writeSerialQueue0.isEmpty() && mOutputStream0 != null)
+					{
+						synchronized(writeSerialQueue0)
+						{
+							BufferStruct buffer = writeSerialQueue0.poll();
+							mOutputStream0.write(buffer.buffer);
+						}
+					}
+					if (!writeSerialQueue1.isEmpty() && mOutputStream1 != null)
+					{
+						synchronized(writeSerialQueue1)
+						{
+							BufferStruct buffer = writeSerialQueue1.poll();
+							mOutputStream1.write(buffer.buffer);
+						}
+					}
+					if (!writeSerialQueue2.isEmpty() && mOutputStream2 != null)
+					{
+						synchronized(writeSerialQueue2)
+						{
+							BufferStruct buffer = writeSerialQueue2.poll();
+							mOutputStream2.write(buffer.buffer);
+						}
+					}
+					if (!writeSerialQueue3.isEmpty() && mOutputStream3 != null)
+					{
+						synchronized(writeSerialQueue3)
+						{
+							BufferStruct buffer = writeSerialQueue3.poll();
+							mOutputStream3.write(buffer.buffer);
+						}
+					}
+				}
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+					return;
+				}
 			}
-			else if (idx == 3)
-			{
-				mSerialPort3 = new SerialPort(new File("/dev/ttyS3"), baudrate, 0);
-				
-				readSerialQueue3 = new ConcurrentLinkedQueue<BufferStruct>();
-			}
+		}
+	}
+	
+	public void openSerialPort(int baudrate)
+	{
+		try
+		{
+			mSerialPort0 = new SerialPort(new File("/dev/ttyS0"), baudrate, 0);
+			mOutputStream0 = mSerialPort0.getOutputStream();
+			mInputStream0 = mSerialPort0.getInputStream();
+			
+			mSerialPort1 = new SerialPort(new File("/dev/ttyS1"), baudrate, 0);
+			mOutputStream1 = mSerialPort1.getOutputStream();
+			mInputStream1 = mSerialPort1.getInputStream();
+			
+			mSerialPort2 = new SerialPort(new File("/dev/ttyS2"), baudrate, 0);
+			mOutputStream2 = mSerialPort2.getOutputStream();
+			mInputStream2 = mSerialPort2.getInputStream();
+			
+			mSerialPort3 = new SerialPort(new File("/dev/ttyS3"), baudrate, 0);
+			mOutputStream3 = mSerialPort3.getOutputStream();
+			mInputStream3 = mSerialPort3.getInputStream();
+			
+			mReadThread0 = new ReadThread0();
+			mReadThread0.start();
+			mReadThread1 = new ReadThread1();
+			mReadThread1.start();
+			mReadThread2 = new ReadThread2();
+			mReadThread2.start();
+			mReadThread3 = new ReadThread3();
+			mReadThread3.start();
+			
+			mSendingThread = new SendingThread();
+			mSendingThread.start();
+			
 		}
 		catch (SecurityException e)
 		{
@@ -234,41 +379,27 @@ public class UnityPlayerActivity extends Activity
 		catch (IOException e)
 		{
 			e.printStackTrace();
-		}   
+		} 
 	}
 
-	public void closeSerialPort(int idx)
+	public void closeSerialPort()
 	{
-		if (idx != 0) 
-		{
-			closeSerialPort(mSerialPort0);
-			mSerialPort0 = null;
-		}
-		else if (idx == 1)
-		{
-			closeSerialPort(mSerialPort1);
-			mSerialPort1 = null;
-		}
-		else if (idx == 2)
-		{
-			closeSerialPort(mSerialPort2);
-			mSerialPort2 = null;
-		}
-		else if (idx == 3)
-		{
-			closeSerialPort(mSerialPort3);
-			mSerialPort3 = null;
-		}
+		isExit0 = true;
+		isExit1 = true;
+		isExit2 = true;
+		isExit3 = true;
+		isSendExit = true;
+		
+		mSerialPort0.close();
+		mSerialPort0 = null;
+		mSerialPort1.close();
+		mSerialPort1 = null;
+		mSerialPort2.close();
+		mSerialPort2 = null;
+		mSerialPort3.close();
+		mSerialPort3 = null;
 	}
-	
-	private void closeSerialPort(SerialPort port)
-	{
-		if (port != null)
-		{
-			port.close();
-		}
-	}
-	
+
 	 public byte[] readSerialPort0()
 	 {
 		 synchronized(readSerialQueue0)

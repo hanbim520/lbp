@@ -5,16 +5,16 @@ using System.Threading;
 
 public class SerialUtils : MonoBehaviour
 {
+	public int baudrate = 115200;
+
 	private AndroidJavaClass jc;
 	private AndroidJavaObject jo;
-
-	private Thread readThread;
+	private Timer timerRead;
+	private Timer timerSend;
 
 	void Start()
 	{
-//		readThread = new Thread();
-//		readThread.Start();
-
+		DontDestroyOnLoad(this);
 		InitData();
         RegisterEvent();
 		Test();
@@ -22,66 +22,36 @@ public class SerialUtils : MonoBehaviour
 
 	void Test()
 	{
-
-
-		//writeSerialPort0
-		byte[] data = new byte[]{3, 4, 5};
-
-		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
-		jvalue[] blah = new jvalue[1];
-		blah[0].l = pArr;
-		
-		IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "writeSerialPort0");
-		bool rev = AndroidJNI.CallBooleanMethod(jo.GetRawObject(), methodId, blah);
-
-		if (rev)
+		if (Application.platform == RuntimePlatform.Android)
 		{
-			print("write ok");
-		}
-		else
-		{
-			print("can't write");
-		}
-
-		print ("1");
-		AndroidJavaObject methord = jo.Call<AndroidJavaObject>("getBytes");
-		print ("2");
-		if (methord == null)
-		{
-			print ("read methord is null");
-		}
-		else if (methord.GetRawObject() == IntPtr.Zero)
-		{
-			print ("read GetRawObject is null");
-		}
-		else
-		{
-			print ("ConvertFromJNIArray. methord.GetRawObject(): " + methord.GetRawObject().ToString());
-			byte[] b = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(methord.GetRawObject());
-			print("read data:");
-			for (int i = 0; i < b.Length; ++i)
-			{
-				print(b[i]);
-			}
+			OpenSerial();
 		}
 	}
 
 	// Note: java side should be return boolean
 	private bool WriteData(byte[] data, string methodName)
 	{
-		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
-		jvalue[] blah = new jvalue[1];
-		blah[0].l = pArr;
-		
-		IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), methodName);
-		return AndroidJNI.CallBooleanMethod(jo.GetRawObject(), methodId, blah);
+		if (Application.platform == RuntimePlatform.Android)
+		{
+			IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
+			jvalue[] blah = new jvalue[1];
+			blah[0].l = pArr;
+			
+			IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), methodName);
+			return AndroidJNI.CallBooleanMethod(jo.GetRawObject(), methodId, blah);
+		}
+		return false;
 	}
 
 	// Note: Java side should be return byte[]
 	private byte[] ReadData(string methodName)
 	{
-		AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
-		return AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
+		if (Application.platform == RuntimePlatform.Android)
+		{
+			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
+			return AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
+		}
+		return null;
 	}
 
     void OnDestroy()
@@ -93,11 +63,8 @@ public class SerialUtils : MonoBehaviour
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-			print("InitData1");
 			jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
-			print("InitData2");
 			jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-			print("InitData3");
 		}
 	}
 	
@@ -120,13 +87,44 @@ public class SerialUtils : MonoBehaviour
     }
 
     private void OpenSerial()
-    {}
+    {
+		if (Application.platform == RuntimePlatform.Android)
+		{
+			jo.Call("openSerialPort", baudrate);
+//			timerRead = TimerManager.GetInstance().CreateTimer(100, TimerType.Loop);
+//			timerRead.Tick += ;
+		}
+	}
 
     private void CloseSerial()
-    {}
+    {
+		if (Application.platform == RuntimePlatform.Android)
+		{
+			jo.Call("closeSerialPort");
+		}
+	}
+
+	private void ReadSerialPort()
+	{
+//		byte[] data = ReadData();
+//		if (data)
+	}
 	
 	void Update()
 	{
 	
+	}
+
+	void OnGUI()
+	{
+		if (GUI.Button(new Rect(10, 50, 200, 150), "Open"))
+		{
+			OpenSerial();
+		}
+
+		if (GUI.Button(new Rect(10, 250, 200, 150), "Close"))
+		{
+			CloseSerial();
+		}
 	}
 }
