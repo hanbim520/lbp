@@ -5,7 +5,7 @@ using System.Threading;
 
 public class SerialUtils : MonoBehaviour
 {
-	public int baudrate = 115200;
+	public int baudrate = 9600;
 
 	private AndroidJavaClass jc;
 	private AndroidJavaObject jo;
@@ -20,6 +20,15 @@ public class SerialUtils : MonoBehaviour
 		Test();
 	}
 
+	void OnDestroy()
+	{
+		if (timerRead != null && timerRead.IsStarted())
+		{
+			timerRead.Stop();
+		}
+		UnregisterEvent();
+	}
+
 	void Test()
 	{
 		if (Application.platform == RuntimePlatform.Android)
@@ -29,7 +38,7 @@ public class SerialUtils : MonoBehaviour
 	}
 
 	// Note: java side should be return boolean
-	private bool WriteData(byte[] data, string methodName)
+	private bool WriteData(int[] data, string methodName)
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
@@ -43,21 +52,16 @@ public class SerialUtils : MonoBehaviour
 		return false;
 	}
 
-	// Note: Java side should be return byte[]
-	private byte[] ReadData(string methodName)
+	// Note: Java side should be return int[]
+	private int[] ReadData(string methodName)
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
 			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
-			return AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
+			return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
 		}
 		return null;
 	}
-
-    void OnDestroy()
-    {
-        UnregisterEvent();
-    }
 
 	private void InitData()
 	{
@@ -90,9 +94,11 @@ public class SerialUtils : MonoBehaviour
     {
 		if (Application.platform == RuntimePlatform.Android)
 		{
+			DebugConsole.Log("cs OpenSerial");
 			jo.Call("openSerialPort", baudrate);
-//			timerRead = TimerManager.GetInstance().CreateTimer(100, TimerType.Loop);
-//			timerRead.Tick += ;
+			timerRead = TimerManager.GetInstance().CreateTimer(100, TimerType.Loop);
+			timerRead.Tick += ReadSerialPort;
+			timerRead.Start();
 		}
 	}
 
@@ -106,14 +112,24 @@ public class SerialUtils : MonoBehaviour
 
 	private void ReadSerialPort()
 	{
-//		byte[] data = ReadData();
-//		if (data)
+		int[] data = ReadData("readSerialPort3");
+		if (data.Length > 0)
+		{
+			if (data[0] == -1)
+			{
+				DebugConsole.Log("ReadSerialPort get -1.");
+				return;
+			}
+			log = "";
+			for (int i = 0; i < data.Length; ++i)
+			{
+//				DebugConsole.Log(data[i].ToString());
+				log += data[i].ToString() + ", ";
+			}
+		}
 	}
-	
-	void Update()
-	{
-	
-	}
+
+	string log = "";
 
 	void OnGUI()
 	{
@@ -125,6 +141,11 @@ public class SerialUtils : MonoBehaviour
 		if (GUI.Button(new Rect(10, 250, 200, 150), "Close"))
 		{
 			CloseSerial();
+		}
+
+		if (GUI.Button(new Rect(250, 50, 200, 150), log))
+		{
+
 		}
 	}
 }

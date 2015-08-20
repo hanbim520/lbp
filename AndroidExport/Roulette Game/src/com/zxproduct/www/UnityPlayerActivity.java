@@ -14,6 +14,7 @@ import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -110,16 +111,14 @@ public class UnityPlayerActivity extends Activity
 	private InputStream mInputStream1 = null;
 	private InputStream mInputStream2 = null;
 	private InputStream mInputStream3 = null;
-	private ReadThread0 mReadThread0;
-	private ReadThread1 mReadThread1;
-	private ReadThread2 mReadThread2;
-	private ReadThread3 mReadThread3;
-	private SendingThread mSendingThread = null;
-	private boolean isExit0 = true;
-	private boolean isExit1 = true;
-	private boolean isExit2 = true;
-	private boolean isExit3 = true;
-	private boolean isSendExit = true;
+	private ReadThread0 mReadThread0 = null;
+	private ReadThread1 mReadThread1 = null;
+	private ReadThread2 mReadThread2 = null;
+	private ReadThread3 mReadThread3 = null;
+	private SendThread0 mSendThread0 = null;
+	private SendThread1 mSendThread1 = null;
+	private SendThread2 mSendThread2 = null;
+	private SendThread3 mSendThread3 = null;
 	
 	private ConcurrentLinkedQueue<BufferStruct> readSerialQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 	private ConcurrentLinkedQueue<BufferStruct> readSerialQueue1 = new ConcurrentLinkedQueue<BufferStruct>();
@@ -132,20 +131,16 @@ public class UnityPlayerActivity extends Activity
 	
 	private class BufferStruct
 	{
-		public byte[] buffer;
+		public int[] buffer;
 	}
 	
 	private class ReadThread0 extends Thread 
 	{	
-		public ReadThread0()
-		{
-			isExit0 = false;
-		}
 		@Override
 		public void run()
 		{
 			super.run();
-			while(!isExit0) 
+			while(!isInterrupted()) 
 			{
 				try
 				{
@@ -158,7 +153,12 @@ public class UnityPlayerActivity extends Activity
 							synchronized(readSerialQueue0)
 							{
 								BufferStruct buf = new BufferStruct();
-								buf.buffer = buffer;
+								int count = buffer.length;
+								buf.buffer = new int[count];
+								for (int i = 0; i < count; ++i)
+								{
+									buf.buffer[i] = buffer[i] & 0xff;
+								}
 								readSerialQueue0.offer(buf);
 							}
 						}
@@ -169,21 +169,22 @@ public class UnityPlayerActivity extends Activity
 					e.printStackTrace();
 					return;
 				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}
 			}
 		}
 	}
 	
 	private class ReadThread1 extends Thread 
 	{	
-		public ReadThread1()
-		{
-			isExit1 = false;
-		}
 		@Override
 		public void run()
 		{
 			super.run();
-			while(!isExit1) 
+			while(!isInterrupted()) 
 			{
 				try
 				{
@@ -196,7 +197,12 @@ public class UnityPlayerActivity extends Activity
 							synchronized(readSerialQueue1)
 							{
 								BufferStruct buf = new BufferStruct();
-								buf.buffer = buffer;
+								int count = buffer.length;
+								buf.buffer = new int[count];
+								for (int i = 0; i < count; ++i)
+								{
+									buf.buffer[i] = buffer[i] & 0xff;
+								}
 								readSerialQueue1.offer(buf);
 							}
 						}
@@ -207,21 +213,22 @@ public class UnityPlayerActivity extends Activity
 					e.printStackTrace();
 					return;
 				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}
 			}
 		}
 	}
 	
 	private class ReadThread2 extends Thread 
 	{	
-		public ReadThread2()
-		{
-			isExit2 = false;
-		}
 		@Override
 		public void run()
 		{
 			super.run();
-			while(!isExit2) 
+			while(!isInterrupted()) 
 			{
 				try
 				{
@@ -234,7 +241,12 @@ public class UnityPlayerActivity extends Activity
 							synchronized(readSerialQueue2)
 							{
 								BufferStruct buf = new BufferStruct();
-								buf.buffer = buffer;
+								int count = buffer.length;
+								buf.buffer = new int[count];
+								for (int i = 0; i < count; ++i)
+								{
+									buf.buffer[i] = buffer[i] & 0xff;
+								}
 								readSerialQueue2.offer(buf);
 							}
 						}
@@ -245,21 +257,22 @@ public class UnityPlayerActivity extends Activity
 					e.printStackTrace();
 					return;
 				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}
 			}
 		}
 	}
 	
 	private class ReadThread3 extends Thread 
 	{	
-		public ReadThread3()
-		{
-			isExit3 = false;
-		}
 		@Override
 		public void run()
 		{
 			super.run();
-			while(!isExit3) 
+			while(!isInterrupted()) 
 			{
 				try
 				{
@@ -269,12 +282,55 @@ public class UnityPlayerActivity extends Activity
 						int size = mInputStream3.read(buffer);
 						if (size > 0)
 						{
-							synchronized(readSerialQueue3)
-							{
 								BufferStruct buf = new BufferStruct();
-								buf.buffer = buffer;
-								readSerialQueue3.offer(buf);
+								buf.buffer = new int[size];
+								for (int i = 0; i < size; ++i)
+								{
+									buf.buffer[i] = buffer[i] & 0xff;
+								}
+								synchronized(readSerialQueue3)
+								{
+									readSerialQueue3.offer(buf);
+								}
+						}
+					}
+				}
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+					return;
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+	}
+	
+	private class SendThread0 extends Thread 
+	{
+		@Override
+		public void run()
+		{
+			super.run();
+			while (!isInterrupted())
+			{
+				try
+				{
+					if (!writeSerialQueue0.isEmpty() && mOutputStream0 != null)
+					{
+						synchronized(writeSerialQueue0)
+						{
+							BufferStruct buffer = writeSerialQueue0.poll();
+							int count = buffer.buffer.length;
+							byte[] buf = new byte[count];
+							for (int i = 0; i < count; ++i)
+							{
+								buf[i] = (byte)buffer.buffer[i];
 							}
+							mOutputStream0.write(buf);
 						}
 					}
 				}
@@ -287,46 +343,98 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	private class SendingThread extends Thread 
+	
+	
+	private class SendThread1 extends Thread
 	{
 		@Override
 		public void run()
 		{
 			super.run();
-			while (!isSendExit)
+			while (!isInterrupted())
 			{
 				try
 				{
-					if (!writeSerialQueue0.isEmpty() && mOutputStream0 != null)
-					{
-						synchronized(writeSerialQueue0)
-						{
-							BufferStruct buffer = writeSerialQueue0.poll();
-							mOutputStream0.write(buffer.buffer);
-						}
-					}
 					if (!writeSerialQueue1.isEmpty() && mOutputStream1 != null)
 					{
 						synchronized(writeSerialQueue1)
 						{
 							BufferStruct buffer = writeSerialQueue1.poll();
-							mOutputStream1.write(buffer.buffer);
+							int count = buffer.buffer.length;
+							byte[] buf = new byte[count];
+							for (int i = 0; i < count; ++i)
+							{
+								buf[i] = (byte)buffer.buffer[i];
+							}
+							mOutputStream1.write(buf);
 						}
 					}
+				}
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+	}
+	
+	private class SendThread2 extends Thread
+	{
+		@Override
+		public void run()
+		{
+			super.run();
+			while (!isInterrupted())
+			{
+				try
+				{
 					if (!writeSerialQueue2.isEmpty() && mOutputStream2 != null)
 					{
 						synchronized(writeSerialQueue2)
 						{
 							BufferStruct buffer = writeSerialQueue2.poll();
-							mOutputStream2.write(buffer.buffer);
+							int count = buffer.buffer.length;
+							byte[] buf = new byte[count];
+							for (int i = 0; i < count; ++i)
+							{
+								buf[i] = (byte)buffer.buffer[i];
+							}
+							mOutputStream2.write(buf);
 						}
 					}
+				}
+				catch (IOException e) 
+				{
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+	}
+	
+	private class SendThread3 extends Thread
+	{
+		@Override
+		public void run()
+		{
+			super.run();
+			while (!isInterrupted())
+			{
+				try
+				{
 					if (!writeSerialQueue3.isEmpty() && mOutputStream3 != null)
 					{
 						synchronized(writeSerialQueue3)
 						{
 							BufferStruct buffer = writeSerialQueue3.poll();
-							mOutputStream3.write(buffer.buffer);
+							int count = buffer.buffer.length;
+							byte[] buf = new byte[count];
+							for (int i = 0; i < count; ++i)
+							{
+								buf[i] = (byte)buffer.buffer[i];
+							}
+							mOutputStream3.write(buf);
 						}
 					}
 				}
@@ -368,9 +476,14 @@ public class UnityPlayerActivity extends Activity
 			mReadThread3 = new ReadThread3();
 			mReadThread3.start();
 			
-			mSendingThread = new SendingThread();
-			mSendingThread.start();
-			
+			mSendThread0 = new SendThread0();
+			mSendThread0.start();
+			mSendThread1 = new SendThread1();
+			mSendThread1.start();
+			mSendThread2 = new SendThread2();
+			mSendThread2.start();
+			mSendThread3 = new SendThread3();
+			mSendThread3.start();
 		}
 		catch (SecurityException e)
 		{
@@ -384,23 +497,46 @@ public class UnityPlayerActivity extends Activity
 
 	public void closeSerialPort()
 	{
-		isExit0 = true;
-		isExit1 = true;
-		isExit2 = true;
-		isExit3 = true;
-		isSendExit = true;
+		if (mReadThread0 != null)
+			mReadThread0.interrupt();
+		if (mReadThread1 != null)
+			mReadThread1.interrupt();
+		if (mReadThread2 != null)
+			mReadThread2.interrupt();
+		if (mReadThread3 != null)
+			mReadThread3.interrupt();
+		if (mSendThread0 != null)
+			mSendThread0.interrupt();
+		if (mSendThread1 != null)
+			mSendThread1.interrupt();
+		if (mSendThread2 != null)
+			mSendThread2.interrupt();
+		if (mSendThread3 != null)
+			mSendThread3.interrupt();
 		
-		mSerialPort0.close();
-		mSerialPort0 = null;
-		mSerialPort1.close();
-		mSerialPort1 = null;
-		mSerialPort2.close();
-		mSerialPort2 = null;
-		mSerialPort3.close();
-		mSerialPort3 = null;
+		if (mSerialPort0 != null)
+		{
+			mSerialPort0.close();
+			mSerialPort0 = null;
+		}
+		if (mSerialPort1 != null)
+		{
+			mSerialPort1.close();
+			mSerialPort1 = null;
+		}
+		if (mSerialPort2 != null)
+		{
+			mSerialPort2.close();
+			mSerialPort2 = null;
+		}
+		if (mSerialPort3 != null)
+		{
+			mSerialPort3.close();
+			mSerialPort3 = null;
+		}
 	}
 
-	 public byte[] readSerialPort0()
+	 public int[] readSerialPort0()
 	 {
 		 synchronized(readSerialQueue0)
 		 {
@@ -411,10 +547,10 @@ public class UnityPlayerActivity extends Activity
 			 }
 		 }
 		 // Can't return null, otherwise csharp side case exception.
-	     return new byte[]{0};
+	     return new int[]{0};
 	 }
 	 
-	 public byte[] readSerialPort1()
+	 public int[] readSerialPort1()
 	 {
 		 synchronized(readSerialQueue1)
 		 {
@@ -425,10 +561,10 @@ public class UnityPlayerActivity extends Activity
 			 }
 		 }
 		// Can't return null, otherwise csharp side case exception.
-		 return new byte[]{0};
+		 return new int[]{0};
 	 }
 	 
-	 public byte[] readSerialPort2()
+	 public int[] readSerialPort2()
 	 {
 		 synchronized(readSerialQueue2)
 		 {
@@ -439,34 +575,38 @@ public class UnityPlayerActivity extends Activity
 			 }
 		 }
 		// Can't return null, otherwise csharp side case exception.
-		 return new byte[]{0};
+		 return new int[]{0};
 	 }
 	 
-	 public byte[] readSerialPort3()
+	 public int[] readSerialPort3()
 	 {
-		 synchronized(readSerialQueue3)
+		 if (!readSerialQueue3.isEmpty())
 		 {
-			 if (!readSerialQueue3.isEmpty())
+			 synchronized(readSerialQueue3)
 			 {
 				 BufferStruct buffer = readSerialQueue3.poll();
 				 return buffer.buffer;
 			 }
 		 }
 		// Can't return null, otherwise csharp side case exception.
-		 return new byte[]{0};
+		 return new int[]{-1};
 	 }
 	 
-	 public boolean writeSerialPort0(byte[] data)
+	 public boolean writeSerialPort0(int[] data)
 	 {
 		 synchronized(writeSerialQueue0)
 		 {
 			 BufferStruct buffer = new BufferStruct();
 			 buffer.buffer = data;
+			 for (int i = 0; i < buffer.buffer.length; ++i)
+			 {
+				 Log.i("Unity", "java write: " + buffer.buffer[i]);
+			 }
 			 return writeSerialQueue0.offer(buffer);
 		 }
 	 }
 	 
-	 public boolean writeSerialPort1(byte[] data)
+	 public boolean writeSerialPort1(int[] data)
 	 {
 		 synchronized(writeSerialQueue1)
 		 {
@@ -476,7 +616,7 @@ public class UnityPlayerActivity extends Activity
 		 }
 	 }
 	 
-	 public boolean writeSerialPort2(byte[] data)
+	 public boolean writeSerialPort2(int[] data)
 	 {
 		 synchronized(writeSerialQueue2)
 		 {
@@ -486,7 +626,7 @@ public class UnityPlayerActivity extends Activity
 		 }
 	 }
 	 
-	 public boolean writeSerialPort3(byte[] data)
+	 public boolean writeSerialPort3(int[] data)
 	 {
 		 synchronized(writeSerialQueue3)
 		 {
