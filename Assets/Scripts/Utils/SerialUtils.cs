@@ -96,9 +96,13 @@ public class SerialUtils : MonoBehaviour
 		{
 			DebugConsole.Log("cs OpenSerial");
 			jo.Call("openSerialPort", baudrate);
-			timerRead = TimerManager.GetInstance().CreateTimer(100, TimerType.Loop);
+			timerRead = TimerManager.GetInstance().CreateTimer(0.1f, TimerType.Loop);
 			timerRead.Tick += ReadSerialPort;
 			timerRead.Start();
+
+//			timerRead = TimerManager.GetInstance().CreateTimer(1.0f, TimerType.Loop);
+//			timerRead.Tick += WriteSerialPort;
+//			timerRead.Start();
 		}
 	}
 
@@ -108,6 +112,11 @@ public class SerialUtils : MonoBehaviour
 		{
 			jo.Call("closeSerialPort");
 		}
+	}
+
+	private void WriteSerialPort()
+	{
+		WriteData(new int[]{0x55, 0x55}, "writeSerialPort3");
 	}
 
 	private void ReadSerialPort()
@@ -126,10 +135,13 @@ public class SerialUtils : MonoBehaviour
 //				DebugConsole.Log(data[i].ToString());
 				log += data[i].ToString() + ", ";
 			}
+			++receiveCount;
+			DebugConsole.Log(log + receiveCount);
 		}
 	}
 
 	string log = "";
+	int receiveCount = 0;
 
 	void OnGUI()
 	{
@@ -141,11 +153,6 @@ public class SerialUtils : MonoBehaviour
 		if (GUI.Button(new Rect(10, 250, 200, 150), "Close"))
 		{
 			CloseSerial();
-		}
-
-		if (GUI.Button(new Rect(250, 50, 200, 150), log))
-		{
-
 		}
 	}
 }

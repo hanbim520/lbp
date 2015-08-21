@@ -150,15 +150,15 @@ public class UnityPlayerActivity extends Activity
 						int size = mInputStream0.read(buffer);
 						if (size > 0)
 						{
+							BufferStruct buf = new BufferStruct();
+							int count = buffer.length;
+							buf.buffer = new int[count];
+							for (int i = 0; i < count; ++i)
+							{
+								buf.buffer[i] = buffer[i] & 0xff;
+							}
 							synchronized(readSerialQueue0)
 							{
-								BufferStruct buf = new BufferStruct();
-								int count = buffer.length;
-								buf.buffer = new int[count];
-								for (int i = 0; i < count; ++i)
-								{
-									buf.buffer[i] = buffer[i] & 0xff;
-								}
 								readSerialQueue0.offer(buf);
 							}
 						}
@@ -194,15 +194,15 @@ public class UnityPlayerActivity extends Activity
 						int size = mInputStream1.read(buffer);
 						if (size > 0)
 						{
+							BufferStruct buf = new BufferStruct();
+							int count = buffer.length;
+							buf.buffer = new int[count];
+							for (int i = 0; i < count; ++i)
+							{
+								buf.buffer[i] = buffer[i] & 0xff;
+							}
 							synchronized(readSerialQueue1)
 							{
-								BufferStruct buf = new BufferStruct();
-								int count = buffer.length;
-								buf.buffer = new int[count];
-								for (int i = 0; i < count; ++i)
-								{
-									buf.buffer[i] = buffer[i] & 0xff;
-								}
 								readSerialQueue1.offer(buf);
 							}
 						}
@@ -238,15 +238,15 @@ public class UnityPlayerActivity extends Activity
 						int size = mInputStream2.read(buffer);
 						if (size > 0)
 						{
+							BufferStruct buf = new BufferStruct();
+							int count = buffer.length;
+							buf.buffer = new int[count];
+							for (int i = 0; i < count; ++i)
+							{
+								buf.buffer[i] = buffer[i] & 0xff;
+							}
 							synchronized(readSerialQueue2)
 							{
-								BufferStruct buf = new BufferStruct();
-								int count = buffer.length;
-								buf.buffer = new int[count];
-								for (int i = 0; i < count; ++i)
-								{
-									buf.buffer[i] = buffer[i] & 0xff;
-								}
 								readSerialQueue2.offer(buf);
 							}
 						}
@@ -282,16 +282,16 @@ public class UnityPlayerActivity extends Activity
 						int size = mInputStream3.read(buffer);
 						if (size > 0)
 						{
-								BufferStruct buf = new BufferStruct();
-								buf.buffer = new int[size];
-								for (int i = 0; i < size; ++i)
-								{
-									buf.buffer[i] = buffer[i] & 0xff;
-								}
-								synchronized(readSerialQueue3)
-								{
-									readSerialQueue3.offer(buf);
-								}
+							BufferStruct buf = new BufferStruct();
+							buf.buffer = new int[size];
+							for (int i = 0; i < size; ++i)
+							{
+								buf.buffer[i] = buffer[i] & 0xff;
+							}
+							synchronized(readSerialQueue3)
+							{
+								readSerialQueue3.offer(buf);
+							}
 						}
 					}
 				}
@@ -538,9 +538,9 @@ public class UnityPlayerActivity extends Activity
 
 	 public int[] readSerialPort0()
 	 {
-		 synchronized(readSerialQueue0)
+		 if (!readSerialQueue0.isEmpty())
 		 {
-			 if (!readSerialQueue0.isEmpty())
+			 synchronized(readSerialQueue0)
 			 {
 				 BufferStruct buffer = readSerialQueue0.poll();
 				 return buffer.buffer;
@@ -552,9 +552,9 @@ public class UnityPlayerActivity extends Activity
 	 
 	 public int[] readSerialPort1()
 	 {
-		 synchronized(readSerialQueue1)
+		 if (!readSerialQueue1.isEmpty())
 		 {
-			 if (!readSerialQueue1.isEmpty())
+			 synchronized(readSerialQueue1)
 			 {
 				 BufferStruct buffer = readSerialQueue1.poll();
 				 return buffer.buffer;
@@ -566,9 +566,9 @@ public class UnityPlayerActivity extends Activity
 	 
 	 public int[] readSerialPort2()
 	 {
-		 synchronized(readSerialQueue2)
+		 if (!readSerialQueue2.isEmpty())
 		 {
-			 if (!readSerialQueue2.isEmpty())
+			 synchronized(readSerialQueue2)
 			 {
 				 BufferStruct buffer = readSerialQueue2.poll();
 				 return buffer.buffer;
