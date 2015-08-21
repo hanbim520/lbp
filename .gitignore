@@ -5,3 +5,6 @@ AndroidExport/Roulette Game/assets
 AndroidExport/Roulette Game/bin
 AndroidExport/Roulette Game/gen
 *.apk
+*.csproj
+
+*.sln
