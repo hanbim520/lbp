@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.security.InvalidParameterException;
@@ -13,6 +15,12 @@ import com.unity3d.player.*;
 import android.app.Activity;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
+import android.hardware.usb.UsbConstants;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
+import android.hardware.usb.UsbInterface;
+import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -20,6 +28,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android_serialport_api.SerialPort;
 import android_serialport_api.SerialPortFinder;
@@ -635,4 +645,229 @@ public class UnityPlayerActivity extends Activity
 			 return writeSerialQueue3.offer(buffer);
 		 }
 	 }
+	 
+	 private UsbManager mUsbManager = null;
+	 private UsbEndpoint epBulkOut;
+	 private UsbEndpoint epBulkIn;
+	 private UsbEndpoint epControl;
+	 private UsbEndpoint epIntEndpointOut;
+	 private UsbEndpoint epIntEndpointIn;
+	 private UsbDevice mUsbDevice;
+	 private UsbDeviceConnection mDeviceConnection;
+	 private UsbInterface Interface1;
+	 private UsbInterface Interface2;
+	 private String TAG = "Unity";
+	 private int ProductID;
+	 private int VendorID;
+	 public void FindHID()
+	 {
+		 mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+		 if(mUsbManager == null)
+			 return;
+		 
+		// 枚举设备  
+        enumerateDevice(mUsbManager);  
+        // 查找设备接口  
+        getDeviceInterface();  
+        // 获取设备endpoint  
+        assignEndpoint(Interface2);  
+        // 打开conn连接通道  
+        openDevice(Interface2);  
+	 }
+	 
+	 // 枚举设备函数  
+	 private void enumerateDevice(UsbManager mUsbManager) 
+	 {
+		 System.out.println("开始进行枚举设备!");  
+		 if (mUsbManager == null) 
+		 {  
+			 System.out.println("创建UsbManager失败，请重新启动应用！");  
+			 return;  
+		 } 
+		 else
+		 {  
+			 HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();  
+			 if (!(deviceList.isEmpty())) 
+			 {  
+				 System.out.println("deviceList is not null!");  
+				 Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();  
+				 while (deviceIterator.hasNext()) 
+				 {  
+					 UsbDevice device = deviceIterator.next();  
+					 // 输出设备信息  
+					 Log.i(TAG, "DeviceInfo: " + device.getVendorId() + " , "  
+	                        + device.getProductId());  
+					 // 保存设备VID和PID  
+					 VendorID = device.getVendorId();  
+					 ProductID = device.getProductId();  
+					 // 保存匹配到的设备  
+					 if (VendorID == 1105 && ProductID == 5800)
+					 {   
+						 mUsbDevice = device; // 获取USBDevice  
+		                 System.out.println("发现待匹配设备:" + device.getVendorId()  
+		                            + "," + device.getProductId());  
+		                 Context context = getApplicationContext();  
+		                 Toast.makeText(context, "发现待匹配设备", Toast.LENGTH_SHORT).show();  
+		             }
+				 }
+			 } 
+			 else
+			 {
+				 Context context = getApplicationContext();  
+		         Toast.makeText(context, "请连接USB设备至PAD！", Toast.LENGTH_SHORT).show();  
+		     }  
+		 }  
+	}  
+
+	// 寻找设备接口
+	private void getDeviceInterface()
+	{
+		if (mUsbDevice != null) 
+		{
+			Log.d(TAG, "interfaceCounts : " + mUsbDevice.getInterfaceCount());
+			for (int i = 0; i < mUsbDevice.getInterfaceCount(); i++)
+			{
+				UsbInterface intf = mUsbDevice.getInterface(i);
+				
+				if (i == 0)
+				{
+					Interface1 = intf; // 保存设备接口
+					System.out.println("成功获得设备接口:" + Interface1.getId());
+				}
+				if (i == 1)
+				{
+					Interface2 = intf;
+					System.out.println("成功获得设备接口:" + Interface2.getId());
+				}
+			}
+		} 
+		else 
+		{
+			System.out.println("设备为空！");
+		}
+	}
+	
+	// 分配端点，IN | OUT，即输入输出；可以通过判断
+	private UsbEndpoint assignEndpoint(UsbInterface mInterface)
+	{
+
+		for (int i = 0; i < mInterface.getEndpointCount(); i++)
+		{
+			UsbEndpoint ep = mInterface.getEndpoint(i);
+			// look for bulk endpoint
+			if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK)
+			{
+				if (ep.getDirection() == UsbConstants.USB_DIR_OUT) 
+				{
+					epBulkOut = ep;
+					System.out.println("Find the BulkEndpointOut," + "index:"
+							+ i + "," + "使用端点号："
+							+ epBulkOut.getEndpointNumber());
+				} 
+				else
+				{
+					epBulkIn = ep;
+					System.out
+							.println("Find the BulkEndpointIn:" + "index:" + i
+									+ "," + "使用端点号："
+									+ epBulkIn.getEndpointNumber());
+				}
+			}
+			// look for contorl endpoint
+			if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_CONTROL)
+			{
+				epControl = ep;
+				System.out.println("find the ControlEndPoint:" + "index:" + i
+						+ "," + epControl.getEndpointNumber());
+			}
+			// look for interrupte endpoint
+			if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_INT)
+			{
+				if (ep.getDirection() == UsbConstants.USB_DIR_OUT)
+				{
+					epIntEndpointOut = ep;
+					System.out.println("find the InterruptEndpointOut:"
+							+ "index:" + i + ","
+							+ epIntEndpointOut.getEndpointNumber());
+				}
+				if (ep.getDirection() == UsbConstants.USB_DIR_IN) 
+				{
+					epIntEndpointIn = ep;
+					System.out.println("find the InterruptEndpointIn:"
+							+ "index:" + i + ","
+							+ epIntEndpointIn.getEndpointNumber());
+				}
+			}
+		}
+		if (epBulkOut == null && epBulkIn == null && epControl == null
+				&& epIntEndpointOut == null && epIntEndpointIn == null) 
+		{
+			throw new IllegalArgumentException("not endpoint is founded!");
+		}
+		return epIntEndpointIn;
+	}
+	
+	// 打开设备
+	public void openDevice(UsbInterface mInterface)
+	{
+		if (mInterface != null)
+		{
+			UsbDeviceConnection conn = null;
+			// 在open前判断是否有连接权限；对于连接权限可以静态分配，也可以动态分配权限
+			if (mUsbManager.hasPermission(mUsbDevice)) 
+			{
+				conn = mUsbManager.openDevice(mUsbDevice);
+			}
+
+			if (conn == null)
+			{
+				return;
+			}
+
+			if (conn.claimInterface(mInterface, true)) 
+			{
+				mDeviceConnection = conn;
+				if (mDeviceConnection != null)// 到此你的android设备已经连上zigbee设备
+					System.out.println("open设备成功！");
+				final String mySerial = mDeviceConnection.getSerial();
+				System.out.println("设备serial number：" + mySerial);
+			} 
+			else 
+			{
+				System.out.println("无法打开连接通道。");
+				conn.close();
+			}
+		}
+	}
+	
+	// 发送数据
+	private void sendMessageToPoint(byte[] buffer)
+	{
+		// bulkOut传输
+		if (mDeviceConnection
+				.bulkTransfer(epBulkOut, buffer, buffer.length, 0) < 0)
+			System.out.println("bulkOut返回输出为  负数");
+		else
+		{
+			System.out.println("Send Message Succese！");
+		}
+	}
+	
+	// 从设备接收数据bulkIn
+	private byte[] receiveMessageFromPoint() 
+	{
+		byte[] buffer = new byte[15];
+		if (mDeviceConnection.bulkTransfer(epBulkIn, buffer, buffer.length,
+				2000) < 0)
+			System.out.println("bulkIn返回输出为  负数");
+		else 
+		{
+			System.out.println("Receive Message Succese！"
+			// + "数据返回"
+			// + myDeviceConnection.bulkTransfer(epBulkIn, buffer,
+			// buffer.length, 3000)
+					);
+		}
+		return buffer;
+	}
 }

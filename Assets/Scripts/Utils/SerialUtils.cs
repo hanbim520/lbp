@@ -116,7 +116,7 @@ public class SerialUtils : MonoBehaviour
 
 	private void WriteSerialPort()
 	{
-		WriteData(new int[]{0x55, 0x55}, "writeSerialPort3");
+		WriteData(new int[]{0x55,0x54,0x11,0x13,0x0D,0x55,0x54,0x11,0x13,0x0D }, "writeSerialPort3");
 	}
 
 	private void ReadSerialPort()
@@ -145,9 +145,12 @@ public class SerialUtils : MonoBehaviour
 
 	void OnGUI()
 	{
-		if (GUI.Button(new Rect(10, 50, 200, 150), "Open"))
+		if (GUI.Button(new Rect(10, 50, 200, 150), "Loop Send"))
 		{
-			OpenSerial();
+//			OpenSerial();
+			Timer t = TimerManager.GetInstance().CreateTimer(0.2f, TimerType.Loop);
+			t.Tick += WriteSerialPort;
+			t.Start();
 		}
 
 		if (GUI.Button(new Rect(10, 250, 200, 150), "Close"))
