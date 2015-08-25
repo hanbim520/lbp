@@ -37,6 +37,7 @@ import android_serialport_api.SerialPortFinder;
 public class UnityPlayerActivity extends Activity
 {
 	protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
+	private String TAG = "Unity";
 
 	// Setup activity layout
 	@Override protected void onCreate (Bundle savedInstanceState)
@@ -138,6 +139,8 @@ public class UnityPlayerActivity extends Activity
 	private ConcurrentLinkedQueue<BufferStruct> writeSerialQueue1 = new ConcurrentLinkedQueue<BufferStruct>();
 	private ConcurrentLinkedQueue<BufferStruct> writeSerialQueue2 = new ConcurrentLinkedQueue<BufferStruct>();
 	private ConcurrentLinkedQueue<BufferStruct> writeSerialQueue3 = new ConcurrentLinkedQueue<BufferStruct>();
+	private ConcurrentLinkedQueue<BufferStruct> readUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
+	private ConcurrentLinkedQueue<BufferStruct> writeUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 	
 	private class BufferStruct
 	{
@@ -656,10 +659,38 @@ public class UnityPlayerActivity extends Activity
 	 private UsbDeviceConnection mDeviceConnection;
 	 private UsbInterface Interface1;
 	 private UsbInterface Interface2;
-	 private String TAG = "Unity";
 	 private int ProductID;
 	 private int VendorID;
-	 public void FindHID()
+//	 private UsbSendThread usbSendThread;
+//	 private UsbReadThread usbReadThread;
+//	 
+//	 private class UsbSendThread extends Thread
+//	 {
+//		 
+//	 }
+//	 
+//	 private class UsbReadThread extends Thread
+//	 {
+//			@Override
+//			public void run()
+//			{
+//				super.run();
+//				while(!isInterrupted()) 
+//				{
+//					try
+//					{
+//						
+//					}
+//					catch (Exception e)
+//					{
+//						e.printStackTrace();
+//						return;
+//					}
+//				}
+//			}
+//	 }
+	 
+	 public void openUsb()
 	 {
 		 mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 		 if(mUsbManager == null)
@@ -673,84 +704,73 @@ public class UnityPlayerActivity extends Activity
         assignEndpoint(Interface2);  
         // 打开conn连接通道  
         openDevice(Interface2);  
+        
+	 }
+	 
+	 public void closeUsb()
+	 {
+		 
 	 }
 	 
 	 // 枚举设备函数  
 	 private void enumerateDevice(UsbManager mUsbManager) 
 	 {
-		 System.out.println("开始进行枚举设备!");  
-		 if (mUsbManager == null) 
+		 HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();  
+		 if (!(deviceList.isEmpty())) 
 		 {  
-			 System.out.println("创建UsbManager失败，请重新启动应用！");  
-			 return;  
+			 System.out.println("deviceList is not null!");  
+			 Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();  
+			 while (deviceIterator.hasNext()) 
+			 {  
+				 UsbDevice device = deviceIterator.next();  
+				 // 输出设备信息  
+				 Log.i(TAG, "DeviceInfo: " + device.getVendorId() + " , "  
+                        + device.getProductId());  
+				 // 保存设备VID和PID  
+				 VendorID = device.getVendorId();  
+				 ProductID = device.getProductId();  
+				 // 保存匹配到的设备  
+				 if (VendorID == 1105 && ProductID == 5800)
+				 {   
+					 mUsbDevice = device; // 获取USBDevice  
+	                 System.out.println("发现待匹配设备:" + device.getVendorId()  
+	                            + "," + device.getProductId());  
+	                 Context context = getApplicationContext();  
+	                 Toast.makeText(context, "发现待匹配设备", Toast.LENGTH_SHORT).show();  
+	             }
+			 }
 		 } 
 		 else
-		 {  
-			 HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();  
-			 if (!(deviceList.isEmpty())) 
-			 {  
-				 System.out.println("deviceList is not null!");  
-				 Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();  
-				 while (deviceIterator.hasNext()) 
-				 {  
-					 UsbDevice device = deviceIterator.next();  
-					 // 输出设备信息  
-					 Log.i(TAG, "DeviceInfo: " + device.getVendorId() + " , "  
-	                        + device.getProductId());  
-					 // 保存设备VID和PID  
-					 VendorID = device.getVendorId();  
-					 ProductID = device.getProductId();  
-					 // 保存匹配到的设备  
-					 if (VendorID == 1105 && ProductID == 5800)
-					 {   
-						 mUsbDevice = device; // 获取USBDevice  
-		                 System.out.println("发现待匹配设备:" + device.getVendorId()  
-		                            + "," + device.getProductId());  
-		                 Context context = getApplicationContext();  
-		                 Toast.makeText(context, "发现待匹配设备", Toast.LENGTH_SHORT).show();  
-		             }
-				 }
-			 } 
-			 else
-			 {
-				 Context context = getApplicationContext();  
-		         Toast.makeText(context, "请连接USB设备至PAD！", Toast.LENGTH_SHORT).show();  
-		     }  
-		 }  
+		 {
+			 Context context = getApplicationContext();  
+	         Toast.makeText(context, "请连接USB设备至PAD！", Toast.LENGTH_SHORT).show();  
+	     }  
 	}  
 
 	// 寻找设备接口
 	private void getDeviceInterface()
 	{
-		if (mUsbDevice != null) 
+		Log.d(TAG, "interfaceCounts : " + mUsbDevice.getInterfaceCount());
+		for (int i = 0; i < mUsbDevice.getInterfaceCount(); i++)
 		{
-			Log.d(TAG, "interfaceCounts : " + mUsbDevice.getInterfaceCount());
-			for (int i = 0; i < mUsbDevice.getInterfaceCount(); i++)
+			UsbInterface intf = mUsbDevice.getInterface(i);
+			
+			if (i == 0)
 			{
-				UsbInterface intf = mUsbDevice.getInterface(i);
-				
-				if (i == 0)
-				{
-					Interface1 = intf; // 保存设备接口
-					System.out.println("成功获得设备接口:" + Interface1.getId());
-				}
-				if (i == 1)
-				{
-					Interface2 = intf;
-					System.out.println("成功获得设备接口:" + Interface2.getId());
-				}
+				Interface1 = intf; // 保存设备接口
+				System.out.println("成功获得设备接口:" + Interface1.getId());
 			}
-		} 
-		else 
-		{
-			System.out.println("设备为空！");
+			if (i == 1)
+			{
+				Interface2 = intf;
+				System.out.println("成功获得设备接口:" + Interface2.getId());
+			}
 		}
 	}
 	
 	// 分配端点，IN | OUT，即输入输出；可以通过判断
 	private UsbEndpoint assignEndpoint(UsbInterface mInterface)
 	{
-
 		for (int i = 0; i < mInterface.getEndpointCount(); i++)
 		{
 			UsbEndpoint ep = mInterface.getEndpoint(i);
@@ -840,34 +860,30 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	// 发送数据
-	private void sendMessageToPoint(byte[] buffer)
+	public int writeUsbPort(byte[] buffer)
 	{
-		// bulkOut传输
-		if (mDeviceConnection
-				.bulkTransfer(epBulkOut, buffer, buffer.length, 0) < 0)
-			System.out.println("bulkOut返回输出为  负数");
-		else
-		{
-			System.out.println("Send Message Succese！");
-		}
+		return mDeviceConnection.bulkTransfer(epBulkOut, buffer, buffer.length, 0);
 	}
 	
-	// 从设备接收数据bulkIn
-	private byte[] receiveMessageFromPoint() 
+	public byte[] readUsbPort() 
 	{
-		byte[] buffer = new byte[15];
-		if (mDeviceConnection.bulkTransfer(epBulkIn, buffer, buffer.length,
-				2000) < 0)
-			System.out.println("bulkIn返回输出为  负数");
-		else 
+		byte[] buffer = new byte[256];
+		int count = mDeviceConnection.bulkTransfer(epBulkIn, buffer, buffer.length, 150);
+		if (count > 0)
 		{
-			System.out.println("Receive Message Succese！"
-			// + "数据返回"
-			// + myDeviceConnection.bulkTransfer(epBulkIn, buffer,
-			// buffer.length, 3000)
-					);
+			BufferStruct buf = new BufferStruct();
+			buf.buffer = new int[count];
+			for (int i = 0; i < count; ++i)
+			{
+				buf.buffer[i] = buffer[i] & 0xff;
+			}
+			readUsbQueue0.offer(buf);
 		}
 		return buffer;
+	}
+	
+	public void CallCSLog(String msg)
+	{
+		UnityPlayer.UnitySendMessage("SerialUtils", "DebugLog", msg);
 	}
 }

@@ -145,7 +145,7 @@ public class SerialUtils : MonoBehaviour
 
 	void OnGUI()
 	{
-		if (GUI.Button(new Rect(10, 50, 200, 150), "Loop Send"))
+		if (GUI.Button(new Rect(10, 50, 100, 50), "Loop Send"))
 		{
 //			OpenSerial();
 			Timer t = TimerManager.GetInstance().CreateTimer(0.2f, TimerType.Loop);
@@ -153,9 +153,30 @@ public class SerialUtils : MonoBehaviour
 			t.Start();
 		}
 
-		if (GUI.Button(new Rect(10, 250, 200, 150), "Close"))
+		if (GUI.Button(new Rect(10, 200, 100, 50), "Close"))
 		{
 			CloseSerial();
 		}
+
+		if (GUI.Button(new Rect(200, 50, 100, 50), ""))
+		{
+			jo.Call("CallCSLog", "Hello chenxi " + Time.realtimeSinceStartup);
+		}
+	}
+
+	private void ReadUsb()
+	{
+
+	}
+
+	private void Writeusb()
+	{
+
+	}
+
+	public void DebugLog(string message)
+	{
+
+		DebugConsole.Log(message);
 	}
 }
