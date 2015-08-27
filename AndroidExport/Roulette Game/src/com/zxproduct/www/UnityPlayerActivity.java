@@ -744,7 +744,7 @@ public class UnityPlayerActivity extends Activity
 				 VendorID = device.getVendorId();  
 				 ProductID = device.getProductId();  
 				 // 保存匹配到的设备  
-				 if (VendorID == 1105 && ProductID == 5800)
+				 if (VendorID == 0x0483 && ProductID == 0x1000)
 				 {   
 					 mUsbDevice = device; // 获取USBDevice  
 	                 System.out.println("发现待匹配设备:" + device.getVendorId()  
