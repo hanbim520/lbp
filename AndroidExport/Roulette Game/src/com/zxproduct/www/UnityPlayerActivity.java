@@ -140,7 +140,7 @@ public class UnityPlayerActivity extends Activity
 	private ConcurrentLinkedQueue<BufferStruct> writeSerialQueue2 = new ConcurrentLinkedQueue<BufferStruct>();
 	private ConcurrentLinkedQueue<BufferStruct> writeSerialQueue3 = new ConcurrentLinkedQueue<BufferStruct>();
 	private ConcurrentLinkedQueue<BufferStruct> readUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
-	private ConcurrentLinkedQueue<BufferStruct> writeUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
+//	private ConcurrentLinkedQueue<BufferStruct> writeUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 	
 	private class BufferStruct
 	{
@@ -355,8 +355,6 @@ public class UnityPlayerActivity extends Activity
 			}
 		}
 	}
-	
-	
 	
 	private class SendThread1 extends Thread
 	{
@@ -649,6 +647,7 @@ public class UnityPlayerActivity extends Activity
 		 }
 	 }
 	 
+	 private final int kUsbReadTimeout = 150;
 	 private UsbManager mUsbManager = null;
 	 private UsbEndpoint epBulkOut;
 	 private UsbEndpoint epBulkIn;
@@ -661,34 +660,46 @@ public class UnityPlayerActivity extends Activity
 	 private UsbInterface Interface2;
 	 private int ProductID;
 	 private int VendorID;
-//	 private UsbSendThread usbSendThread;
+	 private TReadUsb0 mTReadUsb0 = null;
 //	 private UsbReadThread usbReadThread;
-//	 
-//	 private class UsbSendThread extends Thread
-//	 {
-//		 
-//	 }
-//	 
-//	 private class UsbReadThread extends Thread
-//	 {
-//			@Override
-//			public void run()
-//			{
-//				super.run();
-//				while(!isInterrupted()) 
-//				{
-//					try
-//					{
-//						
-//					}
-//					catch (Exception e)
-//					{
-//						e.printStackTrace();
-//						return;
-//					}
-//				}
-//			}
-//	 }
+	 
+	private class TReadUsb0 extends Thread
+	{
+		@Override
+		public void run()
+		{
+			super.run();
+			while (!isInterrupted())
+			{
+				try
+				{
+					if (mDeviceConnection != null && epBulkIn != null)
+					{
+						byte[] buffer = new byte[128];
+						int count = mDeviceConnection.bulkTransfer(epBulkIn, buffer, buffer.length, kUsbReadTimeout);
+						if (count > 0)
+						{
+							BufferStruct buf = new BufferStruct();
+							buf.buffer = new int[count];
+							for (int i = 0; i < count; ++i)
+							{
+								buf.buffer[i] = buffer[i] & 0xff;
+							}
+							synchronized(readUsbQueue0)
+							{
+								readUsbQueue0.offer(buf);
+							}
+						}
+					}
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+	}
 	 
 	 public void openUsb()
 	 {
@@ -705,11 +716,14 @@ public class UnityPlayerActivity extends Activity
         // 打开conn连接通道  
         openDevice(Interface2);  
         
+        mTReadUsb0 = new TReadUsb0();
+        mTReadUsb0.start();
 	 }
 	 
 	 public void closeUsb()
 	 {
-		 
+		 if (mTReadUsb0 != null)
+			 mTReadUsb0.interrupt();
 	 }
 	 
 	 // 枚举设备函数  
@@ -863,23 +877,6 @@ public class UnityPlayerActivity extends Activity
 	public int writeUsbPort(byte[] buffer)
 	{
 		return mDeviceConnection.bulkTransfer(epBulkOut, buffer, buffer.length, 0);
-	}
-	
-	public byte[] readUsbPort() 
-	{
-		byte[] buffer = new byte[256];
-		int count = mDeviceConnection.bulkTransfer(epBulkIn, buffer, buffer.length, 150);
-		if (count > 0)
-		{
-			BufferStruct buf = new BufferStruct();
-			buf.buffer = new int[count];
-			for (int i = 0; i < count; ++i)
-			{
-				buf.buffer[i] = buffer[i] & 0xff;
-			}
-			readUsbQueue0.offer(buf);
-		}
-		return buffer;
 	}
 	
 	public void CallCSLog(String msg)
