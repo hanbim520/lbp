@@ -13,4 +13,9 @@ public class ClientLogic : MonoBehaviour
 	{
 	
 	}
+
+	private void HandleCommands(CNetComs command)
+	{
+
+	}
 }
