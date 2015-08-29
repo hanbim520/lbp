@@ -27,12 +27,12 @@ public class GameData
 	public int[] caiPiao;
 
 	// Odds
-    public const float yanseOdds = 1.97f;
-    public const float shuangOdds = 1.97f;
-    public const float danOdds = 1.97f;
-    public const float daOdds = 1.97f;
-    public const float xiaoOdds = 1.97f;
-    public const float duOdds = 36.97f;
+    public float yanseOdds = 1.97f;
+    public float shuangOdds = 1.97f;
+    public float danOdds = 1.97f;
+    public float daOdds = 1.97f;
+    public float xiaoOdds = 1.97f;
+    public float duOdds = 36.97f;
 
 	public string deviceId; // unique string
 	public int deviceIndex;	// 1, 2, 3...

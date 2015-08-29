@@ -13,6 +13,7 @@ public class UClient : MonoBehaviour
 	private int reliableChannelId;
 	private int unreliableChannelId;
 	private const int kMaxBroadcastMsgSize = 1024;
+	private const int kMaxReceiveMsgSize = 1024;
 	private const float reconnServerInterval = 1.0f;
 	private ConnectionState connState = ConnectionState.Disconnected;
 
@@ -20,16 +21,20 @@ public class UClient : MonoBehaviour
 	{
 		SetupClient();
 	}
+
+	void OnDestroy()
+	{
+		NetworkTransport.RemoveHost(hostId);
+	}
 	
 	void Update()
 	{		
 		int connectionId; 
 		int channelId; 
-		byte[] recBuffer = new byte[1024]; 
-		int bufferSize = 1024;
+		byte[] recBuffer = new byte[kMaxReceiveMsgSize]; 
 		int dataSize;
 		byte error;
-		NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, bufferSize, out dataSize, out error);
+		NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, recBuffer.Length, out dataSize, out error);
 		switch (recData)
 		{
 		case NetworkEventType.Nothing:         
@@ -37,7 +42,10 @@ public class UClient : MonoBehaviour
 		case NetworkEventType.ConnectEvent:    
 			break;
 		case NetworkEventType.DataEvent:       
-			HandleDataEvent(ref recBuffer);
+			if (dataSize > 0)
+			{
+				HandleDataEvent(ref recBuffer);
+			}
 			break;
 		case NetworkEventType.DisconnectEvent: 
 			HandleDisconnectEvent();
@@ -74,9 +82,11 @@ public class UClient : MonoBehaviour
 	private void HandleBroadcast()
 	{
 		if (connState != ConnectionState.Disconnected)
+		{
 			return;
-		connState = ConnectionState.Connecting;
+		}
 
+		connState = ConnectionState.Connecting;
 		string serverAddress;
 		int port;
 		byte error;
@@ -102,11 +112,52 @@ public class UClient : MonoBehaviour
 	private void HandleDataEvent(ref byte[] recBuffer)
 	{
 		Debug.Log("From server: " + Utils.BytesToString(recBuffer));
+		string msg = Utils.BytesToString(recBuffer);
+		char[] delimiterChars = {':'};
+		string[] words = msg.Split(delimiterChars);
+		if (words.Length > 0)
+		{
+			int instr;
+			if (!int.TryParse(words[0], out instr))
+				return;
+
+			if (instr == NetInstr.SynData && words.Length >= 8)
+			{
+				SynData(ref words);
+			}
+		}
+	}
+
+	private void SynData(ref string[] words)
+	{
+     	float yanseOdds;
+		float shuangOdds;
+		float danOdds;
+		float daOdds;
+		float xiaoOdds;
+		float duOdds;
+		int betTimeLimit;
+		if(float.TryParse(words[1], out yanseOdds))
+		   GameData.GetInstance().yanseOdds = yanseOdds;
+		if(float.TryParse(words[2], out shuangOdds))
+			GameData.GetInstance().shuangOdds = shuangOdds;
+		if(float.TryParse(words[3], out danOdds))
+			GameData.GetInstance().danOdds = danOdds;
+		if(float.TryParse(words[4], out daOdds))
+			GameData.GetInstance().daOdds = daOdds;
+		if(float.TryParse(words[5], out xiaoOdds))
+			GameData.GetInstance().xiaoOdds = xiaoOdds;
+		if(float.TryParse(words[6], out duOdds))
+			GameData.GetInstance().duOdds = duOdds;
+		if(int.TryParse(words[7], out betTimeLimit))
+			GameData.GetInstance().betTimeLimit = betTimeLimit;
+		DebugConsole.Log("SynData:"+ yanseOdds + ", " + betTimeLimit);
 	}
 
 	private void HandleDisconnectEvent()
 	{
 		connState = ConnectionState.Disconnected;
+		DebugConsole.Log("HandleDisconnectEvent");
 	}
 
 	public void SendToServer(string msg)
@@ -114,5 +165,13 @@ public class UClient : MonoBehaviour
 		byte[] buffer = Utils.StringToBytes(msg);
 		byte error;
 		NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
+	}
+
+	void OnGUI()
+	{
+		if (GUI.Button(new Rect(10, 50, 100, 50), "To test"))
+		{
+			Application.LoadLevel("test");
+		}
 	}
 }

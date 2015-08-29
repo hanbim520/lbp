@@ -5,14 +5,13 @@ using System.Collections.Generic;
 public class ServerLogic : MonoBehaviour 
 {
     public MainSceneUI ui;
-	public Dictionary<int, int> clientBets = new Dictionary<int, int>();
 
     private float timeInterval = 0;
     private float longPressTime = 3;
     private bool bLoadBackend = false;
 	private UHost host;
 
-	private GamePhase gamePhase;
+	private int gamePhase;
 	private int ballValue = -1;
 
 	void Start() 
@@ -72,10 +71,6 @@ public class ServerLogic : MonoBehaviour
 
     private IEnumerator NextRound()
     {
-		for (int i = 0; i < clientBets.Count; ++i)
-		{
-			clientBets[i] = 0;
-		}
         yield return new WaitForSeconds(2.0f);
         GameEventManager.TriggerGameStart();
     }
@@ -89,9 +84,8 @@ public class ServerLogic : MonoBehaviour
     private void SCountdown()
     {
 		gamePhase = GamePhase.SCountdown;
-		int phase = (int)gamePhase;
 		int time = GameData.GetInstance().betTimeLimit;
-		host.SendToAll(phase.ToString() + ":" + time.ToString());
+		host.SendToAll(gamePhase + ":" + time.ToString());
 		Timer t = TimerManager.GetInstance().CreateTimer(time);
 		t.Tick += ECountdown;
 		t.Start();
@@ -105,8 +99,7 @@ public class ServerLogic : MonoBehaviour
     private void SRun()
     {
 		gamePhase = GamePhase.SRun;
-		int phase = (int)gamePhase;
-		host.SendToAll(phase.ToString());
+		host.SendToAll(gamePhase.ToString());
 		// TODO: chui qiu
 		// simulation
 		Timer t = TimerManager.GetInstance().CreateTimer(Random.Range(2, 5));
@@ -137,8 +130,7 @@ public class ServerLogic : MonoBehaviour
 	private void SShowResult()
 	{
 		gamePhase = GamePhase.SShowResult;
-		int phase = (int)gamePhase;
-		host.SendToAll(phase.ToString() + ":" + ballValue);
+		host.SendToAll(gamePhase + ":" + ballValue);
 		Timer t = TimerManager.GetInstance().CreateTimer(3);
 		t.Tick += EShowResult;
 		t.Start();
@@ -152,8 +144,7 @@ public class ServerLogic : MonoBehaviour
     private void SCompensate()
     {
 		gamePhase = GamePhase.SShowResult;
-		int phase = (int)gamePhase;
-		host.SendToAll(phase.ToString());
+		host.SendToAll(gamePhase.ToString());
     }
 
     private void ECompensate()
