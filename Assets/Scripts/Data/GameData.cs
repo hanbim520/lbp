@@ -13,7 +13,7 @@ public class GameData
     public int danXianZhu;
     public int daXiaoXianHong;
     public int danShuangXianHong;
-    public int yanSeXianHong;
+    public int yanSeXianHong = 1000;
     public int quanTaiBaoJi;
     public int danTaiBaoJi;
 

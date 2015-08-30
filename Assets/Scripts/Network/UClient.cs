@@ -16,9 +16,11 @@ public class UClient : MonoBehaviour
 	private const int kMaxReceiveMsgSize = 1024;
 	private const float reconnServerInterval = 1.0f;
 	private ConnectionState connState = ConnectionState.Disconnected;
+    private ClientLogic clientLogic;
 
 	void Start()
 	{
+        clientLogic = GetComponent<ClientLogic>();
 		SetupClient();
 	}
 
@@ -111,47 +113,14 @@ public class UClient : MonoBehaviour
 
 	private void HandleDataEvent(ref byte[] recBuffer)
 	{
-		Debug.Log("From server: " + Utils.BytesToString(recBuffer));
-		string msg = Utils.BytesToString(recBuffer);
+        string msg = Utils.BytesToString(recBuffer);
+        Debug.Log("Client HandleDataEvent: " + msg);
 		char[] delimiterChars = {':'};
 		string[] words = msg.Split(delimiterChars);
 		if (words.Length > 0)
 		{
-			int instr;
-			if (!int.TryParse(words[0], out instr))
-				return;
-
-			if (instr == NetInstr.SynData && words.Length >= 8)
-			{
-				SynData(ref words);
-			}
+            clientLogic.HandleRecData(ref words);
 		}
-	}
-
-	private void SynData(ref string[] words)
-	{
-     	float yanseOdds;
-		float shuangOdds;
-		float danOdds;
-		float daOdds;
-		float xiaoOdds;
-		float duOdds;
-		int betTimeLimit;
-		if(float.TryParse(words[1], out yanseOdds))
-		   GameData.GetInstance().yanseOdds = yanseOdds;
-		if(float.TryParse(words[2], out shuangOdds))
-			GameData.GetInstance().shuangOdds = shuangOdds;
-		if(float.TryParse(words[3], out danOdds))
-			GameData.GetInstance().danOdds = danOdds;
-		if(float.TryParse(words[4], out daOdds))
-			GameData.GetInstance().daOdds = daOdds;
-		if(float.TryParse(words[5], out xiaoOdds))
-			GameData.GetInstance().xiaoOdds = xiaoOdds;
-		if(float.TryParse(words[6], out duOdds))
-			GameData.GetInstance().duOdds = duOdds;
-		if(int.TryParse(words[7], out betTimeLimit))
-			GameData.GetInstance().betTimeLimit = betTimeLimit;
-		DebugConsole.Log("SynData:"+ yanseOdds + ", " + betTimeLimit);
 	}
 
 	private void HandleDisconnectEvent()
@@ -167,11 +136,11 @@ public class UClient : MonoBehaviour
 		NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
 	}
 
-	void OnGUI()
-	{
-		if (GUI.Button(new Rect(10, 50, 100, 50), "To test"))
-		{
-			Application.LoadLevel("test");
-		}
-	}
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(10, 50, 100, 50), "To test"))
+//		{
+//			Application.LoadLevel("test");
+//		}
+//	}
 }

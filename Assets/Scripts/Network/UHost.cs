@@ -54,7 +54,11 @@ public class UHost : MonoBehaviour
 		case NetworkEventType.ConnectEvent:    
 			HandleConnectEvent(connectionId);
 			break;
-		case NetworkEventType.DataEvent:       
+		case NetworkEventType.DataEvent: 
+            if (dataSize > 0)
+            {
+                HandleDataEvent(ref recBuffer, connectionId);
+            }
 			break;
 		case NetworkEventType.DisconnectEvent: 
 			HandleDisconnectEvent(connectionId);
@@ -85,7 +89,9 @@ public class UHost : MonoBehaviour
 	{
 		Debug.Log("Connect event. connectionId: " + connectionId);
 		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers)
+        {
 			return;
+        }
 
 		allConnections.Add(connectionId);
 		++numOfConnecting;
@@ -102,7 +108,14 @@ public class UHost : MonoBehaviour
 	{
 		GameData gd = GameData.GetInstance();
 		string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}", 
-		                           NetInstr.SynData, gd.yanseOdds, gd.shuangOdds, gd.danOdds, gd.daOdds, gd.xiaoOdds, gd.duOdds, gd.betTimeLimit);
+		                           NetInstr.SynData, 
+                                   gd.yanseOdds, 
+                                   gd.shuangOdds, 
+                                   gd.danOdds, 
+                                   gd.daOdds, 
+                                   gd.xiaoOdds, 
+                                   gd.duOdds, 
+                                   gd.betTimeLimit);
 		SendToPeer(msg, connectionId);
 	}
 
@@ -178,11 +191,23 @@ public class UHost : MonoBehaviour
 		}
 	}
 
-	void OnGUI()
-	{
-		if (GUI.Button(new Rect(10, 50, 100, 50), "To test"))
-		{
-			Application.LoadLevel("test");
-		}
-	}
+    private void HandleDataEvent(ref byte[] recBuffer, int connectionId)
+    {
+        string msg = Utils.BytesToString(recBuffer);
+        Debug.Log("Server HandleDataEvent:" + msg);
+        char[] delimiterChars = {':'};
+        string[] words = msg.Split(delimiterChars);
+        if (words.Length > 0)
+        {
+            serverLogic.HandleRecData(ref words, connectionId);
+        }
+    }
+
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(10, 50, 100, 50), "To test"))
+//		{
+//			Application.LoadLevel("test");
+//		}
+//	}
 }
