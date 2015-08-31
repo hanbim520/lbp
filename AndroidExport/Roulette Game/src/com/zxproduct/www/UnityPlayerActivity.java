@@ -879,6 +879,20 @@ public class UnityPlayerActivity extends Activity
 		return mDeviceConnection.bulkTransfer(epBulkOut, buffer, buffer.length, 0);
 	}
 	
+	public int[] readUsb0()
+	{
+		if (!readUsbQueue0.isEmpty())
+		{
+			synchronized(readUsbQueue0)
+			{
+				BufferStruct buffer = readUsbQueue0.poll();
+				return buffer.buffer;
+			}
+		}
+		// Can't return null, otherwise csharp side case exception.
+	    return new int[]{0};
+	}
+
 	public void CallCSLog(String msg)
 	{
 		UnityPlayer.UnitySendMessage("SerialUtils", "DebugLog", msg);

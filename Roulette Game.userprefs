@@ -1,8 +1,13 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Utils/SerialUtils.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Scenes/ClientLogic.cs">
     <Files>
-      <File FileName="Assets/Scripts/Utils/SerialUtils.cs" Line="83" Column="64" />
+      <File FileName="Assets/Scripts/Network/UClient.cs" Line="118" Column="1" />
+      <File FileName="Assets/Scripts/Network/UHost.cs" Line="202" Column="27" />
+      <File FileName="Assets/Scripts/Scenes/ServerLogic.cs" Line="262" Column="34" />
+      <File FileName="Assets/Scripts/Scenes/ClientLogic.cs" Line="137" Column="59" />
+      <File FileName="Assets/Scripts/Data/GameData.cs" Line="90" Column="43" />
+      <File FileName="Assets/Scripts/Data/Types.cs" Line="44" Column="41" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
