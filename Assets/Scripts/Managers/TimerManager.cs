@@ -27,7 +27,6 @@ public class TimerManager : MonoBehaviour
 	void Awake()
 	{	
 		instance = this;
-        DontDestroyOnLoad(this);
 	}
 
 	public static TimerManager GetInstance()

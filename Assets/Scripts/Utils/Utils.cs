@@ -75,4 +75,9 @@ public static class Utils
 	{
 		return x[0, 0] * x[1, 1] * x[2, 2] + x[1, 0] * x[2, 1] * x[0, 2] + x[0, 1] * x[1, 2] * x[2, 0] - x[2, 0] * x[1, 1] * x[0, 2] - x[2, 1] * x[1, 2] * x[0, 0] - x[1, 0] * x[0, 1] * x[2, 2];
 	}
+
+	public static bool PointInRect(Vector2 point, Rect rect)
+	{
+		return point.x <= rect.xMax && point.x >= rect.xMin && point.y <= rect.yMax && point.y >= rect.yMin;
+	}
 }
