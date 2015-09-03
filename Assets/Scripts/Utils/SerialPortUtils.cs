@@ -6,6 +6,11 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading;
 
+public struct BufferStruct
+{
+	public byte[] buf;
+}
+
 public class SerialPortUtils : MonoBehaviour
 {
 	public string comName = "COM1";
@@ -42,22 +47,17 @@ public class SerialPortUtils : MonoBehaviour
 		}
 		catch(Exception ex)
 		{
-			log = ex.ToString();
+			Debug.Log(ex.ToString());
 		}
 
 		dealThread = new Thread(DealReceivedData); 
 		dealThread.Start(); 
 		readThread = new Thread(ReceiveData);
-		readThread.IsBackground = true;
 		readThread.Start(); 
 
-		writeThread = new Thread(WriteThreadFunc);
-		writeThread.Start();
-
-//		StartCoroutine(delay());
-		Timer t = TimerManager.GetInstance ().CreateTimer(1, TimerType.Loop);
-		t.Tick += delay;
-		t.Start();
+//		writeThread = new Thread(WriteThreadFunc);
+//		writeThread.Start();
+	
 	}
 
 	void OnDestroy()
@@ -69,7 +69,6 @@ public class SerialPortUtils : MonoBehaviour
 
 		if (sp.IsOpen)
 		{
-			print ("close");
 			sp.DtrEnable = false;
 			sp.RtsEnable = false;
 			sp.Close();
@@ -87,14 +86,12 @@ public class SerialPortUtils : MonoBehaviour
 				{
 					byte buf = (byte)sp.ReadByte();
 					queueReadPool.Enqueue(buf);
-					print(buf);
 				}
 			}
 		} 
 		catch (Exception ex) 
 		{ 
-			log = ex.ToString ();
-			Debug.Log(ex); 
+			Debug.Log(ex.ToString()); 
 		} 
 	} 
 
@@ -102,17 +99,43 @@ public class SerialPortUtils : MonoBehaviour
 	{ 
 		while (!isDealTheadExit)
 		{
-			if (queueReadPool.Count != 0) 
+			if (queueReadPool.Count >= 10) 
 			{ 
-				for (int i = 0; i < queueReadPool.Count; i++) 
-				{ 
-					strOutPool+= queueReadPool.Dequeue(); 
-					if(strOutPool.Length==16) 
-					{ 
-						Debug.Log(strOutPool); 
-						strOutPool=string.Empty; 
-					} 
-				} 
+				byte data = queueReadPool.Dequeue(); 
+				if (data == 0x55)
+				{
+					byte next = queueReadPool.Dequeue();
+					if (next == 0x54)
+					{
+						int x = 0;
+						int y = 0;
+						for (int i = 0; i < 2; ++i)
+						{
+							uint count = 4;
+							byte[] element = new byte[count];
+							for (int j = 0; j < count; ++j)
+							{
+								element[j] = queueReadPool.Dequeue();
+							}
+
+							if (System.BitConverter.IsLittleEndian)
+							{
+								System.Array.Reverse(element);
+							}
+							if (i == 0)
+							{
+								x = BitConverter.ToInt32(element, 0);
+							}
+							else if (i == 1)
+							{
+								y = BitConverter.ToInt32(element, 0);
+							}
+						}
+						Debug.Log("x:" + x + ", y:" +y);
+					}
+				}
+
+//				Debug.Log(string.Format("{0:X}", data));
 			} 
 		}
 	} 
@@ -139,21 +162,11 @@ public class SerialPortUtils : MonoBehaviour
 		}
 	}
 
-	string log = "Hello";
 	void OnGUI()
 	{
 		if (GUI.Button(new Rect(10, 10, 200, 150), "Send"))
 		{
 			SendSerialPortData("Hello");
 		}
-
-		if (GUI.Button(new Rect(10, 300, 500, 450), log))
-		{}
-	}
-
-	void delay()
-	{
-		print ("send");
-		SendSerialPortData("Hello");
 	}
 }
