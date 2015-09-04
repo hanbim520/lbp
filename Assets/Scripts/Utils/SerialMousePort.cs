@@ -44,12 +44,7 @@ public class SerialMousePort : MonoBehaviour
 #if UNITY_ANDROID
 
 #endif
-		byte data = 0xcc; 
-		byte mask = 0x80;
-		int lb = mask >> 1 & data;
-		int rb = mask >> 2 & data;
-		print(string.Format ("{0:X}", lb));
-		print(string.Format ("{0:X}", rb));
+
 		dealThread = new Thread(DealReceivedData); 
 		dealThread.Start(); 
 		readThread = new Thread(ReceiveData);
@@ -116,10 +111,19 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 		{
 			if (queueReadPool.Count >= 3) 
 			{ 
-//				byte data = queueReadPool.Dequeue(); 
-//				byte lb = 0x80 >> 3 & data;
-//				byte rb = 0x80 >> 3 & data;
-//				Debug.Log(string.Format("{0:X}", data));
+				byte data = queueReadPool.Dequeue(); 
+				int lb = 0x20 & data >> 5;
+				int rb = 0x10 & data >> 4;
+                int y7 = 8 & data >> 3;
+                int y6 = 4 & data >> 2;
+                int x7 = 2 & data >> 1;
+                int x6 = 1 & data;
+                data = queueReadPool.Dequeue();
+                int deltaX = 0x3F & data | (x7 << 7) | (x6 << 6);
+                data = queueReadPool.Dequeue();
+                int deltaY = 0x3F & data | (y7 << 7) | (y6 << 6);
+//                GameEventManager.OnSerialMouseMove(deltaX, deltaY);
+                Debug.Log(string.Format("{0}, {1}", deltaX, deltaY));
 			} 
 		}
 	} 
