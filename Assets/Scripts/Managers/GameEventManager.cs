@@ -7,7 +7,7 @@ public static class GameEventManager
     public delegate void GameEvent();
 	public delegate void FingerEvent(UInt16 x, UInt16 y);
 	public delegate void SerialMouseMoveEvent(sbyte deltaX, sbyte deltaY);
-	public delegate void SerialMouseButtonEvent(int x, int y);
+	public delegate void SerialMouseButtonEvent();
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver;
     public static event GameEvent SCountdown, ECountdown;
@@ -104,23 +104,23 @@ public static class GameEventManager
 		if (SerialMouseMove != null) SerialMouseMove(deltaX, deltaY);
 	}
 
-	public static void OnSMLBUp(int x, int y)
+	public static void OnSMLBUp()
 	{
-		if (SMLBUp != null) SMLBUp(x, y);
+		if (SMLBUp != null) SMLBUp();
 	}
 
-	public static void OnSMLBDown(int x, int y)
+	public static void OnSMLBDown()
 	{
-		if (SMLBDown != null) SMLBDown(x, y);
+		if (SMLBDown != null) SMLBDown();
 	}
 
-	public static void OnSMRBUp(int x, int y)
+	public static void OnSMRBUp()
 	{
-		if (SMRBUp != null) SMRBUp(x, y);
+		if (SMRBUp != null) SMRBUp();
 	}
 	
-	public static void OnSMRBDown(int x, int y)
+	public static void OnSMRBDown()
 	{
-		if (SMRBDown != null) SMRBDown(x, y);
+		if (SMRBDown != null) SMRBDown();
 	}
 }

@@ -20,9 +20,18 @@ public class SerialMousePort : MonoBehaviour
 	private Thread dealThread;
 	private bool isReadThreadExit = false;
 	private bool isDealTheadExit = false;
+    private bool blAlreadyDown = false;
+    private bool rlAlreadyDown = false;
+    private const float ratio = 0.05f;
+    private float xMax;
+    private float xMin;
+    private float yMax;
+    private float yMin;
 
 	void Start()
 	{
+        Init();
+        RegisterEvents();
 #if UNITY_EDITOR
 		// 端口名称 波特率 奇偶校验位 数据位值 停止位
 		try
@@ -53,6 +62,7 @@ public class SerialMousePort : MonoBehaviour
 
 	void OnDestroy()
 	{
+        UnregisterEvents();
 		readThread.Abort();
 		isReadThreadExit = true;
 		isDealTheadExit = true;
@@ -123,8 +133,71 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
                 data = queueReadPool.Dequeue();
 				sbyte deltaY = (sbyte)(0x3F & data | (y7 << 7) | (y6 << 6));
                 GameEventManager.OnSerialMouseMove(deltaX, deltaY);
+                if (lb == 1)
+                    GameEventManager.OnSMLBDown();
+                else if (lb == 0 && blAlreadyDown)
+                {
+                    GameEventManager.OnSMLBUp();
+                    blAlreadyDown = false;
+                }
+                if (rb == 1)
+                    GameEventManager.OnSMRBDown();
+                else if (rb == 0 && rlAlreadyDown)
+                {
+                    GameEventManager.OnSMRBUp();
+                    rlAlreadyDown = false;
+                }
 //                Debug.Log(string.Format("{0}, {1}", deltaX, deltaY));
 			} 
 		}
 	} 
+
+    private void RegisterEvents()
+    {
+        GameEventManager.SMLBDown += SMLBDown;
+        GameEventManager.SMRBDown += SMRBDown;
+        GameEventManager.SerialMouseMove += SerialMouseMove;
+    }
+
+    private void UnregisterEvents()
+    {
+        GameEventManager.SMLBDown -= SMLBDown;
+        GameEventManager.SMRBDown -= SMRBDown;
+        GameEventManager.SerialMouseMove -= SerialMouseMove;
+    }
+
+    private void SMLBDown()
+    {
+        blAlreadyDown = true;
+    }
+
+    private void SMRBDown()
+    {
+        rlAlreadyDown = true;
+    }
+
+    private void SerialMouseMove(sbyte deltaX, sbyte deltaY)
+    {
+        GameData.GetInstance().serialMouseX += deltaX * ratio;
+        GameData.GetInstance().serialMouseY += deltaY * ratio;
+
+        if (GameData.GetInstance().serialMouseX >= xMax)
+            GameData.GetInstance().serialMouseX = xMax;
+        else if (GameData.GetInstance().serialMouseX <= xMin)
+            GameData.GetInstance().serialMouseX = xMin;
+        else if (GameData.GetInstance().serialMouseY >= yMax)
+            GameData.GetInstance().serialMouseY = yMax;
+        else if (GameData.GetInstance().serialMouseY <= yMin)
+            GameData.GetInstance().serialMouseY = yMin;
+    }
+
+    private void Init()
+    {
+        int resolutionWidth = GameData.GetInstance().resolutionWidth;
+        int resolutionHeight = GameData.GetInstance().resolutionHeight;
+        xMax = resolutionWidth / 2;
+        xMin = -resolutionWidth / 2;
+        yMax = resolutionHeight / 2;
+        yMin = -resolutionHeight / 2;
+    }
 }

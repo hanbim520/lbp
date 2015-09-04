@@ -36,8 +36,11 @@ public class GameData
 	public Dictionary<int, string> clientsId;
 
 	// Serial mouse coordinates
-	public int serialMouesX;
-	public int serialMouseY;
+	public float serialMouseX;
+    public float serialMouseY;
+
+    public int resolutionWidth = 1920;
+    public int resolutionHeight = 1080;
 
 	// For host
 	private int connectClientsTime = 15;
