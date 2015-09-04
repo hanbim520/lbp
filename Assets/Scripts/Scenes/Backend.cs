@@ -164,17 +164,10 @@ public class Backend : MonoBehaviour
         item.GetComponent<Text>().text = GameData.GetInstance().minBet.ToString();
         item = settingMenu.transform.GetChild(4).GetChild(1);
         item.GetComponent<Text>().text = GameData.GetInstance().danXianZhu.ToString();
-        item = settingMenu.transform.GetChild(5).GetChild(1);
-        item.GetComponent<Text>().text = GameData.GetInstance().daXiaoXianHong.ToString();
+		item = settingMenu.transform.GetChild(5).GetChild(1);
+		item.GetComponent<Text>().text = GameData.GetInstance().gameDifficulty.ToString();
         item = settingMenu.transform.GetChild(6).GetChild(1);
-        item.GetComponent<Text>().text = GameData.GetInstance().danShuangXianHong.ToString();
-        item = settingMenu.transform.GetChild(7).GetChild(1);
-        item.GetComponent<Text>().text = GameData.GetInstance().yanSeXianHong.ToString();
-        item = settingMenu.transform.GetChild(8).GetChild(1);
         item.GetComponent<Text>().text = GameData.GetInstance().quanTaiBaoJi.ToString();
-        item = settingMenu.transform.GetChild(9).GetChild(1);
-        item.GetComponent<Text>().text = GameData.GetInstance().danTaiBaoJi.ToString();
-        
     }
 
     private void InitCheckAccount()
@@ -230,11 +223,8 @@ public class Backend : MonoBehaviour
 彩票代分
 最小押分
 单点限注                                1000-30000（每次加1000）
-大小限红								1000-30000（每次加1000）
-单双限红								1000-30000（每次加1000）
-颜色限红                                1000-30000（每次加1000）
+游戏难度
 全台爆机分         
-单台爆机分   
 恢复出厂设置
 保存退出
 不保存退出
@@ -242,7 +232,7 @@ public class Backend : MonoBehaviour
     private void HandleSettingMenu(int idx)
     {
         Transform item = null;
-        if (idx < 10)
+        if (idx < 7)
             item = settingMenu.transform.GetChild(idx).GetChild(1);
         if (idx == 0)
         {
@@ -282,58 +272,33 @@ public class Backend : MonoBehaviour
                 GameData.GetInstance().danXianZhu = 1000;
             item.GetComponent<Text>().text = GameData.GetInstance().danXianZhu.ToString();
         }
-        else if (idx == 5)
-        {
-            intervalValue = 1000;
-            GameData.GetInstance().daXiaoXianHong += intervalValue;
-            if (GameData.GetInstance().daXiaoXianHong > 30000)
-                GameData.GetInstance().daXiaoXianHong = 1000;
-            item.GetComponent<Text>().text = GameData.GetInstance().daXiaoXianHong.ToString();
-        }
+		else if (idx == 5)
+		{
+			intervalValue = 1;
+			GameData.GetInstance().gameDifficulty += intervalValue;
+			if (GameData.GetInstance().gameDifficulty > 480)
+				GameData.GetInstance().gameDifficulty = 1;
+			item.GetComponent<Text>().text = GameData.GetInstance().gameDifficulty.ToString();
+		}
         else if (idx == 6)
-        {
-            intervalValue = 1000;
-            GameData.GetInstance().danShuangXianHong += intervalValue;
-            if (GameData.GetInstance().danShuangXianHong > 30000)
-                GameData.GetInstance().danShuangXianHong = 1000;
-            item.GetComponent<Text>().text = GameData.GetInstance().danShuangXianHong.ToString();
-        }
-        else if (idx == 7)
-        {
-            intervalValue = 1000;
-            GameData.GetInstance().yanSeXianHong += intervalValue;
-            if (GameData.GetInstance().yanSeXianHong > 30000)
-                GameData.GetInstance().yanSeXianHong = 1000;
-            item.GetComponent<Text>().text = GameData.GetInstance().yanSeXianHong.ToString();
-        }
-        else if (idx == 8)
         {
             intervalValue = 1000;
             GameData.GetInstance().quanTaiBaoJi += intervalValue;
             if (GameData.GetInstance().quanTaiBaoJi > 30000)
                 GameData.GetInstance().quanTaiBaoJi = 1000;
-            item.GetComponent<Text>().text = GameData.GetInstance().yanSeXianHong.ToString();
-
+			item.GetComponent<Text>().text = GameData.GetInstance().quanTaiBaoJi.ToString();
         }
-        else if (idx == 9)
-        {
-            intervalValue = 1000;
-            GameData.GetInstance().danTaiBaoJi += intervalValue;
-            if (GameData.GetInstance().danTaiBaoJi > 30000)
-                GameData.GetInstance().danTaiBaoJi = 1000;
-            item.GetComponent<Text>().text = GameData.GetInstance().danTaiBaoJi.ToString();
-        }
-        else if (idx == 10)
+        else if (idx == 7)
         {
             GameData.GetInstance().DefaultSetting();
             InitSettingMenu();
         }
-        else if (idx == 11)
+        else if (idx == 8)
         {
             GameData.GetInstance().SaveSetting();
             SetMenuEnable(BackMenus.Main);
         }
-        else if (idx == 12)
+        else if (idx == 9)
         {
             GameData.GetInstance().ReadDataFromDisk();
             SetMenuEnable(BackMenus.Main);

@@ -11,11 +11,8 @@ public class GameData
     public int ticketToScore;
     public int minBet;
     public int danXianZhu;
-    public int daXiaoXianHong;
-    public int danShuangXianHong;
-    public int yanSeXianHong = 1000;
+	public int gameDifficulty;
     public int quanTaiBaoJi;
-    public int danTaiBaoJi;
 
     // Account
     public int[] zongShang;
@@ -37,6 +34,10 @@ public class GameData
 	public string deviceId; // unique string
 	public int deviceIndex;	// 1, 2, 3...
 	public Dictionary<int, string> clientsId;
+
+	// Serial mouse coordinates
+	public int serialMouesX;
+	public int serialMouseY;
 
 	// For host
 	private int connectClientsTime = 15;
@@ -87,11 +88,8 @@ public class GameData
         PlayerPrefs.SetInt("ticketToScore", ticketToScore);
         PlayerPrefs.SetInt("minBet", minBet);
         PlayerPrefs.SetInt("danXianZhu", danXianZhu);
-        PlayerPrefs.SetInt("daXiaoXianHong", daXiaoXianHong);
-        PlayerPrefs.SetInt("danShuangXianHong", danShuangXianHong);
-        PlayerPrefs.SetInt("yanSeXianHong", yanSeXianHong);
+		PlayerPrefs.SetInt("gameDifficulty", gameDifficulty);
         PlayerPrefs.SetInt("quanTaiBaoJi", quanTaiBaoJi);
-        PlayerPrefs.SetInt("danTaiBaoJi", danTaiBaoJi);
         PlayerPrefs.Save();
     }
 
@@ -102,11 +100,8 @@ public class GameData
         ticketToScore = 1;
         minBet = 1;
         danXianZhu = 20000;
-        daXiaoXianHong = 1000;
-        danShuangXianHong = 1000;
-        yanSeXianHong = 1000;
+		gameDifficulty = 1;
         quanTaiBaoJi = 20000;
-        danTaiBaoJi = 20000;
     }
 
     public void SaveAccount()
@@ -165,11 +160,8 @@ public class GameData
             ticketToScore = PlayerPrefs.GetInt("ticketToScore");
             minBet = PlayerPrefs.GetInt("minBet");
             danXianZhu = PlayerPrefs.GetInt("danXianZhu");
-            daXiaoXianHong = PlayerPrefs.GetInt("daXiaoXianHong");
-            danShuangXianHong = PlayerPrefs.GetInt("danShuangXianHong");
-            yanSeXianHong = PlayerPrefs.GetInt("yanSeXianHong");
+			gameDifficulty = PlayerPrefs.GetInt("gameDifficulty");
             quanTaiBaoJi = PlayerPrefs.GetInt("quanTaiBaoJi");
-            danTaiBaoJi = PlayerPrefs.GetInt("danTaiBaoJi");
 
             // Check account menu 
             for (int i = 0; i < maxNumOfPlayers; ++i)

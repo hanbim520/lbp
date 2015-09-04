@@ -271,52 +271,52 @@ public class ServerLogic : MonoBehaviour
 
     private bool LimitBet(ref string[] words, int connectionId)
     {
-        int field;
-        int bet;
-        if (int.TryParse(words[1], out field) && int.TryParse(words[2], out bet))
-        {
-            if (field == Fields.Black &&
-                CanBet(GameData.GetInstance().yanSeXianHong, blackFieldVal + bet, redFieldVal))
-            {
-                blackFieldVal += bet;
-            }
-            else if (field == Fields.Red &&
-                     CanBet(GameData.GetInstance().yanSeXianHong, redFieldVal + bet, blackFieldVal))
-            {
-                redFieldVal += bet;
-            }
-            else if (field == Fields.Even &&
-                     CanBet(GameData.GetInstance().danShuangXianHong, evenFieldVal + bet, oddFieldVal))
-            {
-                evenFieldVal += bet;
-            }
-            else if (field == Fields.Odd &&
-                     CanBet(GameData.GetInstance().danShuangXianHong, oddFieldVal + bet, evenFieldVal))
-            {
-                oddFieldVal += bet;
-            }
-            else if (field == Fields.Big &&
-                     CanBet(GameData.GetInstance().daXiaoXianHong, bigFieldVal + bet, smallFieldVal))
-            {
-                bigFieldVal += bet;
-            }
-            else if (field == Fields.Small &&
-                     CanBet(GameData.GetInstance().daXiaoXianHong, smallFieldVal + bet, bigFieldVal))
-            {
-                smallFieldVal += bet;
-            }
-            else
-            {
-                if (connectionId > 0)
-                    host.SendToPeer(NetInstr.LimitBet + ":" + field, connectionId);
-                DebugConsole.Log(Time.realtimeSinceStartup + ": LimitBet" + " field-" + field + ", betVal-" + bet);
-                return true;
-            }
-
-            if (connectionId > 0)
-                host.SendToPeer(NetInstr.NoLimitBet + ":" + field + ":" + bet, connectionId);
-            DebugConsole.Log(Time.realtimeSinceStartup + ": NoLimitBet" + " field-" + field + ", betVal-" + bet);
-        }
+//        int field;
+//        int bet;
+//        if (int.TryParse(words[1], out field) && int.TryParse(words[2], out bet))
+//        {
+//            if (field == Fields.Black &&
+//                CanBet(GameData.GetInstance().yanSeXianHong, blackFieldVal + bet, redFieldVal))
+//            {
+//                blackFieldVal += bet;
+//            }
+//            else if (field == Fields.Red &&
+//                     CanBet(GameData.GetInstance().yanSeXianHong, redFieldVal + bet, blackFieldVal))
+//            {
+//                redFieldVal += bet;
+//            }
+//            else if (field == Fields.Even &&
+//                     CanBet(GameData.GetInstance().danShuangXianHong, evenFieldVal + bet, oddFieldVal))
+//            {
+//                evenFieldVal += bet;
+//            }
+//            else if (field == Fields.Odd &&
+//                     CanBet(GameData.GetInstance().danShuangXianHong, oddFieldVal + bet, evenFieldVal))
+//            {
+//                oddFieldVal += bet;
+//            }
+//            else if (field == Fields.Big &&
+//                     CanBet(GameData.GetInstance().daXiaoXianHong, bigFieldVal + bet, smallFieldVal))
+//            {
+//                bigFieldVal += bet;
+//            }
+//            else if (field == Fields.Small &&
+//                     CanBet(GameData.GetInstance().daXiaoXianHong, smallFieldVal + bet, bigFieldVal))
+//            {
+//                smallFieldVal += bet;
+//            }
+//            else
+//            {
+//                if (connectionId > 0)
+//                    host.SendToPeer(NetInstr.LimitBet + ":" + field, connectionId);
+//                DebugConsole.Log(Time.realtimeSinceStartup + ": LimitBet" + " field-" + field + ", betVal-" + bet);
+//                return true;
+//            }
+//
+//            if (connectionId > 0)
+//                host.SendToPeer(NetInstr.NoLimitBet + ":" + field + ":" + bet, connectionId);
+//            DebugConsole.Log(Time.realtimeSinceStartup + ": NoLimitBet" + " field-" + field + ", betVal-" + bet);
+//        }
         return false;
     }
 
