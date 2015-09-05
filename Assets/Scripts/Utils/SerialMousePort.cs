@@ -8,6 +8,7 @@ using System.Threading;
 
 public class SerialMousePort : MonoBehaviour
 {
+    public GameObject mouse;
 	public string comName = "COM1";
 	public int baudRate = 1200; // or 2400
 	public Parity parityBit = Parity.None;
@@ -179,7 +180,7 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
     private void SerialMouseMove(sbyte deltaX, sbyte deltaY)
     {
         GameData.GetInstance().serialMouseX += deltaX * ratio;
-        GameData.GetInstance().serialMouseY += deltaY * ratio;
+        GameData.GetInstance().serialMouseY -= deltaY * ratio;
 
         if (GameData.GetInstance().serialMouseX >= xMax)
             GameData.GetInstance().serialMouseX = xMax;
@@ -189,6 +190,13 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
             GameData.GetInstance().serialMouseY = yMax;
         else if (GameData.GetInstance().serialMouseY <= yMin)
             GameData.GetInstance().serialMouseY = yMin;
+
+        if (mouse != null)
+        {
+            if (!mouse.activeSelf)
+                mouse.SetActive(true);
+            mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
+        }
     }
 
     private void Init()
@@ -199,5 +207,21 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
         xMin = -resolutionWidth / 2;
         yMax = resolutionHeight / 2;
         yMin = -resolutionHeight / 2;
+        StartCoroutine(DetectMouse());
+    }
+
+    private IEnumerator DetectMouse()
+    {
+        if (Application.platform == RuntimePlatform.WindowsEditor ||
+            Application.platform == RuntimePlatform.OSXEditor)
+        {
+            sp.RtsEnable = false;
+            yield return new WaitForSeconds(0.5f);
+            sp.RtsEnable = true;
+        }
+        else if (Application.platform == RuntimePlatform.Android)
+        {
+            
+        }
     }
 }
