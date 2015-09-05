@@ -39,8 +39,11 @@ public class GameData
 	public float serialMouseX;
     public float serialMouseY;
 
-    public int resolutionWidth = 1920;
+    public int resolutionWidth = 1440;
     public int resolutionHeight = 1080;
+
+	public Queue<int> records = new Queue<int>(100);
+	public Dictionary<int, ResultColor> colorTable = new Dictionary<int, ResultColor>();
 
 	// For host
 	private int connectClientsTime = 15;
@@ -72,6 +75,45 @@ public class GameData
 			PlayerPrefs.Save();
 		}
 		deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
+
+		colorTable.Add(0, ResultColor.Green);
+		colorTable.Add(1, ResultColor.Red);
+		colorTable.Add(3, ResultColor.Red);
+		colorTable.Add(5, ResultColor.Red);
+		colorTable.Add(7, ResultColor.Red);
+		colorTable.Add(9, ResultColor.Red);
+		colorTable.Add(12, ResultColor.Red);
+		colorTable.Add(14, ResultColor.Red);
+		colorTable.Add(16, ResultColor.Red);
+		colorTable.Add(18, ResultColor.Red);
+		colorTable.Add(19, ResultColor.Red);
+		colorTable.Add(21, ResultColor.Red);
+		colorTable.Add(23, ResultColor.Red);
+		colorTable.Add(25, ResultColor.Red);
+		colorTable.Add(27, ResultColor.Red);
+		colorTable.Add(30, ResultColor.Red);
+		colorTable.Add(32, ResultColor.Red);
+		colorTable.Add(34, ResultColor.Red);
+		colorTable.Add(36, ResultColor.Red);
+
+		colorTable.Add(2, ResultColor.Black);
+		colorTable.Add(4, ResultColor.Black);
+		colorTable.Add(6, ResultColor.Black);
+		colorTable.Add(8, ResultColor.Black);
+		colorTable.Add(10, ResultColor.Black);
+		colorTable.Add(11, ResultColor.Black);
+		colorTable.Add(13, ResultColor.Black);
+		colorTable.Add(15, ResultColor.Black);
+		colorTable.Add(17, ResultColor.Black);
+		colorTable.Add(20, ResultColor.Black);
+		colorTable.Add(22, ResultColor.Black);
+		colorTable.Add(24, ResultColor.Black);
+		colorTable.Add(26, ResultColor.Black);
+		colorTable.Add(28, ResultColor.Black);
+		colorTable.Add(29, ResultColor.Black);
+		colorTable.Add(31, ResultColor.Black);
+		colorTable.Add(33, ResultColor.Black);
+		colorTable.Add(35, ResultColor.Black);
 	}
 
     private static GameData instance;
@@ -179,4 +221,40 @@ public class GameData
             }
         }
     }
+
+	public void StoreRecords()
+	{
+		if (records.Count > 0)
+		{
+			int idx = 0;
+			foreach (int r in records)
+			{
+				PlayerPrefs.SetInt("R" + idx, r);
+				++idx;
+			}
+			PlayerPrefs.Save();
+		}
+	}
+
+	public void StoreRecord(int result)
+	{
+		if (records.Count > 0)
+			records.Dequeue();
+		records.Enqueue(result);
+		int idx = records.Count - 1;
+		PlayerPrefs.SetInt("R" + idx, result);
+		PlayerPrefs.Save();
+	}
+
+	public void ReadRecords()
+	{
+		for (int i = 0; i < 100; ++i)
+		{
+			int record = PlayerPrefs.GetInt("R" + i, -1);
+			if (record > -1)
+				records.Enqueue(record);
+			else
+				break;
+		}
+	}
 }

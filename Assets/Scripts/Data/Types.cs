@@ -41,3 +41,8 @@ public struct Notifies
 {
     public static string LimitBet = "限红不能押注";
 }
+
+public enum ResultColor
+{
+	Green, Red, Black
+}
