@@ -5,19 +5,17 @@ using System.Collections;
 public static class GameEventManager 
 {
     public delegate void GameEvent();
+    public delegate void RefreshRecordEvent(int result);
 	public delegate void FingerEvent(UInt16 x, UInt16 y);
 	public delegate void SerialMouseMoveEvent(sbyte deltaX, sbyte deltaY);
 	public delegate void SerialMouseButtonEvent();
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver;
-    public static event GameEvent SCountdown, ECountdown;
-    public static event GameEvent SRun, ERun;
-    public static event GameEvent SShowResult, EShowResult;
-    public static event GameEvent SCompensate, ECompensate;
     public static event GameEvent OpenSerial, CloseSerial;
 	public static event FingerEvent FingerUp, FingerDown, FingerHover;
 	public static event SerialMouseMoveEvent SerialMouseMove;
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
+    public static event RefreshRecordEvent RefreshRecord;
 
 	public static void TriggerOpenSerial()
 	{
@@ -42,46 +40,6 @@ public static class GameEventManager
     public static void TriggerGameOver()
     {
         if (GameOver != null) GameOver();
-    }
-
-    public static void TriggerSCountdown()
-    {
-        if (SCountdown != null) SCountdown();
-    }
-
-    public static void TriggerECountdown()
-    {
-        if (ECountdown != null) ECountdown();
-    }
-
-    public static void TriggerSRun()
-    {
-        if (SRun != null) SRun();
-    }
-
-    public static void TriggerERun()
-    {
-        if (ERun != null) ERun();
-    }
-
-    public static void TriggerSShowResult()
-    {
-        if (SShowResult != null) SShowResult();
-    }
-
-    public static void TriggerEShowResult()
-    {
-        if (EShowResult != null) EShowResult();
-    }
-
-    public static void TriggerSCompensate()
-    {
-        if (SCompensate != null) SCompensate();
-    }
-
-    public static void TriggerECompensate()
-    {
-        if (ECompensate != null) ECompensate();
     }
 
 	public static void OnFingerUp(UInt16 x, UInt16 y)
@@ -123,4 +81,9 @@ public static class GameEventManager
 	{
 		if (SMRBDown != null) SMRBDown();
 	}
+
+    public static void OnRefreshRecord(int result)
+    {
+        if (RefreshRecord != null) RefreshRecord(result );
+    }
 }

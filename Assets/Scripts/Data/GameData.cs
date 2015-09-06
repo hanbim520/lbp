@@ -51,7 +51,7 @@ public class GameData
 	public float TF;
 
 	public Queue<int> records = new Queue<int>(100);
-	public Dictionary<int, ResultColor> colorTable = new Dictionary<int, ResultColor>();
+	public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
 
 	// For host
 	private int connectClientsTime = 15;
@@ -84,44 +84,44 @@ public class GameData
 		}
 		deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 
-		colorTable.Add(0, ResultColor.Green);
-		colorTable.Add(1, ResultColor.Red);
-		colorTable.Add(3, ResultColor.Red);
-		colorTable.Add(5, ResultColor.Red);
-		colorTable.Add(7, ResultColor.Red);
-		colorTable.Add(9, ResultColor.Red);
-		colorTable.Add(12, ResultColor.Red);
-		colorTable.Add(14, ResultColor.Red);
-		colorTable.Add(16, ResultColor.Red);
-		colorTable.Add(18, ResultColor.Red);
-		colorTable.Add(19, ResultColor.Red);
-		colorTable.Add(21, ResultColor.Red);
-		colorTable.Add(23, ResultColor.Red);
-		colorTable.Add(25, ResultColor.Red);
-		colorTable.Add(27, ResultColor.Red);
-		colorTable.Add(30, ResultColor.Red);
-		colorTable.Add(32, ResultColor.Red);
-		colorTable.Add(34, ResultColor.Red);
-		colorTable.Add(36, ResultColor.Red);
+		colorTable.Add(0, ResultType.Green);
+		colorTable.Add(1, ResultType.Red);
+		colorTable.Add(3, ResultType.Red);
+		colorTable.Add(5, ResultType.Red);
+		colorTable.Add(7, ResultType.Red);
+		colorTable.Add(9, ResultType.Red);
+		colorTable.Add(12, ResultType.Red);
+		colorTable.Add(14, ResultType.Red);
+		colorTable.Add(16, ResultType.Red);
+		colorTable.Add(18, ResultType.Red);
+		colorTable.Add(19, ResultType.Red);
+		colorTable.Add(21, ResultType.Red);
+		colorTable.Add(23, ResultType.Red);
+		colorTable.Add(25, ResultType.Red);
+		colorTable.Add(27, ResultType.Red);
+		colorTable.Add(30, ResultType.Red);
+		colorTable.Add(32, ResultType.Red);
+		colorTable.Add(34, ResultType.Red);
+		colorTable.Add(36, ResultType.Red);
 
-		colorTable.Add(2, ResultColor.Black);
-		colorTable.Add(4, ResultColor.Black);
-		colorTable.Add(6, ResultColor.Black);
-		colorTable.Add(8, ResultColor.Black);
-		colorTable.Add(10, ResultColor.Black);
-		colorTable.Add(11, ResultColor.Black);
-		colorTable.Add(13, ResultColor.Black);
-		colorTable.Add(15, ResultColor.Black);
-		colorTable.Add(17, ResultColor.Black);
-		colorTable.Add(20, ResultColor.Black);
-		colorTable.Add(22, ResultColor.Black);
-		colorTable.Add(24, ResultColor.Black);
-		colorTable.Add(26, ResultColor.Black);
-		colorTable.Add(28, ResultColor.Black);
-		colorTable.Add(29, ResultColor.Black);
-		colorTable.Add(31, ResultColor.Black);
-		colorTable.Add(33, ResultColor.Black);
-		colorTable.Add(35, ResultColor.Black);
+		colorTable.Add(2, ResultType.Black);
+		colorTable.Add(4, ResultType.Black);
+		colorTable.Add(6, ResultType.Black);
+		colorTable.Add(8, ResultType.Black);
+		colorTable.Add(10, ResultType.Black);
+		colorTable.Add(11, ResultType.Black);
+		colorTable.Add(13, ResultType.Black);
+		colorTable.Add(15, ResultType.Black);
+		colorTable.Add(17, ResultType.Black);
+		colorTable.Add(20, ResultType.Black);
+		colorTable.Add(22, ResultType.Black);
+		colorTable.Add(24, ResultType.Black);
+		colorTable.Add(26, ResultType.Black);
+		colorTable.Add(28, ResultType.Black);
+		colorTable.Add(29, ResultType.Black);
+		colorTable.Add(31, ResultType.Black);
+		colorTable.Add(33, ResultType.Black);
+		colorTable.Add(35, ResultType.Black);
 	}
 
     private static GameData instance;

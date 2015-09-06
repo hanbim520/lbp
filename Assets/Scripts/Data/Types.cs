@@ -27,8 +27,10 @@ public struct NetInstr
     public const int GameResult = 7;
 }
 
+// Use for network
 public struct Fields
 {
+    // 0...36
     public const int Even = 38;
     public const int Odd = 39;
     public const int Red = 40;
@@ -42,7 +44,7 @@ public struct Notifies
     public static string LimitBet = "限红不能押注";
 }
 
-public enum ResultColor
+public enum ResultType
 {
-	Green, Red, Black
+    Green, Red, Black, Even, Odd, Big, Small, Serial1_18, Serial19_36
 }

@@ -197,6 +197,7 @@ public class ServerLogic : MonoBehaviour
                 tGetBallVal.Stop();
                 tGetBallVal = null;
                 ShowResult();
+                GameEventManager.OnRefreshRecord(ballValue);
             }
         }
 	}
