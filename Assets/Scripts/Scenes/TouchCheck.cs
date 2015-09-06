@@ -172,7 +172,7 @@ public class TouchCheck : MonoBehaviour
 
 	private void StoreMatrix()
 	{
-
+        GameData.GetInstance().SaveTouchMatrix();
 	}
 
 	private void FingerUp(UInt16 x, UInt16 y)

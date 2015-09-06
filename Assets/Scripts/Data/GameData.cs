@@ -228,9 +228,10 @@ public class GameData
 				caiPiao[i] = CryptoPrefs.GetInt("caiPiao" + i);
             }
         }
+        ReadTouchMatrix();
     }
 
-	public void StoreRecords()
+	public void SaveRecords()
 	{
 		if (records.Count > 0)
 		{
@@ -244,7 +245,7 @@ public class GameData
 		}
 	}
 
-	public void StoreRecord(int result)
+	public void SaveRecord(int result)
 	{
 		if (records.Count > 0)
 			records.Dequeue();
@@ -265,4 +266,25 @@ public class GameData
 				break;
 		}
 	}
+
+    public void SaveTouchMatrix()
+    {
+        PlayerPrefs.SetFloat("TA", TA);
+        PlayerPrefs.SetFloat("TB", TB);
+        PlayerPrefs.SetFloat("TC", TC);
+        PlayerPrefs.SetFloat("TD", TD);
+        PlayerPrefs.SetFloat("TE", TE);
+        PlayerPrefs.SetFloat("TE", TF);
+        PlayerPrefs.Save();
+    }
+
+    public void ReadTouchMatrix()
+    {
+        TA = PlayerPrefs.GetFloat("TA", 0.0f);
+        TB = PlayerPrefs.GetFloat("TB", 0.0f);
+        TC = PlayerPrefs.GetFloat("TC", 0.0f);
+        TD = PlayerPrefs.GetFloat("TD", 0.0f);
+        TE = PlayerPrefs.GetFloat("TE", 0.0f);
+        TF = PlayerPrefs.GetFloat("TF", 0.0f);
+    }
 }
