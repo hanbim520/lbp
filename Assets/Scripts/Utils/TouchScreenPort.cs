@@ -16,15 +16,10 @@ public class TouchScreenPort : MonoBehaviour
 
 	private SerialPort sp; 
 	private Queue<byte> queueReadPool = new Queue<byte>();
-	private Queue<string> queueWritePool = new Queue<string>();
 	private Thread readThread; 
 	private Thread dealThread;
-	private Thread writeThread;
 	private bool isReadThreadExit = false;
 	private bool isDealTheadExit = false;
-	private bool isWriteThreadExit = false;
-
-	private const int kWriteInterval = 10;
 
 	void Start() 
 	{ 
@@ -54,10 +49,6 @@ public class TouchScreenPort : MonoBehaviour
 		dealThread.Start(); 
 		readThread = new Thread(ReceiveData);
 		readThread.Start(); 
-
-//		writeThread = new Thread(WriteThreadFunc);
-//		writeThread.Start();
-	
 	}
 
 	void OnDestroy()
@@ -65,7 +56,6 @@ public class TouchScreenPort : MonoBehaviour
 		readThread.Abort();
 		isReadThreadExit = true;
 		isDealTheadExit = true;
-		isWriteThreadExit = true;
 
 #if UNITY_EDITOR
 		if (sp.IsOpen)
@@ -149,26 +139,4 @@ public class TouchScreenPort : MonoBehaviour
 			} 
 		}
 	} 
-	
-	public void SendSerialPortData(string data) 
-	{ 
-		queueWritePool.Enqueue(data);
-	} 
-
-	private void WriteThreadFunc()
-	{
-		while (!isWriteThreadExit)
-		{
-			Thread.Sleep(kWriteInterval);
-			if (queueWritePool.Count != 0)
-			{
-				for (int i = 0; i < queueWritePool.Count; ++i)
-				{
-					string data = queueWritePool.Dequeue();
-					if (sp.IsOpen)
-						sp.Write(data);
-				}
-			}
-		}
-	}
 }

@@ -12,7 +12,7 @@ public class SerialMousePort : MonoBehaviour
 	public string comName = "COM1";
 	public int baudRate = 1200; // or 2400
 	public Parity parityBit = Parity.None;
-	public int dataBits = 8;    // or 7
+	public int dataBits = 7;    // or 8
 	public StopBits stopBits = StopBits.One;
 
 	private SerialPort sp; 
@@ -23,15 +23,19 @@ public class SerialMousePort : MonoBehaviour
 	private bool isDealTheadExit = false;
     private bool blAlreadyDown = false;
     private bool rlAlreadyDown = false;
-    private const float ratio = 0.05f;
+    private float ratio = 1.2f;
     private float xMax;
     private float xMin;
     private float yMax;
     private float yMin;
+	private bool bFindMouse = false;
+	private bool bAllowMove = false;
+
+	private const int refrenceWidth = 704;
 
 	void Start()
 	{
-        Init();
+		Init();
         RegisterEvents();
 #if UNITY_EDITOR
 		// 端口名称 波特率 奇偶校验位 数据位值 停止位
@@ -55,6 +59,8 @@ public class SerialMousePort : MonoBehaviour
 
 #endif
 
+		StartCoroutine(DetectMouse());
+
 		dealThread = new Thread(DealReceivedData); 
 		dealThread.Start(); 
 		readThread = new Thread(ReceiveData);
@@ -76,6 +82,11 @@ public class SerialMousePort : MonoBehaviour
 			sp.Close();
 		}
 #endif
+	}
+
+	void Update()
+	{
+		MoveMouse();
 	}
 
 	private void ReceiveData() 
@@ -122,6 +133,8 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 		{
 			if (queueReadPool.Count >= 3) 
 			{ 
+				if (!bFindMouse)
+					bFindMouse = true;
 				byte data = queueReadPool.Dequeue(); 
 				int lb = (0x20 & data) >> 5;
 				int rb = (0x10 & data) >> 4;
@@ -133,11 +146,12 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
                 sbyte deltaX = (sbyte)(0x3F & data | (x7 << 7) | (x6 << 6));
                 data = queueReadPool.Dequeue();
 				sbyte deltaY = (sbyte)(0x3F & data | (y7 << 7) | (y6 << 6));
-                GameEventManager.OnSerialMouseMove(deltaX, deltaY);
+            	GameEventManager.OnSerialMouseMove(deltaX, deltaY);
                 if (lb == 1)
                     GameEventManager.OnSMLBDown();
                 else if (lb == 0 && blAlreadyDown)
                 {
+					print("OnSMLBUp");
                     GameEventManager.OnSMLBUp();
                     blAlreadyDown = false;
                 }
@@ -145,6 +159,7 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
                     GameEventManager.OnSMRBDown();
                 else if (rb == 0 && rlAlreadyDown)
                 {
+					print("OnSMRBUp");
                     GameEventManager.OnSMRBUp();
                     rlAlreadyDown = false;
                 }
@@ -170,17 +185,19 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
     private void SMLBDown()
     {
         blAlreadyDown = true;
+		print("SMLBDown");
     }
 
     private void SMRBDown()
     {
         rlAlreadyDown = true;
+		print("SMRBDown");
     }
 
     private void SerialMouseMove(sbyte deltaX, sbyte deltaY)
     {
-        GameData.GetInstance().serialMouseX += deltaX * ratio;
-        GameData.GetInstance().serialMouseY -= deltaY * ratio;
+        GameData.GetInstance().serialMouseX -= deltaX * ratio;
+        GameData.GetInstance().serialMouseY += deltaY * ratio;
 
         if (GameData.GetInstance().serialMouseX >= xMax)
             GameData.GetInstance().serialMouseX = xMax;
@@ -190,13 +207,6 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
             GameData.GetInstance().serialMouseY = yMax;
         else if (GameData.GetInstance().serialMouseY <= yMin)
             GameData.GetInstance().serialMouseY = yMin;
-
-        if (mouse != null)
-        {
-            if (!mouse.activeSelf)
-                mouse.SetActive(true);
-            mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
-        }
     }
 
     private void Init()
@@ -207,7 +217,7 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
         xMin = -resolutionWidth / 2;
         yMax = resolutionHeight / 2;
         yMin = -resolutionHeight / 2;
-        StartCoroutine(DetectMouse());
+		ratio = Screen.width / refrenceWidth * ratio;
     }
 
     private IEnumerator DetectMouse()
@@ -216,12 +226,25 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
             Application.platform == RuntimePlatform.OSXEditor)
         {
             sp.RtsEnable = false;
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(1.0f);
             sp.RtsEnable = true;
         }
         else if (Application.platform == RuntimePlatform.Android)
         {
             
         }
+		yield return new WaitForSeconds(1.0f);
+		// 防止鼠标乱跳
+		bAllowMove = true;
     }
+
+	private void MoveMouse()
+	{
+		if (bFindMouse && bAllowMove && mouse != null)
+		{
+			if (!mouse.activeSelf)
+				mouse.SetActive(true);
+			mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
+		}
+	}
 }

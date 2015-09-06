@@ -80,4 +80,10 @@ public static class Utils
 	{
 		return point.x <= rect.xMax && point.x >= rect.xMin && point.y <= rect.yMax && point.y >= rect.yMin;
 	}
+
+	public static void TouchScreenToLCD(float tx, float ty, out float lx, out float ly)
+	{
+		lx = GameData.GetInstance().TA * tx + GameData.GetInstance().TB * ty + GameData.GetInstance().TC;
+		ly = GameData.GetInstance().TD * tx + GameData.GetInstance().TE * ty + GameData.GetInstance().TF;
+	}
 }

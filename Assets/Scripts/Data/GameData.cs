@@ -42,6 +42,14 @@ public class GameData
     public int resolutionWidth = 1440;
     public int resolutionHeight = 1080;
 
+	// Det(determinant) for Touch-screen coordinate to UI coordinate
+	public float TA;
+	public float TB;
+	public float TC;
+	public float TD;
+	public float TE;
+	public float TF;
+
 	public Queue<int> records = new Queue<int>(100);
 	public Dictionary<int, ResultColor> colorTable = new Dictionary<int, ResultColor>();
 
