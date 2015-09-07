@@ -84,7 +84,7 @@ public class GameData
 		}
 		deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 
-		colorTable.Add(0, ResultType.Green);
+		colorTable.Add(0, ResultType.Zero);
 		colorTable.Add(1, ResultType.Red);
 		colorTable.Add(3, ResultType.Red);
 		colorTable.Add(5, ResultType.Red);
