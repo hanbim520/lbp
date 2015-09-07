@@ -59,13 +59,24 @@ public class RecordMost : MonoBehaviour
         {
             if (i > fixedCount)
                 break;
-            
-            fewGO[i].SetActive(true);
+
+            if (!fewGO[i].activeSelf)
+                fewGO[i].SetActive(true);
             if (GameData.GetInstance().colorTable[fewValues[i]] == ResultType.Red)
+            {
                 fewGO[i].transform.FindChild("Image").GetComponent<Image>().sprite = images[0];
-            else
+                fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = fewValues[i].ToString();
+            }
+            else if (GameData.GetInstance().colorTable[fewValues[i]] == ResultType.Black)
+            {
                 fewGO[i].transform.FindChild("Image").GetComponent<Image>().sprite = images[1];
-            fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = fewValues[i].ToString();
+                fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = fewValues[i].ToString();
+            }
+            else
+            {
+                fewGO[i].transform.FindChild("Image").GetComponent<Image>().sprite = images[2];
+                fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
+            }
         }
     }
 }
