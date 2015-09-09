@@ -24,7 +24,7 @@ public class GameData
 	public int[] caiPiao;
 
 	// Odds
-    public float yanseOdds = 1.97f;
+    public float yanseOdds = 1.0f;
     public float shuangOdds = 1.97f;
     public float danOdds = 1.97f;
     public float daOdds = 1.97f;
