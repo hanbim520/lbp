@@ -86,4 +86,12 @@ public static class Utils
 		lx = GameData.GetInstance().TA * tx + GameData.GetInstance().TB * ty + GameData.GetInstance().TC;
 		ly = GameData.GetInstance().TD * tx + GameData.GetInstance().TE * ty + GameData.GetInstance().TF;
 	}
+
+	// Convert position from screen space to ugui space.
+	public static void ScreenSpaceToUISpace(float sx, float sy, out float ux, out float uy)
+	{
+		ux = GameData.GetInstance().resolutionWidth / Screen.width * sx;
+		uy = GameData.GetInstance().resolutionHeight / Screen.height * sy;
+	}
+
 }
