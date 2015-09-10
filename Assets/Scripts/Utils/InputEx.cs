@@ -5,9 +5,10 @@ using System.Collections.Generic;
 
 public class InputEx : MonoBehaviour
 {
+	public static bool inputEnable = true;
 	private static Queue<Vector2> touches;
 	private static Queue<Vector2> mousePositions;
-
+//	private const float
 	void Start()
 	{
 		touches = new Queue<Vector2>();
@@ -19,10 +20,10 @@ public class InputEx : MonoBehaviour
 	{
 		UnregisterEvents();
 	}
-	
+
 	void Update()
 	{
-//		if (touches > 5)
+
 	}
 
 	private void RegisterEvents()
@@ -47,6 +48,7 @@ public class InputEx : MonoBehaviour
 
 	private void SerialMouseButtonEvent()
 	{
+		if (!inputEnable) return;
 		float x = GameData.GetInstance().serialMouseX;
 		float y = GameData.GetInstance().serialMouseY;
 		if (mousePositions.Count > 0)
@@ -56,6 +58,7 @@ public class InputEx : MonoBehaviour
 
 	private void OnFingerEvent(UInt16 x, UInt16 y)
 	{
+		if (!inputEnable) return;
 		if (touches.Count > 0)
 			touches.Clear();
 		touches.Enqueue(new Vector2(x, y));

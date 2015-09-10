@@ -12,9 +12,10 @@ public class DetectCollision : MonoBehaviour
 	
 	}
 	
-	void Update()
+	void FixedUpdate()
 	{
-		DetectInputEvents();
+//		DetectInputEvents();
+		test();
 	}
 
 	private void DetectInputEvents()
@@ -43,5 +44,16 @@ public class DetectCollision : MonoBehaviour
 				}
 			}
 		}
+	}
+
+	private void test()
+	{
+		if (Input.GetMouseButtonDown(0))
+		{
+			print(Input.mousePosition);
+		}
+
+		else if (Input.GetMouseButtonUp(0))
+			print(Input.mousePosition);
 	}
 }
