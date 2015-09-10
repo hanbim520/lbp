@@ -85,6 +85,15 @@ public static class Utils
 		return point.x <= xMax && point.x >= xMin && point.y <= yMax && point.y >= yMin;
 	}
 
+	public static bool PointInRect(Vector2 point, RectTransform rt, float scale)
+	{
+		float xMax = rt.localPosition.x + rt.rect.xMax * scale;
+		float xMin = rt.localPosition.x + rt.rect.xMin * scale;
+		float yMax = rt.localPosition.y + rt.rect.yMax * scale;
+		float yMin = rt.localPosition.y + rt.rect.yMin * scale;
+		return point.x <= xMax && point.x >= xMin && point.y <= yMax && point.y >= yMin;
+	}
+
 	public static void TouchScreenToLCD(float tx, float ty, out float lx, out float ly)
 	{
 		lx = GameData.GetInstance().TA * tx + GameData.GetInstance().TB * ty + GameData.GetInstance().TC;

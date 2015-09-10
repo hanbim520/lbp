@@ -52,6 +52,7 @@ public class GameData
 
 	// Custom setting
 	public int language;	// 0:EN 1:CN
+	public int displayType; // 0:classic 1:ellipse
 
 	public Queue<int> records = new Queue<int>(100);
 	public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
@@ -147,6 +148,7 @@ public class GameData
 		PlayerPrefs.SetInt("gameDifficulty", gameDifficulty);
         PlayerPrefs.SetInt("quanTaiBaoJi", quanTaiBaoJi);
 		PlayerPrefs.SetInt("language", language);
+		PlayerPrefs.SetInt("displayType", displayType);
         PlayerPrefs.Save();
     }
 
@@ -159,7 +161,8 @@ public class GameData
         danXianZhu = 20000;
 		gameDifficulty = 1;
         quanTaiBaoJi = 20000;
-		language = 0;
+		language = 0;		// EN
+		displayType = 0;	// classic
     }
 
     public void SaveAccount()
@@ -296,6 +299,12 @@ public class GameData
 	public void SaveLanguage()
 	{
 		PlayerPrefs.SetInt("language", language);
+		PlayerPrefs.Save();
+	}
+
+	public void SaveDisplayType()
+	{
+		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.Save();
 	}
 }
