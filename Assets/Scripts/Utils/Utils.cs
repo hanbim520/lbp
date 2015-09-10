@@ -76,9 +76,13 @@ public static class Utils
 		return x[0, 0] * x[1, 1] * x[2, 2] + x[1, 0] * x[2, 1] * x[0, 2] + x[0, 1] * x[1, 2] * x[2, 0] - x[2, 0] * x[1, 1] * x[0, 2] - x[2, 1] * x[1, 2] * x[0, 0] - x[1, 0] * x[0, 1] * x[2, 2];
 	}
 
-	public static bool PointInRect(Vector2 point, Rect rect)
+	public static bool PointInRect(Vector2 point, RectTransform rt)
 	{
-		return point.x <= rect.xMax && point.x >= rect.xMin && point.y <= rect.yMax && point.y >= rect.yMin;
+		float xMax = rt.localPosition.x + rt.rect.xMax;
+		float xMin = rt.localPosition.x + rt.rect.xMin;
+		float yMax = rt.localPosition.y + rt.rect.yMax;
+		float yMin = rt.localPosition.y + rt.rect.yMin;
+		return point.x <= xMax && point.x >= xMin && point.y <= yMax && point.y >= yMin;
 	}
 
 	public static void TouchScreenToLCD(float tx, float ty, out float lx, out float ly)
@@ -90,8 +94,10 @@ public static class Utils
 	// Convert position from screen space to ugui space.
 	public static void ScreenSpaceToUISpace(float sx, float sy, out float ux, out float uy)
 	{
-		ux = GameData.GetInstance().resolutionWidth / Screen.width * sx;
-		uy = GameData.GetInstance().resolutionHeight / Screen.height * sy;
+		float resolutionWidth = GameData.GetInstance().resolutionWidth;
+		float resolutionHeight = GameData.GetInstance().resolutionHeight;
+		ux = resolutionWidth / Screen.width * sx - resolutionWidth * 0.5f;
+		uy = resolutionHeight / Screen.height * sy - resolutionHeight * 0.5f;
 	}
 
 }

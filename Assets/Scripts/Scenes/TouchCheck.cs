@@ -87,7 +87,7 @@ public class TouchCheck : MonoBehaviour
 			Vector2 touchPos = new Vector2(lx, ly);
 			RectTransform rt = button.GetComponent<RectTransform>();
 			// Hit in button field
-			if (Utils.PointInRect(touchPos, rt.rect))
+			if (Utils.PointInRect(touchPos, rt))
 			{
 				txtSuccess.SetActive(true);
 				// Reboot system
