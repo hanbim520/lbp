@@ -6,13 +6,21 @@ using System.Collections.Generic;
 public class InputEx : MonoBehaviour
 {
 	public static bool inputEnable = true;
-	private static Queue<Vector2> touches;
-	private static Queue<Vector2> mousePositions;
-//	private const float
+	private static Queue<InputInfo> touchUp;
+	private static Queue<InputInfo> touchDown;
+	private static Queue<InputInfo> mouseUp;
+	private static Queue<InputInfo> mouseDown;
+
+	private const int kMaxPointNumber = 5;
+	private const float kDeleteTouchTime = 0.03f;
+	private const float kDeleteMouseTime = 0.03f;
+
 	void Start()
 	{
-		touches = new Queue<Vector2>();
-		mousePositions = new Queue<Vector2>();
+		touchUp = new Queue<InputInfo>();
+		touchDown = new Queue<InputInfo>();
+		mouseUp = new Queue<InputInfo>();
+		mouseDown = new Queue<InputInfo>();
 		RegisterEvents();
 	}
 
@@ -23,70 +31,158 @@ public class InputEx : MonoBehaviour
 
 	void Update()
 	{
+		CheckOutdated();
+	}
 
+	private void CheckOutdated()
+	{
+		float realTime = Time.realtimeSinceStartup;
+		while (touchUp.Count > 0)
+		{
+			InputInfo info = touchUp.Peek();
+			if (Mathf.Abs(realTime - info.time) > kDeleteTouchTime)
+			{
+				touchUp.Dequeue();
+				continue;
+			}
+			break;
+		}
+		while (touchDown.Count > 0)
+		{
+			InputInfo info = touchDown.Peek();
+			if (Mathf.Abs(realTime - info.time) > kDeleteTouchTime)
+			{
+				touchDown.Dequeue();
+				continue;
+			}
+			break;
+		}
+		while (mouseUp.Count > 0)
+		{
+			InputInfo info = mouseUp.Peek();
+			if (Mathf.Abs(realTime - info.time) > kDeleteMouseTime)
+			{
+				mouseUp.Dequeue();
+				continue;
+			}
+			break;
+		}
+		while (mouseDown.Count > 0)
+		{
+			InputInfo info = mouseDown.Peek();
+			if (Mathf.Abs(realTime - info.time) > kDeleteMouseTime)
+			{
+				mouseDown.Dequeue();
+				continue;
+			}
+			break;
+		}
 	}
 
 	private void RegisterEvents()
 	{
-		GameEventManager.SMRBUp += SerialMouseButtonEvent;
-		GameEventManager.SMLBUp += SerialMouseButtonEvent;
-		GameEventManager.SMRBDown += SerialMouseButtonEvent;
-		GameEventManager.SMLBDown += SerialMouseButtonEvent;
-		GameEventManager.FingerUp += OnFingerEvent;
-		GameEventManager.FingerDown += OnFingerEvent;
+		GameEventManager.SMRBUp += MouseButtonUp;
+		GameEventManager.SMLBUp += MouseButtonUp;
+		GameEventManager.SMRBDown += MouseButtonDown;
+		GameEventManager.SMLBDown += MouseButtonDown;
+		GameEventManager.FingerUp += FingerUp;
+		GameEventManager.FingerDown += FingerDown;
 	}
 
 	private void UnregisterEvents()
 	{
-		GameEventManager.SMRBUp -= SerialMouseButtonEvent;
-		GameEventManager.SMLBUp -= SerialMouseButtonEvent;
-		GameEventManager.SMRBDown -= SerialMouseButtonEvent;
-		GameEventManager.SMLBDown -= SerialMouseButtonEvent;
-		GameEventManager.FingerUp -= OnFingerEvent;
-		GameEventManager.FingerDown -= OnFingerEvent;
+		GameEventManager.SMRBUp -= MouseButtonUp;
+		GameEventManager.SMLBUp -= MouseButtonUp;
+		GameEventManager.SMRBDown -= MouseButtonDown;
+		GameEventManager.SMLBDown -= MouseButtonDown;
+		GameEventManager.FingerUp -= FingerUp;
+		GameEventManager.FingerDown -= FingerDown;
 	}
 
-	private void SerialMouseButtonEvent()
+	private void MouseButtonDown()
 	{
-		if (!inputEnable) return;
+		if (!inputEnable ||
+		    mouseDown.Count >= kMaxPointNumber)
+			return;
+
 		float x = GameData.GetInstance().serialMouseX;
 		float y = GameData.GetInstance().serialMouseY;
-		if (mousePositions.Count > 0)
-			mousePositions.Clear();
-		mousePositions.Enqueue(new Vector2(x, y));
+		InputInfo info = new InputInfo();
+		info.x = x;
+		info.y = y;
+		info.time = Time.realtimeSinceStartup;
+		info.state = 1;
+		mouseDown.Enqueue(info);
 	}
 
-	private void OnFingerEvent(UInt16 x, UInt16 y)
+	private void MouseButtonUp()
 	{
-		if (!inputEnable) return;
-		if (touches.Count > 0)
-			touches.Clear();
-		touches.Enqueue(new Vector2(x, y));
+		if (!inputEnable ||
+		    mouseUp.Count >= kMaxPointNumber)
+			return;
+		
+		float x = GameData.GetInstance().serialMouseX;
+		float y = GameData.GetInstance().serialMouseY;
+		InputInfo info = new InputInfo();
+		info.x = x;
+		info.y = y;
+		info.time = Time.realtimeSinceStartup;
+		info.state = 0;
+		mouseUp.Enqueue(info);
+	}
+
+	private void FingerUp(UInt16 x, UInt16 y)
+	{
+		if (!inputEnable ||
+		    touchUp.Count >= kMaxPointNumber)
+			return;
+
+		InputInfo info = new InputInfo();
+		info.x = x;
+		info.y = y;
+		info.time = Time.realtimeSinceStartup;
+		info.state = 0;
+		touchUp.Enqueue(info);
+	}
+
+	private void FingerDown(UInt16 x, UInt16 y)
+	{
+		if (!inputEnable ||
+		    touchDown.Count >= kMaxPointNumber)
+			return;
+		
+		InputInfo info = new InputInfo();
+		info.x = x;
+		info.y = y;
+		info.time = Time.realtimeSinceStartup;
+		info.state = 1;
+		touchDown.Enqueue(info);
 	}
 
 	public static bool GetMouseUp()
 	{
-		return mousePositions.Count > 0;
+		return mouseUp.Count > 0;
+	}
+
+	public static bool GetMouseDown()
+	{
+		return mouseDown.Count > 0;
 	}
 
 	public static bool GetTouchUp()
 	{
-		return touches.Count > 0;
+		return touchUp.Count > 0;
+	}
+
+	public static bool GetTouchDown()
+	{
+		return touchDown.Count > 0;
+		
 	}
 
 	public static bool GetInputUp()
 	{
 		return (GetMouseUp() || GetTouchUp() || Input.GetMouseButtonUp(0));
-	}
-
-	public static bool GetMouseDown()
-	{
-		return mousePositions.Count > 0;
-	}
-
-	public static bool GetTouchDown()
-	{
-		return touches.Count > 0;
 	}
 
 	public static bool GetInputDown()
@@ -96,37 +192,37 @@ public class InputEx : MonoBehaviour
 
 	public static void MouseUpPosition(out Vector2 mousePosition)
 	{
-		if (mousePositions.Count == 0)
+		if (mouseUp.Count == 0)
 		{
 			mousePosition = Vector2.zero;
 			return;
 		}
 
-		Vector2 pos = mousePositions.Dequeue();
-		mousePosition = new Vector2(pos.x, pos.y);
+		InputInfo info = mouseUp.Peek();
+		mousePosition = new Vector2(info.x, info.y);
 	}
 
 	public static void MouseDownPosition(out Vector2 mousePosition)
 	{
-		if (mousePositions.Count == 0)
+		if (mouseDown.Count == 0)
 		{
 			mousePosition = Vector2.zero;
 			return;
 		}
 		
-		Vector2 pos = mousePositions.Dequeue();
-		mousePosition = new Vector2(pos.x, pos.y);
+		InputInfo info = mouseDown.Peek();
+		mousePosition = new Vector2(info.x, info.y);
 	}
 
 	public static void TouchUpPosition(out Vector2 touchPosition)
 	{
-		if (touches.Count == 0)
+		if (touchUp.Count == 0)
 		{
 			touchPosition = Vector2.zero;
 			return;
 		}
 
-		Vector2 pos = touches.Dequeue();
+		InputInfo pos = touchUp.Peek();
 		float lcdx, lcdy;
 		Utils.TouchScreenToLCD(pos.x, pos.y, out lcdx, out lcdy);
 		touchPosition = new Vector2(lcdx, lcdy);
@@ -134,13 +230,13 @@ public class InputEx : MonoBehaviour
 
 	public static void TouchDownPosition(out Vector2 touchPosition)
 	{
-		if (touches.Count == 0)
+		if (touchDown.Count == 0)
 		{
 			touchPosition = Vector2.zero;
 			return;
 		}
 		
-		Vector2 pos = touches.Dequeue();
+		InputInfo pos = touchDown.Peek();
 		float lcdx, lcdy;
 		Utils.TouchScreenToLCD(pos.x, pos.y, out lcdx, out lcdy);
 		touchPosition = new Vector2(lcdx, lcdy);

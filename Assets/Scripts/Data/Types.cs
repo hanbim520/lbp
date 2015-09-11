@@ -48,3 +48,11 @@ public enum ResultType
 {
     Zero, Red, Black, Even, Odd, Big, Small, Serial1_18, Serial19_36
 }
+
+public struct InputInfo
+{
+	public float x;
+	public float y;
+	public float time;
+	public byte state;	// 0:up 1:down
+}

@@ -53,6 +53,7 @@ public class GameData
 	// Custom setting
 	public int language;	// 0:EN 1:CN
 	public int displayType; // 0:classic 1:ellipse
+	public int maxNumberOfFields; // 37 or 38
 
 	public Queue<int> records = new Queue<int>(100);
 	public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
@@ -149,6 +150,7 @@ public class GameData
         PlayerPrefs.SetInt("quanTaiBaoJi", quanTaiBaoJi);
 		PlayerPrefs.SetInt("language", language);
 		PlayerPrefs.SetInt("displayType", displayType);
+		PlayerPrefs.SetInt("maxNumberOfFields", maxNumberOfFields);
         PlayerPrefs.Save();
     }
 
@@ -163,6 +165,7 @@ public class GameData
         quanTaiBaoJi = 20000;
 		language = 0;		// EN
 		displayType = 0;	// classic
+		maxNumberOfFields = 37;
     }
 
     public void SaveAccount()
@@ -235,6 +238,11 @@ public class GameData
                 zongYing[i] = CryptoPrefs.GetInt("zongYing" + i);
 				caiPiao[i] = CryptoPrefs.GetInt("caiPiao" + i);
             }
+
+			// Custom setting
+			language = PlayerPrefs.GetInt("language");
+			displayType = PlayerPrefs.GetInt("displayType");
+			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
         }
         ReadTouchMatrix();
     }

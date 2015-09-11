@@ -3,19 +3,22 @@ using System.Collections;
 
 public class DetectCollision : MonoBehaviour
 {
-	public RectTransform[] validFieldsButtons;
+	private RectTransform[] validFieldsButtons;
 	public RectTransform[] validFieldsMain1;
 	public RectTransform[] validFieldsMain2;
 
-	void Start()
+	void Awake()
 	{
-	
+		GameObject[] btns = GameObject.FindGameObjectsWithTag("Button");
+		validFieldsButtons = new RectTransform[btns.Length];
+		for (int i = 0; i < btns.Length; ++i)
+			validFieldsButtons[i] = btns[i].GetComponent<RectTransform>();
+
 	}
 	
-	void FixedUpdate()
+	void Update()
 	{
-//		DetectInputEvents();
-		test();
+		DetectInputEvents();
 	}
 
 	private void DetectInputEvents()
@@ -26,9 +29,10 @@ public class DetectCollision : MonoBehaviour
 			InputEx.InputDownPosition(out pos);
 			foreach (RectTransform item in validFieldsButtons)
 			{
-				if (Utils.PointInRect(new Vector2(pos.x, pos.y), item))
+				if (item.gameObject.activeInHierarchy && Utils.PointInRect(new Vector2(pos.x, pos.y), item))
 				{
 					item.GetComponent<ButtonEvent>().OnInputDown(item.transform);
+					break;
 				}
 			}
 		}
@@ -38,22 +42,18 @@ public class DetectCollision : MonoBehaviour
 			InputEx.InputUpPosition(out pos);
 			foreach (RectTransform item in validFieldsButtons)
 			{
-				if (Utils.PointInRect(new Vector2(pos.x, pos.y), item))
+				if (item.gameObject.activeInHierarchy && Utils.PointInRect(new Vector2(pos.x, pos.y), item))
 				{
 					item.GetComponent<ButtonEvent>().OnInputUp(item.transform);
+					break;
 				}
 			}
+			print("1");
+			RaycastHit hit;
+			if (Physics.Raycast(pos, Vector3.back, out hit)) {
+				print(hit.collider.name);
+			}
+			print("2");
 		}
-	}
-
-	private void test()
-	{
-		if (Input.GetMouseButtonDown(0))
-		{
-			print(Input.mousePosition);
-		}
-
-		else if (Input.GetMouseButtonUp(0))
-			print(Input.mousePosition);
 	}
 }
