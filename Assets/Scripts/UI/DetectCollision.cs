@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 using System.Collections;
+using System.Collections.Generic;
 
 public class DetectCollision : MonoBehaviour
 {
@@ -48,12 +50,21 @@ public class DetectCollision : MonoBehaviour
 					break;
 				}
 			}
-			print("1");
-			RaycastHit hit;
-			if (Physics.Raycast(pos, Vector3.back, out hit)) {
-				print(hit.collider.name);
-			}
-			print("2");
+
+            EventSystem system = EventSystem.current;
+            List<RaycastResult> hits = new List<RaycastResult>();
+            PointerEventData pointer = new PointerEventData(system);
+
+            float sx, sy;
+            Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
+            pointer.position = new Vector2(sx, sy);
+            system.RaycastAll(pointer, hits);
+            
+            for(int k = 0; k < hits.Count; k++)
+            {
+                print(hits[k].gameObject.name);
+
+            }
 		}
 	}
 }

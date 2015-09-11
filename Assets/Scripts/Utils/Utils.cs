@@ -109,4 +109,11 @@ public static class Utils
 		uy = resolutionHeight / Screen.height * sy - resolutionHeight * 0.5f;
 	}
 
+    public static void UISpaceToScreenSpace(float ux, float uy, out float sx, out float sy)
+    {
+        float resolutionWidth = GameData.GetInstance().resolutionWidth;
+        float resolutionHeight = GameData.GetInstance().resolutionHeight;
+        sx = (ux + resolutionWidth * 0.5f) * Screen.width / resolutionWidth;
+        sy = (uy + resolutionHeight * 0.5f) * Screen.height / resolutionHeight;
+    }
 }
