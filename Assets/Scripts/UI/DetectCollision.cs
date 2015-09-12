@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
@@ -51,19 +52,27 @@ public class DetectCollision : MonoBehaviour
 				}
 			}
 
-            EventSystem system = EventSystem.current;
-            List<RaycastResult> hits = new List<RaycastResult>();
-            PointerEventData pointer = new PointerEventData(system);
+//            EventSystem system = EventSystem.current;
+//            List<RaycastResult> hits = new List<RaycastResult>();
+//            PointerEventData pointer = new PointerEventData(system);
+//
+//            float sx, sy;
+//            Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
+//            pointer.position = new Vector2(sx, sy);
+//            system.RaycastAll(pointer, hits);
+//            
+//            for(int k = 0; k < hits.Count; k++)
+//            {
+//                print(hits[k].gameObject.name);
+//
+//            }
 
             float sx, sy;
             Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
-            pointer.position = new Vector2(sx, sy);
-            system.RaycastAll(pointer, hits);
-            
-            for(int k = 0; k < hits.Count; k++)
+            RaycastHit2D hit = Physics2D.Raycast(new Vector2(sx, sy), Vector2.zero);
+            if (hit.collider != null)
             {
-                print(hits[k].gameObject.name);
-
+                print(hit.collider.name);
             }
 		}
 	}

@@ -11,7 +11,7 @@ public class HandleButtonEvents : MonoBehaviour
 	void Start()
 	{
 		SetLanguage();
-		SetDisplay();
+//		SetDisplay();
 	}
 
 	public void ChangeLanguage(Transform hitObject)
