@@ -245,6 +245,7 @@ public class GameData
 			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
         }
         ReadTouchMatrix();
+        ReadRecords();
     }
 
 	public void SaveRecords()
