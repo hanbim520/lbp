@@ -52,21 +52,6 @@ public class DetectCollision : MonoBehaviour
 				}
 			}
 
-//            EventSystem system = EventSystem.current;
-//            List<RaycastResult> hits = new List<RaycastResult>();
-//            PointerEventData pointer = new PointerEventData(system);
-//
-//            float sx, sy;
-//            Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
-//            pointer.position = new Vector2(sx, sy);
-//            system.RaycastAll(pointer, hits);
-//            
-//            for(int k = 0; k < hits.Count; k++)
-//            {
-//                print(hits[k].gameObject.name);
-//
-//            }
-
             float sx, sy;
             Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
             RaycastHit2D hit = Physics2D.Raycast(new Vector2(sx, sy), Vector2.zero);
