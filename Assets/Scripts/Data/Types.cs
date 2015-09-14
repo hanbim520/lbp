@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum ConnectionState
 {
@@ -55,4 +56,19 @@ public struct InputInfo
 	public float y;
 	public float time;
 	public byte state;	// 0:up 1:down
+}
+
+public struct BetRecord
+{
+    public List<BetInfo> bets;
+    public int startCredit;
+    public int endCredit;
+    public int bet;
+    public int win;
+}
+
+public struct BetInfo
+{
+    public string betField;
+    public int betValue;
 }

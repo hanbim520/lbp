@@ -26,7 +26,7 @@ public class DetectCollision : MonoBehaviour
 
 	private void DetectInputEvents()
 	{
-		if (InputEx.GetInputDown())
+        if (InputEx.GetInputDown())
 		{
 			Vector2 pos;
 			InputEx.InputDownPosition(out pos);
@@ -52,13 +52,13 @@ public class DetectCollision : MonoBehaviour
 				}
 			}
 
-            float sx, sy;
-            Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
-            RaycastHit2D hit = Physics2D.Raycast(new Vector2(sx, sy), Vector2.zero);
-            if (hit.collider != null)
-            {
-                print(hit.collider.name);
-            }
+//            float sx, sy;
+//            Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
+//            RaycastHit2D hit = Physics2D.Raycast(new Vector2(sx, sy), Vector2.zero);
+//            if (hit.collider != null)
+//            {
+//                print(hit.collider.name);
+//            }
 		}
 	}
 }

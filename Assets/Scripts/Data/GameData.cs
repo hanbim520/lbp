@@ -55,6 +55,7 @@ public class GameData
 	public int displayType; // 0:classic 1:ellipse
 	public int maxNumberOfFields; // 37 or 38
 
+    public List<BetRecord> betRecords = new List<BetRecord>();
 	public Queue<int> records = new Queue<int>(100);
 	public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
 
@@ -246,6 +247,7 @@ public class GameData
         }
         ReadTouchMatrix();
         ReadRecords();
+        ReadBetRecords();
     }
 
 	public void SaveRecords()
@@ -316,4 +318,50 @@ public class GameData
 		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.Save();
 	}
+
+    public void SaveBetRecords()
+    {
+        int recordsNum = betRecords.Count;
+        for (int idx = 0; idx < recordsNum; ++idx)
+        {
+            int betsNum = betRecords[idx].bets.Count;
+            for (int i = 0; i < betsNum; ++i)
+            {
+                PlayerPrefs.SetString("br_bets" + idx + "_field" + i, betRecords[idx].bets[i].betField);
+                PlayerPrefs.SetInt("br_bets" + idx + "_value" + i, betRecords[idx].bets[i].betValue);
+            }
+            PlayerPrefs.SetInt("br_startCredit" + idx, betRecords[idx].startCredit);
+            PlayerPrefs.SetInt("br_endCredit" + idx, betRecords[idx].endCredit);
+            PlayerPrefs.SetInt("br_bet" + idx, betRecords[idx].bet);
+            PlayerPrefs.SetInt("br_win" + idx, betRecords[idx].win);
+        }
+        PlayerPrefs.Save();
+    }
+
+    private void ReadBetRecords()
+    {
+        for (int idx = 0; idx < 10; ++idx)
+        {
+            int startCredit = PlayerPrefs.GetInt("br_startCredit" + idx, -1);
+            if (startCredit < 0)
+                break;
+            BetRecord br = new BetRecord();
+            br.startCredit = startCredit;
+            br.endCredit = PlayerPrefs.GetInt("br_endCredit" + idx);
+            br.bet = PlayerPrefs.GetInt("br_bet" + idx);
+            br.win = PlayerPrefs.GetInt("br_win" + idx);
+            br.bets = new List<BetInfo>();
+            for (int i = 0; i < 10; ++i)
+            {
+                string str = PlayerPrefs.GetString("br_bets" + idx + "_field" + i, string.Empty);
+                if (string.IsNullOrEmpty(str))
+                    break;
+                BetInfo betInfo = new BetInfo();
+                betInfo.betField = str;
+                betInfo.betValue = PlayerPrefs.GetInt("br_bets" + idx + "_value" + i);
+                br.bets.Add(betInfo);
+            }
+            betRecords.Add(br);
+        }
+    }
 }
