@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class ServerLogic : MonoBehaviour 
 {
-    public MainSceneUI ui;
+    public MainUILogic ui;
 
     private float timeInterval = 0;
     private float longPressTime = 3;

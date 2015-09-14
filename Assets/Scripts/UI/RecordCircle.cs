@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class RecordCircle : MonoBehaviour
 {
+	public int fieldsCount = 37;
 	private Image[] triangles;
 
 	void Start()
@@ -21,9 +22,8 @@ public class RecordCircle : MonoBehaviour
 
 	private void Init()
 	{
-		int count = 37;
-		triangles = new Image[count];
-		for (int i = 0; i < count; ++i)
+		triangles = new Image[fieldsCount];
+		for (int i = 0; i < fieldsCount; ++i)
 		{
 			triangles[i] = transform.FindChild("T" + i).GetComponent<Image>();
 		}
@@ -40,7 +40,7 @@ public class RecordCircle : MonoBehaviour
 		}
 		int sum = 100;
 		Dictionary<int, int> dict = new Dictionary<int, int>();
-		for (int i = 0; i < 37; ++i)
+		for (int i = 0; i < fieldsCount; ++i)
 		{
 			dict.Add(i, 0);
 		}

@@ -47,7 +47,7 @@ public struct Notifies
 
 public enum ResultType
 {
-    Zero, Red, Black, Even, Odd, Big, Small, Serial1_18, Serial19_36
+    Green, Red, Black, Even, Odd, Big, Small, Serial1_18, Serial19_36
 }
 
 public struct InputInfo

@@ -85,12 +85,12 @@ public static class Utils
 		return point.x <= xMax && point.x >= xMin && point.y <= yMax && point.y >= yMin;
 	}
 
-	public static bool PointInRect(Vector2 point, RectTransform rt, float scale)
+	public static bool PointInRect(Vector2 point, RectTransform rt, float scaleX, float scaleY)
 	{
-		float xMax = rt.localPosition.x + rt.rect.xMax * scale;
-		float xMin = rt.localPosition.x + rt.rect.xMin * scale;
-		float yMax = rt.localPosition.y + rt.rect.yMax * scale;
-		float yMin = rt.localPosition.y + rt.rect.yMin * scale;
+		float xMax = rt.localPosition.x + rt.rect.xMax * scaleX;
+		float xMin = rt.localPosition.x + rt.rect.xMin * scaleX;
+		float yMax = rt.localPosition.y + rt.rect.yMax * scaleY;
+		float yMin = rt.localPosition.y + rt.rect.yMin * scaleY;
 		return point.x <= xMax && point.x >= xMin && point.y <= yMax && point.y >= yMin;
 	}
 

@@ -9,6 +9,7 @@ public class DetectCollision : MonoBehaviour
 	private RectTransform[] validFieldsButtons;
 	public RectTransform[] validFieldsMain1;
 	public RectTransform[] validFieldsMain2;
+	private RectTransform mouseIcon;
 
 	void Awake()
 	{
@@ -17,6 +18,8 @@ public class DetectCollision : MonoBehaviour
 		for (int i = 0; i < btns.Length; ++i)
 			validFieldsButtons[i] = btns[i].GetComponent<RectTransform>();
 
+		mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
+		mouseIcon.localPosition = Vector3.zero;
 	}
 	
 	void Update()
@@ -38,6 +41,7 @@ public class DetectCollision : MonoBehaviour
 					break;
 				}
 			}
+			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
 		}
 		else if (InputEx.GetInputUp())
 		{
@@ -51,6 +55,7 @@ public class DetectCollision : MonoBehaviour
 					break;
 				}
 			}
+			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
 
 //            float sx, sy;
 //            Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);

@@ -34,7 +34,8 @@ public class RecordFew : MonoBehaviour
         }
 
         Dictionary<int, int> dict = new Dictionary<int, int>();
-		for (int i = 0; i < 37; ++i)
+		int num = GameData.GetInstance().maxNumberOfFields;
+		for (int i = 0; i < num; ++i)
 		{
 			dict.Add(i, 0);
 		}
@@ -50,10 +51,10 @@ public class RecordFew : MonoBehaviour
         {
             fewValues.Add(lst[i].Key);
         }
-        RefreshFew();
+        RefreshView();
 	}
 
-	public void RefreshFew()
+	public void RefreshView()
 	{
         for (int i = 0; i < fewValues.Count; ++i)
         {
@@ -74,8 +75,11 @@ public class RecordFew : MonoBehaviour
             }
             else
             {
-                fewGO[i].transform.FindChild("Image").GetComponent<Image>().sprite = images[2];
-                fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
+				if (fewValues[i] == 0)
+					fewGO[i].transform.FindChild("Image").GetComponent<Image>().sprite = images[2];
+				else
+					fewGO[i].transform.FindChild("Image").GetComponent<Image>().sprite = images[3];
+				fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
             }
         }
 	}

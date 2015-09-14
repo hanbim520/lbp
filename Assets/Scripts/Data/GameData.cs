@@ -51,12 +51,14 @@ public class GameData
 	public float TF;
 
 	// Custom setting
-	public int language;	// 0:EN 1:CN
-	public int displayType; // 0:classic 1:ellipse
-	public int maxNumberOfFields; // 37 or 38
+	public int language;			// 0:EN 1:CN
+	public int displayType; 		// 0:classic 1:ellipse
+	public int maxNumberOfFields = 37; 	// 37 or 38
+	public int maxNumberOfChips = 6;	// 1 ~ 6
+	public List<int> betChipValues = new List<int>();
 
     public List<BetRecord> betRecords = new List<BetRecord>();
-	public Queue<int> records = new Queue<int>(100);
+	public Queue<int> records = new Queue<int>(100);	// 00:用38表示
 	public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
 
 	// For host
@@ -90,7 +92,8 @@ public class GameData
 		}
 		deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 
-		colorTable.Add(0, ResultType.Zero);
+		colorTable.Add(0, ResultType.Green);
+		colorTable.Add(38, ResultType.Green);	// 38: 00
 		colorTable.Add(1, ResultType.Red);
 		colorTable.Add(3, ResultType.Red);
 		colorTable.Add(5, ResultType.Red);
@@ -152,6 +155,9 @@ public class GameData
 		PlayerPrefs.SetInt("language", language);
 		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.SetInt("maxNumberOfFields", maxNumberOfFields);
+		PlayerPrefs.SetInt("maxNumberOfChips", maxNumberOfChips);
+		for (int i = 0; i < betChipValues.Count; ++i)
+			PlayerPrefs.SetInt("betChipValues" + i, betChipValues[i]);
         PlayerPrefs.Save();
     }
 
@@ -167,6 +173,13 @@ public class GameData
 		language = 0;		// EN
 		displayType = 0;	// classic
 		maxNumberOfFields = 37;
+		maxNumberOfChips = 6;
+		betChipValues.Add(10);
+		betChipValues.Add(50);
+		betChipValues.Add(100);
+		betChipValues.Add(500);
+		betChipValues.Add(1000);
+		betChipValues.Add(5000);
     }
 
     public void SaveAccount()
@@ -244,6 +257,9 @@ public class GameData
 			language = PlayerPrefs.GetInt("language");
 			displayType = PlayerPrefs.GetInt("displayType");
 			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
+			maxNumberOfChips = PlayerPrefs.GetInt("maxNumberOfChips");
+			for (int i = 0; i < maxNumberOfChips; ++i)
+				betChipValues.Add(PlayerPrefs.GetInt("betChipValues" + i));
         }
         ReadTouchMatrix();
         ReadRecords();
