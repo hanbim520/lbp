@@ -8,10 +8,12 @@ public class MainUILogic : MonoBehaviour
 	public GameObject fields37;
 	public GameObject fields38;
 	public GameObject backendTip;
+	public GameObject chooseBetEffect;
 
 	private GameObject displayClassic;
 	private GameObject displayEllipse;
 	private GameObject eraser;
+	private RectTransform mouseIcon;
 
 	void Start()
 	{
@@ -25,6 +27,8 @@ public class MainUILogic : MonoBehaviour
 	{
 		eraser = GameObject.Find("Canvas/eraser");
 		eraser.SetActive(false);
+		mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
+		mouseIcon.localPosition = Vector3.zero;
 	}
 
 	public void ChangeLanguage(Transform hitObject)
@@ -134,6 +138,7 @@ public class MainUILogic : MonoBehaviour
 		{
 			start = -394.0f;
 		}
+
 		for (int i = 1; i <= num; ++i)
 		{
 			Object prefab = (Object)Resources.Load(path + "BetChip" + i);
@@ -141,6 +146,8 @@ public class MainUILogic : MonoBehaviour
 			betChip.transform.SetParent(root.transform);
 			betChip.transform.localPosition = new Vector3(start + (i - 1) * dist, y, 0);
 			betChip.transform.localScale = Vector3.one;
+			betChip.GetComponent<ButtonEvent>().receiver = gameObject;
+			betChip.GetComponent<ButtonEvent>().inputUpEvent = "BetEvent";
 			prefab = null;
 		}
 	}
@@ -158,5 +165,49 @@ public class MainUILogic : MonoBehaviour
 	public void RepeatEvent()
 	{
 		
+	}
+
+	public void BetEvent(Transform hitObject)
+	{
+		if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
+		chooseBetEffect.transform.localPosition = hitObject.localPosition + new Vector3(0, 10f, 0);
+	}
+
+	void Update()
+	{
+		DetectInputEvents();
+	}
+
+	private void DetectInputEvents()
+	{
+		if (InputEx.GetInputDown())
+		{
+			Vector2 pos;
+			InputEx.InputDownPosition(out pos);
+
+			float sx, sy;
+			Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
+			RaycastHit2D hit = Physics2D.Raycast(new Vector2(sx, sy), Vector2.zero);
+			if (hit.collider != null)
+			{
+				hit.collider.gameObject.GetComponent<ButtonEvent>().OnInputDown(hit.collider.transform);
+			}
+
+			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+		}
+		else if (InputEx.GetInputUp())
+		{
+			Vector2 pos;
+			InputEx.InputUpPosition(out pos);
+			
+	        float sx, sy;
+	        Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
+	        RaycastHit2D hit = Physics2D.Raycast(new Vector2(sx, sy), Vector2.zero);
+	        if (hit.collider != null)
+	        {
+				hit.collider.gameObject.GetComponent<ButtonEvent>().OnInputUp(hit.collider.transform);
+	        }
+
+			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);}
 	}
 }
