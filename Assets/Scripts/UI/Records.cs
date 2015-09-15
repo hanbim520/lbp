@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
+// 20场记录
 public class Records : MonoBehaviour 
 {
     public GameObject[] records;
@@ -59,7 +60,10 @@ public class Records : MonoBehaviour
             }
             else
             {
-                records[j].transform.FindChild("Image").GetComponent<Image>().sprite = imgs[2];
+				if (r[i] == 0)
+                	records[j].transform.FindChild("Image").GetComponent<Image>().sprite = imgs[2];
+				else
+					records[j].transform.FindChild("Image").GetComponent<Image>().sprite = imgs[3];
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
                 records[j].transform.FindChild("Text").localPosition = Vector3.zero;
             }

@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
+// 出现最少的5个号
 public class RecordFew : MonoBehaviour
 {
     public GameObject[] fewGO;
