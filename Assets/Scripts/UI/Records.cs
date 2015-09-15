@@ -48,24 +48,27 @@ public class Records : MonoBehaviour
                 records[j].SetActive(true);
             if (GameData.GetInstance().colorTable[r[i]] == ResultType.Red)
             {
-                records[j].transform.FindChild("Image").GetComponent<Image>().sprite = imgs[0];
+				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[0];
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
-                records[j].transform.FindChild("Text").localPosition = new Vector3(0, 14, 0);
+				Vector3 pos = records[j].transform.localPosition;
+                records[j].transform.localPosition = new Vector3(pos.x, 14, 0);
             }
             else if (GameData.GetInstance().colorTable[r[i]] == ResultType.Black)
             {
-                records[j].transform.FindChild("Image").GetComponent<Image>().sprite = imgs[1];
+				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[1];
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
-                records[j].transform.FindChild("Text").localPosition = new Vector3(0, -14, 0);
+				Vector3 pos = records[j].transform.localPosition;
+				records[j].transform.localPosition = new Vector3(pos.x, -14, 0);
             }
             else
             {
 				if (r[i] == 0)
-                	records[j].transform.FindChild("Image").GetComponent<Image>().sprite = imgs[2];
+					records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[2];
 				else
-					records[j].transform.FindChild("Image").GetComponent<Image>().sprite = imgs[3];
+					records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[3];
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
-                records[j].transform.FindChild("Text").localPosition = Vector3.zero;
+				Vector3 pos = records[j].transform.localPosition;
+                records[j].transform.localPosition = new Vector3(pos.x, 0, 0);
             }
         }
     }
