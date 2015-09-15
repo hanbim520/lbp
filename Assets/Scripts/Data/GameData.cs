@@ -58,7 +58,7 @@ public class GameData
 	public List<int> betChipValues = new List<int>();
 
     public List<BetRecord> betRecords = new List<BetRecord>();
-	public Queue<int> records = new Queue<int>(100);	// 00:用38表示
+	public Queue<int> records = new Queue<int>(100);	// 00:用37表示
 	public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
 
 	// For host
@@ -93,7 +93,7 @@ public class GameData
 		deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 
 		colorTable.Add(0, ResultType.Green);
-		colorTable.Add(38, ResultType.Green);	// 38: 00
+		colorTable.Add(37, ResultType.Green);	// 37: 00
 		colorTable.Add(1, ResultType.Red);
 		colorTable.Add(3, ResultType.Red);
 		colorTable.Add(5, ResultType.Red);

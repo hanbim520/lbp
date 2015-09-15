@@ -56,7 +56,7 @@ public class RecordBar : MonoBehaviour
 		int sumRed = 0, sumBlue = 0, sumGreen = 0;
 		foreach (int item in GameData.GetInstance().records)
 		{
-			if (item == 0)
+			if (item == 0 || item == 37)
 				++sumGreen;
 			else
 			{
