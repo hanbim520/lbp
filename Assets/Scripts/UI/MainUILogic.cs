@@ -14,9 +14,11 @@ public class MainUILogic : MonoBehaviour
 	private GameObject displayEllipse;
 	private GameObject eraser;
 	private RectTransform mouseIcon;
+	private int curChipIdx = 0;
 
 	void Start()
 	{
+		GameData.GetInstance().DefaultSetting();
 		Init();
 		SetLanguage();
 		SetDisplay();
@@ -139,15 +141,15 @@ public class MainUILogic : MonoBehaviour
 			start = -394.0f;
 		}
 
-		for (int i = 1; i <= num; ++i)
+		for (int i = 0; i < num; ++i)
 		{
 			Object prefab = (Object)Resources.Load(path + "BetChip" + i);
 			GameObject betChip = (GameObject)Instantiate(prefab);
 			betChip.transform.SetParent(root.transform);
-			betChip.transform.localPosition = new Vector3(start + (i - 1) * dist, y, 0);
+			betChip.transform.localPosition = new Vector3(start + i * dist, y, 0);
 			betChip.transform.localScale = Vector3.one;
 			betChip.GetComponent<ButtonEvent>().receiver = gameObject;
-			betChip.GetComponent<ButtonEvent>().inputUpEvent = "BetEvent";
+			betChip.GetComponent<ButtonEvent>().inputUpEvent = "ChipButtonEvent";
 			prefab = null;
 		}
 	}
@@ -167,10 +169,21 @@ public class MainUILogic : MonoBehaviour
 		
 	}
 
-	public void BetEvent(Transform hitObject)
+	public void FieldClickEvent(Transform hitObject)
+	{
+
+	}
+
+	public void ChipButtonEvent(Transform hitObject)
 	{
 		if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
 		chooseBetEffect.transform.localPosition = hitObject.localPosition + new Vector3(0, 10f, 0);
+
+		int idx;
+		if (int.TryParse(hitObject.name.Substring(7, 1), out idx))
+			curChipIdx = idx;
+		else
+			curChipIdx = 0;
 	}
 
 	void Update()

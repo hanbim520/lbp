@@ -13,6 +13,7 @@ public class GameData
     public int danXianZhu;
 	public int gameDifficulty;
     public int quanTaiBaoJi;
+	public List<int> betChipValues = new List<int>();
 
     // Account
     public int[] zongShang;
@@ -55,7 +56,6 @@ public class GameData
 	public int displayType; 		// 0:classic 1:ellipse
 	public int maxNumberOfFields = 37; 	// 37 or 38
 	public int maxNumberOfChips = 6;	// 1 ~ 6
-	public List<int> betChipValues = new List<int>();
 
     public List<BetRecord> betRecords = new List<BetRecord>();
 	public Queue<int> records = new Queue<int>(100);	// 00:用37表示
@@ -240,6 +240,8 @@ public class GameData
             danXianZhu = PlayerPrefs.GetInt("danXianZhu");
 			gameDifficulty = PlayerPrefs.GetInt("gameDifficulty");
             quanTaiBaoJi = PlayerPrefs.GetInt("quanTaiBaoJi");
+			for (int i = 0; i < maxNumberOfChips; ++i)
+				betChipValues.Add(PlayerPrefs.GetInt("betChipValues" + i));
 
             // Check account menu 
             for (int i = 0; i < maxNumOfPlayers; ++i)
@@ -258,8 +260,6 @@ public class GameData
 			displayType = PlayerPrefs.GetInt("displayType");
 			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
 			maxNumberOfChips = PlayerPrefs.GetInt("maxNumberOfChips");
-			for (int i = 0; i < maxNumberOfChips; ++i)
-				betChipValues.Add(PlayerPrefs.GetInt("betChipValues" + i));
         }
         ReadTouchMatrix();
         ReadRecords();
