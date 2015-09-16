@@ -59,7 +59,7 @@ public class GameData
 
     public List<BetRecord> betRecords = new List<BetRecord>();
 	public Queue<int> records = new Queue<int>(100);	// 00:用37表示
-	public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
+    public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
 
 	// For host
 	private int connectClientsTime = 15;
@@ -92,8 +92,8 @@ public class GameData
 		}
 		deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 
+        colorTable.Add(37, ResultType.Green);    // 37: 00
 		colorTable.Add(0, ResultType.Green);
-		colorTable.Add(37, ResultType.Green);	// 37: 00
 		colorTable.Add(1, ResultType.Red);
 		colorTable.Add(3, ResultType.Red);
 		colorTable.Add(5, ResultType.Red);
@@ -129,8 +129,8 @@ public class GameData
 		colorTable.Add(28, ResultType.Black);
 		colorTable.Add(29, ResultType.Black);
 		colorTable.Add(31, ResultType.Black);
-		colorTable.Add(33, ResultType.Black);
-		colorTable.Add(35, ResultType.Black);
+        colorTable.Add(33, ResultType.Black);
+        colorTable.Add(35, ResultType.Black);
 	}
 
     private static GameData instance;

@@ -26,7 +26,7 @@ public class ServerLogic : MonoBehaviour
 
     private int totalCredits = 10000;
     // Field -- Bet
-    private Dictionary<int, int> betFields = new Dictionary<int, int>();
+    private Dictionary<string, int> betFields = new Dictionary<string, int>();
 
 	void Start() 
     {
@@ -326,7 +326,7 @@ public class ServerLogic : MonoBehaviour
         return Mathf.Abs(minuend - subtrahend) <= maxVal;
     }
 
-    private void Bet(int field, int betVal)
+    private void Bet(string field, int betVal)
     {
         // TODO: 剩下的筹码小于最小押分
         if (totalCredits <= 0 || totalCredits - betVal < 0)
@@ -365,7 +365,7 @@ public class ServerLogic : MonoBehaviour
         }
         if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
         {
-            Bet(Fields.Red, 1000);
+            Bet("red", 1000);
         }
     }
 }

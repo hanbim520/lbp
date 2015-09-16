@@ -116,4 +116,121 @@ public static class Utils
         sx = (ux + resolutionWidth * 0.5f) * Screen.width / resolutionWidth;
         sy = (uy + resolutionHeight * 0.5f) * Screen.height / resolutionHeight;
     }
+
+    public static int IsBingo(string fieldName, int value)
+    {
+        if (string.Equals(fieldName, "Even"))
+        {
+            if (value % 2 == 0) return 2;
+            else                return 0;
+
+        }
+        else if (string.Equals(fieldName, "odd"))
+        {
+            if (value % 2 == 1) return 2;
+            else                return 0;
+        }
+        else if (string.Equals(fieldName, "red"))
+        {
+            if (GameData.GetInstance().colorTable[value] == ResultType.Red)
+                return 2;
+            else
+                return 0;
+        }
+        else if (string.Equals(fieldName, "black"))
+        {
+            if (GameData.GetInstance().colorTable[value] == ResultType.Black)
+                return 2;
+            else
+                return 0;
+        }
+        else if (string.Equals(fieldName, "1to18"))
+        {
+            if (value >= 1 && value <= 18)  return 2;
+            else                            return 0;
+        }
+        else if (string.Equals(fieldName, "19to36"))
+        {
+            if (value >= 19 && value <= 36)  return 2;
+            else                             return 0;
+        }
+        else if (string.Equals(fieldName, "1st12"))
+        {
+            if (value >= 1 && value <= 12)  return 3;
+            else                            return 0;
+        }
+        else if (string.Equals(fieldName, "2nd12"))
+        {
+            if (value >= 13 && value <= 24)  return 3;
+            else                             return 0;
+        }
+        else if (string.Equals(fieldName, "3rd12"))
+        {
+            if (value >= 25 && value <= 36)  return 3;
+            else                             return 0;
+        }
+        else if (string.Equals(fieldName, "2to1 up"))
+        {
+            for (int i = 3; i <= 36; i += 3)
+            {
+                if (i == value)
+                    return 3;
+            }
+            return 0;
+        }
+        else if (string.Equals(fieldName, "2to1 middle"))
+        {
+            for (int i = 2; i <= 35; i += 3)
+            {
+                if (i == value)
+                    return 3;
+            }
+            return 0;
+        }
+        else if (string.Equals(fieldName, "2to1 down"))
+        {
+            for (int i = 1; i <= 34; i += 3)
+            {
+                if (i == value)
+                    return 3;
+            }
+            return 0;
+        }
+        else
+        {
+            // Ellipse
+            if (string.Equals(fieldName.Substring(0, 1), "e"))
+            {
+                string strField = fieldName.Substring(1);
+                char[] separator = {'-'};
+                string[] fields = strField.Split(separator);
+                foreach(string f in fields)
+                {
+                    int v;
+                    if (int.TryParse(f, out v))
+                    {
+                        if (v == value)
+                            return 36;
+                    }
+                }
+                return 0;
+            }
+            // Classic
+            {
+                char[] separator = {'-'};
+                string[] fields = fieldName.Split(separator);
+                foreach(string f in fields)
+                {
+                    int v;
+                    if (int.TryParse(f, out v))
+                    {
+                        if (v == value)
+                            return 36 / separator.Length;
+                    }
+                }
+                return 0;
+            }
+        }
+        return 0;
+    }
 }

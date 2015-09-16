@@ -171,7 +171,28 @@ public class MainUILogic : MonoBehaviour
 
 	public void FieldClickEvent(Transform hitObject)
 	{
-
+        string strField = hitObject.name;
+        // Ellipse
+        if (string.Equals(strField.Substring(0, 1), "e"))
+        {
+            strField = strField.Substring(1);
+            char[] separator = {'-'};
+            string[] fields = strField.Split(separator);
+            foreach(string f in fields)
+            {
+                print(f);
+            }
+        }
+        // Classic
+        else
+        {
+            char[] separator = {'-'};
+            string[] fields = strField.Split(separator);
+            foreach(string f in fields)
+            {
+                print(f);
+            }
+        }
 	}
 
 	public void ChipButtonEvent(Transform hitObject)

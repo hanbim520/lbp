@@ -9,6 +9,7 @@ public static class GameEventManager
 	public delegate void FingerEvent(UInt16 x, UInt16 y);
 	public delegate void SerialMouseMoveEvent(sbyte deltaX, sbyte deltaY);
 	public delegate void SerialMouseButtonEvent();
+    public delegate void FieldClickEvent(string fieldName, int bet);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver;
     public static event GameEvent OpenSerial, CloseSerial;
@@ -16,6 +17,7 @@ public static class GameEventManager
 	public static event SerialMouseMoveEvent SerialMouseMove;
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
     public static event RefreshRecordEvent RefreshRecord;
+    public static event FieldClickEvent FieldClick;
 
 	public static void TriggerOpenSerial()
 	{
@@ -84,6 +86,11 @@ public static class GameEventManager
 
     public static void OnRefreshRecord(int result)
     {
-        if (RefreshRecord != null) RefreshRecord(result );
+        if (RefreshRecord != null) RefreshRecord(result);
+    }
+
+    public static void OnFieldClick(string fieldName, int bet)
+    {
+        if (FieldClick != null) FieldClick(fieldName, bet);
     }
 }
