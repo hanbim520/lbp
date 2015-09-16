@@ -87,12 +87,14 @@ public class ServerLogic : MonoBehaviour
     {
 		GameEventManager.GameStart += GameStart;
         GameEventManager.GameOver += GameOver;
+		GameEventManager.FieldClick += Bet;
     }
 
     private void UnregisterListener()
     {
 		GameEventManager.GameStart -= GameStart;
         GameEventManager.GameOver -= GameOver;
+		GameEventManager.FieldClick -= Bet;
     }
 
 	void Update()

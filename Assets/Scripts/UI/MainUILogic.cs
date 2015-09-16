@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class MainUILogic : MonoBehaviour
@@ -13,8 +14,10 @@ public class MainUILogic : MonoBehaviour
 	private GameObject displayClassic;
 	private GameObject displayEllipse;
 	private GameObject eraser;
+	private GameObject betChipsRoot;
+	private GameObject fieldChipsRoot;
 	private RectTransform mouseIcon;
-	private int curChipIdx = 0;
+	private int curChipIdx = -1;
 
 	void Start()
 	{
@@ -31,6 +34,7 @@ public class MainUILogic : MonoBehaviour
 		eraser.SetActive(false);
 		mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
 		mouseIcon.localPosition = Vector3.zero;
+		fieldChipsRoot = GameObject.Find("Canvas/FieldChipsRoot");
 	}
 
 	public void ChangeLanguage(Transform hitObject)
@@ -106,7 +110,7 @@ public class MainUILogic : MonoBehaviour
 
 	public void SetBetChips()
 	{
-		GameObject root = GameObject.Find("BetChips");
+		betChipsRoot = GameObject.Find("BetChips");
 		string path = "Bet Chips/";
 		float y = -492.0f;
 		float start = 0.0f, dist = 0.0f;
@@ -145,7 +149,7 @@ public class MainUILogic : MonoBehaviour
 		{
 			Object prefab = (Object)Resources.Load(path + "BetChip" + i);
 			GameObject betChip = (GameObject)Instantiate(prefab);
-			betChip.transform.SetParent(root.transform);
+			betChip.transform.SetParent(betChipsRoot.transform);
 			betChip.transform.localPosition = new Vector3(start + i * dist, y, 0);
 			betChip.transform.localScale = Vector3.one;
 			betChip.GetComponent<ButtonEvent>().receiver = gameObject;
@@ -171,40 +175,70 @@ public class MainUILogic : MonoBehaviour
 
 	public void FieldClickEvent(Transform hitObject)
 	{
+		if (curChipIdx == -1)
+			return;
+
         string strField = hitObject.name;
+		int bet = GameData.GetInstance().betChipValues[curChipIdx];
         // Ellipse
         if (string.Equals(strField.Substring(0, 1), "e"))
-        {
             strField = strField.Substring(1);
-            char[] separator = {'-'};
-            string[] fields = strField.Split(separator);
-            foreach(string f in fields)
-            {
-                print(f);
-            }
-        }
-        // Classic
-        else
-        {
-            char[] separator = {'-'};
-            string[] fields = strField.Split(separator);
-            foreach(string f in fields)
-            {
-                print(f);
-            }
-        }
+		GameEventManager.OnFieldClick(strField, bet);
+
+		string prefabPath = "BigChip/BC";
+		if (string.Equals(hitObject.parent.name, "Classic"))
+			prefabPath = "SmallChip/SC";
+		Object prefab = (Object)Resources.Load(prefabPath + curChipIdx);
+		GameObject chip = (GameObject)Instantiate(prefab);
+		chip.transform.SetParent(fieldChipsRoot.transform);
+		chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
+		chip.transform.localScale = Vector3.one;
+		chip.name = hitObject.name + " temp";
+		prefab = null;
+
+		chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
+
+		iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", hitObject.localPosition, 
+		                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
+	}
+
+	private void FieldChipMoveComplete(string param)
+	{
+		char[] separator = {':'};
+		string[] str = param.Split(separator);
+		Transform old = fieldChipsRoot.transform.FindChild(str[0]);
+		Transform newOne = fieldChipsRoot.transform.FindChild(str[0] + " temp");
+
+		int betVal;
+		if (old != null)
+		{
+			if (int.TryParse(old.GetChild(0).GetComponent<Text>().text, out betVal))
+			{
+				betVal = int.Parse(str[1]) + betVal;
+				newOne.GetChild(0).GetComponent<Text>().text = betVal.ToString();
+			}
+			Destroy(old.gameObject);
+		}
+		newOne.name = str[0];
+//		print("FieldChipMoveComplete:" + fieldName);
 	}
 
 	public void ChipButtonEvent(Transform hitObject)
 	{
-		if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
-		chooseBetEffect.transform.localPosition = hitObject.localPosition + new Vector3(0, 10f, 0);
-
 		int idx;
 		if (int.TryParse(hitObject.name.Substring(7, 1), out idx))
 			curChipIdx = idx;
 		else
-			curChipIdx = 0;
+			curChipIdx = -1;
+		
+		if (curChipIdx == -1)
+		{
+			chooseBetEffect.SetActive(false);
+			return;
+		}
+
+		if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
+		chooseBetEffect.transform.localPosition = hitObject.localPosition + new Vector3(0, 10f, 0);
 	}
 
 	void Update()

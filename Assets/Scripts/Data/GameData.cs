@@ -241,7 +241,7 @@ public class GameData
 			gameDifficulty = PlayerPrefs.GetInt("gameDifficulty");
             quanTaiBaoJi = PlayerPrefs.GetInt("quanTaiBaoJi");
 			for (int i = 0; i < maxNumberOfChips; ++i)
-				betChipValues.Add(PlayerPrefs.GetInt("betChipValues" + i));
+				betChipValues.Add(PlayerPrefs.GetInt("betChipValues" + i, 0));
 
             // Check account menu 
             for (int i = 0; i < maxNumOfPlayers; ++i)
