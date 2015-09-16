@@ -25,6 +25,8 @@ public class ServerLogic : MonoBehaviour
     private Timer tGetBallVal = null;
 
     private int totalCredits = 10000;
+	private int currentBet = 0;
+	private int lastWin = 0;
     // Field -- Bet
     private Dictionary<string, int> betFields = new Dictionary<string, int>();
 
@@ -88,6 +90,8 @@ public class ServerLogic : MonoBehaviour
 		GameEventManager.GameStart += GameStart;
         GameEventManager.GameOver += GameOver;
 		GameEventManager.FieldClick += Bet;
+		GameEventManager.ClearAll += ClearAll;
+		GameEventManager.Clear += Clear;
     }
 
     private void UnregisterListener()
@@ -95,6 +99,8 @@ public class ServerLogic : MonoBehaviour
 		GameEventManager.GameStart -= GameStart;
         GameEventManager.GameOver -= GameOver;
 		GameEventManager.FieldClick -= Bet;
+		GameEventManager.ClearAll -= ClearAll;
+		GameEventManager.Clear -= Clear;
     }
 
 	void Update()
@@ -354,20 +360,40 @@ public class ServerLogic : MonoBehaviour
             {
                 betFields.Add(field, betVal);
             }
+//			print(betFields[field].ToString());
+//          DebugConsole.Log(Time.realtimeSinceStartup + ": field-" + field + ", betVal-" + betFields[field]);
             totalCredits -= betVal;
-            DebugConsole.Log(Time.realtimeSinceStartup + ": field-" + field + ", betVal-" + betFields[field]);
+			currentBet += betVal;
         }
     }
 
-    void OnGUI()
-    {
-        if (GUI.Button(new Rect(10, 50, 150, 100), "限注"))
-        {
-            DebugConsole.Clear();
-        }
-        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
-        {
-            Bet("red", 1000);
-        }
-    }
+	private void ClearAll()
+	{
+		foreach (KeyValuePair<string, int> item in betFields)
+		{
+			totalCredits += item.Value;
+		}
+		betFields.Clear();
+	}
+
+	private void Clear(string fieldName)
+	{
+		if (betFields.ContainsKey(fieldName))
+		{
+			totalCredits += betFields[fieldName];
+			betFields.Remove(fieldName);
+		}
+	}
+
+//    void OnGUI()
+//    {
+//        if (GUI.Button(new Rect(10, 50, 150, 100), "限注"))
+//        {
+//            DebugConsole.Clear();
+//        }
+//        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
+//        {
+//            Bet("red", 1000);
+//        }
+//    }
 }

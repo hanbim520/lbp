@@ -83,17 +83,17 @@ public class MainUILogic : MonoBehaviour
 	{
 		if (GameData.GetInstance().maxNumberOfFields == 37)
 		{
-			fields37.SetActive(true);
-			fields38.SetActive(false);
-			displayClassic = GameObject.Find("Canvas/37 Fields/Classic");
-			displayEllipse = GameObject.Find("Canvas/37 Fields/Ellipse");
+			if (!fields37.activeSelf) fields37.SetActive(true);
+			if (fields38.activeSelf) fields38.SetActive(false);
+			if (displayClassic == null) displayClassic = GameObject.Find("Canvas/37 Fields/Classic");
+			if (displayEllipse == null) displayEllipse = GameObject.Find("Canvas/37 Fields/Ellipse");
 		}
 		else if (GameData.GetInstance().maxNumberOfFields == 38)
 		{
-			fields37.SetActive(false);
-			fields38.SetActive(true);
-			displayClassic = GameObject.Find("Canvas/38 Fields/Classic");
-			displayEllipse = GameObject.Find("Canvas/38 Fields/Ellipse");
+			if (fields37.activeSelf) fields37.SetActive(false);
+			if (!fields38.activeSelf) fields38.SetActive(true);
+			if (displayClassic == null) displayClassic = GameObject.Find("Canvas/38 Fields/Classic");
+			if (displayEllipse == null) displayEllipse = GameObject.Find("Canvas/38 Fields/Ellipse");
 		}
 
 		if (GameData.GetInstance().displayType == 0)	// classic
@@ -105,6 +105,22 @@ public class MainUILogic : MonoBehaviour
 		{
 			if (displayClassic != null) displayClassic.SetActive(false);
 			if (displayEllipse != null) displayEllipse.SetActive(true);
+		}
+
+		if (fieldChipsRoot.transform.childCount > 0)
+		{
+			int childCount = fieldChipsRoot.transform.childCount;
+			for (int i = 0; i < childCount; ++i)
+			{
+				Transform child = fieldChipsRoot.transform.GetChild(i);
+				string betValue = child.GetChild(0).GetComponent<Text>().text;
+				string name = child.name;
+				if (string.Equals(name.Substring(0, 1), "e"))
+					name = name.Substring(1);
+
+
+				Destroy(child.gameObject);
+			}
 		}
 	}
 
@@ -158,14 +174,26 @@ public class MainUILogic : MonoBehaviour
 		}
 	}
 
-	public void ClearEvent()
+	public void ClearEvent(Transform hitObject)
 	{
-		if (eraser != null) eraser.SetActive(true);
+		if (fieldChipsRoot.transform.childCount == 0)
+			return;
+
+		if (eraser != null) 
+		{
+			eraser.SetActive(true);
+			eraser.transform.localPosition = hitObject.localPosition;
+		}
+		if (mouseIcon != null) mouseIcon.gameObject.SetActive(false);
 	}
 
-	public void ClearAllEvent()
+	public void ClearAllEvent(Transform hitObject)
 	{
+		if (fieldChipsRoot.transform.childCount == 0)
+			return;
 
+		fieldChipsRoot.transform.DetachChildren();
+		GameEventManager.OnClearAll();
 	}
 
 	public void RepeatEvent()
@@ -173,8 +201,25 @@ public class MainUILogic : MonoBehaviour
 		
 	}
 
+	public void FieldDownEvent(Transform hitObject)
+	{
+		if (eraser.activeSelf || curChipIdx == -1)
+			return;
+
+
+	}
+
 	public void FieldClickEvent(Transform hitObject)
 	{
+		if (eraser.activeSelf)
+		{
+			Destroy(fieldChipsRoot.transform.FindChild(hitObject.name).gameObject);
+			GameEventManager.OnClear(hitObject.name);
+			eraser.SetActive(false);
+			mouseIcon.gameObject.SetActive(true);
+			return;
+		}
+
 		if (curChipIdx == -1)
 			return;
 
@@ -198,8 +243,12 @@ public class MainUILogic : MonoBehaviour
 
 		chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
 
-		iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", hitObject.localPosition, 
+		Vector3 targetPos = new Vector3(hitObject.localPosition.x * hitObject.parent.localScale.x,
+		                                hitObject.localPosition.y * hitObject.parent.localScale.y,
+		                                0);
+		iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
 		                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
+		// TODO:Choose effect
 	}
 
 	private void FieldChipMoveComplete(string param)
@@ -212,6 +261,7 @@ public class MainUILogic : MonoBehaviour
 		int betVal;
 		if (old != null)
 		{
+			// Change bet text
 			if (int.TryParse(old.GetChild(0).GetComponent<Text>().text, out betVal))
 			{
 				betVal = int.Parse(str[1]) + betVal;

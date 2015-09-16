@@ -10,9 +10,12 @@ public static class GameEventManager
 	public delegate void SerialMouseMoveEvent(sbyte deltaX, sbyte deltaY);
 	public delegate void SerialMouseButtonEvent();
     public delegate void FieldClickEvent(string fieldName, int bet);
+    public delegate void ClearEvent(string fieldName);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver;
     public static event GameEvent OpenSerial, CloseSerial;
+    public static event GameEvent ClearAll;
+	public static event ClearEvent Clear;
 	public static event FingerEvent FingerUp, FingerDown, FingerHover;
 	public static event SerialMouseMoveEvent SerialMouseMove;
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
@@ -93,4 +96,14 @@ public static class GameEventManager
     {
         if (FieldClick != null) FieldClick(fieldName, bet);
     }
+
+	public static void OnClearAll()
+	{
+		if (ClearAll != null) ClearAll();
+	}
+
+	public static void OnClear(string fieldName)
+	{
+		if (Clear != null) Clear(fieldName);
+	}
 }
