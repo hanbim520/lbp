@@ -192,7 +192,8 @@ public class MainUILogic : MonoBehaviour
 		if (fieldChipsRoot.transform.childCount == 0)
 			return;
 
-		fieldChipsRoot.transform.DetachChildren();
+        foreach (Transform child in fieldChipsRoot.transform)
+            Destroy(child.gameObject);
 		GameEventManager.OnClearAll();
 	}
 
