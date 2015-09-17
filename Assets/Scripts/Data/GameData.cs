@@ -14,6 +14,17 @@ public class GameData
 	public int gameDifficulty;
     public int quanTaiBaoJi;
 	public List<int> betChipValues = new List<int>();
+	public int max36Value;
+	public int max18Value;
+	public int max12Value;
+	public int max9Value;
+	public int max6Value;
+	public int max3Value;
+	public int max2Value;
+	public int bigRechargeValue;
+	public int smallRechargeValue;
+	// 优惠卡分限
+	public int coupons;
 
     // Account
     public int[] zongShang;
@@ -158,6 +169,15 @@ public class GameData
 		PlayerPrefs.SetInt("maxNumberOfChips", maxNumberOfChips);
 		for (int i = 0; i < betChipValues.Count; ++i)
 			PlayerPrefs.SetInt("betChipValues" + i, betChipValues[i]);
+		PlayerPrefs.SetInt("max36Value", max36Value);
+		PlayerPrefs.SetInt("max18Value", max18Value);
+		PlayerPrefs.SetInt("max12Value", max12Value);
+		PlayerPrefs.SetInt("max9Value", max9Value);
+		PlayerPrefs.SetInt("max6Value", max6Value);
+		PlayerPrefs.SetInt("max3Value", max3Value);
+		PlayerPrefs.SetInt("max2Value", max2Value);
+		PlayerPrefs.SetInt("bigRechargeValue", bigRechargeValue);
+		PlayerPrefs.SetInt("smallRechargeValue", smallRechargeValue);
         PlayerPrefs.Save();
     }
 
@@ -180,6 +200,15 @@ public class GameData
 		betChipValues.Add(500);
 		betChipValues.Add(1000);
 		betChipValues.Add(5000);
+		max36Value = 100;
+		max18Value = 100;
+		max12Value = 100;
+		max9Value = 100;
+		max6Value = 100;
+		max3Value = 100;
+		max2Value = 100;
+		bigRechargeValue = 100;
+		smallRechargeValue = 100;
     }
 
     public void SaveAccount()
@@ -242,6 +271,15 @@ public class GameData
             quanTaiBaoJi = PlayerPrefs.GetInt("quanTaiBaoJi");
 			for (int i = 0; i < maxNumberOfChips; ++i)
 				betChipValues.Add(PlayerPrefs.GetInt("betChipValues" + i, 0));
+			max36Value = PlayerPrefs.GetInt("max36Value");
+			max18Value = PlayerPrefs.GetInt("max18Value");
+			max12Value = PlayerPrefs.GetInt("max12Value");
+			max9Value = PlayerPrefs.GetInt("max9Value");
+			max6Value = PlayerPrefs.GetInt("max6Value");
+			max3Value = PlayerPrefs.GetInt("max3Value");
+			max2Value = PlayerPrefs.GetInt("max2Value");
+			bigRechargeValue = PlayerPrefs.GetInt("bigRechargeValue");
+			smallRechargeValue = PlayerPrefs.GetInt("smallRechargeValue");
 
             // Check account menu 
             for (int i = 0; i < maxNumOfPlayers; ++i)

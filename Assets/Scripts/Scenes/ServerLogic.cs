@@ -34,50 +34,6 @@ public class ServerLogic : MonoBehaviour
     {
 		host = GetComponent<UHost>();
         RegisterListener();
-		Test();
-	}
-
-	private void Test()
-	{
-		//81 81 08 EC
-		//81 D5 02 EC
-		//81 B9 05 A0
-//		byte[] b = {0x81, 0x81, 0x08, 0xEC};
-////		byte[] b = {0x81, 0xD5, 0x02, 0xE8};
-////		byte[] b = {0x81, 0xB9, 0x05, 0xA0};
-//		if (System.BitConverter.IsLittleEndian)
-//		{
-//			Debug.Log("IsLittleEndian");
-//			System.Array.Reverse(b);
-//			for (int i = 0; i < b.Length; ++i)
-//			{
-//				print(string.Format("{0:X}", b[i]));
-//			}
-//		}
-//		else
-//			Debug.Log("IsNotLittleEndian");
-//
-//		uint x = System.BitConverter.ToUInt32(b, 0);
-//		Debug.Log("x: " + x);
-
-		double[,] det = new double[3, 4];
-		det[0, 0] = 2.0d;
-		det[0, 1] = 3.0d;
-		det[0, 2] = -5.0d;
-		det[0, 3] = 3.0d;
-		det[1, 0] = 1.0d;
-		det[1, 1] = -2.0d;
-		det[1, 2] = 1.0d;
-		det[1, 3] = 0d;
-		det[2, 0] = 3.0d;
-		det[2, 1] = 1.0d;
-		det[2, 2] = 3.0d;
-		det[2, 3] = 7.0d;
-		double x, y, z;
-		Utils.LEqations3x3(det, out x, out y, out z);
-		print(x);
-		print(y);
-		print(z);
 	}
 
     void OnDestroy()
