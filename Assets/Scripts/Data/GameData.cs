@@ -68,6 +68,7 @@ public class GameData
 	public int maxNumberOfFields = 37; 	// 37 or 38
 	public int maxNumberOfChips = 6;	// 1 ~ 6
 
+    // 记录最近20场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
 	public Queue<int> records = new Queue<int>(100);	// 00:用37表示
     public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();

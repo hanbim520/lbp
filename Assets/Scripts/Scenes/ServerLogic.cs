@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class ServerLogic : MonoBehaviour 
+public class ServerLogic : GameLogic 
 {
     public MainUILogic ui;
 
@@ -24,9 +24,6 @@ public class ServerLogic : MonoBehaviour
     private int smallFieldVal = 0;
     private Timer tGetBallVal = null;
 
-    private int totalCredits = 10000;
-	private int currentBet = 0;
-	private int lastWin = 0;
     // Field -- Bet
     private Dictionary<string, int> betFields = new Dictionary<string, int>();
 

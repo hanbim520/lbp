@@ -5,6 +5,7 @@ using System.Collections.Generic;
 
 public class MainUILogic : MonoBehaviour
 {
+    public GameLogic gameLogic;
 	public GameObject setEN;
 	public GameObject setCN;
 	public GameObject fields37;
@@ -21,8 +22,6 @@ public class MainUILogic : MonoBehaviour
 	private int curChipIdx = -1;
     private GameObject downHitObject;
     private List<Transform> lightEffects = new List<Transform>();
-	// 记录押分区域
-    private List<Transform> curBetFields = new List<Transform>();
     
 	void Start()
 	{
@@ -290,6 +289,101 @@ public class MainUILogic : MonoBehaviour
 
 	public void RepeatEvent()
 	{
+        int count = GameData.GetInstance().betRecords.Count;
+        if (count == 0)
+            return;
+
+        BetRecord lastRecord = GameData.GetInstance().betRecords[count - 1];
+        if (lastRecord.bet > gameLogic.totalCredits)
+            return;
+
+        if (displayClassic.activeSelf)
+        {
+            string rootPath = "Canvas/38 Fields/Classic/Valid Fields";
+            if (GameData.GetInstance().maxNumberOfFields == 37)
+            {
+                rootPath = "Canvas/37 Fields/Classic/Valid Fields";
+            }
+            GameObject root = GameObject.Find(rootPath);
+            string prefabPath = "BigChip/BC" + curChipIdx;
+            if (root != null)
+            {
+                foreach (BetInfo info in lastRecord.bets)
+                {
+                    if (info.betField == "00" && fields37.activeSelf)
+                        continue;
+
+                    Transform target = root.transform.FindChild(info.betField);
+                    if (target != null)
+                    {
+                        Object prefab = (Object)Resources.Load(prefabPath);
+                        GameObject chip = (GameObject)Instantiate(prefab);
+                        chip.transform.SetParent(fieldChipsRoot.transform);
+                        chip.transform.localScale = Vector3.one;
+                        prefab = null;
+                        Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
+                                                        target.localPosition.y * target.parent.localScale.y,
+                                                        0);
+                        chip.transform.localPosition = targetPos;
+                        chip.transform.GetChild(0).GetComponent<Text>().text = info.betValue.ToString();
+                        chip.name = info.betField;
+                        gameLogic.totalCredits -= info.betValue;
+                    }
+                }
+            }
+        }
+        else
+        {
+            string vfRootPath = "Canvas/38 Fields/Ellipse/Valid Fields";
+            string ceRootPath = "Canvas/38 Fields/Ellipse/Choose Effect";
+            if (GameData.GetInstance().maxNumberOfFields == 37)
+            {
+                vfRootPath = "Canvas/37 Fields/Ellipse/Valid Fields";
+                ceRootPath = "Canvas/37 Fields/Ellipse/Choose Effect";
+            }
+            GameObject vfRoot = GameObject.Find(vfRootPath);
+            GameObject ceRoot = GameObject.Find(ceRootPath);
+            //Choose Effect
+            if (vfRoot != null && ceRoot != null)
+            {
+                foreach (BetInfo info in lastRecord.bets)
+                {
+                    if (info.betField == "00" && fields37.activeSelf)
+                        continue;
+
+                    string prefabPath = "SmallChip/SC" + curChipIdx;
+                    Transform target;
+                    int fieldName;
+                    string name = info.betField;
+                    if (int.TryParse(info.betField, out fieldName) || string.Equals(info.betField, "00"))
+                    {
+                        prefabPath = "BigChip/BC" + curChipIdx;
+                        name = "e" + name;
+                        target = ceRoot.transform.FindChild(name);
+                    }
+                    else
+                    {
+                        target = vfRoot.transform.FindChild(info.betField);
+                    }
+                    
+                    if (target != null)
+                    {
+                        Object prefab = (Object)Resources.Load(prefabPath);
+                        GameObject chip = (GameObject)Instantiate(prefab);
+                        chip.transform.SetParent(fieldChipsRoot.transform);
+                        chip.transform.localScale = Vector3.one;
+                        prefab = null;
+                        Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
+                                                        target.localPosition.y * target.parent.localScale.y,
+                                                        0);
+                        chip.transform.localPosition = targetPos;
+                        chip.transform.GetChild(0).GetComponent<Text>().text = info.betValue.ToString();
+                        chip.name = name;
+                        gameLogic.totalCredits -= info.betValue;
+                    }
+                }
+            }
+        }
 
     }
 
@@ -376,8 +470,6 @@ public class MainUILogic : MonoBehaviour
 		                                0);
 		iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
 		                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
-
-        curBetFields.Add(hitObject);
 	}
 
 	private void FieldChipMoveComplete(string param)
@@ -399,7 +491,6 @@ public class MainUILogic : MonoBehaviour
 			Destroy(old.gameObject);
 		}
 		newOne.name = str[0];
-//		print("FieldChipMoveComplete:" + fieldName);
 	}
 
 	public void ChipButtonEvent(Transform hitObject)
@@ -459,6 +550,6 @@ public class MainUILogic : MonoBehaviour
 
     public void SaveBetRecords()
     {
-        curBetFields.Clear();
+
     }
 }
