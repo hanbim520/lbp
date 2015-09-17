@@ -20,6 +20,7 @@ public class MainUILogic : MonoBehaviour
 	private RectTransform mouseIcon;
 	private int curChipIdx = -1;
     private List<Transform> lightEffects = new List<Transform>();
+    private List<Transform> curBetFields = new List<Transform>();
     
 	void Start()
 	{
@@ -287,6 +288,8 @@ public class MainUILogic : MonoBehaviour
 		                                0);
 		iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
 		                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
+
+        curBetFields.Add(hitObject);
 	}
 
 	private void FieldChipMoveComplete(string param)
@@ -366,4 +369,9 @@ public class MainUILogic : MonoBehaviour
 
 			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);}
 	}
+
+    public void SaveBetRecords()
+    {
+        curBetFields.Clear();
+    }
 }
