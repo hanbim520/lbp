@@ -250,7 +250,7 @@ public class GameData
 
     public void ReadDataFromDisk()
     {
-        PlayerPrefs.DeleteAll();
+//        PlayerPrefs.DeleteAll();
         int firstWrite = PlayerPrefs.GetInt("FirstWrite", 0);
         if (firstWrite == 0)
         {

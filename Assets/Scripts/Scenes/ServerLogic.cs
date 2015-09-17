@@ -27,9 +27,15 @@ public class ServerLogic : GameLogic
     // Field -- Bet
     private Dictionary<string, int> betFields = new Dictionary<string, int>();
 
+    private void Init()
+    {
+        host = GetComponent<UHost>();
+        FixExitAbnormally();
+    }
+
 	void Start() 
     {
-		host = GetComponent<UHost>();
+        Init();
         RegisterListener();
 	}
 
