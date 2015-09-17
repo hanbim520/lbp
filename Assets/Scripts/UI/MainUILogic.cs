@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class MainUILogic : MonoBehaviour
 {
@@ -18,7 +19,8 @@ public class MainUILogic : MonoBehaviour
 	private GameObject fieldChipsRoot;
 	private RectTransform mouseIcon;
 	private int curChipIdx = -1;
-
+    private List<Transform> lightEffects = new List<Transform>();
+    
 	void Start()
 	{
 		GameData.GetInstance().DefaultSetting();
@@ -207,9 +209,35 @@ public class MainUILogic : MonoBehaviour
 		if (eraser.activeSelf || curChipIdx == -1)
 			return;
 
-
-	}
-
+        if (string.Equals(hitObject.name.Substring(0, 1), "e"))
+        {
+            lightEffects.Add(hitObject);
+        }
+        else
+        {
+            Transform effectRoot = hitObject.parent.parent.FindChild("Choose Effect");
+            if (effectRoot != null)
+            {
+                char[] separater = {'-'};
+                string[] names = hitObject.name.Split(separater);
+                foreach (string str in names)
+                {
+                    Transform effect = effectRoot.FindChild(str);
+                    if (effect != null)
+                    {
+                        lightEffects.Add(effect);
+                    }
+                }
+            }
+        }
+        foreach (Transform t in lightEffects)
+        {
+            Color c = t.GetComponent<Image>().color;
+            c.a = 255;
+            t.GetComponent<Image>().color = c;
+        }
+    }
+    
 	public void FieldClickEvent(Transform hitObject)
 	{
 		if (eraser.activeSelf)
@@ -228,11 +256,21 @@ public class MainUILogic : MonoBehaviour
 		int bet = GameData.GetInstance().betChipValues[curChipIdx];
         // Ellipse
         if (string.Equals(strField.Substring(0, 1), "e"))
+        {
             strField = strField.Substring(1);
+        }
+        foreach (Transform t in lightEffects)
+        {
+            Color c = t.GetComponent<Image>().color;
+            c.a = 0;
+            t.GetComponent<Image>().color = c;
+        }
+        lightEffects.Clear();
 		GameEventManager.OnFieldClick(strField, bet);
 
 		string prefabPath = "BigChip/BC";
-		if (string.Equals(hitObject.parent.name, "Classic"))
+        if (string.Equals(hitObject.parent.name, "Valid Fields") && 
+            string.Equals(hitObject.parent.parent.name, "Ellipse"))
 			prefabPath = "SmallChip/SC";
 		Object prefab = (Object)Resources.Load(prefabPath + curChipIdx);
 		GameObject chip = (GameObject)Instantiate(prefab);
@@ -249,7 +287,6 @@ public class MainUILogic : MonoBehaviour
 		                                0);
 		iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
 		                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
-		// TODO:Choose effect
 	}
 
 	private void FieldChipMoveComplete(string param)
