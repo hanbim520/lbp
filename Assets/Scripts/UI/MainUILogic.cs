@@ -19,6 +19,7 @@ public class MainUILogic : MonoBehaviour
 	private GameObject fieldChipsRoot;
 	private RectTransform mouseIcon;
 	private int curChipIdx = -1;
+    private GameObject downHitObject;
     private List<Transform> lightEffects = new List<Transform>();
 	// 记录押分区域
     private List<Transform> curBetFields = new List<Transform>();
@@ -289,8 +290,8 @@ public class MainUILogic : MonoBehaviour
 
 	public void RepeatEvent()
 	{
-		
-	}
+
+    }
 
 	public void FieldDownEvent(Transform hitObject)
 	{
@@ -437,6 +438,7 @@ public class MainUILogic : MonoBehaviour
 			if (hit.collider != null)
 			{
 				hit.collider.gameObject.GetComponent<ButtonEvent>().OnInputDown(hit.collider.transform);
+                downHitObject = hit.collider.gameObject;
 			}
 
 			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
@@ -445,16 +447,14 @@ public class MainUILogic : MonoBehaviour
 		{
 			Vector2 pos;
 			InputEx.InputUpPosition(out pos);
-			
-	        float sx, sy;
-	        Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
-	        RaycastHit2D hit = Physics2D.Raycast(new Vector2(sx, sy), Vector2.zero);
-	        if (hit.collider != null)
-	        {
-				hit.collider.gameObject.GetComponent<ButtonEvent>().OnInputUp(hit.collider.transform);
-	        }
+            mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
 
-			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);}
+            if (downHitObject != null)
+            {
+                downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
+            }
+            downHitObject = null;
+        }
 	}
 
     public void SaveBetRecords()
