@@ -70,7 +70,7 @@ public class GameData
 
     // 记录最近20场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
-	public Queue<int> records = new Queue<int>(100);	// 00:用37表示
+	public Queue<int> records = new Queue<int>();	// 00:用37表示
     public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
 
 	// For host
@@ -184,7 +184,7 @@ public class GameData
 
     public void DefaultSetting ()
     {
-        betTimeLimit = 15;
+        betTimeLimit = 2;
         coinToScore = 1;
         ticketToScore = 1;
         minBet = 1;

@@ -12,7 +12,7 @@ public static class GameEventManager
     public delegate void FieldClickEvent(string fieldName, int bet);
     public delegate void ClearEvent(string fieldName);
     public static event GameEvent ObtainInput;
-    public static event GameEvent GameStart, GameOver;
+    public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll;
 	public static event ClearEvent Clear;
@@ -105,5 +105,10 @@ public static class GameEventManager
 	public static void OnClear(string fieldName)
 	{
 		if (Clear != null) Clear(fieldName);
+	}
+
+	public static void OnEndCountdown()
+	{
+		if (EndCountdown != null) EndCountdown();
 	}
 }

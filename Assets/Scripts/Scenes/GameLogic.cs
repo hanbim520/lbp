@@ -13,10 +13,20 @@ public class GameLogic : MonoBehaviour
             SaveTotalCredits();
         }
     }
-    public int currentBet = 0;
-    public int lastWin = 0;
+    public int currentBet
+	{
+		get { return _currentBet; }
+		set { _currentBet = value; }
+	}
+    public int lastWin
+	{
+		get { return _lastWin; }
+		set { _lastWin = value; }
+	}
 
     protected int _totalCredits;
+	protected int _currentBet = 0;
+	protected int _lastWin = 0;
 
     protected void FixExitAbnormally()
     {

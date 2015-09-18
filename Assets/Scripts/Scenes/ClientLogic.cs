@@ -2,8 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class ClientLogic : MonoBehaviour
+public class ClientLogic : GameLogic
 {
+	public MainUILogic ui;
+
     private UClient client;
     private int gamePhase = GamePhase.GameEnd;
     private bool inputEnable = false;
@@ -17,19 +19,6 @@ public class ClientLogic : MonoBehaviour
         client = GetComponent<UClient>();
 	}
 	
-	void Update()
-	{
-	    if (inputEnable)
-        {
-            HandleInput();
-        }
-	}
-
-    private void HandleInput()
-    {
-
-    }
-
     public void HandleRecData(ref string[] words)
 	{
         int instr;

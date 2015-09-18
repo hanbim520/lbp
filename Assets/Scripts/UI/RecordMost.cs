@@ -50,7 +50,10 @@ public class RecordMost : MonoBehaviour
         fewValues.Clear();
         for (int i = 0; i < fixedCount; ++i)
         {
-            fewValues.Add(lst[i].Key);
+			if (lst[i].Value > 0)
+            	fewValues.Add(lst[i].Key);
+			else
+				break;
         }
         RefreshView();
     }
@@ -59,7 +62,7 @@ public class RecordMost : MonoBehaviour
     {
         for (int i = 0; i < fewValues.Count; ++i)
         {
-            if (i > fixedCount)
+			if (i > fixedCount || fewValues[i] == 0)
                 break;
 
             if (!fewGO[i].activeSelf)

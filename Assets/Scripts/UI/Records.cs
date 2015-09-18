@@ -36,7 +36,7 @@ public class Records : MonoBehaviour
             lastIdx = 0;
         else
             lastIdx = r.Length - records.Length;
-        for (int i = r.Length - 1, j = 0; i <= lastIdx; --i, ++j)
+        for (int i = r.Length - 1, j = 0; i >= lastIdx; --i, ++j)
         {
             Sprite[] imgs;
             if (j == 0)
@@ -51,14 +51,20 @@ public class Records : MonoBehaviour
 				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[0];
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
-                records[j].transform.localPosition = new Vector3(pos.x, 14, 0);
+				if (j != 0)
+                	records[j].transform.localPosition = new Vector3(pos.x, 14, 0);
+				else
+					records[j].transform.localPosition = new Vector3(pos.x, 0, 0);
             }
             else if (GameData.GetInstance().colorTable[r[i]] == ResultType.Black)
             {
 				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[1];
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
-				records[j].transform.localPosition = new Vector3(pos.x, -14, 0);
+				if (j != 0)
+					records[j].transform.localPosition = new Vector3(pos.x, -14, 0);
+				else
+					records[j].transform.localPosition = new Vector3(pos.x, 0, 0);
             }
             else
             {

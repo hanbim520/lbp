@@ -18,8 +18,10 @@ public class MainUILogic : MonoBehaviour
 	private GameObject eraser;
 	private GameObject betChipsRoot;
 	private GameObject fieldChipsRoot;
+	private GameObject countdown;
 	private RectTransform mouseIcon;
 	private int curChipIdx = -1;
+	private int timeLimit;
     private GameObject downHitObject;
     private List<Transform> lightEffects = new List<Transform>();
     
@@ -39,6 +41,7 @@ public class MainUILogic : MonoBehaviour
 		mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
 		mouseIcon.localPosition = Vector3.zero;
 		fieldChipsRoot = GameObject.Find("Canvas/FieldChipsRoot");
+		countdown = GameObject.Find("Canvas/Countdown");
 	}
 
 	public void ChangeLanguage(Transform hitObject)
@@ -552,4 +555,29 @@ public class MainUILogic : MonoBehaviour
     {
 
     }
+
+	public void Countdown()
+	{
+		print("ui Countdown");
+		timeLimit = GameData.GetInstance().betTimeLimit;
+		countdown.transform.FindChild("Text").GetComponent<Text>().text = timeLimit.ToString();
+		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = (float)timeLimit / GameData.GetInstance().betTimeLimit;
+		Timer t = TimerManager.GetInstance().CreateTimer(1, TimerType.Loop, timeLimit);
+		t.Tick += CountdownTick;
+		t.OnComplete += CountdownComplete;
+		t.Start();
+	}
+
+	private void CountdownTick()
+	{
+		--timeLimit;
+		countdown.transform.FindChild("Text").GetComponent<Text>().text = timeLimit.ToString();
+		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = (float)timeLimit / GameData.GetInstance().betTimeLimit;
+	}
+
+	private void CountdownComplete()
+	{
+		print("ui CountdownComplete");
+		GameEventManager.OnEndCountdown();
+	}
 }

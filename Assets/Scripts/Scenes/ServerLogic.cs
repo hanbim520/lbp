@@ -13,7 +13,6 @@ public class ServerLogic : GameLogic
 
 	private int gamePhase = GamePhase.GameEnd;
 	private int ballValue = -1;
-    private bool inputEnable = false;
 
     // Current round variables
     private int redFieldVal = 0;
@@ -22,13 +21,13 @@ public class ServerLogic : GameLogic
     private int oddFieldVal = 0;
     private int bigFieldVal = 0;
     private int smallFieldVal = 0;
-    private Timer tGetBallVal = null;
 
     // Field -- Bet
     private Dictionary<string, int> betFields = new Dictionary<string, int>();
 
     private void Init()
     {
+		InputEx.inputEnable = false;
         host = GetComponent<UHost>();
         FixExitAbnormally();
     }
@@ -51,6 +50,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.FieldClick += Bet;
 		GameEventManager.ClearAll += ClearAll;
 		GameEventManager.Clear += Clear;
+		GameEventManager.EndCountdown += CountdownComplete;
     }
 
     private void UnregisterListener()
@@ -60,35 +60,29 @@ public class ServerLogic : GameLogic
 		GameEventManager.FieldClick -= Bet;
 		GameEventManager.ClearAll -= ClearAll;
 		GameEventManager.Clear -= Clear;
+		GameEventManager.EndCountdown -= CountdownComplete;
     }
 
 	void Update()
     {
-        if (!bLoadBackend && Input.GetKey(KeyCode.Return))
-        {
-            timeInterval += Time.deltaTime;
-            if (timeInterval > longPressTime)
-            {
-                timeInterval = 0;
-                bLoadBackend = true;
-                StartCoroutine(LoadBackend());
-                ui.backendTip.SetActive(true);
-            }
-        }
-        if (inputEnable)
-        {
-            HandleInput();
-        }
+#if UNITY_EDITOR
+		if (!bLoadBackend && Input.GetKey(KeyCode.Return))
+		{
+			timeInterval += Time.deltaTime;
+			if (timeInterval > longPressTime)
+			{
+				timeInterval = 0;
+				bLoadBackend = true;
+				StartCoroutine(LoadBackend());
+				ui.backendTip.SetActive(true);
+			}
+		}
+#endif
 	}
-
-    private void HandleInput()
-    {
-
-    }
-
-    private IEnumerator LoadBackend()
-    {
-        yield return new WaitForSeconds(2.0f);
+	
+	private IEnumerator LoadBackend()
+	{
+		yield return new WaitForSeconds(2.0f);
         if (Config.Language == "CN")
             GameData.GetInstance().NextLevelName = "Backend CN";
         else if (Config.Language == "EN")
@@ -119,75 +113,55 @@ public class ServerLogic : GameLogic
 	
     private void Countdown()
     {
+		print("logic countdown");
 		gamePhase = GamePhase.Countdown;
 		host.SendToAll(NetInstr.GamePhase + ":"+ gamePhase);
-        inputEnable = true;
-
-		Timer t = TimerManager.GetInstance().CreateTimer(1.0f, TimerType.Loop, GameData.GetInstance().betTimeLimit);
-        t.Tick += CountdownTick;
-        t.OnComplete += CountdownComplete;
-		t.Start();
-    }
-
-    private void CountdownTick()
-    {
-        // TODO: UI
+		InputEx.inputEnable = true;
+		ui.Countdown();
     }
 
     private void CountdownComplete()
     {
-        inputEnable = false;
-        GoBall();
+		InputEx.inputEnable = false;
+		StartCoroutine(GoBall());
     }
 
-    private void GoBall()
+    private IEnumerator GoBall()
     {
+		print("Goball");
 		gamePhase = GamePhase.Run;
         host.SendToAll(NetInstr.GamePhase + ":"+ gamePhase);
 		// TODO: chui qiu
-		// simulation
-		Timer t = TimerManager.GetInstance().CreateTimer(Random.Range(2, 5));
-		t.Tick += SetBallValue;
-		t.Start();
-
-        tGetBallVal = TimerManager.GetInstance().CreateTimer(0.5f, TimerType.Loop);
-        tGetBallVal.Tick += GetBallValue;
-        tGetBallVal.Start();
+		
+		yield return new WaitForSeconds(2);
+		SetBallValue();
     }
-
-	private void GetBallValue()
-	{
-		if (ballValue != -1)
-        {
-            if (tGetBallVal != null)
-            {
-                tGetBallVal.Stop();
-                tGetBallVal = null;
-                ShowResult();
-                GameEventManager.OnRefreshRecord(ballValue);
-            }
-        }
-	}
 
 	private void SetBallValue()
 	{
 		ballValue = Random.Range(0, 37);
-    }
+		print("SetBallValue: " + ballValue);
+		while (GameData.GetInstance().records.Count >= 100)
+			GameData.GetInstance().records.Dequeue();
+		GameData.GetInstance().records.Enqueue(ballValue);
+        GameEventManager.OnRefreshRecord(ballValue);
+		StartCoroutine(ShowResult());
+	}
 
-	private void ShowResult()
+	private IEnumerator ShowResult()
 	{
+		print("ShowResult");
 		gamePhase = GamePhase.ShowResult;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue);
 
         // TODO: UI
-
-		Timer t = TimerManager.GetInstance().CreateTimer(3);
-        t.OnComplete += Compensate;
-		t.Start();
+		yield return new WaitForSeconds(2);
+		StartCoroutine(Compensate());
 	}
 
-    private void Compensate()
+	private IEnumerator Compensate()
     {
+		print("Compensate");
         gamePhase = GamePhase.Compensate;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
 
@@ -195,13 +169,13 @@ public class ServerLogic : GameLogic
         // TODO: Save account
         // TODO: UI
 
-        Timer t = TimerManager.GetInstance().CreateTimer(3);
-        t.OnComplete += CompensateComplete;
-        t.Start();
+		yield return new WaitForSeconds(2);
+		CompensateComplete();
     }
 
     private void CompensateComplete()
     {
+		print("CompensateComplete");
         gamePhase = GamePhase.GameEnd;
         host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
         // TODO: UI
@@ -344,15 +318,15 @@ public class ServerLogic : GameLogic
 		}
 	}
 
-//    void OnGUI()
-//    {
+    void OnGUI()
+    {
 //        if (GUI.Button(new Rect(10, 50, 150, 100), "限注"))
 //        {
 //            DebugConsole.Clear();
 //        }
-//        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
-//        {
-//            Bet("red", 1000);
-//        }
-//    }
+        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
+        {
+			GameEventManager.TriggerGameStart();
+        }
+    }
 }
