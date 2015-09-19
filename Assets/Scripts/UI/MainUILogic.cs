@@ -580,4 +580,28 @@ public class MainUILogic : MonoBehaviour
 		print("ui CountdownComplete");
 		GameEventManager.OnEndCountdown();
 	}
+
+	public void FlashResult(int result)
+	{
+		if (displayClassic.activeSelf)
+		{
+			Transform target = displayClassic.transform.FindChild("Choose Effect/" + result.ToString());
+			if (target != null)
+			{
+				FlashImage fo = target.gameObject.AddComponent<FlashImage>();
+				fo.flashCount = 5;
+				fo.interval = 0.5f;
+			}
+		}
+		else
+		{
+			Transform target = displayEllipse.transform.FindChild("Choose Effect/" + "e" + result.ToString());
+			if (target != null)
+			{
+				FlashImage fo = target.gameObject.AddComponent<FlashImage>();
+				fo.flashCount = 5;
+				fo.interval = 0.5f;
+			}
+		}
+	}
 }

@@ -160,6 +160,7 @@ public class ServerLogic : GameLogic
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue);
 
         // TODO: UI
+		ui.FlashResult(ballValue);
 		yield return new WaitForSeconds(2);
 		StartCoroutine(Compensate());
 	}
