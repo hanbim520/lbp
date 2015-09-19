@@ -141,17 +141,17 @@ public class Backend : MonoBehaviour
 
     private void InitMainMenu()
     {
-        if (Config.Language == "CN")
+        if (GameData.GetInstance().language == 1)
             txtMenuGuide.GetComponent<Text>().text = "后台";
-        else if (Config.Language == "EN")
+        else if (GameData.GetInstance().language == 0)
             txtMenuGuide.GetComponent<Text>().text = "Backend";
     }
 
     private void InitSettingMenu()
     {
-        if (Config.Language == "CN")
+        if (GameData.GetInstance().language == 1)
             txtMenuGuide.GetComponent<Text>().text = "后台 | 游戏设置";
-        else if (Config.Language == "EN")
+        else if (GameData.GetInstance().language == 0)
             txtMenuGuide.GetComponent<Text>().text = "Backend | Setting";
 
         Transform item = settingMenu.transform.GetChild(0).GetChild(1);
@@ -172,9 +172,10 @@ public class Backend : MonoBehaviour
 
     private void InitCheckAccount()
     {
-        if (Config.Language == "CN")
+
+        if (GameData.GetInstance().language == 1)
             txtMenuGuide.GetComponent<Text>().text = "后台 | 账目查询";
-        else if (Config.Language == "EN")
+        else if (GameData.GetInstance().language == 0)
             txtMenuGuide.GetComponent<Text>().text = "Backend | Check Account";
 
 		for (int i = 0; i < GameData.GetInstance().MaxNumOfPlayers; ++i)
@@ -209,9 +210,9 @@ public class Backend : MonoBehaviour
             SetMenuEnable(BackMenus.CheckAccount);
         else if (idx == 2)
         {
-            if (Config.Language == "CN")
+            if (GameData.GetInstance().language == 1)
                 txtMenuGuide.GetComponent<Text>().text = "后台 | 退出";
-            else if (Config.Language == "EN")
+            else if (GameData.GetInstance().language == 0)
                 txtMenuGuide.GetComponent<Text>().text = "Backend | Exit";
             SetMenuEnable(BackMenus.Exit);
         }

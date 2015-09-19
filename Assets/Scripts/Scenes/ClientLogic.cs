@@ -8,14 +8,17 @@ public class ClientLogic : GameLogic
 
     private UClient client;
     private int gamePhase = GamePhase.GameEnd;
-    private bool inputEnable = false;
 
-    private int totalCredits = 10000;
     // Field -- Bet
     private Dictionary<int, int> betFields = new Dictionary<int, int>();
 
 	void Start()
 	{
+        if (GameData.GetInstance().deviceIndex == 1)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
         client = GetComponent<UClient>();
 	}
 	
@@ -53,7 +56,7 @@ public class ClientLogic : GameLogic
             gamePhase = phase;
             if (gamePhase == GamePhase.Countdown)
             {
-                inputEnable = true;
+                InputEx.inputEnable = true;
                 Timer t = TimerManager.GetInstance().CreateTimer(1.0f, TimerType.Loop, GameData.GetInstance().betTimeLimit);
                 t.Tick += CountdownTick;
                 t.OnComplete += CountdownComplete;
@@ -81,7 +84,7 @@ public class ClientLogic : GameLogic
 
     private void CountdownComplete()
     {
-        inputEnable = false;
+        InputEx.inputEnable = false;
     }
 
     private void Compensate()

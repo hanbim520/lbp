@@ -231,6 +231,5 @@ public static class Utils
                 return 0;
             }
         }
-        return 0;
     }
 }

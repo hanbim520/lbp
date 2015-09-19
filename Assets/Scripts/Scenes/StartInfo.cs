@@ -5,10 +5,7 @@ public class StartInfo : MonoBehaviour
 {
 	void Awake()
 	{
-		if (Config.Host)
-			GameData.GetInstance().NextLevelName = "Server";
-		else
-			GameData.GetInstance().NextLevelName = "Client";
+		GameData.GetInstance().NextLevelName = "Main";
 		GameData.GetInstance().ReadDataFromDisk();
 	}
 

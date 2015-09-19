@@ -50,7 +50,7 @@ public class RebootSystem : MonoBehaviour
     {
         if (countdown < 0)
             countdown = 0;
-        if (Config.Language == "CN")
+        if (GameData.GetInstance().language == 1)
             transform.GetChild(0).GetComponent<Text>().text = string.Format("参数已保存，{0} 秒后重启系统。", countdown);
         else
             transform.GetChild(0).GetComponent<Text>().text = string.Format("Saving all parameters, \nreboot system after {0} seconds.", countdown);

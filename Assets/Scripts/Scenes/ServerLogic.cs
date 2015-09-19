@@ -34,6 +34,11 @@ public class ServerLogic : GameLogic
 
 	void Start() 
     {
+        if (GameData.GetInstance().deviceIndex != 1)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
         Init();
         RegisterListener();
 	}
@@ -83,9 +88,9 @@ public class ServerLogic : GameLogic
 	private IEnumerator LoadBackend()
 	{
 		yield return new WaitForSeconds(2.0f);
-        if (Config.Language == "CN")
+        if (GameData.GetInstance().language == 1)
             GameData.GetInstance().NextLevelName = "Backend CN";
-        else if (Config.Language == "EN")
+        else if (GameData.GetInstance().language == 0)
             GameData.GetInstance().NextLevelName = "Backend EN";
         Application.LoadLevel("Loading");
     }
