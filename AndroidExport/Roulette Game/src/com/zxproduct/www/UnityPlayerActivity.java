@@ -703,21 +703,28 @@ public class UnityPlayerActivity extends Activity
 	 
 	 public void openUsb()
 	 {
+		 CallCSLog("java openUsb 1");
 		 mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 		 if(mUsbManager == null)
 			 return;
-		 
+		 CallCSLog("java openUsb 2");
 		// 枚举设备  
         enumerateDevice(mUsbManager);  
         // 查找设备接口  
+        CallCSLog("java openUsb 3");
         getDeviceInterface();  
+        CallCSLog("java openUsb 4");
         // 获取设备endpoint  
-        assignEndpoint(Interface2);  
+        assignEndpoint(Interface1);
+        CallCSLog("java openUsb 5");
         // 打开conn连接通道  
-        openDevice(Interface2);  
+        openDevice(Interface1);  
+        CallCSLog("java openUsb 6");
         
         mTReadUsb0 = new TReadUsb0();
+        CallCSLog("java openUsb 7");
         mTReadUsb0.start();
+        CallCSLog("java openUsb 8");
 	 }
 	 
 	 public void closeUsb()
@@ -731,40 +738,37 @@ public class UnityPlayerActivity extends Activity
 	 {
 		 HashMap<String, UsbDevice> deviceList = mUsbManager.getDeviceList();  
 		 if (!(deviceList.isEmpty())) 
-		 {  
-			 System.out.println("deviceList is not null!");  
+		 {
+			 CallCSLog("deviceList is not null!");  
 			 Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();  
 			 while (deviceIterator.hasNext()) 
 			 {  
 				 UsbDevice device = deviceIterator.next();  
 				 // 输出设备信息  
-				 Log.i(TAG, "DeviceInfo: " + device.getVendorId() + " , "  
+				 CallCSLog("DeviceInfo: " + device.getVendorId() + " , "  
                         + device.getProductId());  
 				 // 保存设备VID和PID  
 				 VendorID = device.getVendorId();  
 				 ProductID = device.getProductId();  
 				 // 保存匹配到的设备  
-				 if (VendorID == 0x0483 && ProductID == 0x1000)
+				 if (VendorID == 0x0483 && ProductID == 0x5750)
 				 {   
 					 mUsbDevice = device; // 获取USBDevice  
-	                 System.out.println("发现待匹配设备:" + device.getVendorId()  
+	                 CallCSLog("发现待匹配设备:" + device.getVendorId()  
 	                            + "," + device.getProductId());  
-	                 Context context = getApplicationContext();  
-	                 Toast.makeText(context, "发现待匹配设备", Toast.LENGTH_SHORT).show();  
 	             }
 			 }
 		 } 
 		 else
 		 {
-			 Context context = getApplicationContext();  
-	         Toast.makeText(context, "请连接USB设备至PAD！", Toast.LENGTH_SHORT).show();  
+			 CallCSLog("请连接USB设备至PAD！");  
 	     }  
 	}  
 
 	// 寻找设备接口
 	private void getDeviceInterface()
 	{
-		Log.d(TAG, "interfaceCounts : " + mUsbDevice.getInterfaceCount());
+		CallCSLog("interfaceCounts : " + mUsbDevice.getInterfaceCount());
 		for (int i = 0; i < mUsbDevice.getInterfaceCount(); i++)
 		{
 			UsbInterface intf = mUsbDevice.getInterface(i);
@@ -772,12 +776,12 @@ public class UnityPlayerActivity extends Activity
 			if (i == 0)
 			{
 				Interface1 = intf; // 保存设备接口
-				System.out.println("成功获得设备接口:" + Interface1.getId());
+				CallCSLog("成功获得设备接口:" + Interface1.getId());
 			}
 			if (i == 1)
 			{
 				Interface2 = intf;
-				System.out.println("成功获得设备接口:" + Interface2.getId());
+				CallCSLog("成功获得设备接口:" + Interface2.getId());
 			}
 		}
 	}
@@ -794,15 +798,14 @@ public class UnityPlayerActivity extends Activity
 				if (ep.getDirection() == UsbConstants.USB_DIR_OUT) 
 				{
 					epBulkOut = ep;
-					System.out.println("Find the BulkEndpointOut," + "index:"
+					CallCSLog("Find the BulkEndpointOut," + "index:"
 							+ i + "," + "使用端点号："
 							+ epBulkOut.getEndpointNumber());
 				} 
 				else
 				{
 					epBulkIn = ep;
-					System.out
-							.println("Find the BulkEndpointIn:" + "index:" + i
+					CallCSLog("Find the BulkEndpointIn:" + "index:" + i
 									+ "," + "使用端点号："
 									+ epBulkIn.getEndpointNumber());
 				}
@@ -811,7 +814,7 @@ public class UnityPlayerActivity extends Activity
 			if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_CONTROL)
 			{
 				epControl = ep;
-				System.out.println("find the ControlEndPoint:" + "index:" + i
+				CallCSLog("find the ControlEndPoint:" + "index:" + i
 						+ "," + epControl.getEndpointNumber());
 			}
 			// look for interrupte endpoint
@@ -820,14 +823,14 @@ public class UnityPlayerActivity extends Activity
 				if (ep.getDirection() == UsbConstants.USB_DIR_OUT)
 				{
 					epIntEndpointOut = ep;
-					System.out.println("find the InterruptEndpointOut:"
+					CallCSLog("find the InterruptEndpointOut:"
 							+ "index:" + i + ","
 							+ epIntEndpointOut.getEndpointNumber());
 				}
 				if (ep.getDirection() == UsbConstants.USB_DIR_IN) 
 				{
 					epIntEndpointIn = ep;
-					System.out.println("find the InterruptEndpointIn:"
+					CallCSLog("find the InterruptEndpointIn:"
 							+ "index:" + i + ","
 							+ epIntEndpointIn.getEndpointNumber());
 				}
@@ -836,6 +839,7 @@ public class UnityPlayerActivity extends Activity
 		if (epBulkOut == null && epBulkIn == null && epControl == null
 				&& epIntEndpointOut == null && epIntEndpointIn == null) 
 		{
+			CallCSLog("not endpoint is founded!");
 			throw new IllegalArgumentException("not endpoint is founded!");
 		}
 		return epIntEndpointIn;
@@ -850,11 +854,17 @@ public class UnityPlayerActivity extends Activity
 			// 在open前判断是否有连接权限；对于连接权限可以静态分配，也可以动态分配权限
 			if (mUsbManager.hasPermission(mUsbDevice)) 
 			{
+				CallCSLog("有连接权限");
 				conn = mUsbManager.openDevice(mUsbDevice);
+			}
+			else
+			{
+				CallCSLog("没有连接权限");
 			}
 
 			if (conn == null)
 			{
+				CallCSLog("openDevice conn = null");
 				return;
 			}
 
@@ -862,15 +872,38 @@ public class UnityPlayerActivity extends Activity
 			{
 				mDeviceConnection = conn;
 				if (mDeviceConnection != null)// 到此你的android设备已经连上zigbee设备
-					System.out.println("open设备成功！");
+					CallCSLog("open设备成功！");
 				final String mySerial = mDeviceConnection.getSerial();
-				System.out.println("设备serial number：" + mySerial);
+				CallCSLog("设备serial number：" + mySerial);
 			} 
 			else 
 			{
-				System.out.println("无法打开连接通道。");
+				CallCSLog("无法打开连接通道。");
 				conn.close();
 			}
+		}
+	}
+	
+	public void openGate()
+	{
+		try
+		{
+			byte[] buffer = {0x58, 0x57, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78};
+			CallCSLog("openGate buffer.length = " + buffer.length);
+			int result = mDeviceConnection.bulkTransfer(epIntEndpointOut, buffer, buffer.length, 0);
+			CallCSLog("bulkTransfer result:" + result);
+			CallCSLog("java openGate");
+		}
+		catch(Exception ex)
+		{
+			CallCSLog(ex.getMessage());
 		}
 	}
 	
@@ -895,6 +928,6 @@ public class UnityPlayerActivity extends Activity
 
 	public void CallCSLog(String msg)
 	{
-		UnityPlayer.UnitySendMessage("SerialUtils", "DebugLog", msg);
+		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
 	}
 }
