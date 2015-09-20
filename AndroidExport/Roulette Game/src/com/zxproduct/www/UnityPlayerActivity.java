@@ -170,17 +170,9 @@ public class UnityPlayerActivity extends Activity
 							{
 								buf.buffer[i] = buffer[i] & 0xff;
 							}
-							synchronized(readSerialQueue0)
-							{
-								readSerialQueue0.offer(buf);
-							}
+							readSerialQueue0.offer(buf);
 						}
 					}
-				}
-				catch (IOException e) 
-				{
-					e.printStackTrace();
-					return;
 				}
 				catch (Exception e)
 				{
@@ -214,17 +206,9 @@ public class UnityPlayerActivity extends Activity
 							{
 								buf.buffer[i] = buffer[i] & 0xff;
 							}
-							synchronized(readSerialQueue1)
-							{
-								readSerialQueue1.offer(buf);
-							}
+							readSerialQueue1.offer(buf);
 						}
 					}
-				}
-				catch (IOException e) 
-				{
-					e.printStackTrace();
-					return;
 				}
 				catch (Exception e)
 				{
@@ -258,17 +242,9 @@ public class UnityPlayerActivity extends Activity
 							{
 								buf.buffer[i] = buffer[i] & 0xff;
 							}
-							synchronized(readSerialQueue2)
-							{
-								readSerialQueue2.offer(buf);
-							}
+							readSerialQueue2.offer(buf);
 						}
 					}
-				}
-				catch (IOException e) 
-				{
-					e.printStackTrace();
-					return;
 				}
 				catch (Exception e)
 				{
@@ -301,17 +277,9 @@ public class UnityPlayerActivity extends Activity
 							{
 								buf.buffer[i] = buffer[i] & 0xff;
 							}
-							synchronized(readSerialQueue3)
-							{
-								readSerialQueue3.offer(buf);
-							}
+							readSerialQueue3.offer(buf);
 						}
 					}
-				}
-				catch (IOException e) 
-				{
-					e.printStackTrace();
-					return;
 				}
 				catch (Exception e)
 				{
@@ -334,20 +302,17 @@ public class UnityPlayerActivity extends Activity
 				{
 					if (!writeSerialQueue0.isEmpty() && mOutputStream0 != null)
 					{
-						synchronized(writeSerialQueue0)
+						BufferStruct buffer = writeSerialQueue0.poll();
+						int count = buffer.buffer.length;
+						byte[] buf = new byte[count];
+						for (int i = 0; i < count; ++i)
 						{
-							BufferStruct buffer = writeSerialQueue0.poll();
-							int count = buffer.buffer.length;
-							byte[] buf = new byte[count];
-							for (int i = 0; i < count; ++i)
-							{
-								buf[i] = (byte)buffer.buffer[i];
-							}
-							mOutputStream0.write(buf);
+							buf[i] = (byte)buffer.buffer[i];
 						}
+						mOutputStream0.write(buf);
 					}
 				}
-				catch (IOException e) 
+				catch (Exception e) 
 				{
 					e.printStackTrace();
 					return;
@@ -368,20 +333,17 @@ public class UnityPlayerActivity extends Activity
 				{
 					if (!writeSerialQueue1.isEmpty() && mOutputStream1 != null)
 					{
-						synchronized(writeSerialQueue1)
+						BufferStruct buffer = writeSerialQueue1.poll();
+						int count = buffer.buffer.length;
+						byte[] buf = new byte[count];
+						for (int i = 0; i < count; ++i)
 						{
-							BufferStruct buffer = writeSerialQueue1.poll();
-							int count = buffer.buffer.length;
-							byte[] buf = new byte[count];
-							for (int i = 0; i < count; ++i)
-							{
-								buf[i] = (byte)buffer.buffer[i];
-							}
-							mOutputStream1.write(buf);
+							buf[i] = (byte)buffer.buffer[i];
 						}
+						mOutputStream1.write(buf);
 					}
 				}
-				catch (IOException e) 
+				catch (Exception e) 
 				{
 					e.printStackTrace();
 					return;
@@ -402,20 +364,17 @@ public class UnityPlayerActivity extends Activity
 				{
 					if (!writeSerialQueue2.isEmpty() && mOutputStream2 != null)
 					{
-						synchronized(writeSerialQueue2)
+						BufferStruct buffer = writeSerialQueue2.poll();
+						int count = buffer.buffer.length;
+						byte[] buf = new byte[count];
+						for (int i = 0; i < count; ++i)
 						{
-							BufferStruct buffer = writeSerialQueue2.poll();
-							int count = buffer.buffer.length;
-							byte[] buf = new byte[count];
-							for (int i = 0; i < count; ++i)
-							{
-								buf[i] = (byte)buffer.buffer[i];
-							}
-							mOutputStream2.write(buf);
+							buf[i] = (byte)buffer.buffer[i];
 						}
+						mOutputStream2.write(buf);
 					}
 				}
-				catch (IOException e) 
+				catch (Exception e) 
 				{
 					e.printStackTrace();
 					return;
@@ -436,20 +395,17 @@ public class UnityPlayerActivity extends Activity
 				{
 					if (!writeSerialQueue3.isEmpty() && mOutputStream3 != null)
 					{
-						synchronized(writeSerialQueue3)
+						BufferStruct buffer = writeSerialQueue3.poll();
+						int count = buffer.buffer.length;
+						byte[] buf = new byte[count];
+						for (int i = 0; i < count; ++i)
 						{
-							BufferStruct buffer = writeSerialQueue3.poll();
-							int count = buffer.buffer.length;
-							byte[] buf = new byte[count];
-							for (int i = 0; i < count; ++i)
-							{
-								buf[i] = (byte)buffer.buffer[i];
-							}
-							mOutputStream3.write(buf);
+							buf[i] = (byte)buffer.buffer[i];
 						}
+						mOutputStream3.write(buf);
 					}
 				}
-				catch (IOException e) 
+				catch (Exception e) 
 				{
 					e.printStackTrace();
 					return;
@@ -496,35 +452,14 @@ public class UnityPlayerActivity extends Activity
 			mSendThread3 = new SendThread3();
 			mSendThread3.start();
 		}
-		catch (SecurityException e)
+		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		} 
 	}
 
 	public void closeSerialPort()
 	{
-		if (mReadThread0 != null)
-			mReadThread0.interrupt();
-		if (mReadThread1 != null)
-			mReadThread1.interrupt();
-		if (mReadThread2 != null)
-			mReadThread2.interrupt();
-		if (mReadThread3 != null)
-			mReadThread3.interrupt();
-		if (mSendThread0 != null)
-			mSendThread0.interrupt();
-		if (mSendThread1 != null)
-			mSendThread1.interrupt();
-		if (mSendThread2 != null)
-			mSendThread2.interrupt();
-		if (mSendThread3 != null)
-			mSendThread3.interrupt();
-		
 		if (mSerialPort0 != null)
 		{
 			mSerialPort0.close();
@@ -545,121 +480,85 @@ public class UnityPlayerActivity extends Activity
 			mSerialPort3.close();
 			mSerialPort3 = null;
 		}
+		
+		if (mReadThread0 != null)
+			mReadThread0.interrupt();
+		if (mReadThread1 != null)
+			mReadThread1.interrupt();
+		if (mReadThread2 != null)
+			mReadThread2.interrupt();
+		if (mReadThread3 != null)
+			mReadThread3.interrupt();
+		if (mSendThread0 != null)
+			mSendThread0.interrupt();
+		if (mSendThread1 != null)
+			mSendThread1.interrupt();
+		if (mSendThread2 != null)
+			mSendThread2.interrupt();
+		if (mSendThread3 != null)
+			mSendThread3.interrupt();
 	}
 
-	 public int[] readSerialPort0()
+	 public int[] readSerialPort(int queueIdx)
 	 {
-		 if (!readSerialQueue0.isEmpty())
+		 if (queueIdx == 0)
 		 {
-			 synchronized(readSerialQueue0)
+			 if (!readSerialQueue0.isEmpty())
 			 {
 				 BufferStruct buffer = readSerialQueue0.poll();
 				 return buffer.buffer;
 			 }
 		 }
-		 // Can't return null, otherwise csharp side case exception.
-	     return new int[]{0};
-	 }
-	 
-	 public int[] readSerialPort1()
-	 {
-		 if (!readSerialQueue1.isEmpty())
+		 else if (queueIdx == 1)
 		 {
-			 synchronized(readSerialQueue1)
+			 if (!readSerialQueue1.isEmpty())
 			 {
 				 BufferStruct buffer = readSerialQueue1.poll();
 				 return buffer.buffer;
 			 }
 		 }
-		// Can't return null, otherwise csharp side case exception.
-		 return new int[]{0};
-	 }
-	 
-	 public int[] readSerialPort2()
-	 {
-		 if (!readSerialQueue2.isEmpty())
+		 else if (queueIdx == 2)
 		 {
-			 synchronized(readSerialQueue2)
+			 if (!readSerialQueue2.isEmpty())
 			 {
 				 BufferStruct buffer = readSerialQueue2.poll();
 				 return buffer.buffer;
 			 }
 		 }
-		// Can't return null, otherwise csharp side case exception.
-		 return new int[]{0};
-	 }
-	 
-	 public int[] readSerialPort3()
-	 {
-		 if (!readSerialQueue3.isEmpty())
+		 else if (queueIdx == 3)
 		 {
-			 synchronized(readSerialQueue3)
+			 if (!readSerialQueue3.isEmpty())
 			 {
 				 BufferStruct buffer = readSerialQueue3.poll();
 				 return buffer.buffer;
 			 }
 		 }
-		// Can't return null, otherwise csharp side case exception.
-		 return new int[]{-1};
+		 
+		 // Can't return null, otherwise csharp side case exception.
+	     return new int[]{0};
 	 }
 	 
-	 public boolean writeSerialPort0(int[] data)
+	 public boolean writeSerialPort(int[] data, int queueIdx)
 	 {
-		 synchronized(writeSerialQueue0)
-		 {
-			 BufferStruct buffer = new BufferStruct();
-			 buffer.buffer = data;
-			 for (int i = 0; i < buffer.buffer.length; ++i)
-			 {
-				 Log.i("Unity", "java write: " + buffer.buffer[i]);
-			 }
+		 BufferStruct buffer = new BufferStruct();
+		 buffer.buffer = data;
+		 if (queueIdx == 0)
 			 return writeSerialQueue0.offer(buffer);
-		 }
-	 }
-	 
-	 public boolean writeSerialPort1(int[] data)
-	 {
-		 synchronized(writeSerialQueue1)
-		 {
-			 BufferStruct buffer = new BufferStruct();
-			 buffer.buffer = data;
+		 else if (queueIdx == 1)
 			 return writeSerialQueue1.offer(buffer);
-		 }
-	 }
-	 
-	 public boolean writeSerialPort2(int[] data)
-	 {
-		 synchronized(writeSerialQueue2)
-		 {
-			 BufferStruct buffer = new BufferStruct();
-			 buffer.buffer = data;
+		 else if (queueIdx == 2)
 			 return writeSerialQueue2.offer(buffer);
-		 }
-	 }
-	 
-	 public boolean writeSerialPort3(int[] data)
-	 {
-		 synchronized(writeSerialQueue3)
-		 {
-			 BufferStruct buffer = new BufferStruct();
-			 buffer.buffer = data;
+		 else if (queueIdx == 3)
 			 return writeSerialQueue3.offer(buffer);
-		 }
+		 return false;
 	 }
 	 
 	 private final int kUsbReadTimeout = 150;
 	 private UsbManager mUsbManager = null;
-	 private UsbEndpoint epBulkOut;
-	 private UsbEndpoint epBulkIn;
-	 private UsbEndpoint epControl;
 	 private UsbEndpoint epIntEndpointOut;
 	 private UsbEndpoint epIntEndpointIn;
 	 private UsbDevice mUsbDevice;
 	 private UsbDeviceConnection mDeviceConnection;
-	 private UsbInterface Interface1;
-	 private UsbInterface Interface2;
-	 private int ProductID;
-	 private int VendorID;
 	 private TReadUsb0 mTReadUsb0 = null;
 //	 private UsbReadThread usbReadThread;
 	 
@@ -673,10 +572,10 @@ public class UnityPlayerActivity extends Activity
 			{
 				try
 				{
-					if (mDeviceConnection != null && epBulkIn != null)
+					if (mDeviceConnection != null && epIntEndpointIn != null)
 					{
-						byte[] buffer = new byte[128];
-						int count = mDeviceConnection.bulkTransfer(epBulkIn, buffer, buffer.length, kUsbReadTimeout);
+						byte[] buffer = new byte[64];
+						int count = mDeviceConnection.bulkTransfer(epIntEndpointIn, buffer, buffer.length, kUsbReadTimeout);
 						if (count > 0)
 						{
 							BufferStruct buf = new BufferStruct();
@@ -685,10 +584,7 @@ public class UnityPlayerActivity extends Activity
 							{
 								buf.buffer[i] = buffer[i] & 0xff;
 							}
-							synchronized(readUsbQueue0)
-							{
-								readUsbQueue0.offer(buf);
-							}
+							readUsbQueue0.offer(buf);
 						}
 					}
 				}
@@ -712,14 +608,17 @@ public class UnityPlayerActivity extends Activity
         enumerateDevice(mUsbManager);  
         // 查找设备接口  
         CallCSLog("java openUsb 3");
-        getDeviceInterface();  
-        CallCSLog("java openUsb 4");
-        // 获取设备endpoint  
-        assignEndpoint(Interface1);
-        CallCSLog("java openUsb 5");
-        // 打开conn连接通道  
-        openDevice(Interface1);  
-        CallCSLog("java openUsb 6");
+        UsbInterface usbInterface = getDeviceInterface(); 
+        if (usbInterface != null)
+        {
+        	CallCSLog("java openUsb 4");
+            // 获取设备endpoint  
+            assignEndpoint(usbInterface);
+            CallCSLog("java openUsb 5");
+            // 打开conn连接通道  
+            openDevice(usbInterface);  
+            CallCSLog("java openUsb 6");
+        }
         
         mTReadUsb0 = new TReadUsb0();
         CallCSLog("java openUsb 7");
@@ -748,10 +647,10 @@ public class UnityPlayerActivity extends Activity
 				 CallCSLog("DeviceInfo: " + device.getVendorId() + " , "  
                         + device.getProductId());  
 				 // 保存设备VID和PID  
-				 VendorID = device.getVendorId();  
-				 ProductID = device.getProductId();  
+				 int vendorID = device.getVendorId();  
+				 int productID = device.getProductId();  
 				 // 保存匹配到的设备  
-				 if (VendorID == 0x0483 && ProductID == 0x5750)
+				 if (vendorID == 0x0483 && productID == 0x5750)
 				 {   
 					 mUsbDevice = device; // 获取USBDevice  
 	                 CallCSLog("发现待匹配设备:" + device.getVendorId()  
@@ -766,7 +665,7 @@ public class UnityPlayerActivity extends Activity
 	}  
 
 	// 寻找设备接口
-	private void getDeviceInterface()
+	private UsbInterface getDeviceInterface()
 	{
 		CallCSLog("interfaceCounts : " + mUsbDevice.getInterfaceCount());
 		for (int i = 0; i < mUsbDevice.getInterfaceCount(); i++)
@@ -775,48 +674,19 @@ public class UnityPlayerActivity extends Activity
 			
 			if (i == 0)
 			{
-				Interface1 = intf; // 保存设备接口
-				CallCSLog("成功获得设备接口:" + Interface1.getId());
-			}
-			if (i == 1)
-			{
-				Interface2 = intf;
-				CallCSLog("成功获得设备接口:" + Interface2.getId());
+				CallCSLog("成功获得设备接口:" + intf.getId());
+				return intf; // 保存设备接口
 			}
 		}
+		return null;
 	}
 	
 	// 分配端点，IN | OUT，即输入输出；可以通过判断
-	private UsbEndpoint assignEndpoint(UsbInterface mInterface)
+	private void assignEndpoint(UsbInterface usbInterface)
 	{
-		for (int i = 0; i < mInterface.getEndpointCount(); i++)
+		for (int i = 0; i < usbInterface.getEndpointCount(); i++)
 		{
-			UsbEndpoint ep = mInterface.getEndpoint(i);
-			// look for bulk endpoint
-			if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_BULK)
-			{
-				if (ep.getDirection() == UsbConstants.USB_DIR_OUT) 
-				{
-					epBulkOut = ep;
-					CallCSLog("Find the BulkEndpointOut," + "index:"
-							+ i + "," + "使用端点号："
-							+ epBulkOut.getEndpointNumber());
-				} 
-				else
-				{
-					epBulkIn = ep;
-					CallCSLog("Find the BulkEndpointIn:" + "index:" + i
-									+ "," + "使用端点号："
-									+ epBulkIn.getEndpointNumber());
-				}
-			}
-			// look for contorl endpoint
-			if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_CONTROL)
-			{
-				epControl = ep;
-				CallCSLog("find the ControlEndPoint:" + "index:" + i
-						+ "," + epControl.getEndpointNumber());
-			}
+			UsbEndpoint ep = usbInterface.getEndpoint(i);
 			// look for interrupte endpoint
 			if (ep.getType() == UsbConstants.USB_ENDPOINT_XFER_INT)
 			{
@@ -836,19 +706,12 @@ public class UnityPlayerActivity extends Activity
 				}
 			}
 		}
-		if (epBulkOut == null && epBulkIn == null && epControl == null
-				&& epIntEndpointOut == null && epIntEndpointIn == null) 
-		{
-			CallCSLog("not endpoint is founded!");
-			throw new IllegalArgumentException("not endpoint is founded!");
-		}
-		return epIntEndpointIn;
 	}
 	
 	// 打开设备
-	public void openDevice(UsbInterface mInterface)
+	public void openDevice(UsbInterface usbInterface)
 	{
-		if (mInterface != null)
+		if (usbInterface != null)
 		{
 			UsbDeviceConnection conn = null;
 			// 在open前判断是否有连接权限；对于连接权限可以静态分配，也可以动态分配权限
@@ -868,7 +731,7 @@ public class UnityPlayerActivity extends Activity
 				return;
 			}
 
-			if (conn.claimInterface(mInterface, true)) 
+			if (conn.claimInterface(usbInterface, true)) 
 			{
 				mDeviceConnection = conn;
 				if (mDeviceConnection != null)// 到此你的android设备已经连上zigbee设备
@@ -909,7 +772,7 @@ public class UnityPlayerActivity extends Activity
 	
 	public int writeUsbPort(byte[] buffer)
 	{
-		return mDeviceConnection.bulkTransfer(epBulkOut, buffer, buffer.length, 0);
+		return mDeviceConnection.bulkTransfer(epIntEndpointOut, buffer, buffer.length, 0);
 	}
 	
 	public int[] readUsb0()
