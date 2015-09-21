@@ -10,9 +10,9 @@ public class USBUtils : MonoBehaviour
 		InitData();
 	}
 	
-	void Update()
+	void FixedUpdate()
 	{
-	
+		ReadUsbPort();
 	}
 
 	private void InitData()
@@ -47,6 +47,37 @@ public class USBUtils : MonoBehaviour
 		DebugConsole.Log(msg);
 	}
 
+	private int[] ReadData(string methodName)
+	{
+		if (Application.platform == RuntimePlatform.Android)
+		{
+			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
+			return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
+		}
+		return null;
+	}
+
+	private void ReadUsbPort()
+	{
+		int[] data = ReadData("readUsb0");
+		if (data.Length > 0)
+		{
+			if (data[0] == -1)
+			{
+				return;
+			}
+			log = "";
+			for (int i = 0; i < data.Length; ++i)
+			{
+
+				log += string.Format("{0:X}", data[i]) + ", ";
+			}
+			DebugConsole.Log(log);
+		}
+	}
+
+	private string log = "";
+
 	void OnGUI()
 	{
 		if (GUI.Button(new Rect(200, 10 , 200, 150), "open usb"))
@@ -63,6 +94,14 @@ public class USBUtils : MonoBehaviour
 			{
 				DebugConsole.Log("cs open gate");
 				jo.Call("openGate");
+			}
+		}
+		if (GUI.Button(new Rect(420, 200 , 200, 150), "blow ball"))
+		{
+			if (Application.platform == RuntimePlatform.Android)
+			{
+				DebugConsole.Log("cs open gate");
+				jo.Call("blowBall");
 			}
 		}
 		if (GUI.Button(new Rect(200, 400, 200, 150), "Quit"))

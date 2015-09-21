@@ -535,7 +535,7 @@ public class UnityPlayerActivity extends Activity
 		 }
 		 
 		 // Can't return null, otherwise csharp side case exception.
-	     return new int[]{0};
+	     return new int[]{-1};
 	 }
 	 
 	 public boolean writeSerialPort(int[] data, int queueIdx)
@@ -553,7 +553,6 @@ public class UnityPlayerActivity extends Activity
 		 return false;
 	 }
 	 
-	 private final int kUsbReadTimeout = 150;
 	 private UsbManager mUsbManager = null;
 	 private UsbEndpoint epIntEndpointOut;
 	 private UsbEndpoint epIntEndpointIn;
@@ -575,7 +574,7 @@ public class UnityPlayerActivity extends Activity
 					if (mDeviceConnection != null && epIntEndpointIn != null)
 					{
 						byte[] buffer = new byte[64];
-						int count = mDeviceConnection.bulkTransfer(epIntEndpointIn, buffer, buffer.length, kUsbReadTimeout);
+						int count = mDeviceConnection.bulkTransfer(epIntEndpointIn, buffer, buffer.length, 0);
 						if (count > 0)
 						{
 							BufferStruct buf = new BufferStruct();
@@ -759,10 +758,31 @@ public class UnityPlayerActivity extends Activity
 					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
 					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
 					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78};
-			CallCSLog("openGate buffer.length = " + buffer.length);
 			int result = mDeviceConnection.bulkTransfer(epIntEndpointOut, buffer, buffer.length, 0);
 			CallCSLog("bulkTransfer result:" + result);
 			CallCSLog("java openGate");
+		}
+		catch(Exception ex)
+		{
+			CallCSLog(ex.getMessage());
+		}
+	}
+	
+	public void blowBall()
+	{
+		try
+		{
+			byte[] buffer = {0x58, 0x57, 0x03, 0x01, 0x00, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78,
+					 0x02, 0x10, 0x02, 0x10, 0x78, 0x02, 0x10, 0x78};
+			int result = mDeviceConnection.bulkTransfer(epIntEndpointOut, buffer, buffer.length, 0);
+			CallCSLog("bulkTransfer result:" + result);
+			CallCSLog("java blowBall");
 		}
 		catch(Exception ex)
 		{
@@ -779,14 +799,11 @@ public class UnityPlayerActivity extends Activity
 	{
 		if (!readUsbQueue0.isEmpty())
 		{
-			synchronized(readUsbQueue0)
-			{
-				BufferStruct buffer = readUsbQueue0.poll();
-				return buffer.buffer;
-			}
+			BufferStruct buffer = readUsbQueue0.poll();
+			return buffer.buffer;
 		}
 		// Can't return null, otherwise csharp side case exception.
-	    return new int[]{0};
+	    return new int[]{-1};
 	}
 
 	public void CallCSLog(String msg)
