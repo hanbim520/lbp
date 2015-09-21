@@ -14,8 +14,8 @@
       <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" android:resource="@xml/device_filter" />  
       <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
     </activity>
-    <receiver android:name="com.zxproduct.www.BootBroadcastReceiver">
-        <intent-filter>
+    <receiver android:name=".BootBroadcastReceiver">
+        <intent-filter android:priority="1000">
         <action android:name="android.intent.action.BOOT_COMPLETED" />
         <category android:name="android.intent.category.HOME" />
         </intent-filter>
@@ -26,7 +26,8 @@
   <uses-permission android:name="android.permission.INTERNET" />
   <uses-permission android:name="android.permission.READ_PHONE_STATE" />
   <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-  <uses-permission android:name="android.hardware.usb.host" android:required="false" />  
+  <uses-permission android:name="android.hardware.usb.host" android:required="false" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />  
   <uses-feature android:name="android.hardware.usb.host" android:required="true" />  
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
   <uses-feature android:name="android.hardware.touchscreen.multitouch" android:required="false" />
