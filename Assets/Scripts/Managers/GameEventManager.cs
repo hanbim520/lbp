@@ -11,6 +11,7 @@ public static class GameEventManager
 	public delegate void SerialMouseButtonEvent();
     public delegate void FieldClickEvent(string fieldName, int bet);
     public delegate void ClearEvent(string fieldName);
+	public delegate void BallValueEvent(int ballValue);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
@@ -21,6 +22,9 @@ public static class GameEventManager
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
     public static event RefreshRecordEvent RefreshRecord;
     public static event FieldClickEvent FieldClick;
+
+	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
+	public static event BallValueEvent BallValue;
 
 	public static void TriggerOpenSerial()
 	{
@@ -110,5 +114,30 @@ public static class GameEventManager
 	public static void OnEndCountdown()
 	{
 		if (EndCountdown != null) EndCountdown();
+	}
+
+	public static void OnSBlowBall()
+	{
+		if (SBlowBall != null) SBlowBall();
+	}
+
+	public static void OnEBlowBall()
+	{
+		if (EBlowBall != null) EBlowBall();
+	}
+
+	public static void OnOpenGate()
+	{
+		if (OpenGate != null) OpenGate();
+	}
+
+	public static void OnCloseGate()
+	{
+		if (CloseGate != null) CloseGate();
+	}
+
+	public static void OnBallValue(int ballValue)
+	{
+		if (BallValue != null) BallValue(ballValue);
 	}
 }

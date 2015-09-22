@@ -790,9 +790,15 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	public int writeUsbPort(byte[] buffer)
+	public int writeUsbPort(int[] buffer)
 	{
-		return mDeviceConnection.bulkTransfer(epIntEndpointOut, buffer, buffer.length, 0);
+		int count = buffer.length;
+		byte[] buf = new byte[count];
+		for (int i = 0; i < count; ++i)
+		{
+			buf[i] = (byte)buffer[i];
+		}
+		return mDeviceConnection.bulkTransfer(epIntEndpointOut, buf, buf.length, 0);
 	}
 	
 	public int[] readUsb0()
