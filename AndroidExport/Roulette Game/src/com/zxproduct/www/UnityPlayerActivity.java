@@ -574,7 +574,9 @@ public class UnityPlayerActivity extends Activity
 					if (mDeviceConnection != null && epIntEndpointIn != null)
 					{
 						byte[] buffer = new byte[64];
-						int count = mDeviceConnection.bulkTransfer(epIntEndpointIn, buffer, buffer.length, 0);
+						for (int i = 0; i < buffer.length; ++i)
+							buffer[i] = 0;
+						int count = mDeviceConnection.bulkTransfer(epIntEndpointIn, buffer, buffer.length, 2000);
 						if (count > 0)
 						{
 							BufferStruct buf = new BufferStruct();
@@ -590,7 +592,6 @@ public class UnityPlayerActivity extends Activity
 				catch(Exception e)
 				{
 					e.printStackTrace();
-					return;
 				}
 			}
 		}
@@ -814,6 +815,6 @@ public class UnityPlayerActivity extends Activity
 
 	public void CallCSLog(String msg)
 	{
-		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
+//		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
 	}
 }
