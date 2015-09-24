@@ -52,9 +52,9 @@ public class Records : MonoBehaviour
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
 				if (j != 0)
-                	records[j].transform.localPosition = new Vector3(pos.x, 14, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 21.9f, 0);
 				else
-					records[j].transform.localPosition = new Vector3(pos.x, 0, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 7.9f, 0);
             }
             else if (GameData.GetInstance().colorTable[r[i]] == ResultType.Black)
             {
@@ -62,9 +62,9 @@ public class Records : MonoBehaviour
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
 				if (j != 0)
-					records[j].transform.localPosition = new Vector3(pos.x, -14, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, -6.1f, 0);
 				else
-					records[j].transform.localPosition = new Vector3(pos.x, 0, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 7.9f, 0);
             }
             else
             {
@@ -74,7 +74,7 @@ public class Records : MonoBehaviour
 					records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[3];
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
 				Vector3 pos = records[j].transform.localPosition;
-                records[j].transform.localPosition = new Vector3(pos.x, 0, 0);
+				records[j].transform.localPosition = new Vector3(pos.x, 7.9f, 0);
             }
         }
     }

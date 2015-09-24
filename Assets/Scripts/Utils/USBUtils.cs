@@ -18,13 +18,14 @@ public class USBUtils : MonoBehaviour
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-			getDataTimeDelta += Time.deltaTime;
-			if (getDataTimeDelta >= getDataTime)
-			{
-				getDataTimeDelta = 0;
-				GetData();
-				ReadUsbPort();
-			}
+//			getDataTimeDelta += Time.deltaTime;
+//			if (getDataTimeDelta >= getDataTime)
+//			{
+//				getDataTimeDelta = 0;
+//				GetData();
+//				ReadUsbPort();
+//			}
+			ReadUsbPort();
 		}
 	}
 
@@ -72,20 +73,21 @@ public class USBUtils : MonoBehaviour
 
 	public void ReadUsbPort()
 	{
-		int[] data = ReadData("readUsb0");
-		if (data != null && data.Length > 2)
-		{
-			if (data[0] == -1 || data[0] != 0x58 || data[1] != 0x57)
-			{ 
-				return;
-			}
-			log = "data.Length:" + data.Length + "--";
-			for (int i = 0; i < data.Length; ++i)
-			{
-				log += string.Format("{0:X}", data[i]) + ", ";
-			}
-			DebugConsole.Log(log);
-		}
+//		int[] data = ReadData("readUsb0");
+//		if (data != null && data.Length > 2)
+//		{
+//			if (data[0] == -1 || data[0] != 0x58 || data[1] != 0x57)
+//			{ 
+//				return;
+//			}
+//			log = "data.Length:" + data.Length + "--";
+//			for (int i = 0; i < data.Length; ++i)
+//			{
+//				log += string.Format("{0:X}", data[i]) + ", ";
+//			}
+//			DebugConsole.Log(log);
+//		}
+		jo.Call("test");
 	}
 
 	public void GetData()
@@ -151,12 +153,16 @@ public class USBUtils : MonoBehaviour
 	}
 
 	private string log = "";
-
+	private bool bopen = false;
 	void OnGUI()
 	{
 		if (GUI.Button(new Rect(200, 10 , 200, 150), "open usb"))
 		{
-			OpenUSB();
+			if (!bopen)
+			{
+				bopen = true;
+				OpenUSB();
+			}
 		}
 		if (GUI.Button(new Rect(200, 200 , 200, 150), "close usb"))
 		{

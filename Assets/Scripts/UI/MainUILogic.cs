@@ -221,37 +221,37 @@ public class MainUILogic : MonoBehaviour
 	{
 		betChipsRoot = GameObject.Find("BetChips");
 		string path = "Bet Chips/";
-		float y = -492.0f;
+		float y = -508.0f;
 		float start = 0.0f, dist = 0.0f;
 		int num = GameData.GetInstance().maxNumberOfChips;
 		if (num == 6)
 		{
-			start = -644.0f;
-			dist = 100;
+			start = -577.0f;
+			dist = 93;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 5)
 		{
-			start = -594.0f;
+			start = -540.0f;
 			dist = 100;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 4)
 		{
-			start = -544.0f;
-			dist = 100;
+			start = -540.0f;
+			dist = 130;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 3)
 		{
-			start = -494.0f;
-			dist = 100;
+			start = -500.0f;
+			dist = 160;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 2)
 		{
-			start = -544.0f;
-			dist = 300;
+			start = -420.0f;
+			dist = 160;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 1)
 		{
-			start = -394.0f;
+			start = -330.0f;
 		}
 
 		for (int i = 0; i < num; ++i)

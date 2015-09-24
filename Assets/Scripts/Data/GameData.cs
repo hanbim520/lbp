@@ -70,7 +70,7 @@ public class GameData
 	public int language;			// 0:EN 1:CN
 	public int displayType; 		// 0:classic 1:ellipse
 	public int maxNumberOfFields = 37; 	// 37 or 38
-	public int maxNumberOfChips = 6;	// 1 ~ 6
+	public int maxNumberOfChips;	// 1 ~ 6
 
     // 记录最近20场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
