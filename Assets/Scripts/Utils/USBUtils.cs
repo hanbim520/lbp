@@ -7,10 +7,11 @@ public class USBUtils : MonoBehaviour
 	private AndroidJavaClass jc;
 	private AndroidJavaObject jo;
 	// In seconds
-	private const float getDataTime = 1.0f;
+	private const float getDataTime = 0.1f;
 	private float getDataTimeDelta = 0;
 	void Start()
 	{
+		print(getDataTime);
 		InitData();
 	}
 	
@@ -18,14 +19,13 @@ public class USBUtils : MonoBehaviour
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-//			getDataTimeDelta += Time.deltaTime;
-//			if (getDataTimeDelta >= getDataTime)
-//			{
-//				getDataTimeDelta = 0;
-//				GetData();
-//				ReadUsbPort();
-//			}
-			ReadUsbPort();
+			getDataTimeDelta += Time.deltaTime;
+			if (getDataTimeDelta >= getDataTime)
+			{
+				getDataTimeDelta = 0;
+				GetData();
+				ReadUsbPort();
+			}
 		}
 	}
 
