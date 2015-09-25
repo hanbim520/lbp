@@ -2,18 +2,29 @@
 using System;
 using System.Collections;
 
-public class USBUtils : MonoBehaviour
+public class HIDUtils : MonoBehaviour
 {
+	public const int kPhaseStartBlowBall = 1;
+	public const int kPhaseEndBlowBall = 2;
+	public const int kPhaseOpenGate = 3;
+	public const int kPhaseCloseGate = 4;
+	public const int kPhaseDetectBallValue = 5;
+
 	private AndroidJavaClass jc;
 	private AndroidJavaObject jo;
 	// In seconds
 	private const float getDataTime = 0.1f;
 	private float getDataTimeDelta = 0;
 	private const int kReadDataLength = 61;
+	private const int kHeader1 = 0x58;
+	private const int kHeader2 = 0x57;
+	private const int kBlowBall = 0x55;
+	private const int kOpenGate = 0x55;
+	private const int kPreviousValue = 0x55;
 
 	private bool bBlowedBall = false;
 	private bool bOpenGate = false;
-	private int phase = -1; // 0:blow ball. 1:open gate. 2:close gate.
+	private int phase = 0; 
 
 	void Start()
 	{
@@ -78,22 +89,23 @@ public class USBUtils : MonoBehaviour
 		int[] data = ReadData("readHID");
 		if (data != null && data.Length == kReadDataLength)
 		{
-			if (data[0] == -1 || data[0] != 0x58 || data[1] != 0x57)
+			if (data[0] == -1 || data[0] != kHeader1 || data[1] != kHeader2)
 			{ 
 				return;
 			}
-			log = "data.Length:" + data.Length + "--";
-			for (int i = 0; i < data.Length; ++i)
-			{
-				log += string.Format("{0:X}", data[i]) + ", ";
-			}
-			DebugConsole.Log(log);
+//			log = "data.Length:" + data.Length + "--";
+//			for (int i = 0; i < data.Length; ++i)
+//			{
+//				log += string.Format("{0:X}", data[i]) + ", ";
+//			}
+//			DebugConsole.Log(log);
 
 			// 吹风
-			if (data[2] == 0x55)
+			if (data[2] == kBlowBall)
 			{
 				if (!bBlowedBall)
 				{
+					phase = kPhaseStartBlowBall;
 					bBlowedBall = true;
 					GameEventManager.OnSBlowBall();
 				}
@@ -102,15 +114,17 @@ public class USBUtils : MonoBehaviour
 			{
 				if (bBlowedBall)
 				{
+					phase = kPhaseEndBlowBall;
 					bBlowedBall = false;
 					GameEventManager.OnEBlowBall();
 				}
 			}
 			// 开门
-			if (data[3] == 0x55)
+			if (data[3] == kOpenGate)
 			{
 				if (!bOpenGate)
 				{
+					phase = kPhaseOpenGate;
 					bOpenGate = true;
 					GameEventManager.OnOpenGate();
 				}
@@ -119,14 +133,15 @@ public class USBUtils : MonoBehaviour
 			{
 				if (bOpenGate)
 				{
+					phase = kPhaseCloseGate;
 					bOpenGate = false;
 					GameEventManager.OnCloseGate();
 				}
 			}
 			// 不是上轮结果
-			if (data[5] == 0x00 && phase == 1)
+			if (data[5] != kPreviousValue && phase == kPhaseCloseGate)
 			{
-				phase = 2;
+				phase = kPhaseDetectBallValue;
 				// 结果
 				int idx = data[4];
 				if (GameData.GetInstance().maxNumberOfFields == 38)
@@ -186,28 +201,28 @@ public class USBUtils : MonoBehaviour
 		}
 	}
 
-	private string log = "";
-	void OnGUI()
-	{
-		if (GUI.Button(new Rect(200, 10 , 200, 150), "open usb"))
-		{
-			OpenUSB();
-		}
-		if (GUI.Button(new Rect(200, 200 , 200, 150), "close usb"))
-		{
-			CloseUSB();
-		}
-		if (GUI.Button(new Rect(420, 10 , 200, 150), "open gate"))
-		{
-			OpenGate();
-		}
-		if (GUI.Button(new Rect(420, 200 , 200, 150), "blow ball"))
-		{
-			BlowBall(1500);
-		}
-		if (GUI.Button(new Rect(200, 400, 200, 150), "Quit"))
-		{
-			Application.Quit();
-		}
-	}
+//	private string log = "";
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(200, 10 , 200, 150), "open usb"))
+//		{
+//			OpenUSB();
+//		}
+//		if (GUI.Button(new Rect(200, 200 , 200, 150), "close usb"))
+//		{
+//			CloseUSB();
+//		}
+//		if (GUI.Button(new Rect(420, 10 , 200, 150), "open gate"))
+//		{
+//			OpenGate();
+//		}
+//		if (GUI.Button(new Rect(420, 200 , 200, 150), "blow ball"))
+//		{
+//			BlowBall(1500);
+//		}
+//		if (GUI.Button(new Rect(200, 400, 200, 150), "Quit"))
+//		{
+//			Application.Quit();
+//		}
+//	}
 }

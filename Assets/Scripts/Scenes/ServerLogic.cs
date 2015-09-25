@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public class ServerLogic : GameLogic 
 {
     public MainUILogic ui;
-	public USBUtils usbUtils;
+	public HIDUtils hidUtils;
     private float timeInterval = 0;
     private float longPressTime = 3;
     private bool bLoadBackend = false;
@@ -30,7 +30,6 @@ public class ServerLogic : GameLogic
 		InputEx.inputEnable = false;
         host = GetComponent<UHost>();
         FixExitAbnormally();
-		usbUtils.OpenUSB();
     }
 
 	void Start() 
