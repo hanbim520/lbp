@@ -20,12 +20,10 @@
         <category android:name="android.intent.category.LAUNCHER" />
         <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
       </intent-filter>
-      <intent-filter>  
-        <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />  
-        <action android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" />  
+      <intent-filter>
+          <action android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" />  
       </intent-filter>
-      <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" android:resource="@xml/device_filter" />  
-      <meta-data android:name="android.hardware.usb.action.USB_DEVICE_DETACHED" android:resource="@xml/device_filter" />  
+      <meta-data android:name="android.hardware.usb.action.USB_DEVICE_ATTACHED" android:resource="@xml/device_filter" /> 
       <meta-data android:name="unityplayer.UnityActivity" android:value="true" />
     </activity>
     <receiver android:name=".BootBroadcastReceiver">
@@ -36,7 +34,12 @@
 	</receiver>
 	<receiver android:name=".USBBroadcastReceiver">
 		<intent-filter android:priority="1000">
-			<action android:name="android.hardware.usb.action.USB_STATE"/>	
+			<action android:name="android.intent.action.MEDIA_EJECT"/>
+            <action android:name="android.intent.action.MEDIA_REMOVED"/>
+          	<action android:name="android.intent.action.MEDIA_BAD_REMOVAL"/>
+			<action android:name="android.intent.action.MEDIA_MOUNTED"/>
+			<action android:name="android.intent.action.MEDIA_CHECKING"/>
+			<data android:scheme="file"/>	
 		</intent-filter>
 	</receiver>
   </application>

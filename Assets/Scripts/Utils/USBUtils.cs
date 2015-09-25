@@ -9,12 +9,17 @@ public class USBUtils : MonoBehaviour
 	// In seconds
 	private const float getDataTime = 0.1f;
 	private float getDataTimeDelta = 0;
+	private const int kReadDataLength = 61;
+
+	private bool bBlowedBall = false;
+	private bool bOpenGate = false;
+	private int phase = -1; // 0:blow ball. 1:open gate. 2:close gate.
+
 	void Start()
 	{
-		print(getDataTime);
 		InitData();
 	}
-	
+
 	void Update()
 	{
 		if (Application.platform == RuntimePlatform.Android)
@@ -23,7 +28,6 @@ public class USBUtils : MonoBehaviour
 			if (getDataTimeDelta >= getDataTime)
 			{
 				getDataTimeDelta = 0;
-				GetData();
 				ReadUsbPort();
 			}
 		}
@@ -42,7 +46,6 @@ public class USBUtils : MonoBehaviour
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-			DebugConsole.Log("cs openUsb");
 			jo.Call("openUsb");
 		}
 	}
@@ -51,7 +54,6 @@ public class USBUtils : MonoBehaviour
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-			DebugConsole.Log("cs closeUsb");
 			jo.Call("closeUsb");
 		}
 	}
@@ -73,34 +75,66 @@ public class USBUtils : MonoBehaviour
 
 	public void ReadUsbPort()
 	{
-//		int[] data = ReadData("readUsb0");
-//		if (data != null && data.Length > 2)
-//		{
-//			if (data[0] == -1 || data[0] != 0x58 || data[1] != 0x57)
-//			{ 
-//				return;
-//			}
-//			log = "data.Length:" + data.Length + "--";
-//			for (int i = 0; i < data.Length; ++i)
-//			{
-//				log += string.Format("{0:X}", data[i]) + ", ";
-//			}
-//			DebugConsole.Log(log);
-//		}
-		jo.Call("test");
-	}
+		int[] data = ReadData("readHID");
+		if (data != null && data.Length == kReadDataLength)
+		{
+			if (data[0] == -1 || data[0] != 0x58 || data[1] != 0x57)
+			{ 
+				return;
+			}
+			log = "data.Length:" + data.Length + "--";
+			for (int i = 0; i < data.Length; ++i)
+			{
+				log += string.Format("{0:X}", data[i]) + ", ";
+			}
+			DebugConsole.Log(log);
 
-	public void GetData()
-	{
-		int[] data = new int[]{0x58, 0x57, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0, 0, 0};
-		WriteData(data, "writeUsbPort");
+			// 吹风
+			if (data[2] == 0x55)
+			{
+				if (!bBlowedBall)
+				{
+					bBlowedBall = true;
+					GameEventManager.OnSBlowBall();
+				}
+			}
+			else
+			{
+				if (bBlowedBall)
+				{
+					bBlowedBall = false;
+					GameEventManager.OnEBlowBall();
+				}
+			}
+			// 开门
+			if (data[3] == 0x55)
+			{
+				if (!bOpenGate)
+				{
+					bOpenGate = true;
+					GameEventManager.OnOpenGate();
+				}
+			}
+			else
+			{
+				if (bOpenGate)
+				{
+					bOpenGate = false;
+					GameEventManager.OnCloseGate();
+				}
+			}
+			// 不是上轮结果
+			if (data[5] == 0x00 && phase == 1)
+			{
+				phase = 2;
+				// 结果
+				int idx = data[4];
+				if (GameData.GetInstance().maxNumberOfFields == 38)
+					GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
+				else if (GameData.GetInstance().maxNumberOfFields == 37)
+					GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
+			}
+		}
 	}
 
 	public int WriteData(int[] data, string methodName)
@@ -153,16 +187,11 @@ public class USBUtils : MonoBehaviour
 	}
 
 	private string log = "";
-	private bool bopen = false;
 	void OnGUI()
 	{
 		if (GUI.Button(new Rect(200, 10 , 200, 150), "open usb"))
 		{
-			if (!bopen)
-			{
-				bopen = true;
-				OpenUSB();
-			}
+			OpenUSB();
 		}
 		if (GUI.Button(new Rect(200, 200 , 200, 150), "close usb"))
 		{

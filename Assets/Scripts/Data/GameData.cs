@@ -69,13 +69,16 @@ public class GameData
 	// Custom setting
 	public int language;			// 0:EN 1:CN
 	public int displayType; 		// 0:classic 1:ellipse
-	public int maxNumberOfFields = 37; 	// 37 or 38
+	public int maxNumberOfFields = 38; 	// 37 or 38
 	public int maxNumberOfChips;	// 1 ~ 6
 
     // 记录最近20场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
 	public Queue<int> records = new Queue<int>();	// 00:用37表示
     public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
+
+	public int[] ballValue38 = new int[]{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24};
+	public int[] ballValue37 = new int[]{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24};
 
 	// For host
 	private int connectClientsTime = 15;
