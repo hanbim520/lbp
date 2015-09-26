@@ -15,6 +15,8 @@ import java.security.InvalidParameterException;
 import com.unity3d.player.*;
 
 import android.app.Activity;
+import android.app.Instrumentation;
+import android.app.PendingIntent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.hardware.usb.UsbConstants;
@@ -35,6 +37,7 @@ import android.widget.Toast;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android_serialport_api.SerialPort;
 import android_serialport_api.SerialPortFinder;
@@ -699,6 +702,20 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
+	// 模拟键盘按键，Keycode对应Android键盘按键的的keycode
+	public void setKeyPress(int keycode){
+	        try
+	        {
+	            String keyCommand = "input keyevent " + keycode;
+	            Runtime runtime = Runtime.getRuntime();
+	            Process proc = runtime.exec(keyCommand);
+	        }
+	        catch (IOException e)
+	        {
+	            e.printStackTrace();
+	        }
+	    }
+	
 	// 打开设备
 	public void openDevice(UsbInterface usbInterface)
 	{
@@ -709,6 +726,33 @@ public class UnityPlayerActivity extends Activity
 			if (mUsbManager.hasPermission(mUsbDevice)) 
 			{
 				conn = mUsbManager.openDevice(mUsbDevice);
+			}
+			else
+			{
+				CallCSLog("没有权限");
+			 	new Thread() {
+			 		@Override
+					public void run() {
+			 			try {
+			 				CallCSLog("began 1");
+							Thread.sleep(5000);
+							CallCSLog("began 2");
+							setKeyPress(KeyEvent.KEYCODE_TAB);
+			            	setKeyPress(KeyEvent.KEYCODE_TAB);
+			            	setKeyPress(KeyEvent.KEYCODE_TAB);
+			            	setKeyPress(KeyEvent.KEYCODE_ENTER);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+			 		}
+			 	}.start();
+				String ACTION_USB_PERMISSION = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
+				PendingIntent localPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+				mUsbManager.requestPermission(mUsbDevice, localPendingIntent);
+				CallCSLog("began 3");
+				
+				return;
 			}
 
 			if (conn == null)
@@ -779,7 +823,7 @@ public class UnityPlayerActivity extends Activity
                 }
         }};
          
-        detectTimer.scheduleAtFixedRate(detectTimerTask, 0, detectHIDIntervalInMs);
+        detectTimer.scheduleAtFixedRate(detectTimerTask, 5000, detectHIDIntervalInMs);
     }
     
     public void CallCSLog(String msg)

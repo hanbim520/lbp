@@ -107,7 +107,6 @@ public class HIDUtils : MonoBehaviour
 				{
 					phase = kPhaseStartBlowBall;
 					bBlowedBall = true;
-					GameEventManager.OnSBlowBall();
 				}
 			}
 			else
@@ -126,7 +125,6 @@ public class HIDUtils : MonoBehaviour
 				{
 					phase = kPhaseOpenGate;
 					bOpenGate = true;
-					GameEventManager.OnOpenGate();
 				}
 			}
 			else
