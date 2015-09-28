@@ -56,6 +56,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.ClearAll += ClearAll;
 		GameEventManager.Clear += Clear;
 		GameEventManager.EndCountdown += CountdownComplete;
+		GameEventManager.BallValue += SetBallValue;
     }
 
     private void UnregisterListener()
@@ -66,6 +67,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.ClearAll -= ClearAll;
 		GameEventManager.Clear -= Clear;
 		GameEventManager.EndCountdown -= CountdownComplete;
+		GameEventManager.BallValue -= SetBallValue;
     }
 
 	void Update()
@@ -128,23 +130,21 @@ public class ServerLogic : GameLogic
     private void CountdownComplete()
     {
 		InputEx.inputEnable = false;
-		StartCoroutine(GoBall());
+		BlowBall();
     }
 
-    private IEnumerator GoBall()
+    private void BlowBall()
     {
-		print("Goball");
+		print("BlowBall");
 		gamePhase = GamePhase.Run;
         host.SendToAll(NetInstr.GamePhase + ":"+ gamePhase);
-		// TODO: chui qiu
-		
-		yield return new WaitForSeconds(2);
-		SetBallValue();
+		int time = GameData.GetInstance().gameDifficulty + Random.Range(1200, 1500);
+		hidUtils.BlowBall(time);
     }
 
-	private void SetBallValue()
+	private void SetBallValue(int value)
 	{
-		ballValue = Random.Range(0, 37);
+		ballValue = value;
 		print("SetBallValue: " + ballValue);
 		while (GameData.GetInstance().records.Count >= 100)
 			GameData.GetInstance().records.Dequeue();
@@ -175,7 +175,8 @@ public class ServerLogic : GameLogic
         // TODO: Save account
         // TODO: UI
 
-		yield return new WaitForSeconds(2);
+		yield return new WaitForSeconds(15);
+		hidUtils.OpenGate();
 		CompensateComplete();
     }
 
@@ -330,9 +331,9 @@ public class ServerLogic : GameLogic
 //        {
 //            DebugConsole.Clear();
 //        }
-        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
-        {
-			GameEventManager.TriggerGameStart();
-        }
+//        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
+//        {
+//			GameEventManager.TriggerGameStart();
+//        }
     }
 }

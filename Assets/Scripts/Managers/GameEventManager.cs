@@ -16,6 +16,7 @@ public static class GameEventManager
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll;
+	public static event GameEvent HIDConnected, HIDDisconnected;
 	public static event ClearEvent Clear;
 	public static event FingerEvent FingerUp, FingerDown, FingerHover;
 	public static event SerialMouseMoveEvent SerialMouseMove;
@@ -139,5 +140,15 @@ public static class GameEventManager
 	public static void OnBallValue(int ballValue)
 	{
 		if (BallValue != null) BallValue(ballValue);
+	}
+
+	public static void OnHIDConnected()
+	{
+		if (HIDConnected != null) HIDConnected();
+	}
+
+	public static void OnHIDDisconnected()
+	{
+		if (HIDDisconnected != null) HIDDisconnected();
 	}
 }

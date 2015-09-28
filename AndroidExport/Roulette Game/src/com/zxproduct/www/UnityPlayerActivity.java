@@ -730,28 +730,26 @@ public class UnityPlayerActivity extends Activity
 			else
 			{
 				CallCSLog("没有权限");
-			 	new Thread() {
-			 		@Override
-					public void run() {
-			 			try {
-			 				CallCSLog("began 1");
-							Thread.sleep(5000);
-							CallCSLog("began 2");
-							setKeyPress(KeyEvent.KEYCODE_TAB);
-			            	setKeyPress(KeyEvent.KEYCODE_TAB);
-			            	setKeyPress(KeyEvent.KEYCODE_TAB);
-			            	setKeyPress(KeyEvent.KEYCODE_ENTER);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-			 		}
-			 	}.start();
+//			 	new Thread() {
+//			 		@Override
+//					public void run() {
+//			 			try {
+//			 				CallCSLog("began 1");
+//							Thread.sleep(5000);
+//							CallCSLog("began 2");
+//							setKeyPress(KeyEvent.KEYCODE_TAB);
+//			            	setKeyPress(KeyEvent.KEYCODE_TAB);
+//			            	setKeyPress(KeyEvent.KEYCODE_TAB);
+//			            	setKeyPress(KeyEvent.KEYCODE_ENTER);
+//						} catch (InterruptedException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
+//			 		}
+//			 	}.start();
 				String ACTION_USB_PERMISSION = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 				PendingIntent localPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 				mUsbManager.requestPermission(mUsbDevice, localPendingIntent);
-				CallCSLog("began 3");
-				
 				return;
 			}
 
@@ -766,6 +764,8 @@ public class UnityPlayerActivity extends Activity
 				if (mDeviceConnection != null)// 到此你的android设备已经连上zigbee设备
 				{
 					bHIDConnected = true;
+					UnityPlayer.UnitySendMessage("HIDUtils", "SetState", "True");
+					OpenGate();
 				}
 			} 
 			else 
@@ -773,6 +773,19 @@ public class UnityPlayerActivity extends Activity
 				conn.close();
 			}
 		}
+	}
+	
+	public void OpenGate()
+	{
+		int[] buffer = new int[]{0x58, 0x57, 0x02, 0x0E, 0xA6, 0, 0, 0, 
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0};
+		writeUsbPort(buffer);
 	}
 	
 	public int writeUsbPort(int[] buffer)
@@ -819,6 +832,7 @@ public class UnityPlayerActivity extends Activity
                 }
                 if (!bfound) {
                 	bHIDConnected = false;
+                	UnityPlayer.UnitySendMessage("HIDUtils", "SetState", "False");
                 	closeUsb();
                 }
         }};
@@ -828,6 +842,6 @@ public class UnityPlayerActivity extends Activity
     
     public void CallCSLog(String msg)
 	{
-		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
+//		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
 	}
 }

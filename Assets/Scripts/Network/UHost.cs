@@ -64,6 +64,8 @@ public class UHost : MonoBehaviour
 			HandleDisconnectEvent(connectionId);
 			break;
 		}
+
+		UpdateTimer();
 	}
 
 
@@ -137,15 +139,14 @@ public class UHost : MonoBehaviour
 	private void StartConnectClients()
 	{
 		StartBroadcast();
-		timerConnectClients = TimerManager.GetInstance().CreateTimer(GameData.GetInstance().ConnectClientsTime);
+		timerConnectClients = new Timer(GameData.GetInstance().ConnectClientsTime, 0);
 		timerConnectClients.Tick += StopConnectClients;
 		timerConnectClients.Start();
 	}
 
 	private void StopConnectClients()
 	{
-		if (timerConnectClients.IsStarted())
-			timerConnectClients.Stop();
+		timerConnectClients = null;
 		GameEventManager.TriggerGameStart();
 	}
 
@@ -202,6 +203,12 @@ public class UHost : MonoBehaviour
             serverLogic.HandleRecData(ref words, connectionId);
         }
     }
+
+	private void UpdateTimer()
+	{
+		if (timerConnectClients != null)
+			timerConnectClients.Update(Time.deltaTime);
+	}
 
 //	void OnGUI()
 //	{

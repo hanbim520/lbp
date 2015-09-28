@@ -25,6 +25,12 @@ public class HIDUtils : MonoBehaviour
 	private bool bBlowedBall = false;
 	private bool bOpenGate = false;
 	private int phase = 0; 
+	private bool isOpen = false;
+	public bool IsOpen
+	{
+		get { return isOpen; }
+		set { isOpen = value; }
+	}
 
 	void Start()
 	{
@@ -51,6 +57,15 @@ public class HIDUtils : MonoBehaviour
 			jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
 			jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
 		}
+	}
+
+	public void SetState(string value)
+	{
+		isOpen = bool.Parse(value);
+		if (isOpen)
+			GameEventManager.OnHIDConnected();
+		else
+			GameEventManager.OnHIDDisconnected();
 	}
 
 	public void OpenUSB()
@@ -111,7 +126,7 @@ public class HIDUtils : MonoBehaviour
 			}
 			else
 			{
-				if (bBlowedBall)
+				if (bBlowedBall && phase == kPhaseStartBlowBall)
 				{
 					phase = kPhaseEndBlowBall;
 					bBlowedBall = false;
@@ -129,7 +144,7 @@ public class HIDUtils : MonoBehaviour
 			}
 			else
 			{
-				if (bOpenGate)
+				if (bOpenGate && phase == kPhaseDetectBallValue)
 				{
 					phase = kPhaseCloseGate;
 					bOpenGate = false;
@@ -137,11 +152,15 @@ public class HIDUtils : MonoBehaviour
 				}
 			}
 			// 不是上轮结果
-			if (data[5] != kPreviousValue && phase == kPhaseCloseGate)
+			if (data[5] != kPreviousValue && phase == kPhaseEndBlowBall)
 			{
-				phase = kPhaseDetectBallValue;
 				// 结果
 				int idx = data[4];
+				if (idx == 0)
+					return;
+				else
+					idx -= 1;
+				phase = kPhaseDetectBallValue;
 				if (GameData.GetInstance().maxNumberOfFields == 38)
 					GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
 				else if (GameData.GetInstance().maxNumberOfFields == 37)
@@ -168,7 +187,7 @@ public class HIDUtils : MonoBehaviour
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-			int[] data = new int[]{0x58, 0x57, 0x02, 0x09, 0xC4, 0, 0, 0, 
+			int[] data = new int[]{0x58, 0x57, 0x02, 0x0E, 0xA6, 0, 0, 0, 
 				0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0,

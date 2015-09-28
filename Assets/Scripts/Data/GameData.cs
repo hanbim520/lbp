@@ -192,7 +192,7 @@ public class GameData
 
     public void DefaultSetting ()
     {
-        betTimeLimit = 2;
+        betTimeLimit = 5;
         coinToScore = 1;
         ticketToScore = 1;
         minBet = 1;
@@ -201,7 +201,7 @@ public class GameData
         quanTaiBaoJi = 20000;
 		language = 0;		// EN
 		displayType = 0;	// classic
-		maxNumberOfFields = 37;
+		maxNumberOfFields = 38;
 		maxNumberOfChips = 6;
 		betChipValues.Add(10);
 		betChipValues.Add(50);
