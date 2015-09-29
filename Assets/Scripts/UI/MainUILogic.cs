@@ -12,6 +12,7 @@ public class MainUILogic : MonoBehaviour
 	public GameObject fields38;
 	public GameObject backendTip;
 	public GameObject chooseBetEffect;
+	public GameObject warning;
 
 	private GameObject displayClassic;
 	private GameObject displayEllipse;
@@ -525,6 +526,8 @@ public class MainUILogic : MonoBehaviour
 		{
 			Vector2 pos;
 			InputEx.InputDownPosition(out pos);
+			if (pos == new Vector2(-1, -1))
+				return;
 
 			float sx, sy;
 			Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
@@ -541,6 +544,9 @@ public class MainUILogic : MonoBehaviour
 		{
 			Vector2 pos;
 			InputEx.InputUpPosition(out pos);
+			if (pos == new Vector2(-1, -1))
+				return;
+
             mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
 
             if (downHitObject != null)
@@ -603,5 +609,20 @@ public class MainUILogic : MonoBehaviour
 				fo.interval = 0.5f;
 			}
 		}
+	}
+
+	public void ShowWarning(string str)
+	{
+		if (warning != null && !warning.activeSelf)
+		{
+			warning.SetActive(true);
+			warning.transform.FindChild("Text").GetComponent<Text>().text = str;
+		}
+	}
+
+	public void HideWarning()
+	{
+		if (warning != null && warning.activeSelf)
+			warning.SetActive(false);
 	}
 }

@@ -42,7 +42,8 @@ public struct Fields
 
 public struct Notifies
 {
-    public static string LimitBet = "限红不能押注";
+	public static string[] LimitBet = new string[]{"限红不能押注"};
+	public static string[] usbDisconnected = new string[]{"Disconnect from the usb.\nCheck usb port please.", "Usb断开连接。\n请检查Usb接口。"};
 }
 
 public enum ResultType

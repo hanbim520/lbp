@@ -244,37 +244,53 @@ public class InputEx : MonoBehaviour
 
 	public static void InputUpPosition(out Vector2 inputPosition)
 	{
-		inputPosition = new Vector2(-1, -1);
 		if (GetTouchUp())
+		{
 			TouchUpPosition(out inputPosition);
+			return;
+		}
 		else if (GetMouseUp())
+		{
 			MouseUpPosition(out inputPosition);
+			return;
+		}
 		else
 		{
+//			if (inputEnable && Input.GetMouseButtonUp(0))
 			if (Input.GetMouseButtonUp(0))
 			{
 				float lcdx, lcdy;
 				Utils.ScreenSpaceToUISpace(Input.mousePosition.x, Input.mousePosition.y, out lcdx, out lcdy);
 				inputPosition = new Vector2(lcdx, lcdy);
+				return;
 			}
 		}
+		inputPosition = new Vector2(-1, -1);
 	}
 
 	public static void InputDownPosition(out Vector2 inputPosition)
 	{
-		inputPosition = new Vector2(-1, -1);
 		if (GetTouchDown())
+		{
 			TouchDownPosition(out inputPosition);
+			return;
+		}
 		else if (GetMouseDown())
+		{
 			MouseDownPosition(out inputPosition);
+			return;
+		}
 		else
 		{
+//			if (inputEnable && Input.GetMouseButtonDown(0))
 			if (Input.GetMouseButtonDown(0))
 			{
 				float lcdx, lcdy;
 				Utils.ScreenSpaceToUISpace(Input.mousePosition.x, Input.mousePosition.y, out lcdx, out lcdy);
 				inputPosition = new Vector2(lcdx, lcdy);
+				return;
 			}
 		}
+		inputPosition = new Vector2(-1, -1);
 	}
 }

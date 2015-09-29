@@ -57,6 +57,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.Clear += Clear;
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.BallValue += SetBallValue;
+		GameEventManager.HIDDisconnected += HIDDisconnected;
     }
 
     private void UnregisterListener()
@@ -68,6 +69,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.Clear -= Clear;
 		GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.BallValue -= SetBallValue;
+		GameEventManager.HIDDisconnected -= HIDDisconnected;
     }
 
 	void Update()
@@ -322,6 +324,29 @@ public class ServerLogic : GameLogic
 		{
 			totalCredits += betFields[fieldName];
 			betFields.Remove(fieldName);
+		}
+	}
+
+	private void HIDConnected()
+	{
+		if (!InputEx.inputEnable)
+		{
+			InputEx.inputEnable = true;
+			ui.HideWarning();
+		}
+	}
+
+	private void HIDDisconnected()
+	{
+		if (InputEx.inputEnable)
+		{
+			InputEx.inputEnable = false;
+			ui.ClearAllEvent(null);
+			ClearAll();
+			int language = 0;	// EN
+			if (GameData.GetInstance().language == 1)
+				language = 1;	// CN
+			ui.ShowWarning(Notifies.usbDisconnected[language]);
 		}
 	}
 

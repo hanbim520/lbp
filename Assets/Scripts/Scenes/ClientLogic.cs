@@ -40,7 +40,7 @@ public class ClientLogic : GameLogic
         }
         else if (instr == NetInstr.LimitBet)
         {
-            NotifyMsg(ref Notifies.LimitBet);
+            NotifyMsg(ref Notifies.LimitBet[0]);
         }
         else if (instr == NetInstr.GamePhase)
         {

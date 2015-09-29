@@ -12,9 +12,6 @@ public class GameData
     // Setting menu
     public int betTimeLimit;
     public int coinToScore;
-    public int ticketToScore;
-    public int minBet;
-    public int danXianZhu;
 	public int gameDifficulty;
     public int quanTaiBaoJi;
 	public List<int> betChipValues = new List<int>();
@@ -25,11 +22,13 @@ public class GameData
 	public int max6Value;
 	public int max3Value;
 	public int max2Value;
-	public int bigRechargeValue;
-	public int smallRechargeValue;
 	// 优惠卡分限
-	public int coupons;
-
+	public int couponsStart;
+	public int couponsKeyinRatio;	// 1%~100%
+	public int couponsKeoutRatio;	
+	public int maxNumberOfFields = 38; 	// 37 or 38
+	public int beginSessions;	// 起始场次
+	
     // Account
     public int[] zongShang;
     public int[] zongXia;
@@ -69,7 +68,6 @@ public class GameData
 	// Custom setting
 	public int language;			// 0:EN 1:CN
 	public int displayType; 		// 0:classic 1:ellipse
-	public int maxNumberOfFields = 38; 	// 37 or 38
 	public int maxNumberOfChips;	// 1 ~ 6
 
     // 记录最近20场押分情况
@@ -167,9 +165,6 @@ public class GameData
     {
         PlayerPrefs.SetInt("betTimeLimit", betTimeLimit);
         PlayerPrefs.SetInt("coinToScore", coinToScore);
-        PlayerPrefs.SetInt("ticketToScore", ticketToScore);
-        PlayerPrefs.SetInt("minBet", minBet);
-        PlayerPrefs.SetInt("danXianZhu", danXianZhu);
 		PlayerPrefs.SetInt("gameDifficulty", gameDifficulty);
         PlayerPrefs.SetInt("quanTaiBaoJi", quanTaiBaoJi);
 		PlayerPrefs.SetInt("language", language);
@@ -185,30 +180,24 @@ public class GameData
 		PlayerPrefs.SetInt("max6Value", max6Value);
 		PlayerPrefs.SetInt("max3Value", max3Value);
 		PlayerPrefs.SetInt("max2Value", max2Value);
-		PlayerPrefs.SetInt("bigRechargeValue", bigRechargeValue);
-		PlayerPrefs.SetInt("smallRechargeValue", smallRechargeValue);
         PlayerPrefs.Save();
     }
 
     public void DefaultSetting ()
     {
-        betTimeLimit = 5;
+        betTimeLimit = 5; //30
         coinToScore = 1;
-        ticketToScore = 1;
-        minBet = 1;
-        danXianZhu = 20000;
 		gameDifficulty = 1;
         quanTaiBaoJi = 20000;
-		language = 0;		// EN
 		displayType = 0;	// classic
 		maxNumberOfFields = 38;
 		maxNumberOfChips = 6;
+		betChipValues.Add(1);
 		betChipValues.Add(10);
 		betChipValues.Add(50);
 		betChipValues.Add(100);
 		betChipValues.Add(500);
 		betChipValues.Add(1000);
-		betChipValues.Add(5000);
 		max36Value = 100;
 		max18Value = 100;
 		max12Value = 100;
@@ -216,9 +205,13 @@ public class GameData
 		max6Value = 100;
 		max3Value = 100;
 		max2Value = 100;
-		bigRechargeValue = 100;
-		smallRechargeValue = 100;
     }
+
+	public void DefaultCustom()
+	{
+		language = 0;		// EN
+		
+	}
 
     public void SaveAccount()
     {
@@ -273,11 +266,7 @@ public class GameData
             // Setting menu
             betTimeLimit = PlayerPrefs.GetInt("betTimeLimit");
             coinToScore = PlayerPrefs.GetInt("coinToScore");
-            ticketToScore = PlayerPrefs.GetInt("ticketToScore");
-            minBet = PlayerPrefs.GetInt("minBet");
-            danXianZhu = PlayerPrefs.GetInt("danXianZhu");
 			gameDifficulty = PlayerPrefs.GetInt("gameDifficulty");
-            quanTaiBaoJi = PlayerPrefs.GetInt("quanTaiBaoJi");
 			for (int i = 0; i < maxNumberOfChips; ++i)
 				betChipValues.Add(PlayerPrefs.GetInt("betChipValues" + i, 0));
 			max36Value = PlayerPrefs.GetInt("max36Value");
@@ -287,8 +276,6 @@ public class GameData
 			max6Value = PlayerPrefs.GetInt("max6Value");
 			max3Value = PlayerPrefs.GetInt("max3Value");
 			max2Value = PlayerPrefs.GetInt("max2Value");
-			bigRechargeValue = PlayerPrefs.GetInt("bigRechargeValue");
-			smallRechargeValue = PlayerPrefs.GetInt("smallRechargeValue");
 
             // Check account menu 
             for (int i = 0; i < maxNumOfPlayers; ++i)
