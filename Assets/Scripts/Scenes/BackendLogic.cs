@@ -1,0 +1,426 @@
+﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+using System.Collections.Generic;
+
+public class BackendLogic : MonoBehaviour
+{
+    public GameObject menuMain;
+    public GameObject menuSetting;
+    public GameObject menuAccount;
+    public GameObject dlgPassword;
+    public GameObject dlgYesNO;
+    public GameObject warning;
+
+    private RectTransform mouseIcon;
+    private GameObject downHitObject;
+    private Transform preSelected; // Only for setting menu
+    private bool preInputState;
+    private bool passwordMode;
+    private int passwordType; // 0:none 1:system 2:account
+    private string txtPassword;
+    private Text calcTitle;
+    private Text calcContent;
+    private Text calcPassword;
+    private Timer timerHideWarning;
+    
+    private string[] strPassword = new string[]{"Please Input Password", "请输入原密码"};
+    private string[] strNewPassword = new string[]{"Please Input New Password", "请输入新密码"};
+    private string[] strAgain = new string[]{"Again!", "请再次输入!"};
+    private string[] strOK = new string[]{"OK!", "修改成功!"};
+    private string[] strCorrect = new string[]{"Correct!", "输入正确!"};
+    private string[] strError = new string[]{"Error!", "输入错误!"};
+
+    void Start()
+    {
+        preInputState = InputEx.inputEnable;
+        mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
+        calcTitle = GameObject.Find("Canvas/SettingMenu/Calc/Input/Title").GetComponent<Text>();
+        calcContent = GameObject.Find("Canvas/SettingMenu/Calc/Input/Content").GetComponent<Text>();
+        calcPassword = GameObject.Find("Canvas/SettingMenu/Calc/Input/Password").GetComponent<Text>();
+        calcPassword.text = calcTitle.text = calcContent.text = string.Empty;
+        InitMain();
+    }
+
+    void OnDestroy()
+    {
+        InputEx.inputEnable = preInputState;
+    }
+
+    void Update()
+    {
+        UpdateTimer();
+        DetectInputEvents();
+    }
+    
+    private void DetectInputEvents()
+    {
+        if (InputEx.GetInputDown())
+        {
+            Vector2 pos;
+            InputEx.InputDownPosition(out pos);
+            if (pos == new Vector2(-1, -1))
+                return;
+            
+            float sx, sy;
+            Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
+            RaycastHit2D[] hit = Physics2D.RaycastAll(new Vector2(sx, sy), Vector2.zero);
+            if (hit.Length == 0)
+                return;
+
+            int idx = 0;
+            if (hit.Length > 1)
+            {
+                for (int i = 0; i < hit.Length; ++i)
+                {
+                    if (hit[i].collider.tag == "Dialog")
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+            }
+            if (hit[idx].collider != null)
+            {
+                hit[idx].collider.gameObject.GetComponent<ButtonEvent>().OnInputDown(hit[idx].collider.transform);
+                downHitObject = hit[idx].collider.gameObject;
+            }
+            
+            mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+        }
+        else if (InputEx.GetInputUp())
+        {
+            Vector2 pos;
+            InputEx.InputUpPosition(out pos);
+            if (pos == new Vector2(-1, -1))
+                return;
+            
+            mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+            
+            if (downHitObject != null)
+            {
+                downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
+            }
+            downHitObject = null;
+        }
+    }
+
+	public void SettingDownEvent(Transform hitObject)
+    {
+        if (IsSettingDlgActived())
+            return;
+
+        if (preSelected != null)
+        {
+            Transform t = preSelected.FindChild("Image");
+            if (t != null)
+                t.gameObject.SetActive(false);
+            SetAlpha(preSelected, 0);
+        }
+        SetAlpha(hitObject, 255);
+
+        Transform img = hitObject.FindChild("Image");
+        if (img != null)
+        {
+            img.gameObject.SetActive(true);
+        }
+        preSelected = hitObject;
+    }
+
+    public void SettingUpEvent(Transform hitObject)
+    {
+        if (IsSettingDlgActived())
+            return;
+
+        if (string.Equals(hitObject.name, "exit"))
+        {
+            InitMain();
+        }
+        else if (string.Equals(hitObject.name, "save"))
+        {
+            SaveSetting();
+        }
+        else if (string.Equals(hitObject.name, "password"))
+        {
+            passwordMode = true;
+            InitPasswordDlg();
+        }
+        else if (string.Equals(hitObject.name, "reset"))
+        {
+            GameData.GetInstance().DefaultSetting();
+            GameData.GetInstance().SaveSetting();
+            InitSetting();
+        }
+    }
+
+    public void CalcDownEvent(Transform hitObject)
+    {
+        if (IsSettingDlgActived())
+            return;
+        SetAlpha(hitObject, 255);
+    }
+
+    public void CalcUpEvent(Transform hitObject)
+    {
+        if (IsSettingDlgActived())
+            return;
+        SetAlpha(hitObject, 0);
+        string name = hitObject.name;
+        if (string.Equals(name, "del"))
+        {
+            DelCalcContent();
+        }
+        else if (string.Equals(name, "enter2"))
+        {
+            Transform target = preSelected.FindChild("Text");
+            if (target != null)
+            {
+                target.GetComponent<Text>().text = calcContent.text;
+            }
+        }
+        else
+        {
+            int value;
+            if (int.TryParse(name, out value))
+            {
+                AppendCalcContent(value);
+            }
+        }
+    }
+
+    public void MainDownEvent(Transform hitObject)
+    {
+        SetAlpha(hitObject, 255);
+    }
+
+    public void MainUpEvent(Transform hitObject)
+    {
+        SetAlpha(hitObject, 0);
+        string name = hitObject.name;
+        if (string.Equals(name, "setting"))
+            InitSetting();
+        else if (string.Equals(name, "account"))
+            InitAccount();
+        else if (string.Equals(name, "exit"))
+            Application.LoadLevel("Main");
+    }
+
+    public void DlgPasswordDownEvent(Transform hitObject)
+    {
+        SetAlpha(hitObject, 255);
+    }
+
+    public void DlgPasswordUpEvent(Transform hitObject)
+    {
+        SetAlpha(hitObject, 0);
+        string name = hitObject.name;
+        if (string.Equals(name, "system"))
+        {
+            passwordType = 1;
+        }
+        else if (string.Equals(name, "account"))
+        {
+            passwordType = 2;
+        }
+        int idx = GameData.GetInstance().language;
+        dlgPassword.SetActive(false);
+        SetCalcTitle(strPassword[idx], Color.black);
+        SetCalcContent(string.Empty, Color.white);
+    }
+
+    private void InitMain()
+    {
+        menuMain.SetActive(true);
+        menuSetting.SetActive(false);
+        menuAccount.SetActive(false);
+        SetLanguage(menuMain);
+    }
+
+    private void InitSetting()
+    {
+        GameData.GetInstance().DefaultSetting();
+        menuMain.SetActive(false);
+        menuSetting.SetActive(true);
+        menuAccount.SetActive(false);
+
+        SetLanguage(menuSetting);
+
+        GameData ga = GameData.GetInstance();
+        string[] datas = new string[]{ga.betTimeLimit.ToString(), ga.coinToScore.ToString(), ga.baoji.ToString(), ga.gameDifficulty.ToString(), 
+            ga.betChipValues[0].ToString(), ga.betChipValues[1].ToString(), ga.betChipValues[2].ToString().ToString(), ga.betChipValues[3].ToString(), ga.betChipValues[4].ToString(), ga.betChipValues[5].ToString(),
+            ga.max36Value.ToString(), ga.max18Value.ToString(), ga.max12Value.ToString(), ga.max9Value.ToString(), ga.max6Value.ToString(), ga.max3Value.ToString(), ga.max2Value.ToString(),
+            ga.couponsStart.ToString(), ga.couponsKeyinRatio.ToString() + "%", ga.couponsKeoutRatio.ToString(), ga.beginSessions.ToString(), ga.maxNumberOfFields.ToString()};
+
+        Transform root = menuSetting.transform.FindChild("Valid Fields");
+        if (root != null)
+        {
+            int count = root.childCount;
+            for (int i = 0; i < count; ++i)
+            {
+                Transform str = root.GetChild(i).FindChild("Text");
+                if (str != null)
+                {
+                    str.GetComponent<Text>().text = datas[i];
+                }
+            }
+        }
+    }
+
+    private void InitAccount()
+    {
+
+    }
+
+    private void InitPasswordDlg()
+    {
+        passwordType = 0;
+        dlgPassword.SetActive(true);
+        SetLanguage(dlgPassword);
+    }
+
+    private void SetLanguage(GameObject menu)
+    {
+        GameObject en = menu.transform.FindChild("EN").gameObject;
+        GameObject cn = menu.transform.FindChild("CN").gameObject;
+        if (GameData.GetInstance().language == 0)
+        {
+            en.SetActive(true);
+            cn.SetActive(false);
+        }
+        else
+        {
+            en.SetActive(false);
+            cn.SetActive(true);
+        }
+    }
+
+    private void SetAlpha(Transform target, int alpha)
+    {
+        Image field = target.GetComponent<Image>();
+        Color c = field.color;
+        c.a = alpha;
+        field.color = c;
+    }
+
+    private void SetCalcTitle(string title, Color color)
+    {
+        calcTitle.text = title;
+        calcTitle.color = color;
+    }
+
+    private void AppendCalcContent(int num)
+    {
+        string text = calcContent.text;
+        int length = text.Length;
+        if (string.Equals(text, "0"))
+            text = num.ToString();
+        else
+            text = text + num.ToString();
+            
+        calcContent.text = text;
+    }
+
+    private void DelCalcContent()
+    {
+        string text = calcContent.text;
+        int length = text.Length;
+        if (length > 1)
+            text = text.Substring(0, length - 1);
+        else if (length == 1)
+            text = "0";
+        calcContent.text = text;
+    }
+
+    private void SetCalcContent(string text, Color color)
+    {
+        calcContent.text = text;
+        calcContent.color = color;
+    }
+
+    private bool IsSettingDlgActived()
+    {
+        return dlgPassword.activeSelf || dlgYesNO.activeSelf;
+    }
+
+    private void SaveSetting()
+    {
+        List<int> values = new List<int>();
+        Transform root = menuSetting.transform.FindChild("Valid Fields");
+        if (root != null)
+        {
+            int count = root.childCount;
+            for (int i = 0; i < count; ++i)
+            {
+                Transform str = root.GetChild(i).FindChild("Text");
+                if (str != null)
+                {
+                    int value;
+                    string content = str.GetComponent<Text>().text;
+                    if (content.Contains("%"))
+                        content = content.Substring(0, content.Length - 1);
+                    if (int.TryParse(content, out value))
+                    {
+                        values.Add(value);
+                    }
+                }
+            }
+
+            GameData.GetInstance().betTimeLimit = values[0];
+            GameData.GetInstance().coinToScore = values[1];
+            GameData.GetInstance().baoji = values[2];
+            GameData.GetInstance().gameDifficulty = values[3];
+            GameData.GetInstance().betChipValues[0] = values[4];
+            GameData.GetInstance().betChipValues[1] = values[5];
+            GameData.GetInstance().betChipValues[2] = values[6];
+            GameData.GetInstance().betChipValues[3] = values[7];
+            GameData.GetInstance().betChipValues[4] = values[8];
+            GameData.GetInstance().betChipValues[5] = values[9];
+            GameData.GetInstance().max36Value = values[10];
+            GameData.GetInstance().max18Value = values[11];
+            GameData.GetInstance().max12Value = values[12];
+            GameData.GetInstance().max9Value = values[13];
+            GameData.GetInstance().max6Value = values[14];
+            GameData.GetInstance().max3Value = values[15];
+            GameData.GetInstance().max2Value = values[16];
+            GameData.GetInstance().couponsStart = values[17];
+            GameData.GetInstance().couponsKeyinRatio = values[18];
+            GameData.GetInstance().couponsKeoutRatio = values[19];
+            GameData.GetInstance().beginSessions = values[20];
+            GameData.GetInstance().maxNumberOfFields = values[21];
+            GameData.GetInstance().SaveSetting();
+            int idx = GameData.GetInstance().language;
+            ShowWarning(Notifies.saveSuccess[idx], true);
+        }
+    }
+
+    private void ShowWarning(string str, bool autoDisappear)
+    {
+        if (warning != null && !warning.activeSelf)
+        {
+            warning.SetActive(true);
+            warning.transform.FindChild("Text").GetComponent<Text>().text = str;
+        }
+        if (autoDisappear)
+        {
+            timerHideWarning = new Timer(3, 0);
+            timerHideWarning.Tick += HideWarning;
+            timerHideWarning.Start();
+        }
+    }
+
+    private void HideWarning()
+    {
+        timerHideWarning = null;
+        if (warning != null && warning.activeSelf)
+        {
+            warning.SetActive(false);
+        }
+    }
+
+    private void UpdateTimer()
+    {
+        if (timerHideWarning != null)
+            timerHideWarning.Update(Time.deltaTime);
+    }
+
+}

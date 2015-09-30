@@ -44,6 +44,7 @@ public struct Notifies
 {
 	public static string[] LimitBet = new string[]{"限红不能押注"};
 	public static string[] usbDisconnected = new string[]{"Disconnect from the usb.\nCheck usb port please.", "Usb断开连接。\n请检查Usb接口。"};
+    public static string[] saveSuccess = new string[]{"Saved successfully.", "保存成功。"};
 }
 
 public enum ResultType

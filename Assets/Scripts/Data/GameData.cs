@@ -13,7 +13,7 @@ public class GameData
     public int betTimeLimit;
     public int coinToScore;
 	public int gameDifficulty;
-    public int quanTaiBaoJi;
+    public int baoji;
 	public List<int> betChipValues = new List<int>();
 	public int max36Value;
 	public int max18Value;
@@ -69,6 +69,8 @@ public class GameData
 	public int language;			// 0:EN 1:CN
 	public int displayType; 		// 0:classic 1:ellipse
 	public int maxNumberOfChips;	// 1 ~ 6
+    public string systemPassword;
+    public string accountPassword;
 
     // 记录最近20场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
@@ -166,7 +168,7 @@ public class GameData
         PlayerPrefs.SetInt("betTimeLimit", betTimeLimit);
         PlayerPrefs.SetInt("coinToScore", coinToScore);
 		PlayerPrefs.SetInt("gameDifficulty", gameDifficulty);
-        PlayerPrefs.SetInt("quanTaiBaoJi", quanTaiBaoJi);
+        PlayerPrefs.SetInt("baoji", baoji);
 		PlayerPrefs.SetInt("language", language);
 		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.SetInt("maxNumberOfFields", maxNumberOfFields);
@@ -188,7 +190,7 @@ public class GameData
         betTimeLimit = 5; //30
         coinToScore = 1;
 		gameDifficulty = 1;
-        quanTaiBaoJi = 20000;
+        baoji = 20000;
 		displayType = 0;	// classic
 		maxNumberOfFields = 38;
 		maxNumberOfChips = 6;
@@ -413,5 +415,17 @@ public class GameData
             }
             betRecords.Add(br);
         }
+    }
+
+    public void SaveSysPassword()
+    {
+        CryptoPrefs.SetString("systemPassword", systemPassword);
+        CryptoPrefs.Save();
+    }
+
+    public void SaveAccountPassword()
+    {
+        CryptoPrefs.SetString("accountPassword", accountPassword);
+        CryptoPrefs.Save();
     }
 }
