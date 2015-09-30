@@ -18,7 +18,7 @@ public class BackendLogic : MonoBehaviour
     private bool preInputState;
     private bool passwordMode;
     private int passwordType; // 0:none 1:system 2:account
-    private string txtPassword;
+    private string txtPassword; // Temp variable
     private Text calcTitle;
     private Text calcContent;
     private Text calcPassword;
@@ -132,6 +132,10 @@ public class BackendLogic : MonoBehaviour
         if (IsSettingDlgActived())
             return;
 
+        ClearCalc();
+        passwordMode = false;
+        passwordType = 0;
+        txtPassword = null;
         if (string.Equals(hitObject.name, "exit"))
         {
             InitMain();
@@ -148,7 +152,6 @@ public class BackendLogic : MonoBehaviour
         else if (string.Equals(hitObject.name, "reset"))
         {
             GameData.GetInstance().DefaultSetting();
-            GameData.GetInstance().SaveSetting();
             InitSetting();
         }
     }
@@ -172,11 +175,7 @@ public class BackendLogic : MonoBehaviour
         }
         else if (string.Equals(name, "enter2"))
         {
-            Transform target = preSelected.FindChild("Text");
-            if (target != null)
-            {
-                target.GetComponent<Text>().text = calcContent.text;
-            }
+            CalcEnterEvent();
         }
         else
         {
@@ -310,31 +309,109 @@ public class BackendLogic : MonoBehaviour
 
     private void AppendCalcContent(int num)
     {
-        string text = calcContent.text;
-        int length = text.Length;
-        if (string.Equals(text, "0"))
-            text = num.ToString();
+        if (passwordMode)
+        {
+            string text = calcPassword.text;
+            if (text.Length < GameData.GetInstance().passwordLength)
+            {
+                text += "*";
+                txtPassword += num.ToString();
+                print(txtPassword);
+                SetCalcContent(text, Color.white);
+            }
+        }
         else
-            text = text + num.ToString();
-            
-        calcContent.text = text;
+        {
+            string text = calcContent.text;
+            int length = text.Length;
+            if (string.Equals(text, "0"))
+                text = num.ToString();
+            else
+                text = text + num.ToString();
+            SetCalcContent(text, Color.white);
+        }
     }
 
     private void DelCalcContent()
     {
-        string text = calcContent.text;
+        Text target;
+        if (passwordMode)
+            target = calcPassword;
+        else
+            target = calcContent;
+        string text = target.text;
+
         int length = text.Length;
         if (length > 1)
             text = text.Substring(0, length - 1);
         else if (length == 1)
-            text = "0";
-        calcContent.text = text;
+        {
+            if (passwordMode)
+                text = string.Empty;
+            else
+                text = "0";
+        }
+
+        if (passwordMode)
+        {
+            if (txtPassword.Length > 1)
+                txtPassword = txtPassword.Substring(0, txtPassword.Length - 1);
+            else
+                txtPassword = string.Empty;
+            print(txtPassword);
+        }
+        SetCalcContent(text, Color.white);
+    }
+
+    private void CalcEnterEvent()
+    {
+        if (passwordMode)
+        {
+            if (passwordType == 1)
+            {
+                GameData.GetInstance().systemPassword = txtPassword;
+                GameData.GetInstance().SaveSysPassword();
+            }
+            else if (passwordType == 2)
+            {
+                GameData.GetInstance().accountPassword = txtPassword;
+                GameData.GetInstance().SaveAccountPassword();
+            }
+        }
+        else
+        {
+            if (preSelected != null)
+            {
+                Transform target = preSelected.FindChild("Text");
+                if (target != null)
+                {
+                    int value;
+                    if (int.TryParse(calcContent.text, out value))
+                    {
+                        LimitValue(preSelected.name, ref value);
+                        string str = value.ToString();
+                        if (preSelected.name == "card2")
+                            str += "%";
+                        target.GetComponent<Text>().text = str;
+                    }
+                }
+            }
+        }
     }
 
     private void SetCalcContent(string text, Color color)
     {
-        calcContent.text = text;
+        if (passwordMode)
+            calcPassword.text = text;
+        else
+            calcContent.text = text;
         calcContent.color = color;
+    }
+
+    private void ClearCalc()
+    {
+        SetCalcTitle(string.Empty, Color.black);
+        SetCalcContent(string.Empty, Color.white);
     }
 
     private bool IsSettingDlgActived()
@@ -423,4 +500,84 @@ public class BackendLogic : MonoBehaviour
             timerHideWarning.Update(Time.deltaTime);
     }
 
+    private void LimitValue(string name, ref int value)
+    {
+        if (string.Equals(name, "time"))
+        {
+            if (value > 90)
+                value = 90;
+            else if (value < 5)
+                value = 5;
+        }
+        else if (string.Equals(name, "coin"))
+        {
+            if (value > 100000)
+                value = 100000;
+            else if (value < 1)
+                value = 1;
+        }
+        else if (string.Equals(name, "baoji"))
+        {
+            if (value > 300000)
+                value = 300000;
+            else if (value < 10000)
+                value = 10000;
+        }
+        else if (string.Equals(name, "difficulty"))
+        {
+            if (value > 480)
+                value = 480;
+            else if (value < 1)
+                value = 1;
+        }
+        else if (string.Equals(name, "chip0") || string.Equals(name, "chip1") || string.Equals(name, "chip2") || string.Equals(name, "chip3") ||
+                 string.Equals(name, "chip4") || string.Equals(name, "chip5"))
+        {
+            if (value > 100000)
+                value = 100000;
+        }
+        else if (string.Equals(name, "x36") || string.Equals(name, "x18") || string.Equals(name, "x12") || string.Equals(name, "x9") ||
+                 string.Equals(name, "x6") || string.Equals(name, "x3") || string.Equals(name, "x2"))
+        {
+            if (value > 100000)
+                value = 100000;
+            else if (value < 1)
+                value = 1;
+        }
+        else if (string.Equals(name, "card1"))
+        {
+            if (value > 100000)
+                value = 100000;
+            else if (value < 1)
+                value = 1;
+        }
+        else if (string.Equals(name, "card2"))
+        {
+            if (value > 100)
+                value = 100;
+            else if (value < 1)
+                value = 1;
+        }
+        else if (string.Equals(name, "card3"))
+        {
+            if (value > 100)
+                value = 100;
+            else if (value < 1)
+                value = 1;
+        }
+        else if (string.Equals(name, "card4"))
+        {
+            if (value > 100000)
+                value = 100000;
+            else if (value < 1)
+                value = 1;
+        }
+        else if (string.Equals(name, "type"))
+        {
+            if (value > 38)
+                value = 38;
+            else if (value < 37)
+                value = 37;
+        }
+    }
 }

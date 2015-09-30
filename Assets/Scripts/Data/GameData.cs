@@ -71,6 +71,7 @@ public class GameData
 	public int maxNumberOfChips;	// 1 ~ 6
     public string systemPassword;
     public string accountPassword;
+    public int passwordLength = 6;
 
     // 记录最近20场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
