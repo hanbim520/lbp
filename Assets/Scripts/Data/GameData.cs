@@ -170,12 +170,16 @@ public class GameData
         PlayerPrefs.SetInt("coinToScore", coinToScore);
 		PlayerPrefs.SetInt("gameDifficulty", gameDifficulty);
         PlayerPrefs.SetInt("baoji", baoji);
-		PlayerPrefs.SetInt("language", language);
-		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.SetInt("maxNumberOfFields", maxNumberOfFields);
-		PlayerPrefs.SetInt("maxNumberOfChips", maxNumberOfChips);
+		maxNumberOfChips = 0;
 		for (int i = 0; i < betChipValues.Count; ++i)
-			PlayerPrefs.SetInt("betChipValues" + i, betChipValues[i]);
+		{
+			int value = betChipValues[i];
+			PlayerPrefs.SetInt("betChipValues" + i, value);
+			if (value > 0)
+				++maxNumberOfChips;
+		}
+		PlayerPrefs.SetInt("maxNumberOfChips", maxNumberOfChips);
 		PlayerPrefs.SetInt("max36Value", max36Value);
 		PlayerPrefs.SetInt("max18Value", max18Value);
 		PlayerPrefs.SetInt("max12Value", max12Value);
@@ -183,6 +187,10 @@ public class GameData
 		PlayerPrefs.SetInt("max6Value", max6Value);
 		PlayerPrefs.SetInt("max3Value", max3Value);
 		PlayerPrefs.SetInt("max2Value", max2Value);
+		PlayerPrefs.SetInt("couponsStart", couponsStart);
+		PlayerPrefs.SetInt("couponsKeyinRatio", couponsKeyinRatio);
+		PlayerPrefs.SetInt("couponsKeoutRatio", couponsKeoutRatio);
+		PlayerPrefs.SetInt("beginSessions", beginSessions);
         PlayerPrefs.Save();
     }
 
@@ -208,6 +216,9 @@ public class GameData
 		max6Value = 100;
 		max3Value = 100;
 		max2Value = 100;
+		couponsStart = 100;
+		couponsKeyinRatio = 10;	// 1%~100%
+		couponsKeoutRatio = 4;	
     }
 
 	public void DefaultCustom()
