@@ -16,9 +16,12 @@ public class BackendLogic : MonoBehaviour
     private GameObject downHitObject;
     private Transform preSelected; // Only for setting menu
     private bool preInputState;
-    private bool passwordMode;
+	private int passwordMode;	// 0:non-password 1:modify 2:enter account
     private int passwordType; // 0:none 1:system 2:account
+	private int passwordPhase; // 0:original 1:new 2:check
     private string txtPassword; // Temp variable
+	private string txtCheckPassword;
+    private GameObject dlgCalc;
     private Text calcTitle;
     private Text calcContent;
     private Text calcPassword;
@@ -27,17 +30,22 @@ public class BackendLogic : MonoBehaviour
     private string[] strPassword = new string[]{"Please Input Password", "请输入原密码"};
     private string[] strNewPassword = new string[]{"Please Input New Password", "请输入新密码"};
     private string[] strAgain = new string[]{"Again!", "请再次输入!"};
-    private string[] strOK = new string[]{"OK!", "修改成功!"};
+	private string[] strOK = new string[]{"OK!", "修改成功!"};
     private string[] strCorrect = new string[]{"Correct!", "输入正确!"};
     private string[] strError = new string[]{"Error!", "输入错误!"};
+	private string[] strAccountPassword = new string[]{"Input Account Password", "请输入账户密码"};
 
     void Start()
     {
+		GameData.GetInstance().DefaultSetting();
+		GameData.GetInstance().DefaultCustom();
+
         preInputState = InputEx.inputEnable;
         mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
-        calcTitle = GameObject.Find("Canvas/SettingMenu/Calc/Input/Title").GetComponent<Text>();
-        calcContent = GameObject.Find("Canvas/SettingMenu/Calc/Input/Content").GetComponent<Text>();
-        calcPassword = GameObject.Find("Canvas/SettingMenu/Calc/Input/Password").GetComponent<Text>();
+        calcTitle = GameObject.Find("Canvas/Calc/Input/Title").GetComponent<Text>();
+        calcContent = GameObject.Find("Canvas/Calc/Input/Content").GetComponent<Text>();
+        calcPassword = GameObject.Find("Canvas/Calc/Input/Password").GetComponent<Text>();
+		dlgCalc = GameObject.Find("Canvas/Calc");
         calcPassword.text = calcTitle.text = calcContent.text = string.Empty;
         InitMain();
     }
@@ -133,8 +141,9 @@ public class BackendLogic : MonoBehaviour
             return;
 
         ClearCalc();
-        passwordMode = false;
+        passwordMode = 0;
         passwordType = 0;
+		passwordPhase = 0;
         txtPassword = null;
         if (string.Equals(hitObject.name, "exit"))
         {
@@ -146,7 +155,7 @@ public class BackendLogic : MonoBehaviour
         }
         else if (string.Equals(hitObject.name, "password"))
         {
-            passwordMode = true;
+            passwordMode = 1;
             InitPasswordDlg();
         }
         else if (string.Equals(hitObject.name, "reset"))
@@ -199,7 +208,12 @@ public class BackendLogic : MonoBehaviour
         if (string.Equals(name, "setting"))
             InitSetting();
         else if (string.Equals(name, "account"))
-            InitAccount();
+		{
+			dlgCalc.SetActive(true);
+			dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
+			calcTitle.text = strAccountPassword[GameData.GetInstance().language];
+			passwordMode = 2;
+		}
         else if (string.Equals(name, "exit"))
             Application.LoadLevel("Main");
     }
@@ -232,15 +246,17 @@ public class BackendLogic : MonoBehaviour
         menuMain.SetActive(true);
         menuSetting.SetActive(false);
         menuAccount.SetActive(false);
+		dlgCalc.SetActive(false);
         SetLanguage(menuMain);
     }
 
     private void InitSetting()
     {
-        GameData.GetInstance().DefaultSetting();
         menuMain.SetActive(false);
         menuSetting.SetActive(true);
         menuAccount.SetActive(false);
+		dlgCalc.SetActive(true);
+		dlgCalc.transform.localPosition = Vector3.zero;
 
         SetLanguage(menuSetting);
 
@@ -267,12 +283,13 @@ public class BackendLogic : MonoBehaviour
 
     private void InitAccount()
     {
-
+		print("InitAccount");
     }
 
     private void InitPasswordDlg()
     {
         passwordType = 0;
+		passwordPhase = 0;
         dlgPassword.SetActive(true);
         SetLanguage(dlgPassword);
     }
@@ -309,21 +326,23 @@ public class BackendLogic : MonoBehaviour
 
     private void AppendCalcContent(int num)
     {
-        if (passwordMode)
+		if (calcContent.color == Color.red)
+			calcContent.text = string.Empty;
+
+        if (passwordMode != 0)
         {
             string text = calcPassword.text;
             if (text.Length < GameData.GetInstance().passwordLength)
             {
                 text += "*";
                 txtPassword += num.ToString();
-                print(txtPassword);
+//                print(txtPassword);
                 SetCalcContent(text, Color.white);
             }
         }
         else
         {
             string text = calcContent.text;
-            int length = text.Length;
             if (string.Equals(text, "0"))
                 text = num.ToString();
             else
@@ -335,7 +354,7 @@ public class BackendLogic : MonoBehaviour
     private void DelCalcContent()
     {
         Text target;
-        if (passwordMode)
+        if (passwordMode != 0)
             target = calcPassword;
         else
             target = calcContent;
@@ -346,38 +365,102 @@ public class BackendLogic : MonoBehaviour
             text = text.Substring(0, length - 1);
         else if (length == 1)
         {
-            if (passwordMode)
+            if (passwordMode != 0)
                 text = string.Empty;
             else
                 text = "0";
         }
 
-        if (passwordMode)
+        if (passwordMode != 0)
         {
             if (txtPassword.Length > 1)
                 txtPassword = txtPassword.Substring(0, txtPassword.Length - 1);
             else
                 txtPassword = string.Empty;
-            print(txtPassword);
+//            print(txtPassword);
         }
         SetCalcContent(text, Color.white);
     }
 
     private void CalcEnterEvent()
     {
-        if (passwordMode)
+        if (passwordMode == 1)
         {
-            if (passwordType == 1)
-            {
-                GameData.GetInstance().systemPassword = txtPassword;
-                GameData.GetInstance().SaveSysPassword();
-            }
-            else if (passwordType == 2)
-            {
-                GameData.GetInstance().accountPassword = txtPassword;
-                GameData.GetInstance().SaveAccountPassword();
-            }
+			int idx = GameData.GetInstance().language;
+			if (passwordPhase == 0)
+			{
+				if (string.Equals(txtPassword, GameData.GetInstance().systemPassword))
+				{
+					passwordPhase = 1;
+					SetCalcTitle(strNewPassword[idx], Color.black);
+					calcPassword.text = string.Empty;
+				}
+				else
+				{
+					calcPassword.text = string.Empty;
+					calcContent.text = strError[idx];
+					calcContent.color = Color.red;
+					print(GameData.GetInstance().systemPassword);
+				}
+				txtPassword = null;
+			}
+			else if (passwordPhase == 1)
+			{
+				passwordPhase = 2;
+				txtCheckPassword = txtPassword;
+				calcPassword.text = string.Empty;
+				calcContent.text = strAgain[idx];
+				calcContent.color = Color.red;
+				txtPassword = null;
+			}
+			else if (passwordPhase == 2)
+			{
+				if (string.Equals(txtPassword, txtCheckPassword))
+				{
+					if (passwordType == 1)
+					{
+						GameData.GetInstance().systemPassword = txtPassword;
+						GameData.GetInstance().SaveSysPassword();
+					}
+					else if (passwordType == 2)
+					{
+						GameData.GetInstance().accountPassword = txtPassword;
+						GameData.GetInstance().SaveAccountPassword();
+					}
+					calcTitle.text = string.Empty;
+					calcPassword.text = string.Empty;
+					calcContent.text = strOK[idx];
+					calcContent.color = Color.red;
+
+					passwordMode = 0;
+					passwordType = 0;
+					passwordPhase = 0;
+					txtPassword = null;
+				}
+				else
+				{
+					calcPassword.text = string.Empty;
+					calcContent.text = strError[idx];
+					calcContent.color = Color.red;
+					txtCheckPassword = txtPassword = null;
+					passwordPhase = 1;
+				}
+			}
         }
+		else if (passwordMode == 2)
+		{
+			if (string.Equals(txtPassword, GameData.GetInstance().accountPassword))
+			{
+				InitAccount();
+			}
+			else
+			{
+				calcContent.text = strError[GameData.GetInstance().language];
+				calcContent.color = Color.red;
+				calcPassword.text = string.Empty;
+				txtPassword = null;
+			}
+		}
         else
         {
             if (preSelected != null)
@@ -401,10 +484,19 @@ public class BackendLogic : MonoBehaviour
 
     private void SetCalcContent(string text, Color color)
     {
-        if (passwordMode)
-            calcPassword.text = text;
-        else
-            calcContent.text = text;
+		if (string.IsNullOrEmpty(text))
+		{
+			calcPassword.text = string.Empty;
+			calcContent.text = string.Empty;
+		}
+		else
+		{
+			if (passwordMode != 0)
+				calcPassword.text = text;
+			else
+				calcContent.text = text;
+		}
+       
         calcContent.color = color;
     }
 

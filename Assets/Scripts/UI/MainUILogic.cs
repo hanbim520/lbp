@@ -25,7 +25,7 @@ public class MainUILogic : MonoBehaviour
 	private int timeLimit;
     private GameObject downHitObject;
     private List<Transform> lightEffects = new List<Transform>();
-    
+
 	void Start()
 	{
 		GameData.GetInstance().DefaultSetting();
@@ -424,7 +424,7 @@ public class MainUILogic : MonoBehaviour
             t.GetComponent<Image>().color = c;
         }
     }
-    
+
 	public void FieldClickEvent(Transform hitObject)
 	{
 		if (eraser.activeSelf)
@@ -531,11 +531,26 @@ public class MainUILogic : MonoBehaviour
 
 			float sx, sy;
 			Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
-			RaycastHit2D hit = Physics2D.Raycast(new Vector2(sx, sy), Vector2.zero);
-			if (hit.collider != null)
+			RaycastHit2D[] hit = Physics2D.RaycastAll(new Vector2(sx, sy), Vector2.zero);
+			if (hit.Length == 0)
+				return;
+			
+			int idx = 0;
+			if (hit.Length > 1)
 			{
-				hit.collider.gameObject.GetComponent<ButtonEvent>().OnInputDown(hit.collider.transform);
-                downHitObject = hit.collider.gameObject;
+				for (int i = 0; i < hit.Length; ++i)
+				{
+					if (hit[i].collider.tag == "Dialog")
+					{
+						idx = i;
+						break;
+					}
+				}
+			}
+			if (hit[idx].collider != null)
+			{
+				hit[idx].collider.gameObject.GetComponent<ButtonEvent>().OnInputDown(hit[idx].collider.transform);
+				downHitObject = hit[idx].collider.gameObject;
 			}
 
 			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);

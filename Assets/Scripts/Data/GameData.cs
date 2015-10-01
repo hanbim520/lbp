@@ -26,8 +26,9 @@ public class GameData
 	public int couponsStart;
 	public int couponsKeyinRatio;	// 1%~100%
 	public int couponsKeoutRatio;	
-	public int maxNumberOfFields = 38; 	// 37 or 38
+	public int maxNumberOfFields; 	// 37 or 38
 	public int beginSessions;	// 起始场次
+	public int maxNumberOfChips;	// 1 ~ 6
 	
     // Account
     public int[] zongShang;
@@ -68,7 +69,6 @@ public class GameData
 	// Custom setting
 	public int language;			// 0:EN 1:CN
 	public int displayType; 		// 0:classic 1:ellipse
-	public int maxNumberOfChips;	// 1 ~ 6
     public string systemPassword;
     public string accountPassword;
     public int passwordLength = 6;
@@ -179,7 +179,6 @@ public class GameData
 			if (value > 0)
 				++maxNumberOfChips;
 		}
-		PlayerPrefs.SetInt("maxNumberOfChips", maxNumberOfChips);
 		PlayerPrefs.SetInt("max36Value", max36Value);
 		PlayerPrefs.SetInt("max18Value", max18Value);
 		PlayerPrefs.SetInt("max12Value", max12Value);
@@ -200,7 +199,6 @@ public class GameData
         coinToScore = 1;
 		gameDifficulty = 1;
         baoji = 20000;
-		displayType = 0;	// classic
 		maxNumberOfFields = 38;
 		maxNumberOfChips = 6;
 		betChipValues.Add(1);
@@ -224,7 +222,19 @@ public class GameData
 	public void DefaultCustom()
 	{
 		language = 0;		// EN
-		
+		displayType = 0;	// classic
+		systemPassword = "888888";
+		accountPassword = "888888";
+	}
+
+	public void SaveCustom()
+	{
+		CryptoPrefs.SetString("systemPassword", systemPassword);
+		CryptoPrefs.SetString("accountPassword", accountPassword);
+		CryptoPrefs.Save();
+		PlayerPrefs.SetInt("language", language);
+		PlayerPrefs.SetInt("displayType", displayType);
+		PlayerPrefs.Save();
 	}
 
     public void SaveAccount()
@@ -273,6 +283,8 @@ public class GameData
             SaveSetting();
             DefaultAccount();
             SaveAccount();
+			DefaultCustom();
+			SaveCustom();
             PlayerPrefs.SetInt("FirstWrite", 1);
         }
         else
@@ -280,9 +292,16 @@ public class GameData
             // Setting menu
             betTimeLimit = PlayerPrefs.GetInt("betTimeLimit");
             coinToScore = PlayerPrefs.GetInt("coinToScore");
+			baoji = PlayerPrefs.GetInt("baoji");
 			gameDifficulty = PlayerPrefs.GetInt("gameDifficulty");
+			maxNumberOfChips = 0;
 			for (int i = 0; i < maxNumberOfChips; ++i)
-				betChipValues.Add(PlayerPrefs.GetInt("betChipValues" + i, 0));
+			{
+				int value = PlayerPrefs.GetInt("betChipValues" + i, 0);
+				betChipValues.Add(value);
+				if (value > 0)
+					++maxNumberOfChips;
+			}
 			max36Value = PlayerPrefs.GetInt("max36Value");
 			max18Value = PlayerPrefs.GetInt("max18Value");
 			max12Value = PlayerPrefs.GetInt("max12Value");
@@ -290,6 +309,11 @@ public class GameData
 			max6Value = PlayerPrefs.GetInt("max6Value");
 			max3Value = PlayerPrefs.GetInt("max3Value");
 			max2Value = PlayerPrefs.GetInt("max2Value");
+			couponsStart = PlayerPrefs.GetInt("couponsStart");
+			couponsKeyinRatio = PlayerPrefs.GetInt("couponsKeyinRatio");
+			couponsKeoutRatio = PlayerPrefs.GetInt("couponsKeoutRatio");
+			beginSessions = PlayerPrefs.GetInt("beginSessions");
+			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
 
             // Check account menu 
             for (int i = 0; i < maxNumOfPlayers; ++i)
@@ -306,8 +330,8 @@ public class GameData
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
 			displayType = PlayerPrefs.GetInt("displayType");
-			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
-			maxNumberOfChips = PlayerPrefs.GetInt("maxNumberOfChips");
+			systemPassword = CryptoPrefs.GetString("systemPassword");
+			accountPassword = CryptoPrefs.GetString("accountPassword");
         }
         ReadTouchMatrix();
         ReadRecords();
@@ -338,6 +362,7 @@ public class GameData
 		PlayerPrefs.Save();
 	}
 
+	// 100场记录
 	public void ReadRecords()
 	{
 		for (int i = 0; i < 100; ++i)
@@ -402,6 +427,7 @@ public class GameData
         PlayerPrefs.Save();
     }
 
+	// 最近10场押分记录
     private void ReadBetRecords()
     {
         for (int idx = 0; idx < 10; ++idx)
