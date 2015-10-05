@@ -4,13 +4,13 @@ using System.Collections;
 
 public class LoadLevelAsync : MonoBehaviour
 {
-    public Slider progressBar;
+    public Image progressBar;
 
     private AsyncOperation async;
 
     void Start()
     {
-        progressBar.value = 0;
+        progressBar.fillAmount = 0.05f;
         StartCoroutine(LoadLevel());
     }
 
@@ -21,11 +21,11 @@ public class LoadLevelAsync : MonoBehaviour
 
         while (!async.isDone)
         {
-            if (progressBar.value < async.progress ||
+			if (progressBar.fillAmount < async.progress ||
                 Mathf.Approximately(async.progress, 0))
             {
-                progressBar.value += Time.fixedDeltaTime;
-                if (progressBar.value > 0.8f || Mathf.Approximately(progressBar.value, 0.8f))
+				progressBar.fillAmount += Time.fixedDeltaTime;
+				if (progressBar.fillAmount > 0.8f || Mathf.Approximately(progressBar.fillAmount, 0.8f))
                 {
                     break;
                 }
@@ -34,15 +34,15 @@ public class LoadLevelAsync : MonoBehaviour
             yield return null;
         }
 
-        if (progressBar.value < 1)
+		if (progressBar.fillAmount < 1)
         {
             float delta = 0.01f;
             while (!async.allowSceneActivation)
             {
-                progressBar.value += delta;
-                if (progressBar.value > 0.9f || Mathf.Approximately(progressBar.value, 0.9f))
+				progressBar.fillAmount += delta;
+				if (progressBar.fillAmount > 0.9f || Mathf.Approximately(progressBar.fillAmount, 0.9f))
                 {
-                    progressBar.value = 1;
+					progressBar.fillAmount = 1;
                     async.allowSceneActivation = true;
                 }
             }

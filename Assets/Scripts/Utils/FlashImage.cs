@@ -5,10 +5,11 @@ using System.Collections;
 public class FlashImage : MonoBehaviour
 {
 	public float interval = 3;
-	public int flashCount = 0;
+	public int flashCount = 0;	// greater than 0:loop times. less and equal than 0:loop forever
 	private float timeDelta = 0;
 	private int curFlashCount = 0;
-	private bool stopFlash = false;
+	private bool bStopFlash = false;
+	private bool bDestroyFlash = false;
 
 	void Start()
 	{
@@ -22,24 +23,33 @@ public class FlashImage : MonoBehaviour
 
 	void Update() 
 	{
-		if (stopFlash)
+		if (bStopFlash)
 			return;
+
+		if (bDestroyFlash)
+		{
+			bStopFlash = true;
+			StartCoroutine(DelayDestroy());
+			return;
+		}
 
 		timeDelta += Time.deltaTime;
 		if (timeDelta > interval) 
 		{
 			timeDelta = 0;
-			Color c = gameObject.GetComponent<Image>().color;
-			if (c.a > 0)
-				c.a = 0;
+			float alpha = gameObject.GetComponent<Image>().color.a;
+			if (alpha > 0)
+				SetAlpha(0);
 			else
-				c.a = 255;
-			gameObject.GetComponent<Image>().color = c;
-			++curFlashCount;
-			if (curFlashCount >= flashCount)
+				SetAlpha(255);
+			if (flashCount > 0)
 			{
-				stopFlash = true;
-				StartCoroutine(DelayDestroy());
+				++curFlashCount;
+				if (curFlashCount >= flashCount)
+				{
+					bStopFlash = true;
+					StartCoroutine(DelayDestroy());
+				}
 			}
 		}
 	}
@@ -47,14 +57,19 @@ public class FlashImage : MonoBehaviour
 	private IEnumerator DelayDestroy()
 	{
 		yield return new WaitForSeconds(3.0f);
-		Color c = gameObject.GetComponent<Image>().color;
-		c.a = 0;
-		gameObject.GetComponent<Image>().color = c;
+		SetAlpha(0);
 		Destroy(this);
 	}
 
 	private void StopFlash()
 	{
+		bDestroyFlash = true;
+	}
 
+	private void SetAlpha(int alpha)
+	{
+		Color c = gameObject.GetComponent<Image>().color;
+		c.a = alpha;
+		gameObject.GetComponent<Image>().color = c;
 	}
 }
