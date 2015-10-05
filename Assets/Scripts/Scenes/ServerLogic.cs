@@ -60,6 +60,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.BallValue += SetBallValue;
 		GameEventManager.HIDDisconnected += HIDDisconnected;
+		GameEventManager.CloseGate += CompensateComplete;
     }
 
     private void UnregisterListener()
@@ -72,6 +73,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.BallValue -= SetBallValue;
 		GameEventManager.HIDDisconnected -= HIDDisconnected;
+		GameEventManager.CloseGate -= CompensateComplete;
     }
 
 	void Update()
@@ -179,7 +181,6 @@ public class ServerLogic : GameLogic
 
 		yield return new WaitForSeconds(15);
 		hidUtils.OpenGate();
-		CompensateComplete();
     }
 
     private void CompensateComplete()
