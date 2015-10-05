@@ -13,12 +13,12 @@ public class FlashImage : MonoBehaviour
 
 	void Start()
 	{
-		GameEventManager.StopFlash += StopFlash;
+		GameEventManager.CloseGate += StopFlash;
 	}
 
 	void OnDestroy()
 	{
-		GameEventManager.StopFlash -= StopFlash;
+		GameEventManager.CloseGate -= StopFlash;
 	}
 
 	void Update() 

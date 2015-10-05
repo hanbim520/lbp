@@ -18,7 +18,6 @@ public static class GameEventManager
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll;
 	public static event GameEvent HIDConnected, HIDDisconnected;
-	public static event GameEvent StopFlash;
 	public static event ClearEvent Clear;
 	public static event FingerEvent FingerUp, FingerDown, FingerHover;
 	public static event SerialMouseMoveEvent SerialMouseMove;
@@ -159,9 +158,4 @@ public static class GameEventManager
     {
         if (ModifyCredits != null) ModifyCredits(delta);
     }
-
-	public static void OnStopFlash()
-	{
-		if (StopFlash != null) StopFlash();
-	}
 }
