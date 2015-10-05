@@ -74,3 +74,11 @@ public struct BetInfo
     public string betField;
     public int betValue;
 }
+
+public struct Scenes
+{
+    public static string Main = "Main";
+    public static string Loading = "Loading";
+    public static string StartInfo = "StartInfo";
+    public static string Backend = "Backend";
+}

@@ -110,7 +110,7 @@ public class GameData
 			PlayerPrefs.SetString("deviceId", deviceId);
 			PlayerPrefs.Save();
 		}
-//        deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
+        deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 		deviceIndex = 1;
 
         colorTable.Add(37, ResultType.Green);    // 37: 00
@@ -152,6 +152,14 @@ public class GameData
 		colorTable.Add(31, ResultType.Black);
         colorTable.Add(33, ResultType.Black);
         colorTable.Add(35, ResultType.Black);
+
+        zongShang = new int[maxNumOfPlayers];
+        zongXia = new int[maxNumOfPlayers];
+        zongTou = new int[maxNumOfPlayers];
+        zongTui = new int[maxNumOfPlayers];
+        zongYa = new int[maxNumOfPlayers];
+        zongYing = new int[maxNumOfPlayers];
+        caiPiao = new int[maxNumOfPlayers];
 	}
 
     private static GameData instance;
@@ -254,13 +262,6 @@ public class GameData
 
     public void DefaultAccount()
     {
-        zongShang = new int[maxNumOfPlayers];
-        zongXia = new int[maxNumOfPlayers];
-        zongTou = new int[maxNumOfPlayers];
-        zongTui = new int[maxNumOfPlayers];
-        zongYa = new int[maxNumOfPlayers];
-        zongYing = new int[maxNumOfPlayers];
-		caiPiao = new int[maxNumOfPlayers];
         for (int i = 0; i < maxNumOfPlayers; ++i)
         {
             zongShang[i] = 0;

@@ -12,7 +12,12 @@ public class MainUILogic : MonoBehaviour
 	public GameObject fields38;
 	public GameObject backendTip;
 	public GameObject chooseBetEffect;
-	public GameObject warning;
+	public GameObject dlgWarning;
+    public GameObject dlgCard;
+
+    private Text lblCredit;
+    private Text lblWin;
+    private Text lblBet;
 
 	private GameObject displayClassic;
 	private GameObject displayEllipse;
@@ -33,7 +38,23 @@ public class MainUILogic : MonoBehaviour
 		SetLanguage();
 		SetDisplay();
 		SetBetChips();
+        RegisterEvents();
 	}
+
+    void OnDestroy()
+    {
+        UnregisterEvents();
+    }
+
+    private void RegisterEvents()
+    {
+        GameEventManager.ModifyCredits += ModifyCredits;
+    }
+
+    private void UnregisterEvents()
+    {
+        GameEventManager.ModifyCredits -= ModifyCredits;
+    }
 
 	private void Init()
 	{
@@ -43,6 +64,9 @@ public class MainUILogic : MonoBehaviour
 		mouseIcon.localPosition = Vector3.zero;
 		fieldChipsRoot = GameObject.Find("Canvas/FieldChipsRoot");
 		countdown = GameObject.Find("Canvas/Countdown");
+        lblCredit = GameObject.Find("Canvas/Credit/Credit").GetComponent<Text>();
+        lblWin = GameObject.Find("Canvas/Credit/Win").GetComponent<Text>();
+        lblBet = GameObject.Find("Canvas/Credit/Bet").GetComponent<Text>();
 	}
 
 	public void ChangeLanguage(Transform hitObject)
@@ -517,7 +541,8 @@ public class MainUILogic : MonoBehaviour
 
 	void Update()
 	{
-		DetectInputEvents();
+        if (!IsDlgActived())
+		    DetectInputEvents();
 	}
 
 	private void DetectInputEvents()
@@ -628,16 +653,34 @@ public class MainUILogic : MonoBehaviour
 
 	public void ShowWarning(string str)
 	{
-		if (warning != null && !warning.activeSelf)
+		if (dlgWarning != null && !dlgWarning.activeSelf)
 		{
-			warning.SetActive(true);
-			warning.transform.FindChild("Text").GetComponent<Text>().text = str;
+			dlgWarning.SetActive(true);
+			dlgWarning.transform.FindChild("Text").GetComponent<Text>().text = str;
 		}
 	}
 
 	public void HideWarning()
 	{
-		if (warning != null && warning.activeSelf)
-			warning.SetActive(false);
+		if (dlgWarning != null && dlgWarning.activeSelf)
+			dlgWarning.SetActive(false);
 	}
+
+    public bool IsDlgActived()
+    {
+        return dlgWarning.activeSelf || dlgCard.activeSelf;
+    }
+
+    private void ModifyCredits(int delta)
+    {
+        string strCredit = lblCredit.text;
+        int credit;
+        if (int.TryParse(strCredit, out credit))
+        {
+            credit += delta;
+            if (credit < 0)
+                credit = 0;
+        }
+        lblCredit.text = credit.ToString();
+    }
 }

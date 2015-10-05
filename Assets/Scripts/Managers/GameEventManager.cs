@@ -12,17 +12,20 @@ public static class GameEventManager
     public delegate void FieldClickEvent(string fieldName, int bet);
     public delegate void ClearEvent(string fieldName);
 	public delegate void BallValueEvent(int ballValue);
+    public delegate void ModifyCreditsEvent(int delta);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll;
 	public static event GameEvent HIDConnected, HIDDisconnected;
+	public static event GameEvent StopFlash;
 	public static event ClearEvent Clear;
 	public static event FingerEvent FingerUp, FingerDown, FingerHover;
 	public static event SerialMouseMoveEvent SerialMouseMove;
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
     public static event RefreshRecordEvent RefreshRecord;
     public static event FieldClickEvent FieldClick;
+    public static event ModifyCreditsEvent ModifyCredits;
 
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
@@ -150,5 +153,15 @@ public static class GameEventManager
 	public static void OnHIDDisconnected()
 	{
 		if (HIDDisconnected != null) HIDDisconnected();
+	}
+
+    public static void OnModifyCredits(int delta)
+    {
+        if (ModifyCredits != null) ModifyCredits(delta);
+    }
+
+	public static void OnStopFlash()
+	{
+		if (StopFlash != null) StopFlash();
 	}
 }

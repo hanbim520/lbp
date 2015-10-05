@@ -28,6 +28,7 @@ public class GameLogic : MonoBehaviour
 	protected int _currentBet = 0;
 	protected int _lastWin = 0;
 
+    // 断电重启恢复
     protected void FixExitAbnormally()
     {
         int lastBet = PlayerPrefs.GetInt("currentBet", 0);
@@ -45,5 +46,34 @@ public class GameLogic : MonoBehaviour
         PlayerPrefs.SetInt("totalCredits", _totalCredits);
         PlayerPrefs.SetInt("currentBet", currentBet);
         PlayerPrefs.Save();
+    }
+
+    protected virtual void Start()
+    {
+        RegisterEvents();
+    }
+
+    protected virtual void OnDestroy()
+    {
+        UnregisterEvents();
+    }
+
+    private void RegisterEvents()
+    {
+        GameEventManager.ModifyCredits += ModifyCredits;
+    }
+
+    private void UnregisterEvents()
+    {
+        GameEventManager.ModifyCredits -= ModifyCredits;
+    }
+
+    protected void ModifyCredits(int delta)
+    {
+        _totalCredits += delta;
+        if (_totalCredits < 0)
+        {
+            _totalCredits = 0;
+        }
     }
 }

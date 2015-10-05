@@ -10,6 +10,16 @@ public class FlashImage : MonoBehaviour
 	private int curFlashCount = 0;
 	private bool stopFlash = false;
 
+	void Start()
+	{
+		GameEventManager.StopFlash += StopFlash;
+	}
+
+	void OnDestroy()
+	{
+		GameEventManager.StopFlash -= StopFlash;
+	}
+
 	void Update() 
 	{
 		if (stopFlash)
@@ -41,5 +51,10 @@ public class FlashImage : MonoBehaviour
 		c.a = 0;
 		gameObject.GetComponent<Image>().color = c;
 		Destroy(this);
+	}
+
+	private void StopFlash()
+	{
+
 	}
 }

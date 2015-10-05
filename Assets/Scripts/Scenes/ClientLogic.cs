@@ -12,8 +12,9 @@ public class ClientLogic : GameLogic
     // Field -- Bet
     private Dictionary<int, int> betFields = new Dictionary<int, int>();
 
-	void Start()
+	protected override void Start()
 	{
+        base.Start();
         if (GameData.GetInstance().deviceIndex == 1)
         {
             gameObject.SetActive(false);

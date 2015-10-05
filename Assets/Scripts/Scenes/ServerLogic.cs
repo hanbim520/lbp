@@ -32,8 +32,9 @@ public class ServerLogic : GameLogic
         FixExitAbnormally();
     }
 
-	void Start() 
+    protected override void Start() 
     {
+        base.Start();
         if (GameData.GetInstance().deviceIndex != 1)
         {
             gameObject.SetActive(false);
@@ -43,8 +44,9 @@ public class ServerLogic : GameLogic
         RegisterListener();
 	}
 
-    void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         UnregisterListener();
     }
 
@@ -92,10 +94,7 @@ public class ServerLogic : GameLogic
 	private IEnumerator LoadBackend()
 	{
 		yield return new WaitForSeconds(2.0f);
-        if (GameData.GetInstance().language == 1)
-            GameData.GetInstance().NextLevelName = "Backend CN";
-        else if (GameData.GetInstance().language == 0)
-            GameData.GetInstance().NextLevelName = "Backend EN";
+        GameData.GetInstance().NextLevelName = "Backend";
         Application.LoadLevel("Loading");
     }
 
@@ -144,6 +143,7 @@ public class ServerLogic : GameLogic
 		hidUtils.BlowBall(time);
     }
 
+	// 收到球的号码
 	private void SetBallValue(int value)
 	{
 		ballValue = value;
@@ -158,11 +158,11 @@ public class ServerLogic : GameLogic
 	private IEnumerator ShowResult()
 	{
 		print("ShowResult");
+		ui.FlashResult(ballValue);
+
 		gamePhase = GamePhase.ShowResult;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue);
 
-        // TODO: UI
-		ui.FlashResult(ballValue);
 		yield return new WaitForSeconds(2);
 		StartCoroutine(Compensate());
 	}

@@ -6,6 +6,7 @@ public class CardDlg : MonoBehaviour
 {
 	public GameObject cn;
 	public GameObject en;
+    public Transform mouseIcon;
 	public Text calcTitle;
 	public Text calcContent;
 	public Text calcPassword;
@@ -14,10 +15,12 @@ public class CardDlg : MonoBehaviour
 	private int passwordType; // 0:none 1:system
 	private string txtPassword; // Temp variable
 	private Transform preSelected;
-
+    private GameObject downHitObject;
+    
 	private string[] strKeyin = new string[]{"Keyin", "上分"};
 	private string[] strkeout = new string[]{"Keout", "下分"};
-	private string[] strSysPassword = new string[]{"Please Input System Password", "请输入系统密码"};
+	private string[] strSysPassword = new string[]{"Input Sys-Password", "请输入系统密码"};
+    private string[] strError = new string[]{"Error!", "密码错误!"};
 
 	void OnEnable()
 	{
@@ -76,7 +79,7 @@ public class CardDlg : MonoBehaviour
 	private void Keout()
 	{
 		int idx = GameData.GetInstance().language;
-		SetCalcTitle(strkeout[idx], Color.white);
+		SetCalcTitle(strkeout[idx], Color.black);
 	}
 
 	private void System()
@@ -164,7 +167,22 @@ public class CardDlg : MonoBehaviour
 		{
 			if (passwordType == 1)
 			{
-				//"Backend"
+                if (string.Equals(txtPassword, GameData.GetInstance().systemPassword))
+                {
+                    print("sys p : " + GameData.GetInstance().systemPassword);
+                    print("txtpassword : " + txtPassword);
+                    GameData.GetInstance().NextLevelName = Scenes.Backend;
+                    Application.LoadLevel(Scenes.Loading);
+                }
+                else
+                {
+                    int idx = GameData.GetInstance().language;
+                    calcContent.text = strError[idx];
+                    calcContent.color = Color.red;
+                    calcPassword.text = string.Empty;
+                }
+
+                txtPassword = null;
 			}
 		}
 		else
@@ -173,11 +191,21 @@ public class CardDlg : MonoBehaviour
 			{
 				if (string.Equals(preSelected.name, "keyin"))
 				{
-
+                    int value;
+                    if (int.TryParse(calcContent.text, out value))
+                    {
+                        GameEventManager.OnModifyCredits(value);
+                    }
+                    calcContent.text = string.Empty;
 				}
 				else if (string.Equals(preSelected.name, "keout"))
 				{
-					// TODO: keout
+                    int value;
+                    if (int.TryParse(calcContent.text, out value))
+                    {
+                        GameEventManager.OnModifyCredits(-value);
+                    }
+                    calcContent.text = string.Empty;
 				}
 			}
 		}
@@ -185,6 +213,9 @@ public class CardDlg : MonoBehaviour
 
 	private void AppendCalcContent(int num)
 	{
+        if (calcContent.color == Color.red)
+            calcContent.text = string.Empty;
+
 		if (passwordMode)
 		{
 			string text = calcPassword.text;
@@ -223,10 +254,18 @@ public class CardDlg : MonoBehaviour
 
 	private void SetCalcContent(string text, Color color)
 	{
-		if (passwordMode)
-			calcPassword.text = text;
-		else
-			calcContent.text = text;
+        if (string.IsNullOrEmpty(text))
+        {
+            calcPassword.text = string.Empty;
+            calcContent.text = string.Empty;
+        }
+        else
+        {
+    		if (passwordMode)
+    			calcPassword.text = text;
+    		else
+    			calcContent.text = text;
+        }
 		calcContent.color = color;
 	}
 
@@ -235,4 +274,61 @@ public class CardDlg : MonoBehaviour
 		SetCalcContent(string.Empty, Color.white);
 		SetCalcTitle(string.Empty, Color.black);
 	}
+
+    void Update()
+    {
+        DetectInputEvents();
+    }
+    
+    private void DetectInputEvents()
+    {
+        if (InputEx.GetInputDown())
+        {
+            Vector2 pos;
+            InputEx.InputDownPosition(out pos);
+            if (pos == new Vector2(-1, -1))
+                return;
+            
+            float sx, sy;
+            Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
+            RaycastHit2D[] hit = Physics2D.RaycastAll(new Vector2(sx, sy), Vector2.zero);
+            if (hit.Length == 0)
+                return;
+            
+            int idx = -1;
+            if (hit.Length > 1)
+            {
+                for (int i = 0; i < hit.Length; ++i)
+                {
+                    if (hit[i].collider.tag == "Dialog")
+                    {
+                        idx = i;
+                        break;
+                    }
+                }
+            }
+            if (idx > -1 && hit[idx].collider != null)
+            {
+                hit[idx].collider.gameObject.GetComponent<ButtonEvent>().OnInputDown(hit[idx].collider.transform);
+                downHitObject = hit[idx].collider.gameObject;
+            }
+            
+            mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+        }
+        else if (InputEx.GetInputUp())
+        {
+            Vector2 pos;
+            InputEx.InputUpPosition(out pos);
+            if (pos == new Vector2(-1, -1))
+                return;
+            
+            mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+            
+            if (downHitObject != null)
+            {
+                downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
+            }
+            downHitObject = null;
+        }
+    }
 }
