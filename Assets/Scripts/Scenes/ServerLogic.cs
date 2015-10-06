@@ -60,7 +60,8 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.BallValue += SetBallValue;
 		GameEventManager.HIDDisconnected += HIDDisconnected;
-		GameEventManager.CloseGate += CompensateComplete;
+		GameEventManager.HIDConnected += HIDConnected;
+		GameEventManager.CloseGate += CloseGate;
     }
 
     private void UnregisterListener()
@@ -73,7 +74,8 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.BallValue -= SetBallValue;
 		GameEventManager.HIDDisconnected -= HIDDisconnected;
-		GameEventManager.CloseGate -= CompensateComplete;
+		GameEventManager.HIDConnected -= HIDConnected;
+		GameEventManager.CloseGate -= CloseGate;
     }
 
 	void Update()
@@ -179,13 +181,13 @@ public class ServerLogic : GameLogic
         // TODO: Save account
         // TODO: UI
 
-		yield return new WaitForSeconds(15);
+		yield return new WaitForSeconds(2);
 		hidUtils.OpenGate();
     }
 
-    private void CompensateComplete()
+    private void CloseGate()
     {
-		print("CompensateComplete");
+		print("CloseGate");
         gamePhase = GamePhase.GameEnd;
         host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
         // TODO: UI
@@ -333,6 +335,11 @@ public class ServerLogic : GameLogic
 		if (!InputEx.inputEnable)
 		{
 			InputEx.inputEnable = true;
+		}
+
+		if (isPause)
+		{
+			isPause = false;
 			ui.HideWarning();
 		}
 	}
@@ -342,6 +349,11 @@ public class ServerLogic : GameLogic
 		if (InputEx.inputEnable)
 		{
 			InputEx.inputEnable = false;
+		}
+
+		if (!isPause)
+		{
+			isPause = true;
 			ui.ClearAllEvent(null);
 			ClearAll();
 			int language = 0;	// EN

@@ -641,7 +641,10 @@ public class UnityPlayerActivity extends Activity
 	 public void closeUsb()
 	 {
 		 if (mTReadUsb0 != null && mTReadUsb0.isAlive())
+		 {
 			 mTReadUsb0.stop();
+			 mTReadUsb0 = null;
+		 }
 	 }
 	 
 	 // 枚举设备函数  

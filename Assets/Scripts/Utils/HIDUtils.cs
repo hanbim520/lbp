@@ -61,11 +61,15 @@ public class HIDUtils : MonoBehaviour
 
 	public void SetState(string value)
 	{
-		isOpen = bool.Parse(value);
-		if (isOpen)
-			GameEventManager.OnHIDConnected();
-		else
-			GameEventManager.OnHIDDisconnected();
+		bool state;
+		if (bool.TryParse(value, out state))
+		{
+			isOpen = state;
+			if (isOpen)
+				GameEventManager.OnHIDConnected();
+			else
+				GameEventManager.OnHIDDisconnected();
+		}
 	}
 
 	public void OpenUSB()
@@ -108,7 +112,7 @@ public class HIDUtils : MonoBehaviour
 			{ 
 				return;
 			}
-//			log = "data.Length:" + data.Length + "--";
+//			string log = "data.Length:" + data.Length + "--";
 //			for (int i = 0; i < data.Length; ++i)
 //			{
 //				log += string.Format("{0:X}", data[i]) + ", ";
@@ -144,7 +148,7 @@ public class HIDUtils : MonoBehaviour
 			}
 			else
 			{
-				if (bOpenGate && phase == kPhaseDetectBallValue)
+				if (bOpenGate && phase == kPhaseOpenGate)
 				{
 					phase = kPhaseCloseGate;
 					bOpenGate = false;

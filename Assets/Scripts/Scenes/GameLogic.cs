@@ -27,6 +27,7 @@ public class GameLogic : MonoBehaviour
     protected int _totalCredits;
 	protected int _currentBet = 0;
 	protected int _lastWin = 0;
+	protected bool isPause = false;
 
     // 断电重启恢复
     protected void FixExitAbnormally()
@@ -50,6 +51,7 @@ public class GameLogic : MonoBehaviour
 
     protected virtual void Start()
     {
+		GameData.GetInstance().ReadDataFromDisk();
         RegisterEvents();
     }
 

@@ -635,7 +635,7 @@ public class MainUILogic : MonoBehaviour
 			if (target != null)
 			{
 				FlashImage fo = target.gameObject.AddComponent<FlashImage>();
-				fo.flashCount = 5;
+				fo.flashCount = 0;
 				fo.interval = 0.5f;
 			}
 		}
@@ -645,7 +645,7 @@ public class MainUILogic : MonoBehaviour
 			if (target != null)
 			{
 				FlashImage fo = target.gameObject.AddComponent<FlashImage>();
-				fo.flashCount = 5;
+				fo.flashCount = 0;
 				fo.interval = 0.5f;
 			}
 		}
