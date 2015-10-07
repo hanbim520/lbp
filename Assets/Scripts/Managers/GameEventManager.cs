@@ -13,6 +13,7 @@ public static class GameEventManager
     public delegate void ClearEvent(string fieldName);
 	public delegate void BallValueEvent(int ballValue);
     public delegate void ModifyCreditsEvent(int delta);
+    public delegate void NetworkReadyEvent(bool value);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
@@ -25,7 +26,8 @@ public static class GameEventManager
     public static event RefreshRecordEvent RefreshRecord;
     public static event FieldClickEvent FieldClick;
     public static event ModifyCreditsEvent ModifyCredits;
-
+    public static event NetworkReadyEvent NetworkReady;
+    
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
 
@@ -157,5 +159,10 @@ public static class GameEventManager
     public static void OnModifyCredits(int delta)
     {
         if (ModifyCredits != null) ModifyCredits(delta);
+    }
+
+    public static void OnNetworkReady(bool value)
+    {
+        if (NetworkReady != null) NetworkReady(value);
     }
 }

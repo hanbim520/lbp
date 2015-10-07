@@ -9,6 +9,7 @@ public class ServerLogic : GameLogic
     private float timeInterval = 0;
     private float longPressTime = 3;
     private bool bLoadBackend = false;
+    private bool isNetworkReady = false;
 	private UHost host;
 
 	private int gamePhase = GamePhase.GameEnd;
@@ -62,6 +63,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.HIDDisconnected += HIDDisconnected;
 		GameEventManager.HIDConnected += HIDConnected;
 		GameEventManager.CloseGate += CloseGate;
+        GameEventManager.NetworkReady += NetworkReady;
     }
 
     private void UnregisterListener()
@@ -76,6 +78,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.HIDDisconnected -= HIDDisconnected;
 		GameEventManager.HIDConnected -= HIDConnected;
 		GameEventManager.CloseGate -= CloseGate;
+        GameEventManager.NetworkReady -= NetworkReady;
     }
 
 	void Update()
@@ -362,6 +365,11 @@ public class ServerLogic : GameLogic
 			ui.ShowWarning(Notifies.usbDisconnected[language]);
 		}
 	}
+
+    private void NetworkReady(bool value)
+    {
+        isNetworkReady = value;
+    }
 
     void OnGUI()
     {
