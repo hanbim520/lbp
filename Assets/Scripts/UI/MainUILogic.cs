@@ -619,11 +619,6 @@ public class MainUILogic : MonoBehaviour
         }
 	}
 
-    public void SaveBetRecords()
-    {
-
-    }
-
 	public void Countdown()
 	{
 		print("ui Countdown");

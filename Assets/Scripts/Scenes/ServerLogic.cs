@@ -165,9 +165,7 @@ public class ServerLogic : GameLogic
 		yield return new WaitForSeconds(2);
 		ballValue = value;
 		print("SimulateBallValue: " + ballValue);
-		while (GameData.GetInstance().records.Count >= 100)
-			GameData.GetInstance().records.Dequeue();
-		GameData.GetInstance().records.Enqueue(ballValue);
+        GameData.GetInstance().SaveRecord(ballValue);
 		GameEventManager.OnRefreshRecord(ballValue);
 		StartCoroutine(ShowResult());
 	}
@@ -177,9 +175,7 @@ public class ServerLogic : GameLogic
 	{
 		ballValue = value;
 		print("RecBallValue: " + ballValue);
-		while (GameData.GetInstance().records.Count >= 100)
-			GameData.GetInstance().records.Dequeue();
-		GameData.GetInstance().records.Enqueue(ballValue);
+        GameData.GetInstance().SaveRecord(ballValue);
         GameEventManager.OnRefreshRecord(ballValue);
 		StartCoroutine(ShowResult());
 	}

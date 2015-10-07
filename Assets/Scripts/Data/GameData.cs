@@ -357,7 +357,7 @@ public class GameData
 
 	public void SaveRecord(int result)
 	{
-		if (records.Count > 0)
+		while (records.Count > 100)
 			records.Dequeue();
 		records.Enqueue(result);
 		int idx = records.Count - 1;
