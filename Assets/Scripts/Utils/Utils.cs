@@ -216,6 +216,7 @@ public static class Utils
                 return 0;
             }
             // Classic
+			else
             {
                 char[] separator = {'-'};
                 string[] fields = fieldName.Split(separator);
@@ -225,7 +226,7 @@ public static class Utils
                     if (int.TryParse(f, out v))
                     {
                         if (v == value)
-                            return 36 / separator.Length;
+							return 36 / fields.Length;
                     }
                 }
                 return 0;

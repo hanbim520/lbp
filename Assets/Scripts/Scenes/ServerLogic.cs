@@ -9,11 +9,9 @@ public class ServerLogic : GameLogic
     private float timeInterval = 0;
     private float longPressTime = 3;
     private bool bLoadBackend = false;
-    private bool isNetworkReady = false;
 	private UHost host;
-
-	private int gamePhase = GamePhase.GameEnd;
-	private int ballValue = -1;
+	// Field -- Bet
+	private Dictionary<string, int> betFields = new Dictionary<string, int>();
 
     // Current round variables
     private int redFieldVal = 0;
@@ -23,14 +21,13 @@ public class ServerLogic : GameLogic
     private int bigFieldVal = 0;
     private int smallFieldVal = 0;
 
-    // Field -- Bet
-    private Dictionary<string, int> betFields = new Dictionary<string, int>();
-
     private void Init()
     {
-		InputEx.inputEnable = false;
         host = GetComponent<UHost>();
         FixExitAbnormally();
+		ui.RefreshLalCredits(totalCredits.ToString());
+		ui.RefreshLblWin("0");
+		ui.RefreshLalBet("0");
     }
 
     protected override void Start() 
@@ -56,14 +53,14 @@ public class ServerLogic : GameLogic
 		GameEventManager.GameStart += GameStart;
         GameEventManager.GameOver += GameOver;
 		GameEventManager.FieldClick += Bet;
+		GameEventManager.CleanAll += CleanAll;
 		GameEventManager.ClearAll += ClearAll;
 		GameEventManager.Clear += Clear;
 		GameEventManager.EndCountdown += CountdownComplete;
-		GameEventManager.BallValue += SetBallValue;
+		GameEventManager.BallValue += RecBallValue;
 		GameEventManager.HIDDisconnected += HIDDisconnected;
 		GameEventManager.HIDConnected += HIDConnected;
 		GameEventManager.CloseGate += CloseGate;
-        GameEventManager.NetworkReady += NetworkReady;
     }
 
     private void UnregisterListener()
@@ -71,14 +68,14 @@ public class ServerLogic : GameLogic
 		GameEventManager.GameStart -= GameStart;
         GameEventManager.GameOver -= GameOver;
 		GameEventManager.FieldClick -= Bet;
+		GameEventManager.CleanAll -= CleanAll;
 		GameEventManager.ClearAll -= ClearAll;
 		GameEventManager.Clear -= Clear;
 		GameEventManager.EndCountdown -= CountdownComplete;
-		GameEventManager.BallValue -= SetBallValue;
+		GameEventManager.BallValue -= RecBallValue;
 		GameEventManager.HIDDisconnected -= HIDDisconnected;
 		GameEventManager.HIDConnected -= HIDConnected;
 		GameEventManager.CloseGate -= CloseGate;
-        GameEventManager.NetworkReady -= NetworkReady;
     }
 
 	void Update()
@@ -94,6 +91,10 @@ public class ServerLogic : GameLogic
 				StartCoroutine(LoadBackend());
 				ui.backendTip.SetActive(true);
 			}
+		}
+		if (Input.GetKeyUp(KeyCode.Escape))
+		{
+			ui.ActiveDlgCard(true);
 		}
 #endif
 	}
@@ -122,15 +123,21 @@ public class ServerLogic : GameLogic
     private void GameStart()
     {
         gamePhase = GamePhase.GameStart;
-        ClearVariables();
-        Countdown();
+		ui.ResetCountdown();
+        StartCoroutine(Countdown());
 	}
 	
-    private void Countdown()
+    private IEnumerator Countdown()
     {
 		print("logic countdown");
+		if (isPause)
+		{
+			yield return new WaitForSeconds(1);
+			StartCoroutine(Countdown());
+			yield break;
+		}
 		gamePhase = GamePhase.Countdown;
-		host.SendToAll(NetInstr.GamePhase + ":"+ gamePhase);
+		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
 		InputEx.inputEnable = true;
 		ui.Countdown();
     }
@@ -148,13 +155,28 @@ public class ServerLogic : GameLogic
         host.SendToAll(NetInstr.GamePhase + ":"+ gamePhase);
 		int time = GameData.GetInstance().gameDifficulty + Random.Range(1200, 1500);
 		hidUtils.BlowBall(time);
+		if (GameData.debug)
+			StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
     }
 
+	// 模拟收到球的号码
+	private IEnumerator SimulateBallValue(int value)
+	{
+		yield return new WaitForSeconds(2);
+		ballValue = value;
+		print("SimulateBallValue: " + ballValue);
+		while (GameData.GetInstance().records.Count >= 100)
+			GameData.GetInstance().records.Dequeue();
+		GameData.GetInstance().records.Enqueue(ballValue);
+		GameEventManager.OnRefreshRecord(ballValue);
+		StartCoroutine(ShowResult());
+	}
+
 	// 收到球的号码
-	private void SetBallValue(int value)
+	private void RecBallValue(int value)
 	{
 		ballValue = value;
-		print("SetBallValue: " + ballValue);
+		print("RecBallValue: " + ballValue);
 		while (GameData.GetInstance().records.Count >= 100)
 			GameData.GetInstance().records.Dequeue();
 		GameData.GetInstance().records.Enqueue(ballValue);
@@ -183,17 +205,46 @@ public class ServerLogic : GameLogic
         // TODO: Compensate
         // TODO: Save account
         // TODO: UI
+		int win = 0;
+		foreach (KeyValuePair<string, int> item in betFields)
+		{
+			int peilv = Utils.IsBingo(item.Key, ballValue);
+			if (peilv > 0)
+			{
+				win += peilv * item.Value;
+			}
+		}
+		AppendLast10(totalCredits, totalCredits + win, currentBet, win);
+		currentBet = 0;
+		totalCredits += win;
+		
+		ui.RefreshLalBet("0");
+		ui.RefreshLalCredits(totalCredits.ToString());
+		if (win > 0)
+			ui.RefreshLblWin(win.ToString());
+		else
+			ui.RefreshLblWin("0");
+
+		ui.CleanAll();
 
 		yield return new WaitForSeconds(2);
 		hidUtils.OpenGate();
+		if (GameData.debug)
+			StartCoroutine(SimulateCloseGate());
     }
+
+	private IEnumerator SimulateCloseGate()
+	{
+		yield return new WaitForSeconds(5);
+		CloseGate();
+	}
 
     private void CloseGate()
     {
 		print("CloseGate");
         gamePhase = GamePhase.GameEnd;
         host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
-        // TODO: UI
+		ClearVariables();
 		GameEventManager.TriggerGameOver();
     }
 
@@ -206,6 +257,7 @@ public class ServerLogic : GameLogic
         smallFieldVal = 0;
         ballValue = -1;
         betFields.Clear();
+		ui.StopFlash();
     }
 
     public void HandleRecData(ref string[] words, int connectionId)
@@ -284,6 +336,9 @@ public class ServerLogic : GameLogic
 
     private void Bet(string field, int betVal)
     {
+		 if (!InputEx.inputEnable)
+			return;
+
         // TODO: 剩下的筹码小于最小押分
         if (totalCredits <= 0 || totalCredits - betVal < 0)
         {
@@ -308,12 +363,17 @@ public class ServerLogic : GameLogic
             {
                 betFields.Add(field, betVal);
             }
-//			print(betFields[field].ToString());
-//          DebugConsole.Log(Time.realtimeSinceStartup + ": field-" + field + ", betVal-" + betFields[field]);
-            totalCredits -= betVal;
 			currentBet += betVal;
+			totalCredits -= betVal;
+			ui.RefreshLalCredits(totalCredits.ToString());
+			ui.RefreshLalBet(currentBet.ToString());
         }
     }
+
+	private void CleanAll()
+	{
+		betFields.Clear();
+	}
 
 	private void ClearAll()
 	{
@@ -322,6 +382,7 @@ public class ServerLogic : GameLogic
 			totalCredits += item.Value;
 		}
 		betFields.Clear();
+		ui.RefreshLalCredits(totalCredits.ToString());
 	}
 
 	private void Clear(string fieldName)
@@ -331,6 +392,7 @@ public class ServerLogic : GameLogic
 			totalCredits += betFields[fieldName];
 			betFields.Remove(fieldName);
 		}
+		ui.RefreshLalCredits(totalCredits.ToString());
 	}
 
 	private void HIDConnected()
@@ -358,7 +420,6 @@ public class ServerLogic : GameLogic
 		{
 			isPause = true;
 			ui.ClearAllEvent(null);
-			ClearAll();
 			int language = 0;	// EN
 			if (GameData.GetInstance().language == 1)
 				language = 1;	// CN
@@ -366,10 +427,30 @@ public class ServerLogic : GameLogic
 		}
 	}
 
-    private void NetworkReady(bool value)
-    {
-        isNetworkReady = value;
-    }
+	protected void AppendLast10(int startCredit, int endCredit, int bet, int win)
+	{
+		if (betFields.Count > 0)
+		{
+			BetRecord br = new BetRecord();
+			br.startCredit = startCredit;
+			br.endCredit = endCredit;
+			br.bet = bet;
+			br.win = win;
+			br.bets = new List<BetInfo>();
+			foreach (KeyValuePair<string, int> item in betFields)
+			{
+				BetInfo info = new BetInfo();
+				info.betField = item.Key;
+				info.betValue = item.Value;
+			}
+			GameData.GetInstance().betRecords.Add(br);
+			while (GameData.GetInstance().betRecords.Count > 10)
+			{
+				GameData.GetInstance().betRecords.RemoveAt(0);
+			}
+			GameData.GetInstance().SaveBetRecords();
+		}
+	}
 
     void OnGUI()
     {

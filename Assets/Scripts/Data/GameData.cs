@@ -9,6 +9,8 @@ using System.Collections.Generic;
  */
 public class GameData
 {
+	public static bool debug = true;
+
     // Setting menu
     public int betTimeLimit;
     public int coinToScore;
@@ -73,7 +75,7 @@ public class GameData
     public string accountPassword;
     public int passwordLength = 6;
 
-    // 记录最近20场押分情况
+    // 记录最近10场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
 	public Queue<int> records = new Queue<int>();	// 00:用37表示
     public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
@@ -276,7 +278,7 @@ public class GameData
 
     public void ReadDataFromDisk()
     {
-//        PlayerPrefs.DeleteAll();
+        PlayerPrefs.DeleteAll();
         int firstWrite = PlayerPrefs.GetInt("FirstWrite", 0);
         if (firstWrite == 0)
         {

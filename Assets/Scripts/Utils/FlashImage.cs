@@ -11,16 +11,6 @@ public class FlashImage : MonoBehaviour
 	private bool bStopFlash = false;
 	private bool bDestroyFlash = false;
 
-	void Start()
-	{
-		GameEventManager.CloseGate += StopFlash;
-	}
-
-	void OnDestroy()
-	{
-		GameEventManager.CloseGate -= StopFlash;
-	}
-
 	void Update() 
 	{
 		if (bStopFlash)
@@ -61,7 +51,7 @@ public class FlashImage : MonoBehaviour
 		Destroy(this);
 	}
 
-	private void StopFlash()
+	public void StopFlash()
 	{
 		bDestroyFlash = true;
 	}

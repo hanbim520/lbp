@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class GameLogic : MonoBehaviour 
 {
@@ -24,10 +25,13 @@ public class GameLogic : MonoBehaviour
 		set { _lastWin = value; }
 	}
 
-    protected int _totalCredits;
+    protected int _totalCredits = 10000;
 	protected int _currentBet = 0;
 	protected int _lastWin = 0;
 	protected bool isPause = false;
+	protected int gamePhase = GamePhase.GameEnd;
+	protected int ballValue = -1;
+
 
     // 断电重启恢复
     protected void FixExitAbnormally()
@@ -70,6 +74,7 @@ public class GameLogic : MonoBehaviour
         GameEventManager.ModifyCredits -= ModifyCredits;
     }
 
+	// 上分/下分
     protected void ModifyCredits(int delta)
     {
         _totalCredits += delta;

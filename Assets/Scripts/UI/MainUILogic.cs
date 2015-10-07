@@ -30,6 +30,7 @@ public class MainUILogic : MonoBehaviour
 	private int timeLimit;
     private GameObject downHitObject;
     private List<Transform> lightEffects = new List<Transform>();
+	private Transform flashObject;
 
 	void Start()
 	{
@@ -49,11 +50,13 @@ public class MainUILogic : MonoBehaviour
     private void RegisterEvents()
     {
         GameEventManager.ModifyCredits += ModifyCredits;
+		GameEventManager.CloseGate += StopFlash;
     }
 
     private void UnregisterEvents()
     {
         GameEventManager.ModifyCredits -= ModifyCredits;
+		GameEventManager.CloseGate -= StopFlash;
     }
 
 	private void Init()
@@ -109,6 +112,7 @@ public class MainUILogic : MonoBehaviour
 		}
 		GameData.GetInstance().SaveDisplayType();
 		SetDisplay();
+		ChangeFlash();
 	}
 
 	public void SetDisplay()
@@ -279,16 +283,22 @@ public class MainUILogic : MonoBehaviour
 			start = -330.0f;
 		}
 
-		for (int i = 0; i < num; ++i)
+		int betChipsNum = GameData.GetInstance().betChipValues.Count;
+		for (int i = 0; i < betChipsNum; ++i)
 		{
-			Object prefab = (Object)Resources.Load(path + "BetChip" + i);
-			GameObject betChip = (GameObject)Instantiate(prefab);
-			betChip.transform.SetParent(betChipsRoot.transform);
-			betChip.transform.localPosition = new Vector3(start + i * dist, y, 0);
-			betChip.transform.localScale = Vector3.one;
-			betChip.GetComponent<ButtonEvent>().receiver = gameObject;
-			betChip.GetComponent<ButtonEvent>().inputUpEvent = "ChipButtonEvent";
-			prefab = null;
+			int value = GameData.GetInstance().betChipValues[i];
+			if (value > 0)
+			{
+				Object prefab = (Object)Resources.Load(path + "BetChip" + i);
+				GameObject betChip = (GameObject)Instantiate(prefab);
+				betChip.transform.SetParent(betChipsRoot.transform);
+				betChip.transform.localPosition = new Vector3(start + i * dist, y, 0);
+				betChip.transform.localScale = Vector3.one;
+				betChip.GetComponent<ButtonEvent>().receiver = gameObject;
+				betChip.GetComponent<ButtonEvent>().inputUpEvent = "ChipButtonEvent";
+				betChip.transform.GetChild(0).GetComponent<Text>().text = value.ToString();
+				prefab = null;
+			}
 		}
 	}
 
@@ -305,6 +315,7 @@ public class MainUILogic : MonoBehaviour
 		if (mouseIcon != null) mouseIcon.gameObject.SetActive(false);
 	}
 
+	// 清除桌面筹码 并返还给玩家
 	public void ClearAllEvent(Transform hitObject)
 	{
 		if (fieldChipsRoot.transform.childCount == 0)
@@ -313,6 +324,17 @@ public class MainUILogic : MonoBehaviour
         foreach (Transform child in fieldChipsRoot.transform)
             Destroy(child.gameObject);
 		GameEventManager.OnClearAll();
+	}
+
+	// 清除桌面筹码 不返还给玩家
+	public void CleanAll()
+	{
+		if (fieldChipsRoot.transform.childCount == 0)
+			return;
+		
+		foreach (Transform child in fieldChipsRoot.transform)
+			Destroy(child.gameObject);
+		GameEventManager.OnCleanAll();
 	}
 
 	public void RepeatEvent()
@@ -606,8 +628,7 @@ public class MainUILogic : MonoBehaviour
 	{
 		print("ui Countdown");
 		timeLimit = GameData.GetInstance().betTimeLimit;
-		countdown.transform.FindChild("Text").GetComponent<Text>().text = timeLimit.ToString();
-		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = (float)timeLimit / GameData.GetInstance().betTimeLimit;
+		ResetCountdown();
 		Timer t = TimerManager.GetInstance().CreateTimer(1, TimerType.Loop, timeLimit);
 		t.Tick += CountdownTick;
 		t.OnComplete += CountdownComplete;
@@ -627,6 +648,12 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.OnEndCountdown();
 	}
 
+	public void ResetCountdown()
+	{
+		countdown.transform.FindChild("Text").GetComponent<Text>().text = GameData.GetInstance().betTimeLimit.ToString();
+		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = 1;
+	}
+
 	public void FlashResult(int result)
 	{
 		if (displayClassic.activeSelf)
@@ -634,6 +661,7 @@ public class MainUILogic : MonoBehaviour
 			Transform target = displayClassic.transform.FindChild("Choose Effect/" + result.ToString());
 			if (target != null)
 			{
+				flashObject = target;
 				FlashImage fo = target.gameObject.AddComponent<FlashImage>();
 				fo.flashCount = 0;
 				fo.interval = 0.5f;
@@ -644,9 +672,41 @@ public class MainUILogic : MonoBehaviour
 			Transform target = displayEllipse.transform.FindChild("Choose Effect/" + "e" + result.ToString());
 			if (target != null)
 			{
+				flashObject = target;
 				FlashImage fo = target.gameObject.AddComponent<FlashImage>();
 				fo.flashCount = 0;
 				fo.interval = 0.5f;
+			}
+		}
+	}
+
+	public void StopFlash()
+	{
+		if (flashObject != null)
+		{
+			flashObject.GetComponent<FlashImage>().StopFlash();
+			flashObject = null;
+		}
+	}
+
+	public void ChangeFlash()
+	{
+		if (flashObject != null)
+		{
+			string name = flashObject.name;
+			Destroy(flashObject.GetComponent<FlashImage>());
+			if (string.Equals(name.Substring(0, 1), "e"))
+			{
+				int value;
+				string strField = name.Substring(1);
+				if (int.TryParse(strField, out value))
+				    FlashResult(value);
+			}
+			else
+			{
+				int value;
+				if (int.TryParse(name, out value))
+					FlashResult(value);
 			}
 		}
 	}
@@ -671,6 +731,11 @@ public class MainUILogic : MonoBehaviour
         return dlgWarning.activeSelf || dlgCard.activeSelf;
     }
 
+	public void ActiveDlgCard(bool active)
+	{
+		dlgCard.SetActive(active);
+	}
+
     private void ModifyCredits(int delta)
     {
         string strCredit = lblCredit.text;
@@ -683,4 +748,19 @@ public class MainUILogic : MonoBehaviour
         }
         lblCredit.text = credit.ToString();
     }
+
+	public void RefreshLblWin(string str)
+	{
+		lblWin.text = str;
+	}
+
+	public void RefreshLalCredits(string str)
+	{
+		lblCredit.text = str;
+	}
+
+	public void RefreshLalBet(string str)
+	{
+		lblBet.text = str;
+	}
 }

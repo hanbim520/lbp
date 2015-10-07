@@ -7,7 +7,6 @@ public class ClientLogic : GameLogic
 	public MainUILogic ui;
 
     private UClient client;
-    private int gamePhase = GamePhase.GameEnd;
 
     // Field -- Bet
     private Dictionary<int, int> betFields = new Dictionary<int, int>();

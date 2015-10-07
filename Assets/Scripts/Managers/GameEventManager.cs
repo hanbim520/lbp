@@ -17,7 +17,7 @@ public static class GameEventManager
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
-    public static event GameEvent ClearAll;
+    public static event GameEvent ClearAll, CleanAll;
 	public static event GameEvent HIDConnected, HIDDisconnected;
 	public static event ClearEvent Clear;
 	public static event FingerEvent FingerUp, FingerDown, FingerHover;
@@ -25,8 +25,7 @@ public static class GameEventManager
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
     public static event RefreshRecordEvent RefreshRecord;
     public static event FieldClickEvent FieldClick;
-    public static event ModifyCreditsEvent ModifyCredits;
-    public static event NetworkReadyEvent NetworkReady;
+	public static event ModifyCreditsEvent ModifyCredits;	// 上分/下分
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
@@ -106,6 +105,13 @@ public static class GameEventManager
         if (FieldClick != null) FieldClick(fieldName, bet);
     }
 
+	// 清除桌面筹码 不返还给玩家
+	public static void OnCleanAll()
+	{
+		if (CleanAll != null) CleanAll();
+	}
+
+	// 清除桌面筹码 并返还给玩家
 	public static void OnClearAll()
 	{
 		if (ClearAll != null) ClearAll();
@@ -156,13 +162,9 @@ public static class GameEventManager
 		if (HIDDisconnected != null) HIDDisconnected();
 	}
 
+	// 上分/下分
     public static void OnModifyCredits(int delta)
     {
         if (ModifyCredits != null) ModifyCredits(delta);
-    }
-
-    public static void OnNetworkReady(bool value)
-    {
-        if (NetworkReady != null) NetworkReady(value);
     }
 }

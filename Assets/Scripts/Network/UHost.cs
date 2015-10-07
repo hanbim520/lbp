@@ -100,7 +100,7 @@ public class UHost : MonoBehaviour
 		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers)
 		{
 			StopBroadcast();
-            GameEventManager.OnNetworkReady(true);
+			GameEventManager.TriggerGameStart();
 		}
 		// Synchronize backend data
 		SynData(connectionId);
@@ -147,7 +147,7 @@ public class UHost : MonoBehaviour
 	private void StopConnectClients()
 	{
 		timerConnectClients = null;
-        GameEventManager.OnNetworkReady(true);
+		GameEventManager.TriggerGameStart();
     }
 
 	public void SendToAll(string msg)

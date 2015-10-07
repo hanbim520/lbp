@@ -95,7 +95,8 @@ public class CardDlg : MonoBehaviour
 
 	private void Last10()
 	{
-
+		GameData.GetInstance().NextLevelName = "LastTen";
+		Application.LoadLevel(Scenes.Loading);
 	}
 
 	private void Account()
