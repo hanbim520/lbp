@@ -24,6 +24,10 @@ public class GameLogic : MonoBehaviour
 		get { return _lastWin; }
 		set { _lastWin = value; }
 	}
+	public int LogicPhase
+	{
+		get { return gamePhase; }
+	}
 
     protected int _totalCredits = 10000;
 	protected int _currentBet = 0;
@@ -53,9 +57,13 @@ public class GameLogic : MonoBehaviour
         PlayerPrefs.Save();
     }
 
+	protected virtual void Awake()
+	{
+		GameData.GetInstance().ReadDataFromDisk();
+	}
+
     protected virtual void Start()
     {
-		GameData.GetInstance().ReadDataFromDisk();
         RegisterEvents();
     }
 

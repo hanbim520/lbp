@@ -81,4 +81,5 @@ public struct Scenes
     public static string Loading = "Loading";
     public static string StartInfo = "StartInfo";
     public static string Backend = "Backend";
+	public static string Last10 = "LastTen";
 }

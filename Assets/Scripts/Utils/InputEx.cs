@@ -282,8 +282,8 @@ public class InputEx : MonoBehaviour
 		}
 		else
 		{
-//			if (inputEnable && Input.GetMouseButtonDown(0))
-			if (Input.GetMouseButtonDown(0))
+			if (inputEnable && Input.GetMouseButtonDown(0))
+//			if (Input.GetMouseButtonDown(0))
 			{
 				float lcdx, lcdy;
 				Utils.ScreenSpaceToUISpace(Input.mousePosition.x, Input.mousePosition.y, out lcdx, out lcdy);

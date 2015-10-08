@@ -15,6 +15,11 @@ public class MainUILogic : MonoBehaviour
 	public GameObject dlgWarning;
     public GameObject dlgCard;
 
+	public int CurChipIdx
+	{
+		get { return curChipIdx; }
+	}
+
     private Text lblCredit;
     private Text lblWin;
     private Text lblBet;
@@ -439,7 +444,8 @@ public class MainUILogic : MonoBehaviour
 
 	public void FieldDownEvent(Transform hitObject)
 	{
-		if (eraser.activeSelf || curChipIdx == -1)
+		if (eraser.activeSelf || curChipIdx == -1 || 
+		    gameLogic.LogicPhase != GamePhase.Countdown)
 			return;
 
         if (string.Equals(hitObject.name.Substring(0, 1), "e"))
@@ -482,7 +488,16 @@ public class MainUILogic : MonoBehaviour
 			return;
 		}
 
-		if (curChipIdx == -1)
+		// Clear light effects
+		foreach (Transform t in lightEffects)
+		{
+			Color c = t.GetComponent<Image>().color;
+			c.a = 0;
+			t.GetComponent<Image>().color = c;
+		}
+		lightEffects.Clear();
+
+		if (curChipIdx == -1 || gameLogic.LogicPhase != GamePhase.Countdown)
 			return;
 
         string strField = hitObject.name;
@@ -492,13 +507,6 @@ public class MainUILogic : MonoBehaviour
         {
             strField = strField.Substring(1);
         }
-        foreach (Transform t in lightEffects)
-        {
-            Color c = t.GetComponent<Image>().color;
-            c.a = 0;
-            t.GetComponent<Image>().color = c;
-        }
-        lightEffects.Clear();
 		GameEventManager.OnFieldClick(strField, bet);
 
 		string prefabPath = "BigChip/BC";
@@ -545,6 +553,9 @@ public class MainUILogic : MonoBehaviour
 
 	public void ChipButtonEvent(Transform hitObject)
 	{
+		if (gameLogic.LogicPhase != GamePhase.Countdown)
+			return;
+
 		int idx;
 		if (int.TryParse(hitObject.name.Substring(7, 1), out idx))
 			curChipIdx = idx;

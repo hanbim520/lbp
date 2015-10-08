@@ -138,13 +138,14 @@ public class ServerLogic : GameLogic
 		}
 		gamePhase = GamePhase.Countdown;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
-		InputEx.inputEnable = true;
+		if (ui.CurChipIdx != -1)
+			ui.chooseBetEffect.SetActive(true);
 		ui.Countdown();
     }
 
     private void CountdownComplete()
     {
-		InputEx.inputEnable = false;
+		ui.chooseBetEffect.SetActive(false);
 		BlowBall();
     }
 
