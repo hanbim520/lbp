@@ -37,7 +37,8 @@ public class GameLogic : MonoBehaviour
 	protected int ballValue = -1;
 	// Field -- Bet
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
-
+    public MainUILogic ui;
+    
     // 断电重启恢复
     protected void FixExitAbnormally()
     {
@@ -76,11 +77,17 @@ public class GameLogic : MonoBehaviour
     private void RegisterEvents()
     {
         GameEventManager.ModifyCredits += ModifyCredits;
+        GameEventManager.ClearAll += ClearAll;
+        GameEventManager.Clear += Clear;
+        GameEventManager.CleanAll += CleanAll;
     }
 
     private void UnregisterEvents()
     {
         GameEventManager.ModifyCredits -= ModifyCredits;
+        GameEventManager.ClearAll -= ClearAll;
+        GameEventManager.Clear -= Clear;
+        GameEventManager.CleanAll -= CleanAll;
     }
 
 	// 上分/下分
@@ -91,5 +98,38 @@ public class GameLogic : MonoBehaviour
         {
             _totalCredits = 0;
         }
+    }
+
+    protected void ClearAll()
+    {
+        foreach (KeyValuePair<string, int> item in betFields)
+        {
+            totalCredits += item.Value;
+        }
+        currentBet = 0;
+        betFields.Clear();
+        ui.RefreshLalCredits(totalCredits.ToString());
+        ui.RefreshLalBet(currentBet.ToString());
+    }
+    
+    protected void Clear(string fieldName)
+    {
+        if (string.Equals(fieldName.Substring(0, 1), "e"))
+        {
+            fieldName = fieldName.Substring(1);
+        }
+        if (betFields.ContainsKey(fieldName))
+        {
+            totalCredits += betFields[fieldName];
+            currentBet -= betFields[fieldName];
+            betFields.Remove(fieldName);
+        }
+        ui.RefreshLalCredits(totalCredits.ToString());
+        ui.RefreshLalBet(currentBet.ToString());
+    }
+
+    protected void CleanAll()
+    {
+        betFields.Clear();
     }
 }

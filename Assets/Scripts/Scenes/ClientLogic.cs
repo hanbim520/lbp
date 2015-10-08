@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 public class ClientLogic : GameLogic
 {
-	public MainUILogic ui;
-
     private UClient client;
 
 	protected override void Start()

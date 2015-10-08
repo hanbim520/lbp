@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 public class ServerLogic : GameLogic 
 {
-    public MainUILogic ui;
 	public HIDUtils hidUtils;
     private float timeInterval = 0;
     private float longPressTime = 3;
@@ -51,9 +50,6 @@ public class ServerLogic : GameLogic
 		GameEventManager.GameStart += GameStart;
         GameEventManager.GameOver += GameOver;
 		GameEventManager.FieldClick += Bet;
-		GameEventManager.CleanAll += CleanAll;
-		GameEventManager.ClearAll += ClearAll;
-		GameEventManager.Clear += Clear;
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.BallValue += RecBallValue;
 		GameEventManager.HIDDisconnected += HIDDisconnected;
@@ -66,9 +62,6 @@ public class ServerLogic : GameLogic
 		GameEventManager.GameStart -= GameStart;
         GameEventManager.GameOver -= GameOver;
 		GameEventManager.FieldClick -= Bet;
-		GameEventManager.CleanAll -= CleanAll;
-		GameEventManager.ClearAll -= ClearAll;
-		GameEventManager.Clear -= Clear;
 		GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.BallValue -= RecBallValue;
 		GameEventManager.HIDDisconnected -= HIDDisconnected;
@@ -364,39 +357,6 @@ public class ServerLogic : GameLogic
 			ui.RefreshLalBet(currentBet.ToString());
         }
     }
-
-	private void CleanAll()
-	{
-		betFields.Clear();
-	}
-
-	private void ClearAll()
-	{
-		foreach (KeyValuePair<string, int> item in betFields)
-		{
-			totalCredits += item.Value;
-		}
-		currentBet = 0;
-		betFields.Clear();
-		ui.RefreshLalCredits(totalCredits.ToString());
-		ui.RefreshLalBet(currentBet.ToString());
-	}
-
-	private void Clear(string fieldName)
-	{
-		if (string.Equals(fieldName.Substring(0, 1), "e"))
-		{
-			fieldName = fieldName.Substring(1);
-		}
-		if (betFields.ContainsKey(fieldName))
-		{
-			totalCredits += betFields[fieldName];
-			currentBet -= betFields[fieldName];
-			betFields.Remove(fieldName);
-		}
-		ui.RefreshLalCredits(totalCredits.ToString());
-		ui.RefreshLalBet(currentBet.ToString());
-	}
 
 	private void HIDConnected()
 	{
