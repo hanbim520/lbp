@@ -278,7 +278,7 @@ public class GameData
 
     public void ReadDataFromDisk()
     {
-        PlayerPrefs.DeleteAll();
+//        PlayerPrefs.DeleteAll();
         int firstWrite = PlayerPrefs.GetInt("FirstWrite", 0);
         if (firstWrite == 0)
         {
@@ -341,7 +341,7 @@ public class GameData
         ReadBetRecords();
     }
 
-	public void SaveRecords()
+	private void SaveRecords()
 	{
 		if (records.Count > 0)
 		{
@@ -357,12 +357,20 @@ public class GameData
 
 	public void SaveRecord(int result)
 	{
-		while (records.Count > 100)
-			records.Dequeue();
-		records.Enqueue(result);
-		int idx = records.Count - 1;
-		PlayerPrefs.SetInt("R" + idx, result);
-		PlayerPrefs.Save();
+        if (records.Count < 100)
+        {
+            records.Enqueue(result);
+            int idx = records.Count - 1;
+            PlayerPrefs.SetInt("R" + idx, result);
+            PlayerPrefs.Save();
+        }
+        else
+        {
+            records.Enqueue(result);
+            while (records.Count > 100)
+                records.Dequeue();
+            SaveRecords();
+        }
 	}
 
 	// 100场记录
