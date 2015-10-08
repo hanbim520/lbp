@@ -55,6 +55,12 @@ public class RecordCircle : MonoBehaviour
 		foreach (var item in dict)
 		{
 			triangles[item.Key].fillAmount = (float)item.Value / sum;
+			if (triangles[item.Key].fillAmount >= 0.5f)
+				triangles[item.Key].color = Color.green;
+			else if (triangles[item.Key].fillAmount < 0.5f && triangles[item.Key].fillAmount >= 0.2f)
+				triangles[item.Key].color = new Color(150f, 150f, 255f);
+			else if (triangles[item.Key].fillAmount < 0.2f)
+				triangles[item.Key].color = Color.red;
 		}
 		int currentValue = records[count - 1];
 		if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)
