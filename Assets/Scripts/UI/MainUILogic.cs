@@ -39,7 +39,6 @@ public class MainUILogic : MonoBehaviour
 
 	void Start()
 	{
-		GameData.GetInstance().DefaultSetting();
 		Init();
 		SetLanguage();
 		SetDisplay();

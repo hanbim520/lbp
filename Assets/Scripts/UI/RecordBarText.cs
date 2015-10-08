@@ -21,6 +21,9 @@ public class RecordBarText : MonoBehaviour
 			return;
 		}
 
+		if (bar == null)
+			bar = transform.parent.GetComponent<Image>();
+
 		float fillAccount = bar.fillAmount;
 		float parentWidth = transform.parent.GetComponent<RectTransform>().rect.width;
 		if (bar.gameObject.name == "Red")

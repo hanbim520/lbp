@@ -297,7 +297,7 @@ public class CardDlg : MonoBehaviour
                 return;
             
             int idx = -1;
-            if (hit.Length > 1)
+            if (hit.Length > 0)
             {
                 for (int i = 0; i < hit.Length; ++i)
                 {

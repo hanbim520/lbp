@@ -84,7 +84,7 @@ public class GameData
 	public int[] ballValue37 = new int[]{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24};
 
 	// For host
-	private int connectClientsTime = 15;
+	private int connectClientsTime = 10;
 	public int ConnectClientsTime
 	{
 		get { return connectClientsTime; }
@@ -205,7 +205,7 @@ public class GameData
 
     public void DefaultSetting ()
     {
-        betTimeLimit = 5; //30
+        betTimeLimit = 15; //30
         coinToScore = 1;
 		gameDifficulty = 1;
         baoji = 20000;
@@ -297,13 +297,25 @@ public class GameData
             coinToScore = PlayerPrefs.GetInt("coinToScore");
 			baoji = PlayerPrefs.GetInt("baoji");
 			gameDifficulty = PlayerPrefs.GetInt("gameDifficulty");
+
 			maxNumberOfChips = 0;
-			for (int i = 0; i < maxNumberOfChips; ++i)
+			if (betChipValues.Count > 0)
 			{
-				int value = PlayerPrefs.GetInt("betChipValues" + i, 0);
-				betChipValues.Add(value);
-				if (value > 0)
-					++maxNumberOfChips;
+				foreach (int item in betChipValues)
+				{
+					if (item > 0)
+						++maxNumberOfChips;
+				}
+			}
+			else
+			{
+				for (int i = 0; i < 6; ++i)
+				{
+					int value = PlayerPrefs.GetInt("betChipValues" + i, 0);
+					betChipValues.Add(value);
+					if (value > 0)
+						++maxNumberOfChips;
+				}
 			}
 			max36Value = PlayerPrefs.GetInt("max36Value");
 			max18Value = PlayerPrefs.GetInt("max18Value");
@@ -376,6 +388,9 @@ public class GameData
 	// 100场记录
 	public void ReadRecords()
 	{
+		if (records.Count > 0)
+			return;
+
 		for (int i = 0; i < 100; ++i)
 		{
 			int record = PlayerPrefs.GetInt("R" + i, -1);
@@ -425,6 +440,18 @@ public class GameData
         for (int idx = 0; idx < recordsNum; ++idx)
         {
             int betsNum = betRecords[idx].bets.Count;
+			int oldNum = PlayerPrefs.GetInt("br_bets" + idx + "_num", 0);
+			if (oldNum > 0)
+			{
+				for (int i = 0; i < oldNum; ++i)
+				{
+					PlayerPrefs.DeleteKey("br_bets" + idx + "_field" + i);
+					PlayerPrefs.DeleteKey("br_bets" + idx + "_value" + i);
+				}
+				PlayerPrefs.DeleteKey("br_bets" + idx + "_num");
+			}
+
+			PlayerPrefs.SetInt("br_bets" + idx + "_num", betsNum);
             for (int i = 0; i < betsNum; ++i)
             {
                 PlayerPrefs.SetString("br_bets" + idx + "_field" + i, betRecords[idx].bets[i].betField);
@@ -441,6 +468,9 @@ public class GameData
 	// 最近10场押分记录
     private void ReadBetRecords()
     {
+		if (betRecords.Count > 0)
+			return;
+
         for (int idx = 0; idx < 10; ++idx)
         {
             int startCredit = PlayerPrefs.GetInt("br_startCredit" + idx, -1);
@@ -452,7 +482,8 @@ public class GameData
             br.bet = PlayerPrefs.GetInt("br_bet" + idx);
             br.win = PlayerPrefs.GetInt("br_win" + idx);
             br.bets = new List<BetInfo>();
-            for (int i = 0; i < 10; ++i)
+			int numOfbets = PlayerPrefs.GetInt("br_bets" + idx + "_num");
+			for (int i = 0; i < numOfbets; ++i)
             {
                 string str = PlayerPrefs.GetString("br_bets" + idx + "_field" + i, string.Empty);
                 if (string.IsNullOrEmpty(str))

@@ -7,28 +7,18 @@ public class ExtensionRecord : MonoBehaviour
     public GameObject[] language;       // 0:EN 1:CN
     public GameObject[] displayType;    // 0:37 1:38
     public GameObject[] fonts;          // 0:start credit, 1:end credit, 2:bet, 3:win
-    public GameObject animArrow;
     public RectTransform mouseIcon;
+	public LastTenRecords lastTenRecords;
 
     private GameObject downHitObject;
     private int curRecordsIdx = 0;
+	private Transform betChipsRoot;
 
     void Init()
     {
-        //        GameData.GetInstance().records.Enqueue(23);
-        //        GameData.GetInstance().records.Enqueue(2);
-        //        GameData.GetInstance().records.Enqueue(3);
-        //        GameData.GetInstance().records.Enqueue(28);
-        //        GameData.GetInstance().records.Enqueue(4);
-        GameData.GetInstance().records.Enqueue(31);
-        GameData.GetInstance().records.Enqueue(18);
-        GameData.GetInstance().records.Enqueue(0);
-        GameData.GetInstance().records.Enqueue(32);
-        GameData.GetInstance().records.Enqueue(16);
-        GameData.GetInstance().records.Enqueue(37);
-        GameData.GetInstance().records.Enqueue(36);
+		curRecordsIdx = Mathf.Max(GameData.GetInstance().betRecords.Count - 1, 0);
+		betChipsRoot = GameObject.Find("Canvas/BetChips").transform;
     }
-
 
 	void Start()
     {
@@ -38,7 +28,7 @@ public class ExtensionRecord : MonoBehaviour
         RecoverBetRecords();
 	}
 
-    public void LeftArrowEvent()
+	public void RightArrowEvent()
     {
         --curRecordsIdx;
         if (curRecordsIdx < 0)
@@ -51,10 +41,10 @@ public class ExtensionRecord : MonoBehaviour
         RecoverBetRecords();
     }
 
-    public void RightArrowEvent()
+	public void LeftArrowEvent()
     {
         ++curRecordsIdx;
-        if (curRecordsIdx > GameData.GetInstance().betRecords.Count)
+        if (curRecordsIdx >= GameData.GetInstance().betRecords.Count)
             curRecordsIdx = 0;
         RecoverBetRecords();
     }
@@ -107,11 +97,44 @@ public class ExtensionRecord : MonoBehaviour
         if (GameData.GetInstance().betRecords.Count == 0)
             return;
 
+		// Refresh arrow
+		lastTenRecords.MoveArrow(GameData.GetInstance().betRecords.Count - curRecordsIdx - 1);
+
+		// Refresh strings
         BetRecord betRecord = GameData.GetInstance().betRecords[curRecordsIdx];
         fonts[0].GetComponent<Text>().text = betRecord.startCredit.ToString();
         fonts[1].GetComponent<Text>().text = betRecord.endCredit.ToString();
         fonts[2].GetComponent<Text>().text = betRecord.bet.ToString();
         fonts[3].GetComponent<Text>().text = betRecord.win.ToString();
+
+		// Delete children of betChipsRoot
+		foreach (Transform child in betChipsRoot)
+			Destroy(child.gameObject);
+
+		// Recover bet fields
+		Transform root = displayType[0].activeSelf ? displayType[0].transform.FindChild("Valid Fields") : displayType[1].transform.FindChild("Valid Fields");
+		if (root != null) 
+		{
+			string path = "Bet Chips/";
+			foreach (BetInfo info in betRecord.bets)
+			{
+				Transform location = root.FindChild(info.betField);
+				if (location != null)
+				{
+					Object prefab = (Object)Resources.Load(path + "BetChip0");
+					GameObject chip = (GameObject)Instantiate(prefab); 
+					chip.transform.SetParent(betChipsRoot);
+					chip.transform.localPosition = location.localPosition;
+					chip.transform.localScale = Vector3.one;
+					chip.transform.GetChild(0).GetComponent<Text>().text = info.betValue.ToString();
+					prefab = null;
+				}
+				else
+				{
+					print("can't find:" + info.betField);
+				}
+			}
+		}
     }
 
     void Update()

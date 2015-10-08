@@ -37,9 +37,6 @@ public class BackendLogic : MonoBehaviour
 
     void Start()
     {
-		GameData.GetInstance().DefaultSetting();
-		GameData.GetInstance().DefaultCustom();
-
         preInputState = InputEx.inputEnable;
         mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
         calcTitle = GameObject.Find("Canvas/Calc/Input/Title").GetComponent<Text>();
@@ -215,7 +212,10 @@ public class BackendLogic : MonoBehaviour
 			passwordMode = 2;
 		}
         else if (string.Equals(name, "exit"))
-            Application.LoadLevel("Main");
+		{
+			GameData.GetInstance().NextLevelName = Scenes.Main;
+            Application.LoadLevel(Scenes.Loading);
+		}
     }
 
     public void DlgPasswordDownEvent(Transform hitObject)

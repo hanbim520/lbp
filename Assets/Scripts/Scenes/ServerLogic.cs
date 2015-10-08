@@ -102,8 +102,8 @@ public class ServerLogic : GameLogic
 	private IEnumerator LoadBackend()
 	{
 		yield return new WaitForSeconds(2.0f);
-        GameData.GetInstance().NextLevelName = "Backend";
-        Application.LoadLevel("Loading");
+        GameData.GetInstance().NextLevelName = Scenes.Backend;
+		Application.LoadLevel(Scenes.Loading);
     }
 
     private void GameOver()
@@ -140,6 +140,7 @@ public class ServerLogic : GameLogic
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
 		if (ui.CurChipIdx != -1)
 			ui.chooseBetEffect.SetActive(true);
+		ui.RefreshLblWin("0");
 		ui.Countdown();
     }
 
@@ -157,7 +158,8 @@ public class ServerLogic : GameLogic
 		int time = GameData.GetInstance().gameDifficulty + Random.Range(1200, 1500);
 		hidUtils.BlowBall(time);
 		if (GameData.debug)
-			StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
+//			StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
+			StartCoroutine(SimulateBallValue(16));
     }
 
 	// 模拟收到球的号码
@@ -188,9 +190,8 @@ public class ServerLogic : GameLogic
 
 		gamePhase = GamePhase.ShowResult;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue);
-
-		yield return new WaitForSeconds(2);
 		StartCoroutine(Compensate());
+		yield break;
 	}
 
 	private IEnumerator Compensate()
@@ -215,16 +216,16 @@ public class ServerLogic : GameLogic
 		currentBet = 0;
 		totalCredits += win;
 		
+		yield return new WaitForSeconds(5);
+
 		ui.RefreshLalBet("0");
 		ui.RefreshLalCredits(totalCredits.ToString());
 		if (win > 0)
 			ui.RefreshLblWin(win.ToString());
 		else
 			ui.RefreshLblWin("0");
-
 		ui.CleanAll();
 
-		yield return new WaitForSeconds(2);
 		hidUtils.OpenGate();
 		if (GameData.debug)
 			StartCoroutine(SimulateCloseGate());
@@ -378,8 +379,10 @@ public class ServerLogic : GameLogic
 		{
 			totalCredits += item.Value;
 		}
+		currentBet = 0;
 		betFields.Clear();
 		ui.RefreshLalCredits(totalCredits.ToString());
+		ui.RefreshLalBet(currentBet.ToString());
 	}
 
 	private void Clear(string fieldName)
@@ -387,9 +390,11 @@ public class ServerLogic : GameLogic
 		if (betFields.ContainsKey(fieldName))
 		{
 			totalCredits += betFields[fieldName];
+			currentBet -= betFields[fieldName];
 			betFields.Remove(fieldName);
 		}
 		ui.RefreshLalCredits(totalCredits.ToString());
+		ui.RefreshLalBet(currentBet.ToString());
 	}
 
 	private void HIDConnected()
@@ -426,27 +431,25 @@ public class ServerLogic : GameLogic
 
 	protected void AppendLast10(int startCredit, int endCredit, int bet, int win)
 	{
-		if (betFields.Count > 0)
+		BetRecord br = new BetRecord();
+		br.startCredit = startCredit;
+		br.endCredit = endCredit;
+		br.bet = bet;
+		br.win = win;
+		br.bets = new List<BetInfo>();
+		foreach (KeyValuePair<string, int> item in betFields)
 		{
-			BetRecord br = new BetRecord();
-			br.startCredit = startCredit;
-			br.endCredit = endCredit;
-			br.bet = bet;
-			br.win = win;
-			br.bets = new List<BetInfo>();
-			foreach (KeyValuePair<string, int> item in betFields)
-			{
-				BetInfo info = new BetInfo();
-				info.betField = item.Key;
-				info.betValue = item.Value;
-			}
-			GameData.GetInstance().betRecords.Add(br);
-			while (GameData.GetInstance().betRecords.Count > 10)
-			{
-				GameData.GetInstance().betRecords.RemoveAt(0);
-			}
-			GameData.GetInstance().SaveBetRecords();
+			BetInfo info = new BetInfo();
+			info.betField = item.Key;
+			info.betValue = item.Value;
+			br.bets.Add(info);
 		}
+		GameData.GetInstance().betRecords.Add(br);
+		while (GameData.GetInstance().betRecords.Count > 10)
+		{
+			GameData.GetInstance().betRecords.RemoveAt(0);
+		}
+		GameData.GetInstance().SaveBetRecords();
 	}
 
     void OnGUI()

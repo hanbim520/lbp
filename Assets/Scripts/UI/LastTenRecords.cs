@@ -8,6 +8,7 @@ public class LastTenRecords : MonoBehaviour
 	public GameObject[] records;
 	public Sprite[] imagesSmall;
 	public Sprite[] imagesBig;
+    public GameObject animArrow;
     
 	void Start()
 	{
@@ -72,6 +73,19 @@ public class LastTenRecords : MonoBehaviour
                 else
                     records[j].transform.localPosition = new Vector3(pos.x, -481, 0);
 			}
+		}
+	}
+
+	public void MoveArrow(int idx)
+	{
+		if (animArrow != null)
+		{
+			if (records[idx] == null || !records[idx].activeSelf)
+				return;
+
+			Vector3 pos = animArrow.transform.localPosition;
+			pos.x = records[idx].transform.localPosition.x;
+			animArrow.transform.localPosition = pos;
 		}
 	}
 }
