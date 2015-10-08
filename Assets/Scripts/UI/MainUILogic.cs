@@ -288,7 +288,7 @@ public class MainUILogic : MonoBehaviour
 		}
 
 		int betChipsNum = GameData.GetInstance().betChipValues.Count;
-		for (int i = 0; i < betChipsNum; ++i)
+		for (int i = 0, j = 0; i < betChipsNum; ++i)
 		{
 			int value = GameData.GetInstance().betChipValues[i];
 			if (value > 0)
@@ -296,7 +296,8 @@ public class MainUILogic : MonoBehaviour
 				Object prefab = (Object)Resources.Load(path + "BetChip" + i);
 				GameObject betChip = (GameObject)Instantiate(prefab);
 				betChip.transform.SetParent(betChipsRoot.transform);
-				betChip.transform.localPosition = new Vector3(start + i * dist, y, 0);
+				betChip.transform.localPosition = new Vector3(start + j * dist, y, 0);
+				++j;
 				betChip.transform.localScale = Vector3.one;
 				betChip.GetComponent<ButtonEvent>().receiver = gameObject;
 				betChip.GetComponent<ButtonEvent>().inputUpEvent = "ChipButtonEvent";
@@ -308,7 +309,7 @@ public class MainUILogic : MonoBehaviour
 
 	public void ClearEvent(Transform hitObject)
 	{
-		if (fieldChipsRoot.transform.childCount == 0)
+		if (fieldChipsRoot.transform.childCount == 0 || gameLogic.LogicPhase != GamePhase.Countdown)
 			return;
 
 		if (eraser != null) 
@@ -322,7 +323,7 @@ public class MainUILogic : MonoBehaviour
 	// 清除桌面筹码 并返还给玩家
 	public void ClearAllEvent(Transform hitObject)
 	{
-		if (fieldChipsRoot.transform.childCount == 0)
+		if (fieldChipsRoot.transform.childCount == 0 || gameLogic.LogicPhase != GamePhase.Countdown)
 			return;
 
         foreach (Transform child in fieldChipsRoot.transform)
@@ -344,7 +345,7 @@ public class MainUILogic : MonoBehaviour
 	public void RepeatEvent()
 	{
         int count = GameData.GetInstance().betRecords.Count;
-        if (count == 0)
+		if (count == 0 || gameLogic.LogicPhase != GamePhase.Countdown)
             return;
 
         BetRecord lastRecord = GameData.GetInstance().betRecords[count - 1];
@@ -359,9 +360,11 @@ public class MainUILogic : MonoBehaviour
                 rootPath = "Canvas/37 Fields/Classic/Valid Fields";
             }
             GameObject root = GameObject.Find(rootPath);
-            string prefabPath = "BigChip/BC" + curChipIdx;
+            string prefabPath = "BigChip/BC0";
             if (root != null)
             {
+				int betValue = 0;
+				ClearAllEvent(null);
                 foreach (BetInfo info in lastRecord.bets)
                 {
                     if (info.betField == "00" && fields37.activeSelf)
@@ -381,9 +384,14 @@ public class MainUILogic : MonoBehaviour
                         chip.transform.localPosition = targetPos;
                         chip.transform.GetChild(0).GetComponent<Text>().text = info.betValue.ToString();
                         chip.name = info.betField;
-                        gameLogic.totalCredits -= info.betValue;
+						betValue += info.betValue;
+						gameLogic.betFields.Add(info.betField, info.betValue);
                     }
                 }
+				gameLogic.totalCredits -= betValue;
+				gameLogic.currentBet += betValue;
+				RefreshLalCredits(gameLogic.totalCredits.ToString());
+				RefreshLalBet(gameLogic.currentBet.ToString());
             }
         }
         else
@@ -400,18 +408,20 @@ public class MainUILogic : MonoBehaviour
             //Choose Effect
             if (vfRoot != null && ceRoot != null)
             {
+				int betValue = 0;
+				ClearAllEvent(null);
                 foreach (BetInfo info in lastRecord.bets)
                 {
                     if (info.betField == "00" && fields37.activeSelf)
                         continue;
 
-                    string prefabPath = "SmallChip/SC" + curChipIdx;
+                    string prefabPath = "SmallChip/SC0";
                     Transform target;
                     int fieldName;
                     string name = info.betField;
                     if (int.TryParse(info.betField, out fieldName) || string.Equals(info.betField, "00"))
                     {
-                        prefabPath = "BigChip/BC" + curChipIdx;
+                        prefabPath = "BigChip/BC0";
                         name = "e" + name;
                         target = ceRoot.transform.FindChild(name);
                     }
@@ -433,12 +443,16 @@ public class MainUILogic : MonoBehaviour
                         chip.transform.localPosition = targetPos;
                         chip.transform.GetChild(0).GetComponent<Text>().text = info.betValue.ToString();
                         chip.name = name;
-                        gameLogic.totalCredits -= info.betValue;
+						betValue += info.betValue;
+						gameLogic.betFields.Add(info.betField, info.betValue);
                     }
                 }
+				gameLogic.totalCredits -= betValue;
+				gameLogic.currentBet += betValue;
+				RefreshLalCredits(gameLogic.totalCredits.ToString());
+				RefreshLalBet(gameLogic.currentBet.ToString());
             }
         }
-
     }
 
 	public void FieldDownEvent(Transform hitObject)

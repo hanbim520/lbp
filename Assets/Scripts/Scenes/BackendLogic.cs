@@ -571,7 +571,7 @@ public class BackendLogic : MonoBehaviour
         }
         if (autoDisappear)
         {
-            timerHideWarning = new Timer(3, 0);
+            timerHideWarning = new Timer(1.5f, 0);
             timerHideWarning.Tick += HideWarning;
             timerHideWarning.Start();
         }

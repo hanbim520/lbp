@@ -8,9 +8,6 @@ public class ClientLogic : GameLogic
 
     private UClient client;
 
-    // Field -- Bet
-    private Dictionary<int, int> betFields = new Dictionary<int, int>();
-
 	protected override void Start()
 	{
         base.Start();
@@ -117,9 +114,9 @@ public class ClientLogic : GameLogic
 
     private void ResponseBet(ref string[] words)
     {
-        int field;
+		string field = words[1];
         int betVal;
-        if (int.TryParse(words[1], out field) && int.TryParse(words[2], out betVal))
+        if (int.TryParse(words[2], out betVal))
         {
             if (betFields.ContainsKey(field))
             {

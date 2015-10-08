@@ -35,7 +35,8 @@ public class GameLogic : MonoBehaviour
 	protected bool isPause = false;
 	protected int gamePhase = GamePhase.GameEnd;
 	protected int ballValue = -1;
-
+	// Field -- Bet
+	public Dictionary<string, int> betFields = new Dictionary<string, int>();
 
     // 断电重启恢复
     protected void FixExitAbnormally()

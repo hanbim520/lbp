@@ -10,8 +10,6 @@ public class ServerLogic : GameLogic
     private float longPressTime = 3;
     private bool bLoadBackend = false;
 	private UHost host;
-	// Field -- Bet
-	private Dictionary<string, int> betFields = new Dictionary<string, int>();
 
     // Current round variables
     private int redFieldVal = 0;
@@ -158,8 +156,7 @@ public class ServerLogic : GameLogic
 		int time = GameData.GetInstance().gameDifficulty + Random.Range(1200, 1500);
 		hidUtils.BlowBall(time);
 		if (GameData.debug)
-//			StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
-			StartCoroutine(SimulateBallValue(16));
+			StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
     }
 
 	// 模拟收到球的号码
@@ -387,6 +384,10 @@ public class ServerLogic : GameLogic
 
 	private void Clear(string fieldName)
 	{
+		if (string.Equals(fieldName.Substring(0, 1), "e"))
+		{
+			fieldName = fieldName.Substring(1);
+		}
 		if (betFields.ContainsKey(fieldName))
 		{
 			totalCredits += betFields[fieldName];
