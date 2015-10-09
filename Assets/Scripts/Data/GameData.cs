@@ -103,6 +103,18 @@ public class GameData
 		set { nextLevelName = value; }
 	}
 
+	private int isCardMode = 0; // 0:false 1:ready 2:true
+	public int IsCardMode
+	{
+		get { return isCardMode; }
+		set 
+		{
+			isCardMode = value;
+			PlayerPrefs.SetInt("isCardMode", isCardMode);
+			PlayerPrefs.Save();
+		}
+	}
+
 	private GameData()
 	{
 		deviceId = PlayerPrefs.GetString("deviceId", string.Empty);
@@ -235,6 +247,7 @@ public class GameData
 		displayType = 0;	// classic
 		systemPassword = "888888";
 		accountPassword = "888888";
+		isCardMode = CardMode.NO;
 	}
 
 	public void SaveCustom()
@@ -244,6 +257,7 @@ public class GameData
 		CryptoPrefs.Save();
 		PlayerPrefs.SetInt("language", language);
 		PlayerPrefs.SetInt("displayType", displayType);
+		PlayerPrefs.SetInt("isCardMode", isCardMode);
 		PlayerPrefs.Save();
 	}
 
@@ -347,6 +361,7 @@ public class GameData
 			displayType = PlayerPrefs.GetInt("displayType");
 			systemPassword = CryptoPrefs.GetString("systemPassword");
 			accountPassword = CryptoPrefs.GetString("accountPassword");
+			isCardMode = PlayerPrefs.GetInt("isCardMode");
         }
         ReadTouchMatrix();
         ReadRecords();

@@ -29,7 +29,8 @@ public class GameLogic : MonoBehaviour
 		get { return gamePhase; }
 	}
 
-    protected int _totalCredits = 10000;
+
+    protected int _totalCredits = 0;
 	protected int _currentBet = 0;
 	protected int _lastWin = 0;
 	protected bool isPause = false;

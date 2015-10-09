@@ -12,8 +12,10 @@ public class MainUILogic : MonoBehaviour
 	public GameObject fields38;
 	public GameObject backendTip;
 	public GameObject chooseBetEffect;
+	public GameObject cardEffect;
 	public GameObject dlgWarning;
     public GameObject dlgCard;
+	public GameObject[] cardExplains;
 
 	public int CurChipIdx
 	{
@@ -88,6 +90,23 @@ public class MainUILogic : MonoBehaviour
 		}
 		GameData.GetInstance().SaveLanguage();
 		SetLanguage();
+		// 设置优惠卡效果
+		if (GameData.GetInstance().IsCardMode != CardMode.NO)
+		{
+			cardExplains[0].SetActive(false);
+			cardExplains[1].SetActive(false);
+			if (cardEffect != null) cardEffect.SetActive(true);
+			if (setEN.activeSelf) setEN.transform.GetChild(4).GetChild(0).gameObject.SetActive(true);
+			if (setCN.activeSelf) setCN.transform.GetChild(4).GetChild(0).gameObject.SetActive(true);
+		}
+		else
+		{
+			cardExplains[0].SetActive(false);
+			cardExplains[1].SetActive(false);
+			if (cardEffect != null) cardEffect.SetActive(false);
+			if (setEN.activeSelf) setEN.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
+			if (setCN.activeSelf) setCN.transform.GetChild(4).GetChild(0).gameObject.SetActive(false);
+		}
 	}
 
 	public void SetLanguage()
@@ -454,6 +473,44 @@ public class MainUILogic : MonoBehaviour
             }
         }
     }
+
+	// 优惠卡按钮
+	public void CardButtonEvent(Transform hitObject)
+	{
+		if (gameLogic.totalCredits > 0 ||
+		    GameData.GetInstance().IsCardMode == CardMode.YES)
+			return;
+
+		if (GameData.GetInstance().IsCardMode == CardMode.NO)
+		{
+			if (GameData.GetInstance().language == 0)
+			{
+				cardExplains[0].SetActive(true);
+				cardExplains[1].SetActive(false);
+			}
+			else
+			{
+				cardExplains[0].SetActive(false);
+				cardExplains[1].SetActive(true);
+			}
+			if (cardEffect != null) cardEffect.SetActive(true);
+			hitObject.GetChild(0).gameObject.SetActive(true);
+			GameData.GetInstance().IsCardMode = CardMode.Ready;
+		}
+		else if (GameData.GetInstance().IsCardMode == CardMode.Ready)
+		{
+			GameData.GetInstance().IsCardMode = CardMode.NO;
+			cardExplains[0].SetActive(false);
+			cardExplains[1].SetActive(false);
+			if (cardEffect != null) cardEffect.SetActive(false);
+			hitObject.GetChild(0).gameObject.SetActive(false);
+		}
+	}
+
+	public void CardExplainUpEvent(Transform hitObject)
+	{
+		hitObject.gameObject.SetActive(false);
+	}
 
 	public void FieldDownEvent(Transform hitObject)
 	{

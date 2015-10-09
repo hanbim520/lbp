@@ -83,3 +83,10 @@ public struct Scenes
     public static string Backend = "Backend";
 	public static string Last10 = "LastTen";
 }
+
+public struct CardMode
+{
+	public static int YES = 2;
+	public static int Ready = 1;
+	public static int NO = 0;
+}
