@@ -85,12 +85,18 @@ public class CardDlg : MonoBehaviour
 	private void System()
 	{
 		if (GameData.GetInstance().deviceIndex > 1)
+		{
+			// TODO: Client
 			return;
-
-		passwordMode = true;
-		passwordType = 1;
-		int idx = GameData.GetInstance().language;
-		SetCalcTitle(strSysPassword[idx], Color.black);
+		}
+		else
+		{
+			// Host
+			passwordMode = true;
+			passwordType = 1;
+			int idx = GameData.GetInstance().language;
+			SetCalcTitle(strSysPassword[idx], Color.black);
+		}
 	}
 
 	private void Last10()

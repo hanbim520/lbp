@@ -17,7 +17,11 @@ public class GameLogic : MonoBehaviour
     public int currentBet
 	{
 		get { return _currentBet; }
-		set { _currentBet = value; }
+		set 
+		{ 
+			_currentBet = value;
+			SaveCurrentBet();
+		}
 	}
     public int lastWin
 	{
@@ -56,9 +60,14 @@ public class GameLogic : MonoBehaviour
     public void SaveTotalCredits()
     {
         PlayerPrefs.SetInt("totalCredits", _totalCredits);
-        PlayerPrefs.SetInt("currentBet", currentBet);
         PlayerPrefs.Save();
     }
+
+	public void SaveCurrentBet()
+	{
+        PlayerPrefs.SetInt("currentBet", _currentBet);
+		PlayerPrefs.Save();
+	}
 
 	protected virtual void Awake()
 	{
@@ -94,11 +103,22 @@ public class GameLogic : MonoBehaviour
 	// 上分/下分
     protected void ModifyCredits(int delta)
     {
+		if (delta > 0 && GameData.GetInstance().IsCardMode != CardMode.NO)
+		{
+			delta = delta + Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * delta);
+		}
+		if (GameData.GetInstance().IsCardMode == CardMode.Ready &&
+		    delta > 0)
+		{
+			GameData.GetInstance().IsCardMode = CardMode.YES;
+		}
+
         _totalCredits += delta;
         if (_totalCredits < 0)
         {
             _totalCredits = 0;
         }
+		SaveTotalCredits();
     }
 
     protected void ClearAll()

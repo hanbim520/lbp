@@ -477,12 +477,15 @@ public class MainUILogic : MonoBehaviour
 	// 优惠卡按钮
 	public void CardButtonEvent(Transform hitObject)
 	{
-		if (gameLogic.totalCredits > 0 ||
-		    GameData.GetInstance().IsCardMode == CardMode.YES)
+		if (GameData.GetInstance().IsCardMode == CardMode.YES)
+		{
 			return;
+		}
 
 		if (GameData.GetInstance().IsCardMode == CardMode.NO)
 		{
+			GameData.GetInstance().IsCardMode = CardMode.Ready;
+			// Explain
 			if (GameData.GetInstance().language == 0)
 			{
 				cardExplains[0].SetActive(true);
@@ -493,17 +496,23 @@ public class MainUILogic : MonoBehaviour
 				cardExplains[0].SetActive(false);
 				cardExplains[1].SetActive(true);
 			}
+			// Effect
 			if (cardEffect != null) cardEffect.SetActive(true);
+			// Blue button
 			hitObject.GetChild(0).gameObject.SetActive(true);
-			GameData.GetInstance().IsCardMode = CardMode.Ready;
 		}
 		else if (GameData.GetInstance().IsCardMode == CardMode.Ready)
 		{
 			GameData.GetInstance().IsCardMode = CardMode.NO;
+			// Disable explain
 			cardExplains[0].SetActive(false);
 			cardExplains[1].SetActive(false);
+			// Disable effect
 			if (cardEffect != null) cardEffect.SetActive(false);
+			// Normal button
 			hitObject.GetChild(0).gameObject.SetActive(false);
+			// White credit
+			lblCredit.color = Color.white;
 		}
 	}
 
@@ -818,11 +827,19 @@ public class MainUILogic : MonoBehaviour
         int credit;
         if (int.TryParse(strCredit, out credit))
         {
+			if (delta > 0 && GameData.GetInstance().IsCardMode != CardMode.NO)
+			{
+				delta = delta + Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * delta);
+			}
             credit += delta;
             if (credit < 0)
                 credit = 0;
         }
         lblCredit.text = credit.ToString();
+		if (GameData.GetInstance().IsCardMode != CardMode.NO)
+			lblCredit.color = Color.red;
+		else
+			lblCredit.color = Color.white;
     }
 
 	public void RefreshLblWin(string str)

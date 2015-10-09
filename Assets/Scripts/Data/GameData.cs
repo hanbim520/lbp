@@ -125,7 +125,7 @@ public class GameData
 			PlayerPrefs.Save();
 		}
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
-		deviceIndex = 1;
+//		deviceIndex = 1;
 
         colorTable.Add(37, ResultType.Green);    // 37: 00
 		colorTable.Add(0, ResultType.Green);
@@ -523,4 +523,10 @@ public class GameData
         CryptoPrefs.SetString("accountPassword", accountPassword);
         CryptoPrefs.Save();
     }
+
+	public void SaveDeviceIndex()
+	{
+		PlayerPrefs.SetInt("deviceIndex", deviceIndex);
+		PlayerPrefs.Save();
+	}
 }

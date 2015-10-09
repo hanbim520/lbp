@@ -11,6 +11,7 @@ public class BackendLogic : MonoBehaviour
     public GameObject dlgPassword;
     public GameObject dlgYesNO;
     public GameObject warning;
+	public Text[] deviceId;	// 机台序号 0:en 1:cn
 
     private RectTransform mouseIcon;
     private GameObject downHitObject;
@@ -34,6 +35,7 @@ public class BackendLogic : MonoBehaviour
     private string[] strCorrect = new string[]{"Correct!", "输入正确!"};
     private string[] strError = new string[]{"Error!", "输入错误!"};
 	private string[] strAccountPassword = new string[]{"Input Account Password", "请输入账户密码"};
+	private string[] strDeviceId = new string[]{"Device Id", "请输入设备Id"};
 
     void Start()
     {
@@ -216,6 +218,13 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().NextLevelName = Scenes.Main;
             Application.LoadLevel(Scenes.Loading);
 		}
+		else if (string.Equals(name, "device2 id"))
+		{
+			dlgCalc.SetActive(true);
+			dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
+			calcTitle.text = strDeviceId[GameData.GetInstance().language];
+			passwordMode = 0;
+		}
     }
 
     public void DlgPasswordDownEvent(Transform hitObject)
@@ -248,6 +257,13 @@ public class BackendLogic : MonoBehaviour
         menuAccount.SetActive(false);
 		dlgCalc.SetActive(false);
         SetLanguage(menuMain);
+
+		// Device id
+		int idx = GameData.GetInstance().language;
+		if (GameData.GetInstance().deviceIndex <= 0)
+			deviceId[idx].text = string.Empty;
+		else
+			deviceId[idx].text = GameData.GetInstance().deviceIndex.ToString();
     }
 
     private void InitSetting()
@@ -463,7 +479,8 @@ public class BackendLogic : MonoBehaviour
 		}
         else
         {
-            if (preSelected != null)
+			// Set setting-menu item
+			if (preSelected != null)
             {
                 Transform target = preSelected.FindChild("Text");
                 if (target != null)
@@ -479,6 +496,22 @@ public class BackendLogic : MonoBehaviour
                     }
                 }
             }
+			else
+			{
+				// Set device index
+				int value;
+				if (int.TryParse(calcContent.text, out value))
+				{
+					if (value == 0)
+						deviceId[GameData.GetInstance().language].text = string.Empty;
+					else
+					{
+						deviceId[GameData.GetInstance().language].text = value.ToString();
+						GameData.GetInstance().deviceIndex = value;
+						GameData.GetInstance().SaveDeviceIndex();
+					}
+				}
+			}
         }
     }
 
