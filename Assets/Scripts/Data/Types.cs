@@ -90,3 +90,13 @@ public struct CardMode
 	public static int Ready = 1;
 	public static int NO = 0;
 }
+
+// 时间 上下分 投退币
+public struct KeyinKeoutRecord
+{
+    public string time; // 201510102319
+    public int keyin;
+    public int keout;
+    public int toubi;
+    public int tuibi;
+}
