@@ -4,12 +4,7 @@ using System.Collections;
 
 public class RecordBarText : MonoBehaviour
 {
-	private Image bar;
-
-	void Start()
-	{
-		bar = transform.parent.GetComponent<Image>();
-	}
+	public Image bar;
 
 	public void Refresh(int persentage)
 	{
@@ -20,9 +15,6 @@ public class RecordBarText : MonoBehaviour
 			GetComponent<Text>().text = string.Empty;
 			return;
 		}
-
-		if (bar == null)
-			bar = transform.parent.GetComponent<Image>();
 
 		float fillAccount = bar.fillAmount;
 		float parentWidth = transform.parent.GetComponent<RectTransform>().rect.width;

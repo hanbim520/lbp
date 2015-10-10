@@ -6,10 +6,12 @@ public class CardDlg : MonoBehaviour
 {
 	public GameObject cn;
 	public GameObject en;
+	public GameObject calc;
     public Transform mouseIcon;
 	public Text calcTitle;
 	public Text calcContent;
 	public Text calcPassword;
+
 	private bool previousInputState;
 	private bool passwordMode;
 	private int passwordType; // 0:none 1:system
@@ -36,11 +38,52 @@ public class CardDlg : MonoBehaviour
 		}
 		previousInputState = InputEx.inputEnable;
 		InputEx.inputEnable = true;
+		DisalbeCalc();
 	}
 
 	void OnDisenable()
 	{
 		InputEx.inputEnable = previousInputState;
+	}
+
+	private void DisalbeCalc()
+	{
+		calc.SetActive(false);
+		if (cn.activeSelf)
+		{
+			int count = cn.transform.childCount;
+			for (int i = 0; i < count; ++i)
+				cn.transform.GetChild(i).gameObject.SetActive(false);
+		}
+		if (en.activeSelf)
+		{
+			int count = en.transform.childCount;
+			for (int i = 0; i < count; ++i)
+				en.transform.GetChild(i).gameObject.SetActive(false);
+		}
+	}
+
+	private void EnableCalc()
+	{
+		calc.SetActive(true);
+		if (GameData.GetInstance().language == 0)
+		{
+			if (en.activeSelf)
+			{
+				int count = en.transform.childCount;
+				for (int i = 0; i < count; ++i)
+					en.transform.GetChild(i).gameObject.SetActive(true);
+			}
+		}
+		else
+		{
+			if (cn.activeSelf)
+			{
+				int count = cn.transform.childCount;
+				for (int i = 0; i < count; ++i)
+					cn.transform.GetChild(i).gameObject.SetActive(true);
+			}
+		}
 	}
 
 	public void FieldUpEvent(Transform hitObject)
@@ -72,14 +115,15 @@ public class CardDlg : MonoBehaviour
 
 	private void Keyin()
 	{
+		EnableCalc();
 		int idx = GameData.GetInstance().language;
 		SetCalcTitle(strKeyin[idx], Color.black);
 	}
 
 	private void Keout()
 	{
-		int idx = GameData.GetInstance().language;
-		SetCalcTitle(strkeout[idx], Color.black);
+		DisalbeCalc();
+		GameEventManager.OnKeout();
 	}
 
 	private void System()
@@ -87,11 +131,13 @@ public class CardDlg : MonoBehaviour
 		if (GameData.GetInstance().deviceIndex > 1)
 		{
 			// TODO: Client
+			DisalbeCalc();
 			return;
 		}
 		else
 		{
 			// Host
+			EnableCalc();
 			passwordMode = true;
 			passwordType = 1;
 			int idx = GameData.GetInstance().language;
@@ -107,7 +153,7 @@ public class CardDlg : MonoBehaviour
 
 	private void Account()
 	{
-
+		DisalbeCalc();
 	}
 
 	public void CalcDownEvent(Transform hitObject)
@@ -201,16 +247,7 @@ public class CardDlg : MonoBehaviour
                     int value;
                     if (int.TryParse(calcContent.text, out value))
                     {
-                        GameEventManager.OnModifyCredits(value);
-                    }
-                    calcContent.text = string.Empty;
-				}
-				else if (string.Equals(preSelected.name, "keout"))
-				{
-                    int value;
-                    if (int.TryParse(calcContent.text, out value))
-                    {
-                        GameEventManager.OnModifyCredits(-value);
+                        GameEventManager.OnKeyin(value);
                     }
                     calcContent.text = string.Empty;
 				}

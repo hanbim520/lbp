@@ -25,6 +25,7 @@ public class MainUILogic : MonoBehaviour
     private Text lblCredit;
     private Text lblWin;
     private Text lblBet;
+	private Text lblRemember;
 
 	private GameObject displayClassic;
 	private GameObject displayEllipse;
@@ -55,13 +56,11 @@ public class MainUILogic : MonoBehaviour
 
     private void RegisterEvents()
     {
-        GameEventManager.ModifyCredits += ModifyCredits;
 		GameEventManager.CloseGate += StopFlash;
     }
 
     private void UnregisterEvents()
     {
-        GameEventManager.ModifyCredits -= ModifyCredits;
 		GameEventManager.CloseGate -= StopFlash;
     }
 
@@ -76,6 +75,9 @@ public class MainUILogic : MonoBehaviour
         lblCredit = GameObject.Find("Canvas/Credit/Credit").GetComponent<Text>();
         lblWin = GameObject.Find("Canvas/Credit/Win").GetComponent<Text>();
         lblBet = GameObject.Find("Canvas/Credit/Bet").GetComponent<Text>();
+		lblRemember = GameObject.Find("Canvas/Credit/Remember").GetComponent<Text>();
+
+		countdown.transform.FindChild("Text").GetComponent<Text>().text = GameData.GetInstance().betTimeLimit.ToString();
 	}
 
 	public void ChangeLanguage(Transform hitObject)
@@ -409,8 +411,8 @@ public class MainUILogic : MonoBehaviour
                 }
 				gameLogic.totalCredits -= betValue;
 				gameLogic.currentBet += betValue;
-				RefreshLalCredits(gameLogic.totalCredits.ToString());
-				RefreshLalBet(gameLogic.currentBet.ToString());
+				RefreshLblCredits(gameLogic.totalCredits.ToString());
+				RefreshLblBet(gameLogic.currentBet.ToString());
             }
         }
         else
@@ -468,8 +470,8 @@ public class MainUILogic : MonoBehaviour
                 }
 				gameLogic.totalCredits -= betValue;
 				gameLogic.currentBet += betValue;
-				RefreshLalCredits(gameLogic.totalCredits.ToString());
-				RefreshLalBet(gameLogic.currentBet.ToString());
+				RefreshLblCredits(gameLogic.totalCredits.ToString());
+				RefreshLblBet(gameLogic.currentBet.ToString());
             }
         }
     }
@@ -500,6 +502,8 @@ public class MainUILogic : MonoBehaviour
 			if (cardEffect != null) cardEffect.SetActive(true);
 			// Blue button
 			hitObject.GetChild(0).gameObject.SetActive(true);
+			// Red credit
+			lblCredit.color = Color.red;
 		}
 		else if (GameData.GetInstance().IsCardMode == CardMode.Ready)
 		{
@@ -513,7 +517,49 @@ public class MainUILogic : MonoBehaviour
 			hitObject.GetChild(0).gameObject.SetActive(false);
 			// White credit
 			lblCredit.color = Color.white;
+			// Clear remember credits
+			lblRemember.text = string.Empty;
 		}
+	}
+
+	public void RecoverCardMode()
+	{
+		// Explain
+		if (GameData.GetInstance().language == 0)
+		{
+			// Blue button
+			GameObject.Find("Canvas/Buttons/EN/Card EN").transform.GetChild(0).gameObject.SetActive(true);
+			cardExplains[0].SetActive(true);
+			cardExplains[1].SetActive(false);
+		}
+		else
+		{
+			// Blue button
+			GameObject.Find("Canvas/Buttons/CN/Card CN").transform.GetChild(0).gameObject.SetActive(true);
+			cardExplains[0].SetActive(false);
+			cardExplains[1].SetActive(true);
+		}
+		// Effect
+		if (cardEffect != null) cardEffect.SetActive(true);
+		// Red credit
+		lblCredit.color = Color.red;
+	}
+
+	public void DisableCardMode()
+	{
+		GameData.GetInstance().IsCardMode = CardMode.NO;
+		// Normal button
+		GameObject.Find("Canvas/Buttons/EN/Card EN").transform.GetChild(0).gameObject.SetActive(false);
+		GameObject.Find("Canvas/Buttons/CN/Card CN").transform.GetChild(0).gameObject.SetActive(false);
+		// Disable explain
+		cardExplains[0].SetActive(false);
+		cardExplains[1].SetActive(false);
+		// Disable effect
+		if (cardEffect != null) cardEffect.SetActive(false);
+		// White credit
+		lblCredit.color = Color.white;
+		// Clear remember credits
+		lblRemember.text = string.Empty;
 	}
 
 	public void CardExplainUpEvent(Transform hitObject)
@@ -586,7 +632,9 @@ public class MainUILogic : MonoBehaviour
         {
             strField = strField.Substring(1);
         }
-		GameEventManager.OnFieldClick(strField, bet);
+		bet = GameEventManager.OnFieldClick(strField, bet);
+		if (bet <= 0)
+			return;
 
 		string prefabPath = "BigChip/BC";
         if (string.Equals(hitObject.parent.name, "Valid Fields") && 
@@ -821,39 +869,23 @@ public class MainUILogic : MonoBehaviour
 		dlgCard.SetActive(active);
 	}
 
-    private void ModifyCredits(int delta)
-    {
-        string strCredit = lblCredit.text;
-        int credit;
-        if (int.TryParse(strCredit, out credit))
-        {
-			if (delta > 0 && GameData.GetInstance().IsCardMode != CardMode.NO)
-			{
-				delta = delta + Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * delta);
-			}
-            credit += delta;
-            if (credit < 0)
-                credit = 0;
-        }
-        lblCredit.text = credit.ToString();
-		if (GameData.GetInstance().IsCardMode != CardMode.NO)
-			lblCredit.color = Color.red;
-		else
-			lblCredit.color = Color.white;
-    }
-
 	public void RefreshLblWin(string str)
 	{
 		lblWin.text = str;
 	}
 
-	public void RefreshLalCredits(string str)
+	public void RefreshLblCredits(string str)
 	{
 		lblCredit.text = str;
 	}
 
-	public void RefreshLalBet(string str)
+	public void RefreshLblBet(string str)
 	{
 		lblBet.text = str;
+	}
+
+	public void RefreshLblRemember(string str)
+	{
+		lblRemember.text = str;
 	}
 }

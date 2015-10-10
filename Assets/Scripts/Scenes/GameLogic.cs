@@ -28,6 +28,15 @@ public class GameLogic : MonoBehaviour
 		get { return _lastWin; }
 		set { _lastWin = value; }
 	}
+	public int rememberCredits
+	{
+		get { return _rememberCredits; }
+		set 
+		{
+			_rememberCredits = value;
+			SaveRememberCredits();
+		} 
+	}
 	public int LogicPhase
 	{
 		get { return gamePhase; }
@@ -37,6 +46,7 @@ public class GameLogic : MonoBehaviour
     protected int _totalCredits = 0;
 	protected int _currentBet = 0;
 	protected int _lastWin = 0;
+	protected int _rememberCredits = 0;
 	protected bool isPause = false;
 	protected int gamePhase = GamePhase.GameEnd;
 	protected int ballValue = -1;
@@ -48,24 +58,48 @@ public class GameLogic : MonoBehaviour
     protected void FixExitAbnormally()
     {
         int lastBet = PlayerPrefs.GetInt("currentBet", 0);
+        _totalCredits = PlayerPrefs.GetInt("totalCredits");
         if (lastBet > 0)
         {
-            _totalCredits = PlayerPrefs.GetInt("totalCredits", 0);
             _totalCredits += lastBet;
             currentBet = 0;
-            SaveTotalCredits();
         }
+        SaveTotalCredits();
+		ui.RefreshLblCredits(totalCredits.ToString());
+		ui.RefreshLblWin("0");
+		ui.RefreshLblBet("0");
+
+		// Recover remember credits
+		_rememberCredits = PlayerPrefs.GetInt("rememberCredits");
+		if (rememberCredits > 0)
+			ui.RefreshLblRemember(rememberCredits.ToString());
+		else
+			ui.RefreshLblRemember(string.Empty);
+
+		// Recover card mode ui
+		if (GameData.GetInstance().IsCardMode == CardMode.YES && totalCredits == 0)
+			GameData.GetInstance().IsCardMode = CardMode.Ready;
+		if (GameData.GetInstance().IsCardMode != CardMode.NO)
+		{
+			ui.RecoverCardMode();
+		}
     }
 
     public void SaveTotalCredits()
     {
-        PlayerPrefs.SetInt("totalCredits", _totalCredits);
+        PlayerPrefs.SetInt("totalCredits", totalCredits);
         PlayerPrefs.Save();
     }
 
 	public void SaveCurrentBet()
 	{
-        PlayerPrefs.SetInt("currentBet", _currentBet);
+        PlayerPrefs.SetInt("currentBet", currentBet);
+		PlayerPrefs.Save();
+	}
+
+	public void SaveRememberCredits()
+	{
+		PlayerPrefs.SetInt("rememberCredits", rememberCredits);
 		PlayerPrefs.Save();
 	}
 
@@ -76,6 +110,7 @@ public class GameLogic : MonoBehaviour
 
     protected virtual void Start()
     {
+		FixExitAbnormally();
         RegisterEvents();
     }
 
@@ -86,7 +121,8 @@ public class GameLogic : MonoBehaviour
 
     private void RegisterEvents()
     {
-        GameEventManager.ModifyCredits += ModifyCredits;
+        GameEventManager.Keyin += Keyin;
+		GameEventManager.Keout += Keout;
         GameEventManager.ClearAll += ClearAll;
         GameEventManager.Clear += Clear;
         GameEventManager.CleanAll += CleanAll;
@@ -94,31 +130,70 @@ public class GameLogic : MonoBehaviour
 
     private void UnregisterEvents()
     {
-        GameEventManager.ModifyCredits -= ModifyCredits;
+        GameEventManager.Keyin -= Keyin;
+		GameEventManager.Keout -= Keout;
         GameEventManager.ClearAll -= ClearAll;
         GameEventManager.Clear -= Clear;
         GameEventManager.CleanAll -= CleanAll;
     }
 
-	// 上分/下分
-    protected void ModifyCredits(int delta)
-    {
-		if (delta > 0 && GameData.GetInstance().IsCardMode != CardMode.NO)
+	// 下分
+	protected void Keout()
+	{
+		if (GameData.GetInstance().IsCardMode == CardMode.YES)
 		{
-			delta = delta + Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * delta);
-		}
-		if (GameData.GetInstance().IsCardMode == CardMode.Ready &&
-		    delta > 0)
-		{
-			GameData.GetInstance().IsCardMode = CardMode.YES;
+			int couponsKeout = GameData.GetInstance().couponsKeoutRatio * rememberCredits;
+			if (totalCredits < couponsKeout)
+				return;
+
+			GameData.GetInstance().IsCardMode = CardMode.NO;
+			ui.DisableCardMode();
 		}
 
-        _totalCredits += delta;
-        if (_totalCredits < 0)
-        {
-            _totalCredits = 0;
-        }
-		SaveTotalCredits();
+		totalCredits = 0;
+		ui.RefreshLblCredits(totalCredits.ToString());
+	}
+
+	// 上分
+    protected void Keyin(int delta)
+    {
+		if (delta <= 0)
+			return;
+
+		if (GameData.GetInstance().IsCardMode == CardMode.Ready)
+		{
+			int temp = _totalCredits + delta;
+			if (temp >= GameData.GetInstance().couponsStart)
+			{
+				GameData.GetInstance().IsCardMode = CardMode.YES;
+				temp += Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * temp);
+				totalCredits = temp;
+				rememberCredits = totalCredits;
+			}
+			else
+			{
+				rememberCredits = 0;
+				totalCredits = temp;
+			}
+			ui.RefreshLblCredits(totalCredits.ToString());
+			ui.RefreshLblRemember(rememberCredits.ToString());
+		}
+		else if (GameData.GetInstance().IsCardMode == CardMode.YES)
+		{
+			delta = delta + Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * delta);
+			rememberCredits = rememberCredits + delta;
+			totalCredits = totalCredits + delta;
+
+			ui.RefreshLblCredits(totalCredits.ToString());
+			ui.RefreshLblRemember(rememberCredits.ToString());
+		}
+		else
+		{
+			totalCredits += delta;
+			rememberCredits = 0;
+			ui.RefreshLblCredits(totalCredits.ToString());
+			ui.RefreshLblRemember(string.Empty);
+		}
     }
 
     protected void ClearAll()
@@ -129,8 +204,8 @@ public class GameLogic : MonoBehaviour
         }
         currentBet = 0;
         betFields.Clear();
-        ui.RefreshLalCredits(totalCredits.ToString());
-        ui.RefreshLalBet(currentBet.ToString());
+        ui.RefreshLblCredits(totalCredits.ToString());
+        ui.RefreshLblBet(currentBet.ToString());
     }
     
     protected void Clear(string fieldName)
@@ -145,8 +220,8 @@ public class GameLogic : MonoBehaviour
             currentBet -= betFields[fieldName];
             betFields.Remove(fieldName);
         }
-        ui.RefreshLalCredits(totalCredits.ToString());
-        ui.RefreshLalBet(currentBet.ToString());
+        ui.RefreshLblCredits(totalCredits.ToString());
+        ui.RefreshLblBet(currentBet.ToString());
     }
 
     protected void CleanAll()

@@ -9,10 +9,10 @@ public static class GameEventManager
 	public delegate void FingerEvent(UInt16 x, UInt16 y);
 	public delegate void SerialMouseMoveEvent(sbyte deltaX, sbyte deltaY);
 	public delegate void SerialMouseButtonEvent();
-    public delegate void FieldClickEvent(string fieldName, int bet);
+    public delegate int FieldClickEvent(string fieldName, int bet);
     public delegate void ClearEvent(string fieldName);
 	public delegate void BallValueEvent(int ballValue);
-    public delegate void ModifyCreditsEvent(int delta);
+    public delegate void KeyinEvent(int delta);
     public delegate void NetworkReadyEvent(bool value);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
@@ -25,7 +25,8 @@ public static class GameEventManager
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
     public static event RefreshRecordEvent RefreshRecord;
     public static event FieldClickEvent FieldClick;
-	public static event ModifyCreditsEvent ModifyCredits;	// 上分/下分
+	public static event KeyinEvent Keyin;	// 上分
+	public static event GameEvent Keout;
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
@@ -100,9 +101,11 @@ public static class GameEventManager
         if (RefreshRecord != null) RefreshRecord(result);
     }
 
-    public static void OnFieldClick(string fieldName, int bet)
+    public static int OnFieldClick(string fieldName, int bet)
     {
-        if (FieldClick != null) FieldClick(fieldName, bet);
+        if (FieldClick != null) 
+			return FieldClick(fieldName, bet);
+		return 0;
     }
 
 	// 清除桌面筹码 不返还给玩家
@@ -162,9 +165,15 @@ public static class GameEventManager
 		if (HIDDisconnected != null) HIDDisconnected();
 	}
 
-	// 上分/下分
-    public static void OnModifyCredits(int delta)
+	// 上分
+    public static void OnKeyin(int delta)
     {
-        if (ModifyCredits != null) ModifyCredits(delta);
+        if (Keyin != null) Keyin(delta);
     }
+
+	// 下分
+	public static void OnKeout()
+	{
+		if (Keout != null) Keout();
+	}
 }

@@ -99,6 +99,8 @@ public class RecordBar : MonoBehaviour
 		int b = 100 - r - g;
 		imgRed.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(r);
 		imgBlue.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(b);
-		imgGreen.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(g);
+//		imgGreen.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(g);
+		// Refresh green text
+		imgRed.transform.GetChild(1).GetComponent<RecordBarText>().Refresh(g);
     }
 }

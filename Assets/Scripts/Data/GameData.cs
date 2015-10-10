@@ -125,7 +125,7 @@ public class GameData
 			PlayerPrefs.Save();
 		}
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
-//		deviceIndex = 1;
+		deviceIndex = 1;
 
         colorTable.Add(37, ResultType.Green);    // 37: 00
 		colorTable.Add(0, ResultType.Green);
@@ -254,7 +254,6 @@ public class GameData
 	{
 		CryptoPrefs.SetString("systemPassword", systemPassword);
 		CryptoPrefs.SetString("accountPassword", accountPassword);
-		CryptoPrefs.Save();
 		PlayerPrefs.SetInt("language", language);
 		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.SetInt("isCardMode", isCardMode);

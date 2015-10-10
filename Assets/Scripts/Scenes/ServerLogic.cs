@@ -21,10 +21,6 @@ public class ServerLogic : GameLogic
     private void Init()
     {
         host = GetComponent<UHost>();
-        FixExitAbnormally();
-		ui.RefreshLalCredits(totalCredits.ToString());
-		ui.RefreshLblWin("0");
-		ui.RefreshLalBet("0");
     }
 
     protected override void Start() 
@@ -205,11 +201,13 @@ public class ServerLogic : GameLogic
 		AppendLast10(totalCredits, totalCredits + win, currentBet, win);
 		currentBet = 0;
 		totalCredits += win;
+		if (totalCredits <= 0)
+			ui.DisableCardMode();
 		
 		yield return new WaitForSeconds(5);
 
-		ui.RefreshLalBet("0");
-		ui.RefreshLalCredits(totalCredits.ToString());
+		ui.RefreshLblBet("0");
+		ui.RefreshLblCredits(totalCredits.ToString());
 		if (win > 0)
 			ui.RefreshLblWin(win.ToString());
 		else
@@ -322,17 +320,13 @@ public class ServerLogic : GameLogic
         return Mathf.Abs(minuend - subtrahend) <= maxVal;
     }
 
-    private void Bet(string field, int betVal)
+    private int Bet(string field, int betVal)
     {
-		 if (!InputEx.inputEnable)
-			return;
-
-        // TODO: 剩下的筹码小于最小押分
-        if (totalCredits <= 0 || totalCredits - betVal < 0)
-        {
-            DebugConsole.Log(Time.realtimeSinceStartup + ": totalCredits-" + totalCredits);
-            return;
-        }
+        if (totalCredits <= 0)
+            return 0;
+        // 剩下的筹码小于押分
+		if (totalCredits - betVal < 0)
+			betVal = totalCredits;
         
         string msg = NetInstr.Bet + ":" + field + ":" + betVal;
         char[] d = {':'};
@@ -353,9 +347,10 @@ public class ServerLogic : GameLogic
             }
 			currentBet += betVal;
 			totalCredits -= betVal;
-			ui.RefreshLalCredits(totalCredits.ToString());
-			ui.RefreshLalBet(currentBet.ToString());
+			ui.RefreshLblCredits(totalCredits.ToString());
+			ui.RefreshLblBet(currentBet.ToString());
         }
+		return betVal;
     }
 
 	private void HIDConnected()
