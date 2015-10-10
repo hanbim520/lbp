@@ -233,4 +233,41 @@ public static class Utils
             }
         }
     }
+
+	public static int GetOdds(string fieldName)
+	{
+		int odds = 0;
+		if (string.Equals(fieldName, "Even") ||
+		    string.Equals(fieldName, "odd") ||
+		    string.Equals(fieldName, "red") ||
+		    string.Equals(fieldName, "black") ||
+		    string.Equals(fieldName, "1to18") ||
+		    string.Equals(fieldName, "19to36"))
+		{
+			odds = 2;
+		}
+		else if (string.Equals(fieldName, "1st12") ||
+		         string.Equals(fieldName, "2nd12") ||
+		         string.Equals(fieldName, "3rd12") ||
+		         string.Equals(fieldName, "2to1 up") ||
+		         string.Equals(fieldName, "2to1 middle") ||
+		         string.Equals(fieldName, "2to1 down"))
+		{
+			odds = 3;
+		}
+		else
+		{
+			// Ellipse
+			if (string.Equals(fieldName.Substring(0, 1), "e"))
+				odds = 36;
+			else
+			{
+				// Classic
+				char[] separator = {'-'};
+				string[] fields = fieldName.Split(separator);
+				odds = 36 / fields.Length;
+			}
+		}
+		return odds;
+	}
 }

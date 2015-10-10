@@ -10,14 +10,6 @@ public class ServerLogic : GameLogic
     private bool bLoadBackend = false;
 	private UHost host;
 
-    // Current round variables
-    private int redFieldVal = 0;
-    private int blackFieldVal = 0;
-    private int evenFieldVal = 0;
-    private int oddFieldVal = 0;
-    private int bigFieldVal = 0;
-    private int smallFieldVal = 0;
-
     private void Init()
     {
         host = GetComponent<UHost>();
@@ -45,11 +37,8 @@ public class ServerLogic : GameLogic
     {
 		GameEventManager.GameStart += GameStart;
         GameEventManager.GameOver += GameOver;
-		GameEventManager.FieldClick += Bet;
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.BallValue += RecBallValue;
-		GameEventManager.HIDDisconnected += HIDDisconnected;
-		GameEventManager.HIDConnected += HIDConnected;
 		GameEventManager.CloseGate += CloseGate;
     }
 
@@ -57,11 +46,8 @@ public class ServerLogic : GameLogic
     {
 		GameEventManager.GameStart -= GameStart;
         GameEventManager.GameOver -= GameOver;
-		GameEventManager.FieldClick -= Bet;
 		GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.BallValue -= RecBallValue;
-		GameEventManager.HIDDisconnected -= HIDDisconnected;
-		GameEventManager.HIDConnected -= HIDConnected;
 		GameEventManager.CloseGate -= CloseGate;
     }
 
@@ -236,11 +222,13 @@ public class ServerLogic : GameLogic
 
     private void ClearVariables()
     {
-        blackFieldVal = 0;
-        evenFieldVal = 0;
-        redFieldVal = 0;
-        bigFieldVal = 0;
-        smallFieldVal = 0;
+        x2FieldVal = 0;
+        x3FieldVal = 0;
+        x6FieldVal = 0;
+        x9FieldVal = 0;
+        x12FieldVal = 0;
+        x18FieldVal = 0;
+        x36FieldVal = 0;
         ballValue = -1;
         betFields.Clear();
 		ui.StopFlash();
@@ -256,134 +244,14 @@ public class ServerLogic : GameLogic
         
         if (instr == NetInstr.Bet)
         {
-            LimitBet(ref words, connectionId);
+			// 限红
+//            LimitBet(ref words, connectionId);
         }
         else if (instr == NetInstr.GetGamePhase)
         {
             host.SendToPeer(NetInstr.GamePhase + ":" + gamePhase, connectionId);
         }
     }
-
-    private bool LimitBet(ref string[] words, int connectionId)
-    {
-//        int field;
-//        int bet;
-//        if (int.TryParse(words[1], out field) && int.TryParse(words[2], out bet))
-//        {
-//            if (field == Fields.Black &&
-//                CanBet(GameData.GetInstance().yanSeXianHong, blackFieldVal + bet, redFieldVal))
-//            {
-//                blackFieldVal += bet;
-//            }
-//            else if (field == Fields.Red &&
-//                     CanBet(GameData.GetInstance().yanSeXianHong, redFieldVal + bet, blackFieldVal))
-//            {
-//                redFieldVal += bet;
-//            }
-//            else if (field == Fields.Even &&
-//                     CanBet(GameData.GetInstance().danShuangXianHong, evenFieldVal + bet, oddFieldVal))
-//            {
-//                evenFieldVal += bet;
-//            }
-//            else if (field == Fields.Odd &&
-//                     CanBet(GameData.GetInstance().danShuangXianHong, oddFieldVal + bet, evenFieldVal))
-//            {
-//                oddFieldVal += bet;
-//            }
-//            else if (field == Fields.Big &&
-//                     CanBet(GameData.GetInstance().daXiaoXianHong, bigFieldVal + bet, smallFieldVal))
-//            {
-//                bigFieldVal += bet;
-//            }
-//            else if (field == Fields.Small &&
-//                     CanBet(GameData.GetInstance().daXiaoXianHong, smallFieldVal + bet, bigFieldVal))
-//            {
-//                smallFieldVal += bet;
-//            }
-//            else
-//            {
-//                if (connectionId > 0)
-//                    host.SendToPeer(NetInstr.LimitBet + ":" + field, connectionId);
-//                DebugConsole.Log(Time.realtimeSinceStartup + ": LimitBet" + " field-" + field + ", betVal-" + bet);
-//                return true;
-//            }
-//
-//            if (connectionId > 0)
-//                host.SendToPeer(NetInstr.NoLimitBet + ":" + field + ":" + bet, connectionId);
-//            DebugConsole.Log(Time.realtimeSinceStartup + ": NoLimitBet" + " field-" + field + ", betVal-" + bet);
-//        }
-        return false;
-    }
-
-    private bool CanBet(int maxVal, int minuend, int subtrahend)
-    {
-        return Mathf.Abs(minuend - subtrahend) <= maxVal;
-    }
-
-    private int Bet(string field, int betVal)
-    {
-        if (totalCredits <= 0)
-            return 0;
-        // 剩下的筹码小于押分
-		if (totalCredits - betVal < 0)
-			betVal = totalCredits;
-        
-        string msg = NetInstr.Bet + ":" + field + ":" + betVal;
-        char[] d = {':'};
-        string[] words = msg.Split(d);
-        if (LimitBet(ref words, -1))
-        {
-            DebugConsole.Log(Time.realtimeSinceStartup + ": " + msg);
-        }
-        else
-        {
-            if (betFields.ContainsKey(field))
-            {
-                betFields[field] += betVal;
-            }
-            else
-            {
-                betFields.Add(field, betVal);
-            }
-			currentBet += betVal;
-			totalCredits -= betVal;
-			ui.RefreshLblCredits(totalCredits.ToString());
-			ui.RefreshLblBet(currentBet.ToString());
-        }
-		return betVal;
-    }
-
-	private void HIDConnected()
-	{
-		if (!InputEx.inputEnable)
-		{
-			InputEx.inputEnable = true;
-		}
-
-		if (isPause)
-		{
-			isPause = false;
-			ui.HideWarning();
-		}
-	}
-
-	private void HIDDisconnected()
-	{
-		if (InputEx.inputEnable)
-		{
-			InputEx.inputEnable = false;
-		}
-
-		if (!isPause)
-		{
-			isPause = true;
-			ui.ClearAllEvent(null);
-			int language = 0;	// EN
-			if (GameData.GetInstance().language == 1)
-				language = 1;	// CN
-			ui.ShowWarning(Notifies.usbDisconnected[language]);
-		}
-	}
 
 	protected void AppendLast10(int startCredit, int endCredit, int bet, int win)
 	{

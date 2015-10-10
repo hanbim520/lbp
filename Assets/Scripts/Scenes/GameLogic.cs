@@ -50,6 +50,15 @@ public class GameLogic : MonoBehaviour
 	protected bool isPause = false;
 	protected int gamePhase = GamePhase.GameEnd;
 	protected int ballValue = -1;
+	// Current round variables
+	protected int x36FieldVal = 0;
+	protected int x18FieldVal = 0;
+	protected int x12FieldVal = 0;
+	protected int x9FieldVal = 0;
+	protected int x6FieldVal = 0;
+	protected int x3FieldVal = 0;
+	protected int x2FieldVal = 0;
+
 	// Field -- Bet
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
     public MainUILogic ui;
@@ -126,6 +135,9 @@ public class GameLogic : MonoBehaviour
         GameEventManager.ClearAll += ClearAll;
         GameEventManager.Clear += Clear;
         GameEventManager.CleanAll += CleanAll;
+		GameEventManager.FieldClick += Bet;
+		GameEventManager.HIDDisconnected += HIDDisconnected;
+		GameEventManager.HIDConnected += HIDConnected;
     }
 
     private void UnregisterEvents()
@@ -135,6 +147,9 @@ public class GameLogic : MonoBehaviour
         GameEventManager.ClearAll -= ClearAll;
         GameEventManager.Clear -= Clear;
         GameEventManager.CleanAll -= CleanAll;
+		GameEventManager.FieldClick -= Bet;
+		GameEventManager.HIDConnected -= HIDConnected;
+		GameEventManager.HIDDisconnected -= HIDDisconnected;
     }
 
 	// 下分
@@ -228,4 +243,113 @@ public class GameLogic : MonoBehaviour
     {
         betFields.Clear();
     }
+
+	// 限注
+	protected int CanBet(string field, int betVal)
+	{
+		int odds = Utils.GetOdds(field);
+		if (odds == 36)
+		{
+			betVal = MaxBet(GameData.GetInstance().max36Value, x36FieldVal, betVal);
+			x36FieldVal += betVal;
+		}
+		else if (odds == 18)
+		{
+			betVal = MaxBet(GameData.GetInstance().max18Value, x18FieldVal, betVal);
+			x18FieldVal += betVal;
+		}
+		else if (odds == 12)
+		{
+			betVal = MaxBet(GameData.GetInstance().max12Value, x12FieldVal, betVal);
+			x12FieldVal += betVal;
+		}
+		else if (odds == 9)
+		{
+			betVal = MaxBet(GameData.GetInstance().max9Value, x9FieldVal, betVal);
+			x9FieldVal += betVal;
+		}
+		else if (odds == 6)
+		{
+			betVal = MaxBet(GameData.GetInstance().max6Value, x6FieldVal, betVal);
+			x6FieldVal += betVal;
+		}
+		else if (odds == 3)
+		{
+			betVal = MaxBet(GameData.GetInstance().max3Value, x3FieldVal, betVal);
+			x3FieldVal += betVal;
+		}
+		else if (odds == 2)
+		{
+			betVal = MaxBet(GameData.GetInstance().max2Value, x2FieldVal, betVal);
+			x2FieldVal += betVal;
+		}
+		
+		return betVal;
+	}
+	
+	private int MaxBet(int maxVal, int originalVal, int betVal)
+	{
+		if (originalVal + betVal > maxVal)
+			betVal = maxVal - originalVal;
+		return betVal;
+	}
+
+	protected int Bet(string field, int betVal)
+	{
+		if (totalCredits <= 0)
+			return 0;
+		// 剩下的筹码小于押分
+		if (totalCredits - betVal < 0)
+			betVal = totalCredits;
+		
+		betVal = CanBet(field, betVal);
+		if (betVal > 0)
+		{
+			if (betFields.ContainsKey(field))
+			{
+				betFields[field] += betVal;
+			}
+			else
+			{
+				betFields.Add(field, betVal);
+			}
+			currentBet += betVal;
+			totalCredits -= betVal;
+			ui.RefreshLblCredits(totalCredits.ToString());
+			ui.RefreshLblBet(currentBet.ToString());
+		}
+		return betVal;
+	}
+
+	protected void HIDConnected()
+	{
+		if (!InputEx.inputEnable)
+		{
+			InputEx.inputEnable = true;
+		}
+		
+		if (isPause)
+		{
+			isPause = false;
+			ui.HideWarning();
+		}
+	}
+	
+	protected void HIDDisconnected()
+	{
+		if (InputEx.inputEnable)
+		{
+			InputEx.inputEnable = false;
+		}
+		
+		if (!isPause)
+		{
+			isPause = true;
+			ui.ClearAllEvent(null);
+			int language = 0;	// EN
+			if (GameData.GetInstance().language == 1)
+				language = 1;	// CN
+			ui.ShowWarning(Notifies.usbDisconnected[language]);
+		}
+	}
 }

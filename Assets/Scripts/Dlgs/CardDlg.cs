@@ -20,7 +20,6 @@ public class CardDlg : MonoBehaviour
     private GameObject downHitObject;
     
 	private string[] strKeyin = new string[]{"Keyin", "上分"};
-	private string[] strkeout = new string[]{"Keout", "下分"};
 	private string[] strSysPassword = new string[]{"Input Sys-Password", "请输入系统密码"};
     private string[] strError = new string[]{"Error!", "密码错误!"};
 
