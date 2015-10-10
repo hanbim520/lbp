@@ -12,6 +12,19 @@ public class GameLogic : MonoBehaviour
             _totalCredits = value;
             // Save
             SaveTotalCredits();
+
+			if (_totalCredits >= GameData.GetInstance().baoji)
+			{
+				// 判断暴机
+				IsLock = true;
+				ui.ShowWarning(strBaoji[GameData.GetInstance().language]);
+			}
+			else if (_totalCredits < GameData.GetInstance().baoji && IsLock)
+			{
+				// 解锁
+				IsLock = false;
+				ui.HideWarning();
+			}
         }
     }
     public int currentBet
@@ -41,23 +54,22 @@ public class GameLogic : MonoBehaviour
 	{
 		get { return gamePhase; }
 	}
+	public bool IsLock
+	{
+		get { return isLock; }
+		set { isLock = value; }
+	}
 
 
     protected int _totalCredits = 0;
 	protected int _currentBet = 0;
 	protected int _lastWin = 0;
 	protected int _rememberCredits = 0;
-	protected bool isPause = false;
+	protected bool isPause = false;	// true:程序不往下走
+	protected bool isLock = false;	// true:不能押分
 	protected int gamePhase = GamePhase.GameEnd;
 	protected int ballValue = -1;
-	// Current round variables
-	protected int x36FieldVal = 0;
-	protected int x18FieldVal = 0;
-	protected int x12FieldVal = 0;
-	protected int x9FieldVal = 0;
-	protected int x6FieldVal = 0;
-	protected int x3FieldVal = 0;
-	protected int x2FieldVal = 0;
+	protected string[] strBaoji = new string[]{"Please contact the assistant,\ndevice can't pay more.", "请联系服务员，\n该机台达到赢分上限。"};
 
 	// Field -- Bet
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
@@ -91,6 +103,13 @@ public class GameLogic : MonoBehaviour
 		if (GameData.GetInstance().IsCardMode != CardMode.NO)
 		{
 			ui.RecoverCardMode();
+		}
+
+		// 检查有没有锁死
+		if (totalCredits >= GameData.GetInstance().baoji)
+		{
+			IsLock = true;
+			ui.ShowWarning(strBaoji[GameData.GetInstance().language]);
 		}
     }
 
@@ -245,49 +264,7 @@ public class GameLogic : MonoBehaviour
     }
 
 	// 限注
-	protected int CanBet(string field, int betVal)
-	{
-		int odds = Utils.GetOdds(field);
-		if (odds == 36)
-		{
-			betVal = MaxBet(GameData.GetInstance().max36Value, x36FieldVal, betVal);
-			x36FieldVal += betVal;
-		}
-		else if (odds == 18)
-		{
-			betVal = MaxBet(GameData.GetInstance().max18Value, x18FieldVal, betVal);
-			x18FieldVal += betVal;
-		}
-		else if (odds == 12)
-		{
-			betVal = MaxBet(GameData.GetInstance().max12Value, x12FieldVal, betVal);
-			x12FieldVal += betVal;
-		}
-		else if (odds == 9)
-		{
-			betVal = MaxBet(GameData.GetInstance().max9Value, x9FieldVal, betVal);
-			x9FieldVal += betVal;
-		}
-		else if (odds == 6)
-		{
-			betVal = MaxBet(GameData.GetInstance().max6Value, x6FieldVal, betVal);
-			x6FieldVal += betVal;
-		}
-		else if (odds == 3)
-		{
-			betVal = MaxBet(GameData.GetInstance().max3Value, x3FieldVal, betVal);
-			x3FieldVal += betVal;
-		}
-		else if (odds == 2)
-		{
-			betVal = MaxBet(GameData.GetInstance().max2Value, x2FieldVal, betVal);
-			x2FieldVal += betVal;
-		}
-		
-		return betVal;
-	}
-	
-	private int MaxBet(int maxVal, int originalVal, int betVal)
+	protected int MaxBet(int maxVal, int originalVal, int betVal)
 	{
 		if (originalVal + betVal > maxVal)
 			betVal = maxVal - originalVal;
@@ -302,7 +279,15 @@ public class GameLogic : MonoBehaviour
 		if (totalCredits - betVal < 0)
 			betVal = totalCredits;
 		
-		betVal = CanBet(field, betVal);
+		int maxBet = Utils.GetMaxBet(field);
+		if (betFields.ContainsKey(field))
+		{
+			betVal = MaxBet(maxBet, betFields[field], betVal);
+		}
+		else
+		{
+			betVal = MaxBet(maxBet, 0, betVal);
+		}
 		if (betVal > 0)
 		{
 			if (betFields.ContainsKey(field))

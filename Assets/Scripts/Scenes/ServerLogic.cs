@@ -222,13 +222,6 @@ public class ServerLogic : GameLogic
 
     private void ClearVariables()
     {
-        x2FieldVal = 0;
-        x3FieldVal = 0;
-        x6FieldVal = 0;
-        x9FieldVal = 0;
-        x12FieldVal = 0;
-        x18FieldVal = 0;
-        x36FieldVal = 0;
         ballValue = -1;
         betFields.Clear();
 		ui.StopFlash();
@@ -275,16 +268,4 @@ public class ServerLogic : GameLogic
 		}
 		GameData.GetInstance().SaveBetRecords();
 	}
-
-    void OnGUI()
-    {
-//        if (GUI.Button(new Rect(10, 50, 150, 100), "限注"))
-//        {
-//            DebugConsole.Clear();
-//        }
-//        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
-//        {
-//			GameEventManager.TriggerGameStart();
-//        }
-    }
 }

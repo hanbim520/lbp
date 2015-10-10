@@ -622,7 +622,10 @@ public class MainUILogic : MonoBehaviour
 		}
 		lightEffects.Clear();
 
-		if (curChipIdx == -1 || gameLogic.LogicPhase != GamePhase.Countdown)
+		if (curChipIdx == -1 || 
+		    gameLogic.LogicPhase != GamePhase.Countdown ||
+		    GameData.GetInstance().IsCardMode == CardMode.Ready ||
+		    gameLogic.IsLock)
 			return;
 
         string strField = hitObject.name;

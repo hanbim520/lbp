@@ -270,4 +270,25 @@ public static class Utils
 		}
 		return odds;
 	}
+
+	public static int GetMaxBet(string fieldName)
+	{
+		int maxBet = 0;
+		int odds = GetOdds(fieldName);
+		if (odds == 36)
+			maxBet = GameData.GetInstance().max36Value;
+		else if (odds == 18)
+			maxBet = GameData.GetInstance().max18Value;
+		else if (odds == 12)
+			maxBet = GameData.GetInstance().max12Value;
+		else if (odds == 9)
+			maxBet = GameData.GetInstance().max9Value;
+		else if (odds == 6)
+			maxBet = GameData.GetInstance().max6Value;
+		else if (odds == 3)
+			maxBet = GameData.GetInstance().max3Value;
+		else if (odds == 2)
+			maxBet = GameData.GetInstance().max2Value;
+		return maxBet;
+	}
 }

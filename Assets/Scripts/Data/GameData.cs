@@ -217,10 +217,10 @@ public class GameData
 
     public void DefaultSetting ()
     {
-        betTimeLimit = 15; //30
+        betTimeLimit = 30; //30
         coinToScore = 1;
 		gameDifficulty = 1;
-        baoji = 20000;
+        baoji = 30000;
 		maxNumberOfFields = 38;
 		maxNumberOfChips = 6;
 		betChipValues.Add(1);
