@@ -3,13 +3,16 @@ using System.Collections;
 
 public class StartInfo : MonoBehaviour
 {
-	void Awake()
+	void Start()
 	{
-		Debug.Log("StartInfo1");
-		GameData.GetInstance().NextLevelName = "Main";
-		Debug.Log("StartInfo2");
 		GameData.GetInstance().ReadDataFromDisk();
-		Debug.Log("StartInfo3");
+		if (GameData.GetInstance().deviceIndex > 0)
+		{
+			Application.LoadLevel(Scenes.Main);
+		}
+		else
+		{
+			Application.LoadLevel(Scenes.Backend);
+		}
 	}
-
 }

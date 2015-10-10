@@ -49,7 +49,8 @@ public class RecordBar : MonoBehaviour
 			imgGreen.fillAmount = 0;
 			imgRed.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(0);
 			imgBlue.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(0);
-			imgGreen.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(0);
+//			imgGreen.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(0);
+			imgRed.transform.GetChild(1).GetComponent<RecordBarText>().Refresh(0);
 			return;
 		}
 

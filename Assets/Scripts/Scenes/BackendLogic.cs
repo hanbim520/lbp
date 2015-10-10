@@ -215,8 +215,7 @@ public class BackendLogic : MonoBehaviour
 		}
         else if (string.Equals(name, "exit"))
 		{
-			GameData.GetInstance().NextLevelName = Scenes.Main;
-            Application.LoadLevel(Scenes.Loading);
+            Application.LoadLevel(Scenes.StartInfo);
 		}
 		else if (string.Equals(name, "device2 id"))
 		{

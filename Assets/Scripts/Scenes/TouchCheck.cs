@@ -156,8 +156,7 @@ public class TouchCheck : MonoBehaviour
 
 	private void StartScene()
 	{
-		GameData.GetInstance().NextLevelName = Scenes.Main;
-		Application.LoadLevel(Scenes.Loading);
+		Application.LoadLevel(Scenes.StartInfo);
 	}
 
 	private void CheckAgain()

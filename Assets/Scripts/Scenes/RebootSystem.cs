@@ -43,7 +43,7 @@ public class RebootSystem : MonoBehaviour
         Debug.Log("Reboot");
         // TODO: Save all settings
         // TODO: Reboot system
-		GameData.GetInstance().NextLevelName = Scenes.Main;
+		GameData.GetInstance().NextLevelName = Scenes.StartInfo;
         Application.LoadLevel(Scenes.Loading);
     }
 

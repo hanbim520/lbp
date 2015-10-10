@@ -131,11 +131,6 @@ public class GameLogic : MonoBehaviour
 		PlayerPrefs.Save();
 	}
 
-	protected virtual void Awake()
-	{
-		GameData.GetInstance().ReadDataFromDisk();
-	}
-
     protected virtual void Start()
     {
 		FixExitAbnormally();
