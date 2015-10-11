@@ -41,14 +41,6 @@ public class GameData
     public int[] zongYing;
 	public int[] caiPiao;
 
-	// Odds
-    public float yanseOdds = 1.0f;
-    public float shuangOdds = 1.97f;
-    public float danOdds = 1.97f;
-    public float daOdds = 1.97f;
-    public float xiaoOdds = 1.97f;
-    public float duOdds = 36.97f;
-
 	public string deviceId; // unique string
 	public int deviceIndex;	// 1, 2, 3...
 	public Dictionary<int, string> clientsId;
@@ -125,7 +117,7 @@ public class GameData
 			PlayerPrefs.Save();
 		}
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
-		deviceIndex = 1;
+		deviceIndex = 2;
 
         colorTable.Add(37, ResultType.Green);    // 37: 00
 		colorTable.Add(0, ResultType.Green);
@@ -217,7 +209,7 @@ public class GameData
 
     public void DefaultSetting ()
     {
-        betTimeLimit = 30; //30
+        betTimeLimit = 5; //30
         coinToScore = 1;
 		gameDifficulty = 1;
         baoji = 30000;

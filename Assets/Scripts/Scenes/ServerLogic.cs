@@ -9,7 +9,8 @@ public class ServerLogic : GameLogic
     private float longPressTime = 3;
     private bool bLoadBackend = false;
 	private UHost host;
-
+    private float waitSendTime = 0.1f;
+    
     private void Init()
     {
         host = GetComponent<UHost>();
@@ -23,6 +24,8 @@ public class ServerLogic : GameLogic
             gameObject.SetActive(false);
             return;
         }
+        else
+            GetComponent<UHost>().enabled = true;
         Init();
         RegisterListener();
 	}
@@ -111,6 +114,8 @@ public class ServerLogic : GameLogic
 		}
 		gamePhase = GamePhase.Countdown;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
+        yield return new WaitForSeconds(waitSendTime);
+
 		if (ui.CurChipIdx != -1)
 			ui.chooseBetEffect.SetActive(true);
 		ui.RefreshLblWin("0");
@@ -127,11 +132,11 @@ public class ServerLogic : GameLogic
     {
 		print("BlowBall");
 		gamePhase = GamePhase.Run;
-        host.SendToAll(NetInstr.GamePhase + ":"+ gamePhase);
 		int time = GameData.GetInstance().gameDifficulty + Random.Range(1200, 1500);
-		hidUtils.BlowBall(time);
+        if (!GameData.debug)
+		    hidUtils.BlowBall(time);
 		if (GameData.debug)
-			StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
+            StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
     }
 
 	// 模拟收到球的号码
@@ -158,19 +163,18 @@ public class ServerLogic : GameLogic
 	private IEnumerator ShowResult()
 	{
 		print("ShowResult");
-		ui.FlashResult(ballValue);
-
 		gamePhase = GamePhase.ShowResult;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue);
+        yield return new WaitForSeconds(waitSendTime);
+        
+        ui.FlashResult(ballValue);
 		StartCoroutine(Compensate());
-		yield break;
 	}
 
 	private IEnumerator Compensate()
     {
 		print("Compensate");
         gamePhase = GamePhase.Compensate;
-		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
 
         // TODO: Compensate
         // TODO: Save account
@@ -200,7 +204,8 @@ public class ServerLogic : GameLogic
 			ui.RefreshLblWin("0");
 		ui.CleanAll();
 
-		hidUtils.OpenGate();
+        if (!GameData.debug)
+		    hidUtils.OpenGate();
 		if (GameData.debug)
 			StartCoroutine(SimulateCloseGate());
     }
@@ -245,27 +250,4 @@ public class ServerLogic : GameLogic
             host.SendToPeer(NetInstr.GamePhase + ":" + gamePhase, connectionId);
         }
     }
-
-	protected void AppendLast10(int startCredit, int endCredit, int bet, int win)
-	{
-		BetRecord br = new BetRecord();
-		br.startCredit = startCredit;
-		br.endCredit = endCredit;
-		br.bet = bet;
-		br.win = win;
-		br.bets = new List<BetInfo>();
-		foreach (KeyValuePair<string, int> item in betFields)
-		{
-			BetInfo info = new BetInfo();
-			info.betField = item.Key;
-			info.betValue = item.Value;
-			br.bets.Add(info);
-		}
-		GameData.GetInstance().betRecords.Add(br);
-		while (GameData.GetInstance().betRecords.Count > 10)
-		{
-			GameData.GetInstance().betRecords.RemoveAt(0);
-		}
-		GameData.GetInstance().SaveBetRecords();
-	}
 }

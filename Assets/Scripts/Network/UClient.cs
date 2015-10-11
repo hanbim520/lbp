@@ -26,7 +26,14 @@ public class UClient : MonoBehaviour
 
 	void OnDestroy()
 	{
-		NetworkTransport.RemoveHost(hostId);
+        try
+        {
+		    NetworkTransport.RemoveHost(hostId);
+        }
+        catch(UnityException e)
+        {
+            Debug.Log(e.ToString());
+        }
 	}
 	
 	void Update()
@@ -126,7 +133,7 @@ public class UClient : MonoBehaviour
 	private void HandleDisconnectEvent()
 	{
 		connState = ConnectionState.Disconnected;
-		DebugConsole.Log("HandleDisconnectEvent");
+		Debug.Log("HandleDisconnectEvent");
 	}
 
 	public void SendToServer(string msg)

@@ -332,4 +332,27 @@ public class GameLogic : MonoBehaviour
 			ui.ShowWarning(Notifies.usbDisconnected[language]);
 		}
 	}
+
+    protected void AppendLast10(int startCredit, int endCredit, int bet, int win)
+    {
+        BetRecord br = new BetRecord();
+        br.startCredit = startCredit;
+        br.endCredit = endCredit;
+        br.bet = bet;
+        br.win = win;
+        br.bets = new List<BetInfo>();
+        foreach (KeyValuePair<string, int> item in betFields)
+        {
+            BetInfo info = new BetInfo();
+            info.betField = item.Key;
+            info.betValue = item.Value;
+            br.bets.Add(info);
+        }
+        GameData.GetInstance().betRecords.Add(br);
+        while (GameData.GetInstance().betRecords.Count > 10)
+        {
+            GameData.GetInstance().betRecords.RemoveAt(0);
+        }
+        GameData.GetInstance().SaveBetRecords();
+    }
 }

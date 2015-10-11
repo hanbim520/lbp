@@ -4,7 +4,10 @@ using System.Collections.Generic;
 
 public class ClientLogic : GameLogic
 {
-    private UClient client;
+    private void Init()
+    {
+        gamePhase = GamePhase.GameEnd;
+    }
 
 	protected override void Start()
 	{
@@ -14,8 +17,37 @@ public class ClientLogic : GameLogic
             gameObject.SetActive(false);
             return;
         }
-        client = GetComponent<UClient>();
+        else
+            GetComponent<UClient>().enabled = true;
+        Init();
+        RegisterListener();
 	}
+
+    protected override void OnDestroy()
+    {
+        base.OnDestroy();
+        UnregisterListener();
+    }
+
+    void Update()
+    {
+        #if UNITY_EDITOR
+        if (Input.GetKeyUp(KeyCode.Escape))
+        {
+            ui.ActiveDlgCard(true);
+        }
+        #endif
+    }
+
+    private void RegisterListener()
+    {
+        GameEventManager.EndCountdown += CountdownComplete;
+    }
+    
+    private void UnregisterListener()
+    {
+        GameEventManager.EndCountdown -= CountdownComplete;
+    }
 	
     public void HandleRecData(ref string[] words)
 	{
@@ -25,17 +57,9 @@ public class ClientLogic : GameLogic
             return;
         }
         
-        if (instr == NetInstr.SynData && words.Length >= 8)
+        if (instr == NetInstr.SynData && words.Length > 8)
         {
             SynData(ref words);
-        }
-        else if (instr == NetInstr.NoLimitBet)
-        {
-            ResponseBet(ref words);
-        }
-        else if (instr == NetInstr.LimitBet)
-        {
-            NotifyMsg(ref Notifies.LimitBet[0]);
         }
         else if (instr == NetInstr.GamePhase)
         {
@@ -51,63 +75,96 @@ public class ClientLogic : GameLogic
             gamePhase = phase;
             if (gamePhase == GamePhase.Countdown)
             {
-                InputEx.inputEnable = true;
-                Timer t = TimerManager.GetInstance().CreateTimer(1.0f, TimerType.Loop, GameData.GetInstance().betTimeLimit);
-                t.Tick += CountdownTick;
-                t.OnComplete += CountdownComplete;
-                t.Start();
+                Countdown();
             }
             else if (gamePhase == GamePhase.ShowResult)
             {
                 int value;
                 if (int.TryParse(words[2], out value))
                 {
-                    // TODO: UI
-                    
-                    Timer t = TimerManager.GetInstance().CreateTimer(3);
-                    t.OnComplete += Compensate;
-                    t.Start();
+                    ballValue = value;
+                    GameData.GetInstance().SaveRecord(ballValue);
+                    GameEventManager.OnRefreshRecord(ballValue);
+                    ShowResult();
                 }
+            }
+            else if (gamePhase == GamePhase.GameEnd)
+            {
+                CloseGate();
             }
         }
     }
 
-    private void CountdownTick()
+    private void Countdown()
     {
-        // TODO: UI
+        if (ui.CurChipIdx != -1)
+            ui.chooseBetEffect.SetActive(true);
+        ui.RefreshLblWin("0");
+        ui.ResetCountdown();
+        ui.Countdown();
     }
 
     private void CountdownComplete()
     {
-        InputEx.inputEnable = false;
+        gamePhase = GamePhase.Run;
+        ui.chooseBetEffect.SetActive(false);
     }
 
-    private void Compensate()
+    private void ShowResult()
     {
+        print("Client ShowResult");
+        ui.FlashResult(ballValue);
+        StartCoroutine(Compensate());
+    }
+
+    private IEnumerator Compensate()
+    {
+        print("Client Compensate");
         // TODO: Compensate
         // TODO: Save account
         // TODO: UI
         
-        Timer t = TimerManager.GetInstance().CreateTimer(3);
-        t.OnComplete += CompensateComplete;
-        t.Start();
+        int win = 0;
+        foreach (KeyValuePair<string, int> item in betFields)
+        {
+            int peilv = Utils.IsBingo(item.Key, ballValue);
+            if (peilv > 0)
+            {
+                win += peilv * item.Value;
+            }
+        }
+        AppendLast10(totalCredits, totalCredits + win, currentBet, win);
+        currentBet = 0;
+        totalCredits += win;
+        if (totalCredits <= 0)
+            ui.DisableCardMode();
+        
+        yield return new WaitForSeconds(5);
+        
+        ui.RefreshLblBet("0");
+        ui.RefreshLblCredits(totalCredits.ToString());
+        if (win > 0)
+            ui.RefreshLblWin(win.ToString());
+        else
+            ui.RefreshLblWin("0");
+        ui.CleanAll();
     }
 
-    private void CompensateComplete()
+    private void CloseGate()
     {
-        // TODO: UI
         ClearVariables();
     }
 
     private void ClearVariables()
     {
-        gamePhase = GamePhase.GameEnd;
+        ballValue = -1;
         betFields.Clear();
+        ui.StopFlash();
     }
 
     private void NotifyMsg(ref string msg)
     {
-        DebugConsole.Log(Time.realtimeSinceStartup + ": " + msg);
+        Debug.Log(Time.realtimeSinceStartup + ": " + msg);
     }
 
     private void ResponseBet(ref string[] words)
@@ -125,56 +182,65 @@ public class ClientLogic : GameLogic
                 betFields.Add(field, betVal);
             }
             totalCredits -= betVal;
-            DebugConsole.Log(Time.realtimeSinceStartup + ": field-" + field + ", betVal-" + betFields[field]);
+            Debug.Log(Time.realtimeSinceStartup + ": field-" + field + ", betVal-" + betFields[field]);
         }
     }
 
     private void SynData(ref string[] words)
     {
-        float yanseOdds;
-        float shuangOdds;
-        float danOdds;
-        float daOdds;
-        float xiaoOdds;
-        float duOdds;
-        int betTimeLimit;
-        if(float.TryParse(words[1], out yanseOdds))
-            GameData.GetInstance().yanseOdds = yanseOdds;
-        if(float.TryParse(words[2], out shuangOdds))
-            GameData.GetInstance().shuangOdds = shuangOdds;
-        if(float.TryParse(words[3], out danOdds))
-            GameData.GetInstance().danOdds = danOdds;
-        if(float.TryParse(words[4], out daOdds))
-            GameData.GetInstance().daOdds = daOdds;
-        if(float.TryParse(words[5], out xiaoOdds))
-            GameData.GetInstance().xiaoOdds = xiaoOdds;
-        if(float.TryParse(words[6], out duOdds))
-            GameData.GetInstance().duOdds = duOdds;
-        if(int.TryParse(words[7], out betTimeLimit))
+        int betTimeLimit, coinToScore, baoji;
+        int max36Value, max18Value, max12Value, max9Value, max6Value, max3Value, max2Value;
+        int betChipValue0, betChipValue1, betChipValue2, betChipValue3, betChipValue4, betChipValue5;
+        int couponsStart, couponsKeyinRatio, couponsKeoutRatio;
+        int maxNumberOfFields;
+
+        if(int.TryParse(words[1], out betTimeLimit))
             GameData.GetInstance().betTimeLimit = betTimeLimit;
-        DebugConsole.Log("SynData:"+ yanseOdds + ", " + betTimeLimit);
-    }
+        if(int.TryParse(words[2], out coinToScore))
+            GameData.GetInstance().coinToScore = coinToScore;
+        if(int.TryParse(words[3], out baoji))
+            GameData.GetInstance().baoji = baoji;
 
-    void OnGUI()
-    {
-        if (GUI.Button(new Rect(10, 50, 150, 100), "限注"))
-        {
-            DebugConsole.Clear();
-        }
-//        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Red))
-        if (GUI.Button(new Rect(300, 50, 150, 100), "限红" + Fields.Black))
-        {
-            int betVal = 1000;
-            // TODO: 剩下的筹码小于最小押分
-            // TODO: 程序模拟压分
-            if (totalCredits <= 0 || totalCredits - betVal < 0)
-            {
-                DebugConsole.Log(Time.realtimeSinceStartup + ": totalCredits-" + totalCredits);
-                return;
-            }
+        if(int.TryParse(words[4], out betChipValue0))
+            GameData.GetInstance().betChipValues[0] = betChipValue0;
+        if(int.TryParse(words[5], out betChipValue1))
+            GameData.GetInstance().betChipValues[1] = betChipValue1;
+        if(int.TryParse(words[6], out betChipValue2))
+            GameData.GetInstance().betChipValues[2] = betChipValue2;
+        if(int.TryParse(words[7], out betChipValue3))
+            GameData.GetInstance().betChipValues[3] = betChipValue3;
+        if(int.TryParse(words[8], out betChipValue4))
+            GameData.GetInstance().betChipValues[4] = betChipValue4;
+        if(int.TryParse(words[9], out betChipValue5))
+            GameData.GetInstance().betChipValues[5] = betChipValue5;
 
-            client.SendToServer(NetInstr.Bet + ":" + Fields.Black + ":" + betVal);
-//            client.SendToServer(NetInstr.Bet + ":" + Fields.Red + ":" + betVal);
-        }
+        if(int.TryParse(words[10], out max36Value))
+            GameData.GetInstance().max36Value = max36Value;
+        if(int.TryParse(words[11], out max18Value))
+            GameData.GetInstance().max18Value = max18Value;
+        if(int.TryParse(words[12], out max12Value))
+            GameData.GetInstance().max12Value = max12Value;
+        if(int.TryParse(words[13], out max9Value))
+            GameData.GetInstance().max9Value = max9Value;
+        if(int.TryParse(words[14], out max6Value))
+            GameData.GetInstance().max6Value = max6Value;
+        if(int.TryParse(words[15], out max3Value))
+            GameData.GetInstance().max3Value = max3Value;
+        if(int.TryParse(words[16], out max2Value))
+            GameData.GetInstance().max2Value = max2Value;
+
+        if(int.TryParse(words[17], out couponsStart))
+            GameData.GetInstance().couponsStart = couponsStart;
+        if(int.TryParse(words[18], out couponsKeyinRatio))
+            GameData.GetInstance().couponsKeyinRatio = couponsKeyinRatio;
+        if(int.TryParse(words[19], out couponsKeoutRatio))
+            GameData.GetInstance().couponsKeoutRatio = couponsKeoutRatio;
+
+        if(int.TryParse(words[20], out maxNumberOfFields))
+            GameData.GetInstance().maxNumberOfFields = maxNumberOfFields;
+
+        GameData.GetInstance().SaveSetting();
+        ui.SetDisplay();
+        ui.SetBetChips();
     }
 }

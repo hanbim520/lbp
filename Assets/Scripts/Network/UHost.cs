@@ -35,8 +35,15 @@ public class UHost : MonoBehaviour
 
 	void OnDestroy()
 	{
-		StopBroadcast();
-		NetworkTransport.RemoveHost(hostId);
+        try
+        {
+            StopBroadcast();
+            NetworkTransport.RemoveHost(hostId);
+        }
+        catch(UnityException e)
+        {
+            Debug.Log(e.ToString());
+        }
 	}
 
 	void Update()
@@ -109,21 +116,22 @@ public class UHost : MonoBehaviour
 	private void SynData(int connectionId)
 	{
 		GameData gd = GameData.GetInstance();
-		string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}", 
+        string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9}:{10}:" +
+                                   "{11}:{12}:{13}:{14}:{15}:{16}:{17}:{18}:{19}:{20}", 
 		                           NetInstr.SynData, 
-                                   gd.yanseOdds, 
-                                   gd.shuangOdds, 
-                                   gd.danOdds, 
-                                   gd.daOdds, 
-                                   gd.xiaoOdds, 
-                                   gd.duOdds, 
-                                   gd.betTimeLimit);
+                                   gd.betTimeLimit, gd.coinToScore, gd.baoji,
+                                   gd.betChipValues[0], gd.betChipValues[1], gd.betChipValues[2],
+                                   gd.betChipValues[3], gd.betChipValues[4], gd.betChipValues[5],
+                                   gd.max36Value, gd.max18Value, gd.max12Value, gd.max9Value, 
+                                   gd.max6Value, gd.max3Value, gd.max2Value, 
+                                   gd.couponsStart, gd.couponsKeyinRatio, gd.couponsKeoutRatio, 
+                                   gd.maxNumberOfFields);
 		SendToPeer(msg, connectionId);
 	}
 
 	private void HandleDisconnectEvent(int connectionId)
 	{
-		DebugConsole.Log("Disconnect event. connectionId: " + connectionId);
+		Debug.Log("Disconnect event. connectionId: " + connectionId);
 		if (allConnections.Contains(connectionId))
 		{
 			allConnections.Remove(connectionId);
@@ -209,12 +217,4 @@ public class UHost : MonoBehaviour
 		if (timerConnectClients != null)
 			timerConnectClients.Update(Time.deltaTime);
 	}
-
-//	void OnGUI()
-//	{
-//		if (GUI.Button(new Rect(10, 50, 100, 50), "To test"))
-//		{
-//			Application.LoadLevel("test");
-//		}
-//	}
 }

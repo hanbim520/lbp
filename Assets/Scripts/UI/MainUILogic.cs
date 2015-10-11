@@ -22,10 +22,10 @@ public class MainUILogic : MonoBehaviour
 		get { return curChipIdx; }
 	}
 
-    private Text lblCredit;
-    private Text lblWin;
-    private Text lblBet;
-	private Text lblRemember;
+    public Text lblCredit;
+    public Text lblWin;
+    public Text lblBet;
+    public Text lblRemember;
 
 	private GameObject displayClassic;
 	private GameObject displayEllipse;
@@ -39,6 +39,14 @@ public class MainUILogic : MonoBehaviour
     private GameObject downHitObject;
     private List<Transform> lightEffects = new List<Transform>();
 	private Transform flashObject;
+
+    void Awake()
+    {
+        if (GameData.GetInstance().deviceIndex == 1)
+            gameLogic = GameObject.Find("ServerLogic").GetComponent<GameLogic>();
+        else
+            gameLogic = GameObject.Find("ClientLogic").GetComponent<GameLogic>();
+    }
 
 	void Start()
 	{
@@ -792,9 +800,14 @@ public class MainUILogic : MonoBehaviour
 
 	public void FlashResult(int result)
 	{
+        string strResult = "";
+        if (result != 37)
+            strResult = result.ToString();
+        else
+            strResult = "00";
 		if (displayClassic.activeSelf)
 		{
-			Transform target = displayClassic.transform.FindChild("Choose Effect/" + result.ToString());
+			Transform target = displayClassic.transform.FindChild("Choose Effect/" + strResult);
 			if (target != null)
 			{
 				flashObject = target;
@@ -805,7 +818,7 @@ public class MainUILogic : MonoBehaviour
 		}
 		else
 		{
-			Transform target = displayEllipse.transform.FindChild("Choose Effect/" + "e" + result.ToString());
+            Transform target = displayEllipse.transform.FindChild("Choose Effect/" + "e" + strResult);
 			if (target != null)
 			{
 				flashObject = target;
