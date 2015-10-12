@@ -296,9 +296,24 @@ public class BackendLogic : MonoBehaviour
         }
     }
 
+    private int SetActiveTitles(Transform root)
+    {
+        int activeIdx = GameData.controlCode ? 0 : 1;
+        int nonactiveIdx = Mathf.Abs(activeIdx - 1);
+        root.GetChild(activeIdx).gameObject.SetActive(true);
+        root.GetChild(nonactiveIdx).gameObject.SetActive(false);
+        return activeIdx;
+    }
+
     private void InitAccount()
     {
-		print("InitAccount");
+        menuMain.SetActive(false);
+        menuSetting.SetActive(false);
+        menuAccount.SetActive(true);
+        dlgCalc.SetActive(false);
+
+        GameObject languageRoot = SetLanguage(menuAccount.gameObject);
+        SetActiveTitles(languageRoot.transform);
     }
 
     private void InitPasswordDlg()
@@ -309,7 +324,7 @@ public class BackendLogic : MonoBehaviour
         SetLanguage(dlgPassword);
     }
 
-    private void SetLanguage(GameObject menu)
+    private GameObject SetLanguage(GameObject menu)
     {
         GameObject en = menu.transform.FindChild("EN").gameObject;
         GameObject cn = menu.transform.FindChild("CN").gameObject;
@@ -317,12 +332,15 @@ public class BackendLogic : MonoBehaviour
         {
             en.SetActive(true);
             cn.SetActive(false);
+            return en;
         }
         else
         {
             en.SetActive(false);
             cn.SetActive(true);
+            return cn;
         }
+        return null;
     }
 
     private void SetAlpha(Transform target, int alpha)

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 public class GameData
 {
 	public static bool debug = true;
+    public static bool controlCode = false;
 
     // Setting menu
     public int betTimeLimit;
