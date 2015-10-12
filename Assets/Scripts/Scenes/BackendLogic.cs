@@ -314,6 +314,18 @@ public class BackendLogic : MonoBehaviour
 
         GameObject languageRoot = SetLanguage(menuAccount.gameObject);
         SetActiveTitles(languageRoot.transform);
+
+        Transform itemRoot = menuAccount.transform.FindChild("ItemsRoot");
+        if (itemRoot != null)
+        {
+            string prefabName = GameData.controlCode ? "Account/AccountItem CC" : "Account/AccountItem NCC";
+            Object prefab = (Object)Resources.Load(prefabName);
+            GameObject go = (GameObject)Instantiate(prefab);
+            go.transform.SetParent(itemRoot);
+            go.transform.localScale = Vector3.one;
+//            go.transform.localPosition = 
+            prefab = null;
+        }
     }
 
     private void InitPasswordDlg()
@@ -340,7 +352,6 @@ public class BackendLogic : MonoBehaviour
             cn.SetActive(true);
             return cn;
         }
-        return null;
     }
 
     private void SetAlpha(Transform target, int alpha)
