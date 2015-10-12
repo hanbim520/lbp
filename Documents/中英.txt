@@ -1,0 +1,121 @@
+机台开洗分
+Keyin/Keyout
+
+查阅各机台
+Book All Hosts
+
+调整参数表
+System Setting
+
+机器认球
+Ball Position(Ball Identify)
+
+游戏机台管理系统
+Host Management System
+
+机台号
+Host ID
+
+机台原有分数
+Last Credits
+
+开分数
+Keyin Amount
+
+优惠卡
+Presented Credits
+
+开分
+Keyin
+
+洗分
+Keyout
+
+返回
+Return
+
+管理人员密码
+Admin Password
+
+机号
+Host ID
+
+总上分数
+Total Keyin
+
+总退分数
+Total Keyout
+
+优惠卡分
+Presented Credits
+
+总赢分
+Total Winnings
+
+总计
+Total
+
+通讯
+Communication
+
+上页
+Prev Page
+
+下页
+Next Page
+
+打印
+Print
+
+系统人员密码
+System Password
+
+修改管理人员密码
+Modify Admin Password
+
+修改系统人员密码
+Modify System Password
+
+管理机台数
+Host Amount
+
+清除纪录
+Del Records
+
+系统通信检测
+System Communication Testing
+
+机号
+Host ID
+
+状态
+Status
+
+重测
+Retry 
+
+清除数据中...
+Removing data...
+
+远程通信中...
+Connect...
+
+是否确认清除数据
+Del Data(Y/N)?
+
+确定
+OK
+
+取消
+No
+
+更改画面中...
+Changing Page...
+
+当前时间
+Clock
+
+
+
+
+

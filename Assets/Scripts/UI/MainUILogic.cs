@@ -288,32 +288,32 @@ public class MainUILogic : MonoBehaviour
 		int num = GameData.GetInstance().maxNumberOfChips;
 		if (num == 6)
 		{
-			start = -577.0f;
+			start = -614.0f;
 			dist = 93;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 5)
 		{
-			start = -540.0f;
+			start = -577.0f;
 			dist = 100;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 4)
 		{
-			start = -540.0f;
+			start = -577.0f;
 			dist = 130;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 3)
 		{
-			start = -500.0f;
+			start = -537.0f;
 			dist = 160;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 2)
 		{
-			start = -420.0f;
+			start = -457.0f;
 			dist = 160;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 1)
 		{
-			start = -330.0f;
+			start = -367.0f;
 		}
 
 		int betChipsNum = GameData.GetInstance().betChipValues.Count;
@@ -483,6 +483,14 @@ public class MainUILogic : MonoBehaviour
             }
         }
     }
+
+	// 退币按钮
+	public void BackTicketEvent(Transform hitObject)
+	{
+		if (gameLogic.betFields.Count > 0)
+			return;
+
+	}
 
 	// 优惠卡按钮
 	public void CardButtonEvent(Transform hitObject)
