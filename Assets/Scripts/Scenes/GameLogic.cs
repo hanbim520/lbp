@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -195,13 +196,32 @@ public class GameLogic : MonoBehaviour
 			if (temp >= GameData.GetInstance().couponsStart)
 			{
 				GameData.GetInstance().IsCardMode = CardMode.YES;
-				temp += Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * temp);
+				int giveCredits = Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * temp);
+
+//				KeyinKeoutRecord record = new KeyinKeoutRecord();
+//				record.keyin = temp;
+//				record.keout = 0;
+//				record.toubi = 0;
+//				record.tuibi = 0;
+//				record.card = giveCredits;
+//				GameData.GetInstance().keyinKeoutRecords.Add(record);
+
+				temp += giveCredits;
 				totalCredits = temp;
 				rememberCredits = totalCredits;
 			}
 			else
 			{
 				rememberCredits = 0;
+
+//				KeyinKeoutRecord record = new KeyinKeoutRecord();
+//				record.keyin = temp;
+//				record.keout = 0;
+//				record.toubi = 0;
+//				record.tuibi = 0;
+//				record.card = 0;
+//				GameData.GetInstance().keyinKeoutRecords.Add(record);
+
 				totalCredits = temp;
 			}
 			ui.RefreshLblCredits(totalCredits.ToString());
@@ -209,7 +229,10 @@ public class GameLogic : MonoBehaviour
 		}
 		else if (GameData.GetInstance().IsCardMode == CardMode.YES)
 		{
-			delta = delta + Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * delta);
+			int giveCredits = Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * delta);
+
+
+			delta = delta + giveCredits;
 			rememberCredits = rememberCredits + delta;
 			totalCredits = totalCredits + delta;
 

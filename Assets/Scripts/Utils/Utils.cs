@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -290,5 +291,10 @@ public static class Utils
 		else if (odds == 2)
 			maxBet = GameData.GetInstance().max2Value;
 		return maxBet;
+	}
+
+	public static string GetSystemTime()
+	{
+		return DateTime.Now.Date.ToShortDateString() + " " + DateTime.Now.ToString("HH:mm:ss");
 	}
 }

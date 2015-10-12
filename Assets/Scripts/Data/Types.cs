@@ -94,9 +94,10 @@ public struct CardMode
 // 时间 上下分 投退币
 public struct KeyinKeoutRecord
 {
-    public string time; // 201510102319
+    public string time; // 20151010-23:19:40
     public int keyin;
     public int keout;
     public int toubi;
     public int tuibi;
+	public int card;
 }

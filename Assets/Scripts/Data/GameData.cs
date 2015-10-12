@@ -33,13 +33,14 @@ public class GameData
 	public int maxNumberOfChips;	// 1 ~ 6
 	
     // Account
-    public int[] zongShang;
-    public int[] zongXia;
-    public int[] zongTou;
-    public int[] zongTui;
-    public int[] zongYa;
-    public int[] zongYing;
-	public int[] caiPiao;
+    public int zongShang;	// 总上分
+    public int zongXia;		// 总下分
+    public int zongTou;		// 总投币
+    public int zongTui;		// 总退币
+	public int currentWin;	// 当次赢分（有跳码时候用）
+	public int totalWin;	// 总赢分
+	public int cardCredits;	// 优惠卡送的分
+	public Queue<KeyinKeoutRecord> keyinKeoutRecords = new Queue<KeyinKeoutRecord>();		// 上下分 投退币流水账
 
 	public string deviceId; // unique string
 	public int deviceIndex;	// 1, 2, 3...
@@ -158,14 +159,6 @@ public class GameData
 		colorTable.Add(31, ResultType.Black);
         colorTable.Add(33, ResultType.Black);
         colorTable.Add(35, ResultType.Black);
-
-        zongShang = new int[maxNumOfPlayers];
-        zongXia = new int[maxNumOfPlayers];
-        zongTou = new int[maxNumOfPlayers];
-        zongTui = new int[maxNumOfPlayers];
-        zongYa = new int[maxNumOfPlayers];
-        zongYing = new int[maxNumOfPlayers];
-        caiPiao = new int[maxNumOfPlayers];
 	}
 
     private static GameData instance;
@@ -254,31 +247,19 @@ public class GameData
 
     public void SaveAccount()
     {
-        for (int i = 0; i < maxNumOfPlayers; ++i)
-        {
-            CryptoPrefs.SetInt("zongShang" + i, zongShang[i]);
-            CryptoPrefs.SetInt("zongXia" + i, zongXia[i]);
-            CryptoPrefs.SetInt("zongTou" + i, zongTou[i]);
-            CryptoPrefs.SetInt("zongTui" + i, zongTui[i]);
-            CryptoPrefs.SetInt("zongYa" + i, zongYa[i]);
-            CryptoPrefs.SetInt("zongYing" + i, zongYing[i]);
-			CryptoPrefs.SetInt("caiPiao" + i, caiPiao[i]);
-        }
+        CryptoPrefs.SetInt("zongShang", zongShang);
+        CryptoPrefs.SetInt("zongXia", zongXia);
+        CryptoPrefs.SetInt("zongTou", zongTou);
+        CryptoPrefs.SetInt("zongTui", zongTui);
         CryptoPrefs.Save();
     }
 
     public void DefaultAccount()
     {
-        for (int i = 0; i < maxNumOfPlayers; ++i)
-        {
-            zongShang[i] = 0;
-            zongXia[i] = 0;
-            zongTou[i] = 0;
-            zongTui[i] = 0;
-            zongYa[i] = 0;
-            zongYing[i] = 0;
-			caiPiao[i] = 0;
-        }
+        zongShang = 0;
+        zongXia = 0;
+        zongTou = 0;
+        zongTui = 0;
     }
 
     public void ReadDataFromDisk()
@@ -336,16 +317,10 @@ public class GameData
 			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
 
             // Check account menu 
-            for (int i = 0; i < maxNumOfPlayers; ++i)
-            {
-                zongShang[i] = CryptoPrefs.GetInt("zongShang" + i);
-                zongXia[i] = CryptoPrefs.GetInt("zongXia" + i);
-                zongTou[i] = CryptoPrefs.GetInt("zongTou" + i);
-                zongTui[i] = CryptoPrefs.GetInt("zongTui" + i);
-                zongYa[i] = CryptoPrefs.GetInt("zongYa" + i);
-                zongYing[i] = CryptoPrefs.GetInt("zongYing" + i);
-				caiPiao[i] = CryptoPrefs.GetInt("caiPiao" + i);
-            }
+            zongShang = CryptoPrefs.GetInt("zongShang");
+            zongXia = CryptoPrefs.GetInt("zongXia");
+            zongTou = CryptoPrefs.GetInt("zongTou");
+            zongTui = CryptoPrefs.GetInt("zongTui");
 
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
@@ -357,6 +332,7 @@ public class GameData
         ReadTouchMatrix();
         ReadRecords();
         ReadBetRecords();
+		ReadKeyinKeoutRecords();
     }
 
 	private void SaveRecords()
@@ -395,7 +371,7 @@ public class GameData
 	public void ReadRecords()
 	{
 		if (records.Count > 0)
-			return;
+			records.Clear();
 
 		for (int i = 0; i < 100; ++i)
 		{
@@ -475,7 +451,7 @@ public class GameData
     private void ReadBetRecords()
     {
 		if (betRecords.Count > 0)
-			return;
+			betRecords.Clear();
 
         for (int idx = 0; idx < 10; ++idx)
         {
@@ -519,5 +495,55 @@ public class GameData
 	{
 		PlayerPrefs.SetInt("deviceIndex", deviceIndex);
 		PlayerPrefs.Save();
+	}
+
+	public void AppendKeyinKeoutRecords(int keyin, int keout, int receiveCoin, int payCoin, int card)
+	{
+		KeyinKeoutRecord record = new KeyinKeoutRecord();
+		record.time = Utils.GetSystemTime();
+		record.keyin = keyin;
+		record.keout = keout;
+		record.toubi = receiveCoin;
+		record.tuibi = payCoin;
+		record.card = card;
+
+		keyinKeoutRecords.Enqueue(record);
+		while (keyinKeoutRecords.Count > 20)
+			keyinKeoutRecords.Dequeue();
+
+		int count = 0;
+		foreach (KeyinKeoutRecord item in keyinKeoutRecords)
+		{
+			PlayerPrefs.SetString("daybook_time" + count, item.time);
+			PlayerPrefs.SetInt("daybook_keyin" + count, item.keyin);
+			PlayerPrefs.SetInt("daybook_keout" + count, item.keout);
+			PlayerPrefs.SetInt("daybook_toubi" + count, item.toubi);
+			PlayerPrefs.SetInt("daybook_tuibi" + count, item.tuibi);
+			PlayerPrefs.SetInt("daybook_card" + count, item.card);
+			++count;
+		}
+
+		PlayerPrefs.Save();
+	}
+
+	public void ReadKeyinKeoutRecords()
+	{
+		if (keyinKeoutRecords.Count > 0)
+			keyinKeoutRecords.Clear();
+
+		for (int i = 0; i < 20; ++i)
+		{
+			string time = PlayerPrefs.GetString("daybook_time" + i);
+			if (string.IsNullOrEmpty(time))
+				break;
+			KeyinKeoutRecord record = new KeyinKeoutRecord();
+			record.time = time;
+			record.keyin = PlayerPrefs.GetInt("daybook_keyin" + i);
+			record.keout = PlayerPrefs.GetInt("daybook_keout" + i);
+			record.toubi = PlayerPrefs.GetInt("daybook_toubi" + i);
+			record.tuibi = PlayerPrefs.GetInt("daybook_tuibi" + i);
+			record.card = PlayerPrefs.GetInt("daybook_card" + i);
+			keyinKeoutRecords.Enqueue(record);
+		}
 	}
 }
