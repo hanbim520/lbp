@@ -27,6 +27,11 @@ public class BackendLogic : MonoBehaviour
     private Text calcContent;
     private Text calcPassword;
     private Timer timerHideWarning;
+	private Timer timerRefreshAccounts;
+	private AccountNetwork host;
+	private Dictionary<int, AccountItem> otherDevice = new Dictionary<int, AccountItem>();
+	private Transform accountItemRoot;
+	private Transform loadingRoot;
     
     private string[] strPassword = new string[]{"Please Input Password", "请输入原密码"};
     private string[] strNewPassword = new string[]{"Please Input New Password", "请输入新密码"};
@@ -36,6 +41,7 @@ public class BackendLogic : MonoBehaviour
     private string[] strError = new string[]{"Error!", "输入错误!"};
 	private string[] strAccountPassword = new string[]{"Input Account Password", "请输入账户密码"};
 	private string[] strDeviceId = new string[]{"Device Id", "请输入设备Id"};
+	private string[] strSetError = new string[]{"Only host device can enter.", "只有主机可以进入"};
 
     void Start()
     {
@@ -47,6 +53,12 @@ public class BackendLogic : MonoBehaviour
 		dlgCalc = GameObject.Find("Canvas/Calc");
         calcPassword.text = calcTitle.text = calcContent.text = string.Empty;
         InitMain();
+
+		if (GameData.GetInstance().deviceIndex == 1)
+		{
+			host = GetComponent<AccountNetwork>();
+			host.enabled = true;
+		}
     }
 
     void OnDestroy()
@@ -267,6 +279,11 @@ public class BackendLogic : MonoBehaviour
 
     private void InitSetting()
     {
+		if (GameData.GetInstance().deviceIndex > 1)
+		{
+			ShowWarning(strSetError[GameData.GetInstance().language], true);
+			return;
+		}
         menuMain.SetActive(false);
         menuSetting.SetActive(true);
         menuAccount.SetActive(false);
@@ -315,18 +332,106 @@ public class BackendLogic : MonoBehaviour
         GameObject languageRoot = SetLanguage(menuAccount.gameObject);
         SetActiveTitles(languageRoot.transform);
 
-        Transform itemRoot = menuAccount.transform.FindChild("ItemsRoot");
-        if (itemRoot != null)
-        {
-            string prefabName = GameData.controlCode ? "Account/AccountItem CC" : "Account/AccountItem NCC";
-            Object prefab = (Object)Resources.Load(prefabName);
-            GameObject go = (GameObject)Instantiate(prefab);
-            go.transform.SetParent(itemRoot);
-            go.transform.localScale = Vector3.one;
-//            go.transform.localPosition = 
-            prefab = null;
-        }
+		otherDevice.Clear();
+		int deviceIndex = GameData.GetInstance().deviceIndex;
+		if (!otherDevice.ContainsKey(deviceIndex))
+		{
+			AccountItem item = new AccountItem();
+			item.deviceIndex = deviceIndex;
+			item.keyin = GameData.GetInstance().zongShang;
+			item.keout = GameData.GetInstance().zongXia;
+			item.receiveCoin = GameData.GetInstance().zongTou;
+			item.payCoin = GameData.GetInstance().zongTui;
+			item.winnings = GameData.GetInstance().currentWin;
+			item.totalWinnings = GameData.GetInstance().totalWin;
+			item.card = GameData.GetInstance().cardCredits;
+			otherDevice.Add(deviceIndex, item);
+		}
+
+		if (accountItemRoot == null)
+			accountItemRoot = menuAccount.transform.FindChild("ItemsRoot");
+		if (loadingRoot == null)
+			loadingRoot = menuAccount.transform.FindChild("LoadingTextRoot");
+		if (loadingRoot != null)
+		{
+			float basePosY = 325;
+			float dist = 45;
+			for (int i = 0; i < GameData.GetInstance().MaxNumOfPlayers; ++i)
+			{
+				Object prefab = (Object)Resources.Load("Account/LoadingText");
+				GameObject go = (GameObject)Instantiate(prefab);
+				go.transform.SetParent(loadingRoot);
+				go.transform.localScale = Vector3.one;
+				go.transform.localPosition = new Vector3(-85, basePosY - dist * i, 0);
+				go.GetComponent<LoadingText>().baseText = "Device " + (i + 1) + " is loading";
+				go.name = "LoadingText" + i;
+				prefab = null;
+			}
+		}
+
+		timerRefreshAccounts = new Timer(1, 1, TimerType.Loop);
+		timerRefreshAccounts.Tick += RefreshAccounts;
+		timerRefreshAccounts.Start();
     }
+
+	private void RefreshAccounts()
+	{
+		foreach (KeyValuePair<int, AccountItem> item in otherDevice)
+		{
+			int id = item.Key;
+			if (loadingRoot != null)
+			{
+				Transform t = loadingRoot.FindChild("LoadingText" + (id - 1));
+				if (t != null && accountItemRoot != null)
+				{
+					string prefabName = GameData.controlCode ? "Account/AccountItem CC" : "Account/AccountItem NCC";
+					Object prefab = (Object)Resources.Load(prefabName);
+					GameObject go = (GameObject)Instantiate(prefab);
+					go.transform.SetParent(accountItemRoot);
+					go.transform.localScale = Vector3.one;
+					go.transform.localPosition = new Vector3(0, t.localPosition.y, 0);
+					go.transform.FindChild("idx").GetComponent<Text>().text = item.Value.deviceIndex.ToString();
+					go.transform.FindChild("keyin").GetComponent<Text>().text = item.Value.keyin.ToString();
+					go.transform.FindChild("keout").GetComponent<Text>().text = item.Value.keout.ToString();
+					go.transform.FindChild("tou").GetComponent<Text>().text = item.Value.receiveCoin.ToString();
+					go.transform.FindChild("tui").GetComponent<Text>().text = item.Value.payCoin.ToString();
+					if (GameData.controlCode)
+						go.transform.FindChild("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
+					go.transform.FindChild("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
+					go.transform.FindChild("card").GetComponent<Text>().text = item.Value.card.ToString();
+					prefab = null;
+					Destroy(t.gameObject);
+				}
+			}
+		}
+	}
+
+	public void AccountExitEvent(Transform hitObject)
+	{
+		otherDevice.Clear();
+		if (accountItemRoot == null)
+			accountItemRoot = menuAccount.transform.FindChild("ItemsRoot");
+		if (accountItemRoot != null)
+		{
+			foreach (Transform t in accountItemRoot)
+				Destroy(t.gameObject);
+		}
+
+		Transform loadingRoot = menuAccount.transform.FindChild("LoadingTextRoot");
+		if (loadingRoot != null)
+		{
+			foreach (Transform t in loadingRoot)
+				Destroy(t.gameObject);
+		}
+
+		timerRefreshAccounts.Stop();
+		timerRefreshAccounts = null;
+
+		menuMain.SetActive(true);
+		menuSetting.SetActive(false);
+		menuAccount.SetActive(false);
+		dlgCalc.SetActive(false);
+	}
 
     private void InitPasswordDlg()
     {
@@ -651,6 +756,8 @@ public class BackendLogic : MonoBehaviour
     {
         if (timerHideWarning != null)
             timerHideWarning.Update(Time.deltaTime);
+		if (timerRefreshAccounts != null)
+			timerRefreshAccounts.Update(Time.deltaTime);
     }
 
     private void LimitValue(string name, ref int value)
@@ -733,4 +840,41 @@ public class BackendLogic : MonoBehaviour
                 value = 37;
         }
     }
+
+	public void HandleRecData(ref string[] words, int connectionId)
+	{
+		int instr;
+		if (!int.TryParse(words[0], out instr))
+			return;
+
+		if (instr == NetInstr.CheckAccount)
+		{
+			int deviceIndex;
+			if (int.TryParse(words[1], out deviceIndex))
+			{
+				if (otherDevice.ContainsKey(deviceIndex))
+					return;
+
+				AccountItem item = new AccountItem();
+				item.deviceIndex = deviceIndex;
+				int zongShang, zongXia, zongTou, zongTui, winnings, totalWinnings, card;
+				if (int.TryParse(words[2], out zongShang))
+					item.keyin = zongShang;
+				if (int.TryParse(words[3], out zongXia))
+					item.keout = zongXia;
+				if (int.TryParse(words[4], out zongTou))
+					item.receiveCoin = zongTou;
+				if (int.TryParse(words[5], out zongTui))
+					item.payCoin = zongTui;
+				if (int.TryParse(words[6], out winnings))
+					item.winnings = winnings;
+				if (int.TryParse(words[7], out totalWinnings))
+					item.totalWinnings = totalWinnings;
+				if (int.TryParse(words[8], out card))
+					item.card = card;
+
+				otherDevice.Add(deviceIndex, item);
+			}
+		}
+	}
 }

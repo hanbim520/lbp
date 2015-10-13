@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class ClientLogic : GameLogic
 {
+	private UClient uclient;
+
     private void Init()
     {
         gamePhase = GamePhase.GameEnd;
@@ -19,6 +21,7 @@ public class ClientLogic : GameLogic
         }
         else
             GetComponent<UClient>().enabled = true;
+		uclient = GetComponent<UClient>();
         Init();
         RegisterListener();
 	}
@@ -65,6 +68,21 @@ public class ClientLogic : GameLogic
         {
             HandleGamePhase(ref words);
         }
+		else if (instr == NetInstr.CheckAccount)
+		{
+			SendAccountToHost();
+		}
+	}
+
+	private void SendAccountToHost()
+	{
+		string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}", 
+		                           NetInstr.CheckAccount, GameData.GetInstance().deviceIndex, 
+		                           GameData.GetInstance().zongShang, GameData.GetInstance().zongXia,
+		                           GameData.GetInstance().zongTou, GameData.GetInstance().zongTui,
+		                           GameData.GetInstance().currentWin, GameData.GetInstance().totalWin,
+		                           GameData.GetInstance().cardCredits);
+		uclient.SendToServer(msg);
 	}
 
     private void HandleGamePhase(ref string[] words)

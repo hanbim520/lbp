@@ -912,4 +912,9 @@ public class MainUILogic : MonoBehaviour
 	{
 		lblRemember.text = str;
 	}
+
+	public void OpenKey()
+	{
+		ActiveDlgCard(true);
+	}
 }

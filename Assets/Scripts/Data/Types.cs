@@ -22,10 +22,8 @@ public struct NetInstr
 	public const int SynData = 1;
 	public const int GamePhase = 2;
     public const int Bet = 3;
-    public const int LimitBet = 4;
-    public const int NoLimitBet = 5;
-    public const int GetGamePhase = 6;
-    public const int GameResult = 7;
+    public const int GetGamePhase = 4;
+	public const int CheckAccount = 5;
 }
 
 // Use for network
@@ -82,6 +80,8 @@ public struct Scenes
     public static string StartInfo = "StartInfo";
     public static string Backend = "Backend";
 	public static string Last10 = "LastTen";
+	public static string Account = "Account";
+	public static string TouchCheck = "TouchCheck";
 }
 
 public struct CardMode
@@ -99,5 +99,18 @@ public struct KeyinKeoutRecord
     public int keout;
     public int toubi;
     public int tuibi;
+	public int card;
+}
+
+// 分机账目
+public struct AccountItem
+{
+	public int deviceIndex;
+	public int keyin;
+	public int keout;
+	public int receiveCoin;
+	public int payCoin;
+	public int winnings;
+	public int totalWinnings;
 	public int card;
 }

@@ -11,8 +11,12 @@ public class Account : MonoBehaviour
     public Transform daybookItemRoot;
 	public Transform accountRoot;
 
+	private RectTransform mouseIcon;
+	private GameObject downHitObject;
+
 	void Start()
 	{
+		mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
 		SetLanguage();
 		RecoverDaybook();
 		RecoverAccount();
@@ -79,4 +83,66 @@ public class Account : MonoBehaviour
         root.GetChild(nonactiveIdx).gameObject.SetActive(false);
         return activeIdx;
     }
+
+	public void ExitEvent(Transform hitObject)
+	{
+		Application.LoadLevel(Scenes.StartInfo);
+	}
+
+	void Update()
+	{
+        DetectInputEvents();
+	}
+
+	private void DetectInputEvents()
+	{
+		if (InputEx.GetInputDown())
+		{
+			Vector2 pos;
+			InputEx.InputDownPosition(out pos);
+			if (pos == new Vector2(-1, -1))
+				return;
+			
+			float sx, sy;
+			Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
+			RaycastHit2D[] hit = Physics2D.RaycastAll(new Vector2(sx, sy), Vector2.zero);
+			if (hit.Length == 0)
+				return;
+			
+			int idx = 0;
+			if (hit.Length > 1)
+			{
+				for (int i = 0; i < hit.Length; ++i)
+				{
+					if (hit[i].collider.tag == "Dialog")
+					{
+						idx = i;
+						break;
+					}
+				}
+			}
+			if (hit[idx].collider != null)
+			{
+				hit[idx].collider.gameObject.GetComponent<ButtonEvent>().OnInputDown(hit[idx].collider.transform);
+				downHitObject = hit[idx].collider.gameObject;
+			}
+			
+			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+		}
+		else if (InputEx.GetInputUp())
+		{
+			Vector2 pos;
+			InputEx.InputUpPosition(out pos);
+			if (pos == new Vector2(-1, -1))
+				return;
+			
+			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+			
+			if (downHitObject != null)
+			{
+				downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
+			}
+			downHitObject = null;
+		}
+	}
 }

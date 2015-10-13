@@ -142,12 +142,4 @@ public class UClient : MonoBehaviour
 		byte error;
 		NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
 	}
-
-//	void OnGUI()
-//	{
-//		if (GUI.Button(new Rect(10, 50, 100, 50), "To test"))
-//		{
-//			Application.LoadLevel("test");
-//		}
-//	}
 }

@@ -240,12 +240,7 @@ public class ServerLogic : GameLogic
             return;
         }
         
-        if (instr == NetInstr.Bet)
-        {
-			// 限红
-//            LimitBet(ref words, connectionId);
-        }
-        else if (instr == NetInstr.GetGamePhase)
+        if (instr == NetInstr.GetGamePhase)
         {
             host.SendToPeer(NetInstr.GamePhase + ":" + gamePhase, connectionId);
         }

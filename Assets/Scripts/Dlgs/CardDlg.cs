@@ -127,21 +127,11 @@ public class CardDlg : MonoBehaviour
 
 	private void System()
 	{
-		if (GameData.GetInstance().deviceIndex > 1)
-		{
-			// TODO: Client
-			DisalbeCalc();
-			return;
-		}
-		else
-		{
-			// Host
-			EnableCalc();
-			passwordMode = true;
-			passwordType = 1;
-			int idx = GameData.GetInstance().language;
-			SetCalcTitle(strSysPassword[idx], Color.black);
-		}
+		EnableCalc();
+		passwordMode = true;
+		passwordType = 1;
+		int idx = GameData.GetInstance().language;
+		SetCalcTitle(strSysPassword[idx], Color.black);
 	}
 
 	private void Last10()
@@ -153,6 +143,8 @@ public class CardDlg : MonoBehaviour
 	private void Account()
 	{
 		DisalbeCalc();
+		GameData.GetInstance().NextLevelName = Scenes.Account;
+		Application.LoadLevel(Scenes.Loading);
 	}
 
 	public void CalcDownEvent(Transform hitObject)
