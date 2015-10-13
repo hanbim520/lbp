@@ -487,9 +487,10 @@ public class MainUILogic : MonoBehaviour
 	// 退币按钮
 	public void BackTicketEvent(Transform hitObject)
 	{
-		if (gameLogic.betFields.Count > 0)
+		if (gameLogic.betFields.Count > 0 ||
+		    gameLogic.LogicPhase != GamePhase.GameEnd)
 			return;
-
+		
 	}
 
 	// 优惠卡按钮

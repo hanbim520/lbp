@@ -217,13 +217,23 @@ public class BackendLogic : MonoBehaviour
         SetAlpha(hitObject, 0);
         string name = hitObject.name;
         if (string.Equals(name, "setting"))
-            InitSetting();
+		{
+			if (GameData.GetInstance().deviceIndex == 1)
+            	InitSetting();
+			else
+				ShowWarning(strSetError[GameData.GetInstance().language], true);
+		}
         else if (string.Equals(name, "account"))
 		{
-			dlgCalc.SetActive(true);
-			dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
-			calcTitle.text = strAccountPassword[GameData.GetInstance().language];
-			passwordMode = 2;
+			if (GameData.GetInstance().deviceIndex == 1)
+			{
+				dlgCalc.SetActive(true);
+				dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
+				calcTitle.text = strAccountPassword[GameData.GetInstance().language];
+				passwordMode = 2;
+			}
+			else
+				ShowWarning(strSetError[GameData.GetInstance().language], true);
 		}
         else if (string.Equals(name, "exit"))
 		{

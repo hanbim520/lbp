@@ -119,7 +119,7 @@ public class GameData
 			PlayerPrefs.Save();
 		}
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
-		deviceIndex = 2;
+		deviceIndex = 1;
 
         colorTable.Add(37, ResultType.Green);    // 37: 00
 		colorTable.Add(0, ResultType.Green);
