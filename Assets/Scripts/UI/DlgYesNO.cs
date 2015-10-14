@@ -9,7 +9,6 @@ public class DlgYesNO : MonoBehaviour
     public Transform mouseIcon;
     
 	private GameObject downHitObject;
-	private Transform preSelected;
 	
 	void OnEnable()
 	{
@@ -32,7 +31,6 @@ public class DlgYesNO : MonoBehaviour
 
 	public void FieldDownEvent(Transform hitObject)
 	{
-		preSelected = hitObject;
 		SetAlpha(hitObject, 255);
 	}
 
