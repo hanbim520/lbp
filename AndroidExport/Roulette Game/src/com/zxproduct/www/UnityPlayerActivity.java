@@ -733,23 +733,6 @@ public class UnityPlayerActivity extends Activity
 			else
 			{
 				CallCSLog("没有权限");
-//			 	new Thread() {
-//			 		@Override
-//					public void run() {
-//			 			try {
-//			 				CallCSLog("began 1");
-//							Thread.sleep(5000);
-//							CallCSLog("began 2");
-//							setKeyPress(KeyEvent.KEYCODE_TAB);
-//			            	setKeyPress(KeyEvent.KEYCODE_TAB);
-//			            	setKeyPress(KeyEvent.KEYCODE_TAB);
-//			            	setKeyPress(KeyEvent.KEYCODE_ENTER);
-//						} catch (InterruptedException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
-//			 		}
-//			 	}.start();
 				String ACTION_USB_PERMISSION = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
 				PendingIntent localPendingIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 				mUsbManager.requestPermission(mUsbDevice, localPendingIntent);
@@ -813,10 +796,14 @@ public class UnityPlayerActivity extends Activity
 	    return new int[]{-1};
 	}
 	
-    private void detectHIDViaTimer(){
+    public void detectHIDViaTimer(){
         final Timer detectTimer = new Timer();
         TimerTask detectTimerTask = new TimerTask() {
+        	@Override
             public void run() {
+            	if (bHIDConnected)
+            		return;
+            	
             	boolean bfound = false;
                 UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
                 HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
@@ -847,4 +834,11 @@ public class UnityPlayerActivity extends Activity
 	{
 //		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
 	}
+    
+    //  线号          机号          总利润              当前利润            算码次数 
+    public native String GetPWCheckValue4(long LineID, long CilentID,  long  MaxProfit, long Profit, long CheckCount);
+    
+    static {
+        System.loadLibrary("hello-jni");
+    }
 }

@@ -15,6 +15,7 @@ public class MainUILogic : MonoBehaviour
 	public GameObject cardEffect;
 	public GameObject dlgWarning;
     public GameObject dlgCard;
+	public GameObject dlgYesNO;
 	public GameObject[] cardExplains;
 
 	public int CurChipIdx
@@ -487,10 +488,10 @@ public class MainUILogic : MonoBehaviour
 	// 退币按钮
 	public void BackTicketEvent(Transform hitObject)
 	{
-		if (gameLogic.betFields.Count > 0 ||
-		    gameLogic.LogicPhase != GamePhase.GameEnd)
+		if (gameLogic.betFields.Count > 0)
 			return;
-		
+
+		ActiveDlgYesNO(true);
 	}
 
 	// 优惠卡按钮
@@ -886,12 +887,17 @@ public class MainUILogic : MonoBehaviour
 
     public bool IsDlgActived()
     {
-        return dlgWarning.activeSelf || dlgCard.activeSelf;
+		return dlgWarning.activeSelf || dlgCard.activeSelf || dlgYesNO.activeSelf;
     }
 
 	public void ActiveDlgCard(bool active)
 	{
 		dlgCard.SetActive(active);
+	}
+
+	public void ActiveDlgYesNO(bool active)
+	{
+		dlgYesNO.SetActive(active);
 	}
 
 	public void RefreshLblWin(string str)
