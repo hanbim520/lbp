@@ -744,12 +744,12 @@ public class BackendLogic : MonoBehaviour
         {
             warning.SetActive(true);
             warning.transform.FindChild("Text").GetComponent<Text>().text = str;
-        }
-        if (autoDisappear)
-        {
-            timerHideWarning = new Timer(1.5f, 0);
-            timerHideWarning.Tick += HideWarning;
-            timerHideWarning.Start();
+			if (autoDisappear)
+			{
+				timerHideWarning = new Timer(1.5f, 0);
+				timerHideWarning.Tick += HideWarning;
+				timerHideWarning.Start();
+			}
         }
     }
 

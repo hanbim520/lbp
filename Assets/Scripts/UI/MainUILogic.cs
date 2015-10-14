@@ -40,7 +40,8 @@ public class MainUILogic : MonoBehaviour
     private GameObject downHitObject;
     private List<Transform> lightEffects = new List<Transform>();
 	private Transform flashObject;
-
+    private Timer timerHideWarning;
+	
     void Awake()
     {
         if (GameData.GetInstance().deviceIndex == 1)
@@ -497,7 +498,8 @@ public class MainUILogic : MonoBehaviour
 	// 优惠卡按钮
 	public void CardButtonEvent(Transform hitObject)
 	{
-		if (GameData.GetInstance().IsCardMode == CardMode.YES)
+		if (GameData.GetInstance().IsCardMode == CardMode.YES ||
+		    gameLogic.totalCredits > 0)
 		{
 			return;
 		}
@@ -505,6 +507,7 @@ public class MainUILogic : MonoBehaviour
 		if (GameData.GetInstance().IsCardMode == CardMode.NO)
 		{
 			GameData.GetInstance().IsCardMode = CardMode.Ready;
+
 			// Explain
 			if (GameData.GetInstance().language == 0)
 			{
@@ -724,6 +727,7 @@ public class MainUILogic : MonoBehaviour
 	{
         if (!IsDlgActived())
 		    DetectInputEvents();
+		UpdateTimer();
 	}
 
 	private void DetectInputEvents()
@@ -776,6 +780,12 @@ public class MainUILogic : MonoBehaviour
             }
             downHitObject = null;
         }
+	}
+
+	private void UpdateTimer()
+	{
+		if (timerHideWarning != null)
+			timerHideWarning.Update(Time.deltaTime);
 	}
 
 	public void Countdown()
@@ -870,17 +880,24 @@ public class MainUILogic : MonoBehaviour
 		}
 	}
 
-	public void ShowWarning(string str)
+	public void ShowWarning(string str, bool autoDisappear = false)
 	{
 		if (dlgWarning != null && !dlgWarning.activeSelf)
 		{
 			dlgWarning.SetActive(true);
 			dlgWarning.transform.FindChild("Text").GetComponent<Text>().text = str;
+			if (autoDisappear)
+			{
+				timerHideWarning = new Timer(1.5f, 0);
+				timerHideWarning.Tick += HideWarning;
+				timerHideWarning.Start();
+			}
 		}
 	}
 
 	public void HideWarning()
 	{
+		timerHideWarning = null;
 		if (dlgWarning != null && dlgWarning.activeSelf)
 			dlgWarning.SetActive(false);
 	}

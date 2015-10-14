@@ -71,6 +71,7 @@ public class GameLogic : MonoBehaviour
 	protected int gamePhase = GamePhase.GameEnd;
 	protected int ballValue = -1;
 	protected string[] strBaoji = new string[]{"Please contact the assistant,\ndevice can't pay more.", "请联系服务员，\n该机台达到赢分上限。"};
+	protected string[] strKeoutError = new string[]{"Can't keout now.Total Credits \nshould be greater than {0}.", "现在不能退分。\n总分必须大于 {0}"};
 
 	// Field -- Bet
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
@@ -170,15 +171,27 @@ public class GameLogic : MonoBehaviour
 	// 下分
 	protected void Keout()
 	{
+		ui.ActiveDlgCard(false);
+		if (totalCredits <= 0)
+			return;
+
 		if (GameData.GetInstance().IsCardMode == CardMode.YES)
 		{
 			int couponsKeout = GameData.GetInstance().couponsKeoutRatio * rememberCredits;
 			if (totalCredits < couponsKeout)
+			{
+				string str = string.Format(strKeoutError[GameData.GetInstance().language], couponsKeout);
+				ui.ShowWarning(str, true);
 				return;
+			}
 
 			GameData.GetInstance().IsCardMode = CardMode.NO;
 			ui.DisableCardMode();
 		}
+
+		GameData.GetInstance().AppendKeyinKeoutRecords(0, totalCredits, 0, 0, 0);
+		GameData.GetInstance().zongXia += totalCredits;
+		GameData.GetInstance().SaveAccount();
 
 		totalCredits = 0;
 		ui.RefreshLblCredits(totalCredits.ToString());
@@ -197,32 +210,21 @@ public class GameLogic : MonoBehaviour
 			{
 				GameData.GetInstance().IsCardMode = CardMode.YES;
 				int giveCredits = Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * temp);
-
-//				KeyinKeoutRecord record = new KeyinKeoutRecord();
-//				record.keyin = temp;
-//				record.keout = 0;
-//				record.toubi = 0;
-//				record.tuibi = 0;
-//				record.card = giveCredits;
-//				GameData.GetInstance().keyinKeoutRecords.Add(record);
-
 				temp += giveCredits;
 				totalCredits = temp;
 				rememberCredits = totalCredits;
+				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, giveCredits);
+				GameData.GetInstance().zongShang += delta;
+				GameData.GetInstance().cardCredits += giveCredits;
+				GameData.GetInstance().SaveAccount();
 			}
 			else
 			{
 				rememberCredits = 0;
-
-//				KeyinKeoutRecord record = new KeyinKeoutRecord();
-//				record.keyin = temp;
-//				record.keout = 0;
-//				record.toubi = 0;
-//				record.tuibi = 0;
-//				record.card = 0;
-//				GameData.GetInstance().keyinKeoutRecords.Add(record);
-
 				totalCredits = temp;
+				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, 0);
+				GameData.GetInstance().zongShang += delta;
+				GameData.GetInstance().SaveAccount();
 			}
 			ui.RefreshLblCredits(totalCredits.ToString());
 			ui.RefreshLblRemember(rememberCredits.ToString());
@@ -230,11 +232,13 @@ public class GameLogic : MonoBehaviour
 		else if (GameData.GetInstance().IsCardMode == CardMode.YES)
 		{
 			int giveCredits = Mathf.FloorToInt(GameData.GetInstance().couponsKeyinRatio * 0.01f * delta);
-
-
 			delta = delta + giveCredits;
 			rememberCredits = rememberCredits + delta;
 			totalCredits = totalCredits + delta;
+			GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, giveCredits);
+			GameData.GetInstance().zongShang += delta;
+			GameData.GetInstance().cardCredits += giveCredits;
+			GameData.GetInstance().SaveAccount();
 
 			ui.RefreshLblCredits(totalCredits.ToString());
 			ui.RefreshLblRemember(rememberCredits.ToString());
@@ -243,6 +247,10 @@ public class GameLogic : MonoBehaviour
 		{
 			totalCredits += delta;
 			rememberCredits = 0;
+			GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, 0);
+			GameData.GetInstance().zongShang += delta;
+			GameData.GetInstance().SaveAccount();
+
 			ui.RefreshLblCredits(totalCredits.ToString());
 			ui.RefreshLblRemember(string.Empty);
 		}

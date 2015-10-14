@@ -252,6 +252,9 @@ public class GameData
         CryptoPrefs.SetInt("zongXia", zongXia);
         CryptoPrefs.SetInt("zongTou", zongTou);
         CryptoPrefs.SetInt("zongTui", zongTui);
+		CryptoPrefs.SetInt("currentWin", currentWin);
+		CryptoPrefs.SetInt("totalWin", totalWin);
+		CryptoPrefs.SetInt("cardCredits", cardCredits);
         CryptoPrefs.Save();
     }
 
@@ -261,6 +264,9 @@ public class GameData
         zongXia = 0;
         zongTou = 0;
         zongTui = 0;
+		currentWin = 0;
+		totalWin = 0;
+		cardCredits = 0;
     }
 
     public void ReadDataFromDisk()
@@ -322,6 +328,9 @@ public class GameData
             zongXia = CryptoPrefs.GetInt("zongXia");
             zongTou = CryptoPrefs.GetInt("zongTou");
             zongTui = CryptoPrefs.GetInt("zongTui");
+			currentWin = CryptoPrefs.GetInt("currentWin");
+			totalWin = CryptoPrefs.GetInt("totalWin");
+			cardCredits = CryptoPrefs.GetInt("cardCredits");
 
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
