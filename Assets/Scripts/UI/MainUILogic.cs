@@ -44,10 +44,15 @@ public class MainUILogic : MonoBehaviour
 	
     void Awake()
     {
+        string logicName = "";
         if (GameData.GetInstance().deviceIndex == 1)
-            gameLogic = GameObject.Find("ServerLogic").GetComponent<GameLogic>();
+            logicName = "ServerLogic";
         else
-            gameLogic = GameObject.Find("ClientLogic").GetComponent<GameLogic>();
+            logicName = "ClientLogic";
+        Object prefab = (Object)Resources.Load("Logics/" + logicName);
+        GameObject go = (GameObject)Instantiate(prefab);
+        go.name = logicName;
+        prefab = null;
     }
 
 	void Start()

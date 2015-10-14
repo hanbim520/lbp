@@ -14,6 +14,7 @@ public class ServerLogic : GameLogic
     private void Init()
     {
         host = GetComponent<UHost>();
+        hidUtils = GameObject.Find("HIDUtils").GetComponent<HIDUtils>();
     }
 
     protected override void Start() 

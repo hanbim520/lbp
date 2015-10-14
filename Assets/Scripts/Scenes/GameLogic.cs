@@ -135,6 +135,7 @@ public class GameLogic : MonoBehaviour
 
     protected virtual void Start()
     {
+        ui = GameObject.Find("UILogic").GetComponent<MainUILogic>();
 		FixExitAbnormally();
         RegisterEvents();
     }
