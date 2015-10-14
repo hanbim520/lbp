@@ -41,7 +41,9 @@ public class MainUILogic : MonoBehaviour
     private List<Transform> lightEffects = new List<Transform>();
 	private Transform flashObject;
     private Timer timerHideWarning;
-	
+    private string[] strCardError = new string[]{"If you want to use Presented\nCredits, you have to use up all\ncredits, and then keyin agian.",
+        "要使用优惠卡，\n须从0分开始充值。"};
+
     void Awake()
     {
         string logicName = "";
@@ -53,7 +55,11 @@ public class MainUILogic : MonoBehaviour
         GameObject go = (GameObject)Instantiate(prefab);
         go.name = logicName;
         prefab = null;
-    }
+        if (GameData.GetInstance().deviceIndex == 1)
+            gameLogic = go.GetComponent<ServerLogic>();
+        else
+            gameLogic = go.GetComponent<ClientLogic>();
+     }
 
 	void Start()
 	{
@@ -494,7 +500,8 @@ public class MainUILogic : MonoBehaviour
 	// 退币按钮
 	public void BackTicketEvent(Transform hitObject)
 	{
-		if (gameLogic.betFields.Count > 0)
+		if (gameLogic.betFields.Count > 0 ||
+            gameLogic.totalCredits == 0)
 			return;
 
 		ActiveDlgYesNO(true);
@@ -503,11 +510,16 @@ public class MainUILogic : MonoBehaviour
 	// 优惠卡按钮
 	public void CardButtonEvent(Transform hitObject)
 	{
-		if (GameData.GetInstance().IsCardMode == CardMode.YES ||
-		    gameLogic.totalCredits > 0)
+		if (GameData.GetInstance().IsCardMode == CardMode.YES)
 		{
 			return;
 		}
+
+        if (gameLogic.totalCredits > 0)
+        {
+            ShowWarning(strCardError[GameData.GetInstance().language], true, 4f);
+            return;
+        }
 
 		if (GameData.GetInstance().IsCardMode == CardMode.NO)
 		{
@@ -885,7 +897,7 @@ public class MainUILogic : MonoBehaviour
 		}
 	}
 
-	public void ShowWarning(string str, bool autoDisappear = false)
+	public void ShowWarning(string str, bool autoDisappear = false, float duration = 1.5f)
 	{
 		if (dlgWarning != null && !dlgWarning.activeSelf)
 		{
@@ -893,7 +905,7 @@ public class MainUILogic : MonoBehaviour
 			dlgWarning.transform.FindChild("Text").GetComponent<Text>().text = str;
 			if (autoDisappear)
 			{
-				timerHideWarning = new Timer(1.5f, 0);
+                timerHideWarning = new Timer(duration, 0);
 				timerHideWarning.Tick += HideWarning;
 				timerHideWarning.Start();
 			}
@@ -942,8 +954,15 @@ public class MainUILogic : MonoBehaviour
 		lblRemember.text = str;
 	}
 
+    // 旋转物理钥匙
 	public void OpenKey()
 	{
 		ActiveDlgCard(true);
 	}
+
+    public void ActiveBackendTip(string tip)
+    {
+        backendTip.SetActive(true);
+        backendTip.transform.FindChild("Text").GetComponent<Text>().text = tip;
+    }
 }

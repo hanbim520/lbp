@@ -72,6 +72,8 @@ public class GameLogic : MonoBehaviour
 	protected int ballValue = -1;
 	protected string[] strBaoji = new string[]{"Please contact the assistant,\ndevice can't pay more.", "请联系服务员，\n该机台达到赢分上限。"};
 	protected string[] strKeoutError = new string[]{"Can't keout now.Total Credits \nshould be greater than {0}.", "现在不能退分。\n总分必须大于 {0}"};
+    protected bool bChangeScene = false;    // From main scene to anothers
+    protected string strNextSceneName;
 
 	// Field -- Bet
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
@@ -155,6 +157,7 @@ public class GameLogic : MonoBehaviour
 		GameEventManager.FieldClick += Bet;
 		GameEventManager.HIDDisconnected += HIDDisconnected;
 		GameEventManager.HIDConnected += HIDConnected;
+        GameEventManager.ChangeScene += ReadyToChangeScene;
     }
 
     private void UnregisterEvents()
@@ -167,6 +170,7 @@ public class GameLogic : MonoBehaviour
 		GameEventManager.FieldClick -= Bet;
 		GameEventManager.HIDConnected -= HIDConnected;
 		GameEventManager.HIDDisconnected -= HIDDisconnected;
+        GameEventManager.ChangeScene -= ReadyToChangeScene;
     }
 
 	// 下分
@@ -386,5 +390,19 @@ public class GameLogic : MonoBehaviour
             GameData.GetInstance().betRecords.RemoveAt(0);
         }
         GameData.GetInstance().SaveBetRecords();
+    }
+
+    protected void ReadyToChangeScene(string sceneName)
+    {
+        bChangeScene = true;
+        strNextSceneName = sceneName;
+        ui.ActiveBackendTip("Ready To\n" + sceneName);
+    }
+
+    protected void ChangeScene()
+    {
+        bChangeScene = false;
+        GameData.GetInstance().NextLevelName = strNextSceneName;
+        Application.LoadLevel(Scenes.Loading);
     }
 }

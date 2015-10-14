@@ -93,6 +93,12 @@ public class ClientLogic : GameLogic
             gamePhase = phase;
             if (gamePhase == GamePhase.Countdown)
             {
+                ui.backendTip.SetActive(false);
+                if (bChangeScene)
+                {
+                    ChangeScene();
+                    return;
+                }
                 Countdown();
             }
             else if (gamePhase == GamePhase.ShowResult)

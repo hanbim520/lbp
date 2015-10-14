@@ -14,6 +14,7 @@ public static class GameEventManager
 	public delegate void BallValueEvent(int ballValue);
     public delegate void KeyinEvent(int delta);
     public delegate void NetworkReadyEvent(bool value);
+    public delegate void ChangeSceneEvent(string sceneName);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
@@ -27,6 +28,7 @@ public static class GameEventManager
     public static event FieldClickEvent FieldClick;
 	public static event KeyinEvent Keyin;	// 上分
 	public static event GameEvent Keout;
+    public static event ChangeSceneEvent ChangeScene;
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
@@ -176,4 +178,9 @@ public static class GameEventManager
 	{
 		if (Keout != null) Keout();
 	}
+
+    public static void OnChangeScene(string sceneName)
+    {
+        if (ChangeScene != null) ChangeScene(sceneName);
+    }
 }

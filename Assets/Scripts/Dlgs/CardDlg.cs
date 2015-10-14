@@ -136,15 +136,15 @@ public class CardDlg : MonoBehaviour
 
 	private void Last10()
 	{
-		GameData.GetInstance().NextLevelName = Scenes.Last10;
-		Application.LoadLevel(Scenes.Loading);
+        GameEventManager.OnChangeScene(Scenes.Last10);
+        gameObject.SetActive(false);
 	}
 
 	private void Account()
 	{
 		DisalbeCalc();
-		GameData.GetInstance().NextLevelName = Scenes.Account;
-		Application.LoadLevel(Scenes.Loading);
+        GameEventManager.OnChangeScene(Scenes.Account);
+        gameObject.SetActive(false);
 	}
 
 	public void CalcDownEvent(Transform hitObject)
@@ -215,8 +215,8 @@ public class CardDlg : MonoBehaviour
                 {
                     print("sys p : " + GameData.GetInstance().systemPassword);
                     print("txtpassword : " + txtPassword);
-                    GameData.GetInstance().NextLevelName = Scenes.Backend;
-                    Application.LoadLevel(Scenes.Loading);
+                    GameEventManager.OnChangeScene(Scenes.Backend);
+                    gameObject.SetActive(false);
                 }
                 else
                 {

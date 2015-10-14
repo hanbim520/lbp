@@ -5,9 +5,6 @@ using System.Collections.Generic;
 public class ServerLogic : GameLogic 
 {
 	public HIDUtils hidUtils;
-    private float timeInterval = 0;
-    private float longPressTime = 3;
-    private bool bLoadBackend = false;
 	private UHost host;
     private float waitSendTime = 0.1f;
     
@@ -58,37 +55,16 @@ public class ServerLogic : GameLogic
 	void Update()
     {
 #if UNITY_EDITOR
-		if (!bLoadBackend && Input.GetKey(KeyCode.Return))
-		{
-			timeInterval += Time.deltaTime;
-			if (timeInterval > longPressTime)
-			{
-				timeInterval = 0;
-				bLoadBackend = true;
-				StartCoroutine(LoadBackend());
-				ui.backendTip.SetActive(true);
-			}
-		}
 		if (Input.GetKeyUp(KeyCode.Escape))
 		{
 			ui.ActiveDlgCard(true);
 		}
 #endif
 	}
-	
-	private IEnumerator LoadBackend()
-	{
-		yield return new WaitForSeconds(2.0f);
-        GameData.GetInstance().NextLevelName = Scenes.Backend;
-		Application.LoadLevel(Scenes.Loading);
-    }
 
     private void GameOver()
     {
-        if (bLoadBackend)
-            LoadBackend();
-        else
-            StartCoroutine(NextRound());
+        StartCoroutine(NextRound());
     }
 
     private IEnumerator NextRound()
@@ -99,6 +75,12 @@ public class ServerLogic : GameLogic
 
     private void GameStart()
     {
+        ui.backendTip.SetActive(false);
+        if (bChangeScene)
+        {
+            ChangeScene();
+            return;
+        }
         gamePhase = GamePhase.GameStart;
 		ui.ResetCountdown();
         StartCoroutine(Countdown());
