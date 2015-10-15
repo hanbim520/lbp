@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public class GameData
 {
 	public static bool debug = true;
-    public static bool controlCode = false;
+    public static bool controlCode = true;
 
     // Setting menu
     public int betTimeLimit;
@@ -42,10 +42,41 @@ public class GameData
 	public int totalWin;	// 总赢分
 	public int cardCredits;	// 优惠卡送的分
 	public Queue<KeyinKeoutRecord> keyinKeoutRecords = new Queue<KeyinKeoutRecord>();		// 上下分 投退币流水账
+	public int printCodeTime
+	{
+		get { return _printCodeTime; }
+		set
+		{
+			_printCodeTime = value;
+			SavePrintCodeTime();
+		}
+	}
+	private int _printCodeTime;	// 打码次数
 
-	public string deviceId; // unique string
-	public int deviceIndex;	// 1, 2, 3...
-	public Dictionary<int, string> clientsId;
+	public int lineId = 286; 	// 线号
+	private int _machineId;		// 机台号
+	public int machineId
+	{
+		get { return _machineId; }
+		set 
+		{ 
+			_machineId = value;
+			PlayerPrefs.SetInt("machineId", _machineId);
+			PlayerPrefs.Save();
+		}
+	}
+	private int _hostMachineId;	// 主机的机台号(在分机变主机时使用)
+	public int hostMachineId
+	{
+		get { return _hostMachineId; }
+		set
+		{
+			_hostMachineId = value;
+			PlayerPrefs.SetInt("hostMachineId", _hostMachineId);
+			PlayerPrefs.Save();
+		}
+	}
+	public int deviceIndex;	 	// 机台序号 1, 2, 3...
 
 	// Serial mouse coordinates
 	public float serialMouseX;
@@ -111,13 +142,6 @@ public class GameData
 
 	private GameData()
 	{
-		deviceId = PlayerPrefs.GetString("deviceId", string.Empty);
-		if (deviceId == string.Empty)
-		{
-			deviceId = Guid.NewGuid().ToString();
-			PlayerPrefs.SetString("deviceId", deviceId);
-			PlayerPrefs.Save();
-		}
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 		deviceIndex = 1;
 
@@ -267,6 +291,7 @@ public class GameData
 		currentWin = 0;
 		totalWin = 0;
 		cardCredits = 0;
+		_printCodeTime = 0;
     }
 
     public void ReadDataFromDisk()
@@ -331,6 +356,7 @@ public class GameData
 			currentWin = CryptoPrefs.GetInt("currentWin");
 			totalWin = CryptoPrefs.GetInt("totalWin");
 			cardCredits = CryptoPrefs.GetInt("cardCredits");
+			_printCodeTime = CryptoPrefs.GetInt("printCodeTime");
 
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
@@ -555,5 +581,11 @@ public class GameData
 			record.card = PlayerPrefs.GetInt("daybook_card" + i);
 			keyinKeoutRecords.Enqueue(record);
 		}
+	}
+
+	public void SavePrintCodeTime()
+	{
+		CryptoPrefs.SetInt("printCodeTime", _printCodeTime);
+		CryptoPrefs.Save();
 	}
 }
