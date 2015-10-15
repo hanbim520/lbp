@@ -837,6 +837,10 @@ public class UnityPlayerActivity extends Activity
     
     //  线号          机号          总利润              当前利润            算码次数 
     public native String GetPWCheckValue4(long LineID, long CilentID,  long  MaxProfit, long Profit, long CheckCount);
+    public String GetCheckCode(long LineID, long CilentID,  long  MaxProfit, long Profit, long CheckCount)
+    {
+    	return GetPWCheckValue4(LineID, CilentID, MaxProfit, Profit, CheckCount);
+    }
     
     static {
         System.loadLibrary("hello-jni");

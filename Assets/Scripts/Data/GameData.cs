@@ -42,41 +42,56 @@ public class GameData
 	public int totalWin;	// 总赢分
 	public int cardCredits;	// 优惠卡送的分
 	public Queue<KeyinKeoutRecord> keyinKeoutRecords = new Queue<KeyinKeoutRecord>();		// 上下分 投退币流水账
-	public int printCodeTime
+    private int _printTimes;   // 打码次数
+    public int printTimes
 	{
-		get { return _printCodeTime; }
+		get { return _printTimes; }
 		set
 		{
-			_printCodeTime = value;
-			SavePrintCodeTime();
+			_printTimes = value;
+			SavePrintTimes();
 		}
 	}
-	private int _printCodeTime;	// 打码次数
+    private int _remainSecs; // 剩余打码时间
+    public int remainSecs
+    {
+        get { return _remainSecs; }
+        set
+        {
+            _remainSecs = value;
+            PlayerPrefs.SetInt("remainSecs", _remainSecs);
+            PlayerPrefs.Save();
+        }
+    }
 
-	public int lineId = 286; 	// 线号
-	private int _machineId;		// 机台号
-	public int machineId
-	{
-		get { return _machineId; }
-		set 
-		{ 
-			_machineId = value;
-			PlayerPrefs.SetInt("machineId", _machineId);
-			PlayerPrefs.Save();
-		}
-	}
-	private int _hostMachineId;	// 主机的机台号(在分机变主机时使用)
-	public int hostMachineId
-	{
-		get { return _hostMachineId; }
-		set
-		{
-			_hostMachineId = value;
-			PlayerPrefs.SetInt("hostMachineId", _hostMachineId);
-			PlayerPrefs.Save();
-		}
-	}
-	public int deviceIndex;	 	// 机台序号 1, 2, 3...
+
+
+    private int _lineId;        // 线号
+    public int lineId
+    {
+        get { return _lineId; }
+        set
+        {
+            _lineId = value;
+            PlayerPrefs.SetInt("lineId", _lineId);
+            PlayerPrefs.Save();
+        }
+    }
+
+    private int _machineId;		// 机台号 8位
+    public int machineId
+    {
+        get { return _machineId; }
+        set 
+        { 
+            _machineId = value;
+            PlayerPrefs.SetInt("machineId", _machineId);
+            PlayerPrefs.Save();
+        }
+    }
+
+    public int deviceIndex;     // 机台序号 1, 2, 3...
+
 
 	// Serial mouse coordinates
 	public float serialMouseX;
@@ -291,7 +306,7 @@ public class GameData
 		currentWin = 0;
 		totalWin = 0;
 		cardCredits = 0;
-		_printCodeTime = 0;
+		_printTimes = 0;
     }
 
     public void ReadDataFromDisk()
@@ -356,7 +371,7 @@ public class GameData
 			currentWin = CryptoPrefs.GetInt("currentWin");
 			totalWin = CryptoPrefs.GetInt("totalWin");
 			cardCredits = CryptoPrefs.GetInt("cardCredits");
-			_printCodeTime = CryptoPrefs.GetInt("printCodeTime");
+			_printTimes = CryptoPrefs.GetInt("printCodeTime");
 
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
@@ -583,9 +598,9 @@ public class GameData
 		}
 	}
 
-	public void SavePrintCodeTime()
+	public void SavePrintTimes()
 	{
-		CryptoPrefs.SetInt("printCodeTime", _printCodeTime);
+		CryptoPrefs.SetInt("printCodeTime", _printTimes);
 		CryptoPrefs.Save();
 	}
 }

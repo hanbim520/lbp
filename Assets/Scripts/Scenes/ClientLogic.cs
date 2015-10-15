@@ -217,6 +217,7 @@ public class ClientLogic : GameLogic
         int betChipValue0, betChipValue1, betChipValue2, betChipValue3, betChipValue4, betChipValue5;
         int couponsStart, couponsKeyinRatio, couponsKeoutRatio;
         int maxNumberOfFields;
+        int lineId, machineId;
 
         if(int.TryParse(words[1], out betTimeLimit))
             GameData.GetInstance().betTimeLimit = betTimeLimit;
@@ -262,6 +263,11 @@ public class ClientLogic : GameLogic
 
         if(int.TryParse(words[20], out maxNumberOfFields))
             GameData.GetInstance().maxNumberOfFields = maxNumberOfFields;
+
+        if(int.TryParse(words[21], out lineId))
+            GameData.GetInstance().lineId = lineId;
+        if(int.TryParse(words[22], out machineId))
+            GameData.GetInstance().machineId = machineId;
 
         GameData.GetInstance().SaveSetting();
         ui.SetDisplay();
