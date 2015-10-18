@@ -1,6 +1,9 @@
 package com.zxproduct.www;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -11,6 +14,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.security.InvalidParameterException;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import com.unity3d.player.*;
 
@@ -46,7 +57,9 @@ public class UnityPlayerActivity extends Activity
 {
 	protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
 	private String TAG = "Unity";
-
+	private char[] encryKey = new char[]{'W', '3', 'c', 'd', '9', 'X'};
+    private int encryIndex = 0;
+	    
 	// Setup activity layout
 	@Override protected void onCreate (Bundle savedInstanceState)
 	{
@@ -65,6 +78,9 @@ public class UnityPlayerActivity extends Activity
 		setContentView(mUnityPlayer);
 		mUnityPlayer.requestFocus();
 		detectHIDViaTimer();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+        registerReceiver(mReceiver, intentFilter);
 	}
 
 	// Quit Unity
@@ -841,6 +857,107 @@ public class UnityPlayerActivity extends Activity
     {
     	return GetPWCheckValue4(LineID, CilentID, MaxProfit, Profit, CheckCount);
     }
+    
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() 
+	{
+        @Override
+        public void onReceive(Context context, Intent intent) 
+        {
+        	if (intent.getAction().equals(Intent.ACTION_MEDIA_MOUNTED))
+	   		{
+	   			String path = intent.getData().getPath();
+	   			if (path.contains("/mnt/usbhost"))
+	   			{
+	   				getFiles(path);
+	   			}
+	   		}
+        }
+    };
+    
+    private void getFiles(String filePath)
+	{
+    	File root = new File(filePath);
+	    File[] files = root.listFiles();
+	    String fileName = "update";
+	    for(File file:files)
+	    {     
+	    	if(!file.isDirectory())
+	    	{
+	    		if (file.getName().equals(fileName))
+	    		{
+	    			decryFile(file);
+	    		}
+	    	}  
+	    }
+	}
+    
+    private void decryFile(File file) {
+		InputStream in = null;
+		OutputStream out = null;
+		encryIndex = 0;
+		try {
+			in = new FileInputStream(file);
+			out = new FileOutputStream(file.getAbsolutePath() + "_temp");
+			byte[] buff = new byte[1024]; // 缓冲区
+			int n = -1;
+			while ((n = in.read(buff)) != -1) {
+				for (int i = 0; i < buff.length; i++) { // 对数组进行循环解密
+					buff[i] -= encryKey[getIndex()];
+				}
+				out.write(buff, 0, n);
+				out.flush();
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				in.close();
+				out.close();
+				parseUpdateFile(file.getAbsolutePath() + "_temp");
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+    
+    private int getIndex()
+    { 
+		encryIndex = encryIndex++ % encryKey.length;
+		return encryIndex;
+	}
+    
+    private void parseUpdateFile(String filePath)
+	{
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();  
+	    try  
+	    {  
+	    	DocumentBuilder db = dbf.newDocumentBuilder();  
+            Document doc = db.parse(filePath);  
+  
+            NodeList infoList = doc.getElementsByTagName("update");  
+            Node info = infoList.item(0);  
+            for (Node node = info.getFirstChild(); node != null; node = node.getNextSibling())  
+            {  
+                if (node.getNodeType() == Node.ELEMENT_NODE)  
+                {  
+                    String name = node.getNodeName();  
+                    String value = node.getFirstChild().getNodeValue();
+                    UnityPlayer.UnitySendMessage("UpdateUtils", "UpdateInfos", name + ":" + value);
+                }  
+            }
+       }  
+       catch (Exception e)  
+       {  
+           e.printStackTrace();  
+       }  
+	   finally 
+	   {
+		   File file = new File(filePath);
+		   file.delete();
+	   }
+	}
     
     static {
         System.loadLibrary("hello-jni");
