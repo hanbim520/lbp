@@ -12,6 +12,8 @@ public class BackendLogic : MonoBehaviour
     public GameObject dlgYesNO;
     public GameObject warning;
 	public Text[] deviceId;	// 机台序号 0:en 1:cn
+	public GameObject[] btnMouse;
+	public GameObject[] btnTouchScreen;
 
     private RectTransform mouseIcon;
     private GameObject downHitObject;
@@ -246,6 +248,24 @@ public class BackendLogic : MonoBehaviour
 			calcTitle.text = strDeviceId[GameData.GetInstance().language];
 			passwordMode = 0;
 		}
+		else if (string.Equals(name, "ts2"))
+		{
+			foreach (GameObject i in btnMouse)
+				i.SetActive(true);
+			foreach (GameObject i in btnTouchScreen)
+				i.SetActive(false);
+			GameData.GetInstance().inputDevice = 1;
+			GameData.GetInstance().SaveInputDevice();
+		}
+		else if (string.Equals(name, "mouse2"))
+		{
+			foreach (GameObject i in btnMouse)
+				i.SetActive(false);
+			foreach (GameObject i in btnTouchScreen)
+				i.SetActive(true);
+			GameData.GetInstance().inputDevice = 0;
+			GameData.GetInstance().SaveInputDevice();
+		}
     }
 
     public void DlgPasswordDownEvent(Transform hitObject)
@@ -278,6 +298,7 @@ public class BackendLogic : MonoBehaviour
         menuAccount.SetActive(false);
 		dlgCalc.SetActive(false);
         SetLanguage(menuMain);
+		SetInputDevice();
 
 		// Device id
 		int idx = GameData.GetInstance().language;
@@ -468,6 +489,24 @@ public class BackendLogic : MonoBehaviour
             return cn;
         }
     }
+
+	private void SetInputDevice()
+	{
+		if (GameData.GetInstance().inputDevice == 0)
+		{
+			foreach (GameObject i in btnMouse)
+				i.SetActive(false);
+			foreach (GameObject i in btnTouchScreen)
+				i.SetActive(true);
+		}
+		else
+		{
+			foreach (GameObject i in btnMouse)
+				i.SetActive(true);
+			foreach (GameObject i in btnTouchScreen)
+				i.SetActive(false);
+		}
+	}
 
     private void SetAlpha(Transform target, int alpha)
     {

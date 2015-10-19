@@ -114,6 +114,7 @@ public class GameData
     public string systemPassword;
     public string accountPassword;
     public int passwordLength = 6;
+	public int inputDevice;			// 0:touch screen 1:serial mouse
 
     // 记录最近10场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
@@ -273,6 +274,7 @@ public class GameData
 		systemPassword = "888888";
 		accountPassword = "888888";
 		isCardMode = CardMode.NO;
+		inputDevice = 0;
 	}
 
 	public void SaveCustom()
@@ -282,6 +284,7 @@ public class GameData
 		PlayerPrefs.SetInt("language", language);
 		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.SetInt("isCardMode", isCardMode);
+		PlayerPrefs.SetInt("inputDevice", inputDevice);
 		PlayerPrefs.Save();
 	}
 
@@ -379,6 +382,7 @@ public class GameData
 			systemPassword = CryptoPrefs.GetString("systemPassword");
 			accountPassword = CryptoPrefs.GetString("accountPassword");
 			isCardMode = PlayerPrefs.GetInt("isCardMode");
+			inputDevice = PlayerPrefs.GetInt("inputDevice");
         }
         ReadTouchMatrix();
         ReadRecords();
@@ -602,5 +606,11 @@ public class GameData
 	{
 		CryptoPrefs.SetInt("printCodeTime", _printTimes);
 		CryptoPrefs.Save();
+	}
+
+	public void SaveInputDevice()
+	{
+		PlayerPrefs.SetInt("inputDevice", inputDevice);
+		PlayerPrefs.Save();
 	}
 }
