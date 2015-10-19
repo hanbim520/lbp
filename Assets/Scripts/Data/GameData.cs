@@ -121,7 +121,7 @@ public class GameData
     public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
 
 	public int[] ballValue38 = new int[]{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24};
-	public int[] ballValue37 = new int[]{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24};
+	public int[] ballValue37 = new int[]{26,0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3};
 
 	// For host
 	private int connectClientsTime = 10;
@@ -158,7 +158,7 @@ public class GameData
 	private GameData()
 	{
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
-		deviceIndex = 1;
+//		deviceIndex = 1;
 
         colorTable.Add(37, ResultType.Green);    // 37: 00
 		colorTable.Add(0, ResultType.Green);
