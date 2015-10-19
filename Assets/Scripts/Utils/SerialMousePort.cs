@@ -144,9 +144,17 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 				int x7 = (0x02 & data) >> 1;
 				int x6 = 0x01 & data;
                 data = queueReadPool.Dequeue();
-                sbyte deltaX = (sbyte)(0x3F & data | (x7 << 7) | (x6 << 6));
+//                sbyte deltaX = (sbyte)(0x3F & data | (x7 << 7) | (x6 << 6));
+				int x = 0x3F & data | (x7 << 7) | (x6 << 6);
+				if (x > 127)
+					x -= 256;
+				sbyte deltaX = (sbyte)x;
                 data = queueReadPool.Dequeue();
-				sbyte deltaY = (sbyte)(0x3F & data | (y7 << 7) | (y6 << 6));
+//				sbyte deltaY = (sbyte)(0x3F & data | (y7 << 7) | (y6 << 6));
+				int y = 0x3F & data | (y7 << 7) | (y6 << 6);
+				if (y > 127)
+					y -= 256;
+				sbyte deltaY = (sbyte)y;
             	GameEventManager.OnSerialMouseMove(deltaX, deltaY);
                 if (lb == 1)
                     GameEventManager.OnSMLBDown();
@@ -198,9 +206,9 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
     private void SerialMouseMove(sbyte deltaX, sbyte deltaY)
     {
         GameData.GetInstance().serialMouseX -= deltaX * ratio;
-        GameData.GetInstance().serialMouseY += deltaY * ratio;
-
-        if (GameData.GetInstance().serialMouseX >= xMax)
+        GameData.GetInstance().serialMouseY += deltaY * (ratio + 0.1f);
+		
+		if (GameData.GetInstance().serialMouseX >= xMax)
             GameData.GetInstance().serialMouseX = xMax;
         else if (GameData.GetInstance().serialMouseX <= xMin)
             GameData.GetInstance().serialMouseX = xMin;
@@ -218,7 +226,7 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
         xMin = -resolutionWidth / 2;
         yMax = resolutionHeight / 2;
         yMin = -resolutionHeight / 2;
-		ratio = Screen.width / refrenceWidth * ratio;
+		ratio = (float)Screen.width / refrenceWidth * ratio;
     }
 
     private IEnumerator DetectMouse()
