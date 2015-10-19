@@ -256,6 +256,7 @@ public class BackendLogic : MonoBehaviour
 				i.SetActive(false);
 			GameData.GetInstance().inputDevice = 1;
 			GameData.GetInstance().SaveInputDevice();
+			ChangeInputHanlde();
 		}
 		else if (string.Equals(name, "mouse2"))
 		{
@@ -265,8 +266,31 @@ public class BackendLogic : MonoBehaviour
 				i.SetActive(true);
 			GameData.GetInstance().inputDevice = 0;
 			GameData.GetInstance().SaveInputDevice();
+			ChangeInputHanlde();
 		}
     }
+
+	private void ChangeInputHanlde()
+	{
+		GameObject go = GameObject.Find("InputDevice");
+		if (go != null)
+		{
+			if (GameData.GetInstance().inputDevice == 0)
+			{
+				if (go.GetComponent<TouchScreenPort>() == null)
+					go.AddComponent<TouchScreenPort>();
+				if (go.GetComponent<SerialMousePort>() != null)
+					Destroy(go.GetComponent<SerialMousePort>());
+			}
+			else
+			{
+				if (go.GetComponent<SerialMousePort>() == null)
+					go.AddComponent<SerialMousePort>();
+				if (go.GetComponent<TouchScreenPort>() != null)
+					Destroy(go.GetComponent<TouchScreenPort>());
+			}
+		}
+	}
 
     public void DlgPasswordDownEvent(Transform hitObject)
     {

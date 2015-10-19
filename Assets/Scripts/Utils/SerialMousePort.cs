@@ -71,6 +71,7 @@ public class SerialMousePort : MonoBehaviour
 	{
         UnregisterEvents();
 		readThread.Abort();
+		dealThread.Abort();
 		isReadThreadExit = true;
 		isDealTheadExit = true;
 
