@@ -21,7 +21,7 @@ public class TouchScreenPort : MonoBehaviour
 	private bool isReadThreadExit = false;
 	private bool isDealTheadExit = false;
 
-	void Start() 
+	void OnEnable() 
 	{ 
 #if UNITY_EDITOR
 		// 端口名称 波特率 奇偶校验位 数据位值 停止位
@@ -51,7 +51,7 @@ public class TouchScreenPort : MonoBehaviour
 		readThread.Start(); 
 	}
 
-	void OnDestroy()
+	void OnDisable()
 	{
 		readThread.Abort();
 		isReadThreadExit = true;

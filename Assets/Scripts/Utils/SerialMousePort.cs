@@ -33,31 +33,33 @@ public class SerialMousePort : MonoBehaviour
 
 	private const int refrenceWidth = 704;
 
-	void Start()
+	void OnEnable()
 	{
 		Init();
         RegisterEvents();
-#if UNITY_EDITOR
-		// 端口名称 波特率 奇偶校验位 数据位值 停止位
-		try
-		{
-			sp = new SerialPort(comName, baudRate, parityBit, dataBits, stopBits);
-			if (!sp.IsOpen)
-			{
-				sp.Open();
-				sp.DtrEnable = true;
-				sp.RtsEnable = true;
-			}
-		}
-		catch(Exception ex)
-		{
-			Debug.Log(ex.ToString());
-		}
-#endif
+        if (Application.platform == RuntimePlatform.WindowsEditor ||
+            Application.platform == RuntimePlatform.OSXEditor)
+        {
+            // 端口名称 波特率 奇偶校验位 数据位值 停止位
+            try
+            {
+                sp = new SerialPort(comName, baudRate, parityBit, dataBits, stopBits);
+                if (!sp.IsOpen)
+                {
+                    sp.Open();
+                    sp.DtrEnable = true;
+                    sp.RtsEnable = true;
+                }
+            }
+            catch(Exception ex)
+            {
+                Debug.Log(ex.ToString());
+            }
+        }
+        else if (Application.platform == RuntimePlatform.Android)
+        {
 
-#if UNITY_ANDROID
-
-#endif
+        }
 
 		StartCoroutine(DetectMouse());
 
@@ -67,7 +69,7 @@ public class SerialMousePort : MonoBehaviour
 		readThread.Start(); 
 	}
 
-	void OnDestroy()
+	void OnDisable()
 	{
         UnregisterEvents();
 		readThread.Abort();
@@ -75,14 +77,21 @@ public class SerialMousePort : MonoBehaviour
 		isReadThreadExit = true;
 		isDealTheadExit = true;
 
-#if UNITY_EDITOR
-		if (sp.IsOpen)
-		{
-			sp.DtrEnable = false;
-			sp.RtsEnable = false;
-			sp.Close();
-		}
-#endif
+
+        if (Application.platform == RuntimePlatform.WindowsEditor ||
+            Application.platform == RuntimePlatform.OSXEditor)
+        {
+            if (sp.IsOpen)
+            {
+                sp.DtrEnable = false;
+                sp.RtsEnable = false;
+                sp.Close();
+            }
+        }
+        else if (Application.platform == RuntimePlatform.Android)
+        {
+
+        }
 	}
 
 	void Update()
@@ -94,20 +103,22 @@ public class SerialMousePort : MonoBehaviour
 	{ 
 		try 
 		{ 
-#if UNITY_EDITOR
-			while (!isReadThreadExit)
-			{
-				if (sp != null && sp.IsOpen)
-				{
-					byte buf = (byte)sp.ReadByte();
-					queueReadPool.Enqueue(buf);
-				}
-			}
-#endif
-
-#if UNITY_ANDROID
-			
-#endif
+            if (Application.platform == RuntimePlatform.WindowsEditor ||
+                Application.platform == RuntimePlatform.OSXEditor)
+            {
+    			while (!isReadThreadExit)
+    			{
+    				if (sp != null && sp.IsOpen)
+    				{
+    					byte buf = (byte)sp.ReadByte();
+    					queueReadPool.Enqueue(buf);
+    				}
+    			}
+            }
+            else if (Application.platform == RuntimePlatform.Android)
+            {
+                
+            }
 		} 
 		catch (Exception ex) 
 		{ 

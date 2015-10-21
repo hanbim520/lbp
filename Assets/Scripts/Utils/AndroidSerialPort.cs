@@ -1,23 +1,20 @@
 ﻿using UnityEngine;
 using System;
+using System.IO.Ports;
 using System.Collections;
 using System.Threading;
 
-public class SerialUtils : MonoBehaviour
+public class AndroidSerialPort
 {
 	public int baudrate = 9600;
 
-	private AndroidJavaClass jc;
-	private AndroidJavaObject jo;
+	
 	private Timer timerRead;
 	private Timer timerSend;
 
 	void Start()
 	{
-		DontDestroyOnLoad(this);
 		InitData();
-        RegisterEvent();
-		Test();
 	}
 
 	void OnDestroy()
@@ -25,15 +22,6 @@ public class SerialUtils : MonoBehaviour
 		if (timerRead != null && timerRead.IsStarted())
 		{
 			timerRead.Stop();
-		}
-		UnregisterEvent();
-	}
-
-	void Test()
-	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			OpenSerial();
 		}
 	}
 
@@ -63,33 +51,8 @@ public class SerialUtils : MonoBehaviour
 		return null;
 	}
 
-	private void InitData()
-	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
-			jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-		}
-	}
 	
-    private void RegisterEvent()
-    {
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			GameEventManager.OpenSerial += OpenSerial;
-			GameEventManager.CloseSerial += CloseSerial;
-		}
-    }
-
-    private void UnregisterEvent()
-    {
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			GameEventManager.OpenSerial -= OpenSerial;
-			GameEventManager.CloseSerial -= CloseSerial;
-		}
-    }
-
+   	
     private void OpenSerial()
     {
 		if (Application.platform == RuntimePlatform.Android)
@@ -129,54 +92,56 @@ public class SerialUtils : MonoBehaviour
 				DebugConsole.Log("ReadSerialPort get -1.");
 				return;
 			}
-			log = "";
-			for (int i = 0; i < data.Length; ++i)
-			{
-//				DebugConsole.Log(data[i].ToString());
-				log += data[i].ToString() + ", ";
-			}
-			++receiveCount;
-			DebugConsole.Log(log + receiveCount);
 		}
 	}
 
-	string log = "";
-	int receiveCount = 0;
+    public AndroidSerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) 
+    {
+        this.portName = portName;
+        this.baudrate = baudrate;
+        this.parity = parity;
+        this.dataBits = dataBits;
+        this.stopBits = stopBits;
+    }
 
-	void OnGUI()
-	{
-		if (GUI.Button(new Rect(10, 50, 100, 50), "Loop Send"))
-		{
-//			OpenSerial();
-			Timer t = TimerManager.GetInstance().CreateTimer(0.2f, TimerType.Loop);
-			t.Tick += WriteSerialPort;
-			t.Start();
-		}
+    public void Open()
+    {
+        InitJNI();
+        int stopbits = 0;
+        if (this.stopBits == StopBits.One)
+            stopbits = 1;
+        else if (this.stopBits == StopBits.Two)
+            stopbits = 2;
+        jo.Call("openSerialPort", );
+    }
 
-		if (GUI.Button(new Rect(10, 200, 100, 50), "Close"))
-		{
-			CloseSerial();
-		}
+    public void Close()
+    {
+        jo.Call("closeSerialPort");
+        if (jo != null)
+        {
+            jo.Dispose();
+            jo = null;
+        }
+        if (jc != null)
+        {
+            jc.Dispose();
+            jc = null;
+        }
+    }
 
-		if (GUI.Button(new Rect(200, 50, 100, 50), ""))
-		{
-			jo.Call("CallCSLog", "Hello chenxi " + Time.realtimeSinceStartup);
-		}
-	}
+    protected void InitJNI()
+    {
+        jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
+        jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
+    }
 
-	private void ReadUsb()
-	{
+    protected string portName;
+    protected int baudRate;
+    protected int dataBits;
+    protected StopBits stopBits;
+    protected Parity parity;
 
-	}
-
-	private void Writeusb()
-	{
-
-	}
-
-	public void DebugLog(string message)
-	{
-
-		DebugConsole.Log(message);
-	}
+    protected AndroidJavaClass jc;
+    protected AndroidJavaObject jo;
 }
