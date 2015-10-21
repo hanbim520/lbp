@@ -6,9 +6,6 @@ using System.Threading;
 
 public class AndroidSerialPort
 {
-	public int baudrate = 9600;
-
-	
 	private Timer timerRead;
 	private Timer timerSend;
 
@@ -58,7 +55,7 @@ public class AndroidSerialPort
 		if (Application.platform == RuntimePlatform.Android)
 		{
 			DebugConsole.Log("cs OpenSerial");
-			jo.Call("openSerialPort", baudrate);
+			jo.Call("openSerialPort", baudRate);
 			timerRead = TimerManager.GetInstance().CreateTimer(0.1f, TimerType.Loop);
 			timerRead.Tick += ReadSerialPort;
 			timerRead.Start();
@@ -98,7 +95,7 @@ public class AndroidSerialPort
     public AndroidSerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) 
     {
         this.portName = portName;
-        this.baudrate = baudrate;
+		this.baudRate = baudRate;
         this.parity = parity;
         this.dataBits = dataBits;
         this.stopBits = stopBits;
@@ -117,7 +114,7 @@ public class AndroidSerialPort
 			_parity = 1;
 		else if (this.parity == Parity.Even)
 			_parity = 2;
-		jo.Call("openSerialPort", portName, baudrate, _parity, dataBits, stopbits);
+		jo.Call("openSerialPort", portName, baudRate, _parity, dataBits, stopbits);
     }
 
     public void Close()
