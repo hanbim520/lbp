@@ -12,6 +12,7 @@ public class TestEncryChip : MonoBehaviour
 {
 	protected AndroidJavaClass jc;
 	protected AndroidJavaObject jo;
+    protected HIDUtils hidUtils;
 
 	protected void InitJNI()
 	{
@@ -22,6 +23,7 @@ public class TestEncryChip : MonoBehaviour
 	void Start()
 	{
 		InitJNI();
+        hidUtils = gameObject.GetComponent<HIDUtils>();
 	}
 
 	int lineId = 586;
@@ -62,7 +64,7 @@ public class TestEncryChip : MonoBehaviour
 				data.Add((int)b);
 			while (data.Count < 64)
 				data.Add(0);
-			WriteData(data.ToArray());
+            hidUtils.WriteData(data.ToArray(), "writeUsbPort");
 		}
 
 		if (GUI.Button(new Rect(200, 300, 200, 100), "GetCheckPWStringValue"))
@@ -75,58 +77,5 @@ public class TestEncryChip : MonoBehaviour
 			IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckPWStringValue");
 			DebugConsole.Log(AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah));
 		}
-	}
-
-	public int WriteData(int[] data)
-	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
-			jvalue[] blah = new jvalue[1];
-			blah[0].l = pArr;
-			
-			IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "writeUsbPort");
-			return AndroidJNI.CallIntMethod(jo.GetRawObject(), methodId, blah);
-		}
-		return -1;
-	}
-
-	void Update()
-	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			getDataTimeDelta += Time.deltaTime;
-			if (getDataTimeDelta >= getDataTime)
-			{
-				getDataTimeDelta = 0;
-				ReadUsbPort();
-			}
-		}
-	}
-
-	public int[] ReadData(string methodName)
-	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
-			return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
-		}
-		return null;
-	}
-
-	public void ReadUsbPort()
-	{
-		int[] data = ReadData("readHID");
-		if (data != null && data.Length == kReadDataLength)
-		{
-			if (data[0] == -1 || data.Length < 2)
-			{ 
-				return;
-			}
-			if (data[0] == 0x42 && data[1] == 0x5a)
-			{
-
-			}
-		}
-	}
+    }
 }

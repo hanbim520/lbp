@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class HIDUtils : MonoBehaviour
 {
@@ -108,7 +109,7 @@ public class HIDUtils : MonoBehaviour
 		int[] data = ReadData("readHID");
 		if (data != null && data.Length == kReadDataLength)
 		{
-			if (data[0] == -1 || data[0] != kHeader1 || data[1] != kHeader2)
+			if (data[0] == -1)
 			{ 
 				return;
 			}
@@ -119,57 +120,82 @@ public class HIDUtils : MonoBehaviour
 //			}
 //			DebugConsole.Log(log);
 
-			// 吹风
-			if (data[2] == kBlowBall)
-			{
-				if (!bBlowedBall)
-				{
-					phase = kPhaseStartBlowBall;
-					bBlowedBall = true;
-				}
-			}
-			else
-			{
-				if (bBlowedBall && phase == kPhaseStartBlowBall)
-				{
-					phase = kPhaseEndBlowBall;
-					bBlowedBall = false;
-					GameEventManager.OnEBlowBall();
-				}
-			}
-			// 开门
-			if (data[3] == kOpenGate)
-			{
-				if (!bOpenGate)
-				{
-					phase = kPhaseOpenGate;
-					bOpenGate = true;
-				}
-			}
-			else
-			{
-				if (bOpenGate && phase == kPhaseOpenGate)
-				{
-					phase = kPhaseCloseGate;
-					bOpenGate = false;
-					GameEventManager.OnCloseGate();
-				}
-			}
-			// 不是上轮结果
-			if (data[5] != kPreviousValue && phase == kPhaseEndBlowBall)
-			{
-				// 结果
-				int idx = data[4];
-				if (idx == 0)
-					return;
-				else
-					idx -= 1;
-				phase = kPhaseDetectBallValue;
-				if (GameData.GetInstance().maxNumberOfFields == 38)
-					GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
-				else if (GameData.GetInstance().maxNumberOfFields == 37)
-					GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
-			}
+            // 机芯指令
+            if (data[0] == kHeader1 && data[1] == kHeader2)
+            {
+                // 吹风
+                if (data[2] == kBlowBall)
+                {
+                    if (!bBlowedBall)
+                    {
+                        phase = kPhaseStartBlowBall;
+                        bBlowedBall = true;
+                    }
+                }
+                else
+                {
+                    if (bBlowedBall && phase == kPhaseStartBlowBall)
+                    {
+                        phase = kPhaseEndBlowBall;
+                        bBlowedBall = false;
+                        GameEventManager.OnEBlowBall();
+                    }
+                }
+                // 开门
+                if (data[3] == kOpenGate)
+                {
+                    if (!bOpenGate)
+                    {
+                        phase = kPhaseOpenGate;
+                        bOpenGate = true;
+                    }
+                }
+                else
+                {
+                    if (bOpenGate && phase == kPhaseOpenGate)
+                    {
+                        phase = kPhaseCloseGate;
+                        bOpenGate = false;
+                        GameEventManager.OnCloseGate();
+                    }
+                }
+                // 不是上轮结果
+                if (data[5] != kPreviousValue && phase == kPhaseEndBlowBall)
+                {
+                    // 结果
+                    int idx = data[4];
+                    if (idx == 0)
+                        return;
+                    else
+                        idx -= 1;
+                    phase = kPhaseDetectBallValue;
+                    if (GameData.GetInstance().maxNumberOfFields == 38)
+                        GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
+                    else if (GameData.GetInstance().maxNumberOfFields == 37)
+                        GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
+                }
+            }
+            // 报账指令
+            else if (data[0] == 0x42 && data[1] == 0x5a)
+            {
+                string log = "data.Length:" + data.Length + "--";
+                for (int i = 0; i < data.Length; ++i)
+                {
+                    log += string.Format("{0:X}", data[i]) + ", ";
+                }
+                DebugConsole.Log(log);
+
+                List<int> col = new List<int>();
+                for (int i = 2; i < 14; ++i)
+                    col.Add(data[i]);
+                int[] sendData = col.ToArray();
+                IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(sendData);
+                jvalue[] blah = new jvalue[1];
+                blah[0].l = pArr;
+                
+                IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckPWStringValue");
+                DebugConsole.Log(AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah));
+            }
 		}
 	}
 
@@ -222,28 +248,4 @@ public class HIDUtils : MonoBehaviour
 		}
 	}
 
-//	private string log = "";
-//	void OnGUI()
-//	{
-//		if (GUI.Button(new Rect(200, 10 , 200, 150), "open usb"))
-//		{
-//			OpenUSB();
-//		}
-//		if (GUI.Button(new Rect(200, 200 , 200, 150), "close usb"))
-//		{
-//			CloseUSB();
-//		}
-//		if (GUI.Button(new Rect(420, 10 , 200, 150), "open gate"))
-//		{
-//			OpenGate();
-//		}
-//		if (GUI.Button(new Rect(420, 200 , 200, 150), "blow ball"))
-//		{
-//			BlowBall(1500);
-//		}
-//		if (GUI.Button(new Rect(200, 400, 200, 150), "Quit"))
-//		{
-//			Application.Quit();
-//		}
-//	}
 }
