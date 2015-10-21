@@ -14,7 +14,7 @@ public class AndroidSerialPort
 
 	void Start()
 	{
-		InitData();
+//		InitData();
 	}
 
 	void OnDestroy()
