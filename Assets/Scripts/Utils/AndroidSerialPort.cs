@@ -112,7 +112,12 @@ public class AndroidSerialPort
             stopbits = 1;
         else if (this.stopBits == StopBits.Two)
             stopbits = 2;
-        jo.Call("openSerialPort", );
+		int _parity = 0;
+		if (this.parity == Parity.Odd)
+			_parity = 1;
+		else if (this.parity == Parity.Even)
+			_parity = 2;
+		jo.Call("openSerialPort", portName, baudrate, _parity, dataBits, stopbits);
     }
 
     public void Close()
