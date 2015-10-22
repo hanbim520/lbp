@@ -183,11 +183,11 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	public void openSerialPort(int baudrate, int parity, int dataBits, int stopBits)
+	public void openSerialPort(String filePath, int baudrate, int parity, int dataBits, int stopBits)
 	{
 		try
 		{
-			mSerialPort0 = new SerialPort(new File("/dev/ttyS1"), baudrate,  parity, dataBits, stopBits);
+			mSerialPort0 = new SerialPort(new File(filePath), baudrate,  parity, dataBits, stopBits);
 			mInputStream0 = mSerialPort0.getInputStream();
 			
 			mReadThread0 = new ReadThread0();
@@ -208,7 +208,7 @@ public class UnityPlayerActivity extends Activity
 		}
 		
 		if (mReadThread0 != null)
-			mReadThread0.interrupt();
+			mReadThread0.stop();
 	}
 
 	 public int[] readSerialPort(int queueIdx)

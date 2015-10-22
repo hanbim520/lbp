@@ -6,92 +6,31 @@ using System.Threading;
 
 public class AndroidSerialPort
 {
-	private Timer timerRead;
-	private Timer timerSend;
+	protected string portName;
+	protected int baudRate;
+	protected int dataBits;
+	protected StopBits stopBits;
+	protected Parity parity;
+	
+	protected AndroidJavaClass jc;
+	protected AndroidJavaObject jo;
 
-	void Start()
-	{
-//		InitData();
-	}
-
-	void OnDestroy()
-	{
-		if (timerRead != null && timerRead.IsStarted())
-		{
-			timerRead.Stop();
-		}
-	}
-
-	// Note: java side should be return boolean
-	private bool WriteData(int[] data, string methodName)
-	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
-			jvalue[] blah = new jvalue[1];
-			blah[0].l = pArr;
-			
-			IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), methodName);
-			return AndroidJNI.CallBooleanMethod(jo.GetRawObject(), methodId, blah);
-		}
-		return false;
-	}
+	protected string strOpenMethod = "openSerialPort";
+	protected string strCloseMethod = "closeSerialPort";
+	protected string strReadMethod = "readSerialPort";
 
 	// Note: Java side should be return int[]
-	private int[] ReadData(string methodName)
+	public int[] ReadData()
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
+			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(strReadMethod);
 			return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
 		}
 		return null;
 	}
 
-	
-   	
-    private void OpenSerial()
-    {
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			DebugConsole.Log("cs OpenSerial");
-			jo.Call("openSerialPort", baudRate);
-			timerRead = TimerManager.GetInstance().CreateTimer(0.1f, TimerType.Loop);
-			timerRead.Tick += ReadSerialPort;
-			timerRead.Start();
-
-//			timerRead = TimerManager.GetInstance().CreateTimer(1.0f, TimerType.Loop);
-//			timerRead.Tick += WriteSerialPort;
-//			timerRead.Start();
-		}
-	}
-
-    private void CloseSerial()
-    {
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			jo.Call("closeSerialPort");
-		}
-	}
-
-	private void WriteSerialPort()
-	{
-		WriteData(new int[]{0x55,0x54,0x11,0x13,0x0D,0x55,0x54,0x11,0x13,0x0D }, "writeSerialPort3");
-	}
-
-	private void ReadSerialPort()
-	{
-		int[] data = ReadData("readSerialPort3");
-		if (data.Length > 0)
-		{
-			if (data[0] == -1)
-			{
-				DebugConsole.Log("ReadSerialPort get -1.");
-				return;
-			}
-		}
-	}
-
+	//"/dev/ttyS1"
     public AndroidSerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits) 
     {
         this.portName = portName;
@@ -112,12 +51,12 @@ public class AndroidSerialPort
 			_parity = 1;
 		else if (this.parity == Parity.Even)
 			_parity = 2;
-		jo.Call("openSerialPort", portName, baudRate, _parity, dataBits, stopbits);
+		jo.Call(strOpenMethod, portName, baudRate, _parity, dataBits, stopbits);
     }
 
     public void Close()
     {
-        jo.Call("closeSerialPort");
+        jo.Call(strCloseMethod);
         if (jo != null)
         {
             jo.Dispose();
@@ -135,13 +74,4 @@ public class AndroidSerialPort
         jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
         jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
     }
-
-    protected string portName;
-    protected int baudRate;
-    protected int dataBits;
-    protected StopBits stopBits;
-    protected Parity parity;
-
-    protected AndroidJavaClass jc;
-    protected AndroidJavaObject jo;
 }

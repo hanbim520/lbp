@@ -10,11 +10,12 @@ public class SerialMousePort : MonoBehaviour
 {
     public GameObject mouse;
 	public string comName = "COM1";
-	public int baudRate = 1200; // or 2400
+	public int baudRate = 1200; 
 	public Parity parityBit = Parity.None;
-	public int dataBits = 7;    // or 8
+	public int dataBits = 7;    
 	public StopBits stopBits = StopBits.One;
 
+	private AndroidSerialPort androidSP;
 	private SerialPort sp; 
 	private Queue<byte> queueReadPool = new Queue<byte>();
 	private Thread readThread; 
@@ -29,6 +30,7 @@ public class SerialMousePort : MonoBehaviour
 	private bool bFindMouse = false;
 
 	private const int refrenceWidth = 704;
+	private string portName = "/dev/ttyS1";
 
 	void OnEnable()
 	{
@@ -45,6 +47,9 @@ public class SerialMousePort : MonoBehaviour
                 sp.DtrEnable = true;
                 sp.RtsEnable = true;
             }
+			isReadThreadExit = false;
+			readThread = new Thread(ReceiveData);
+			readThread.Start(); 
         }
         catch(Exception ex)
         {
@@ -53,20 +58,24 @@ public class SerialMousePort : MonoBehaviour
 #endif
 
 #if UNITY_ANDROID
+		try
+		{
+			androidSP = new AndroidSerialPort(portName, baudRate, parityBit, dataBits, stopBits);
+			androidSP.Open();
+		}
+		catch(Exception ex)
+		{
+			Debug.Log(ex.ToString());
+		}
 #endif
-		
-		isReadThreadExit = false;
-		readThread = new Thread(ReceiveData);
-		readThread.Start(); 
 	}
 
 	void OnDisable()
 	{
         UnregisterEvents();
+#if UNITY_EDITOR
 		readThread.Abort();
 		isReadThreadExit = true;
-
-#if UNITY_EDITOR
         if (sp.IsOpen)
         {
             sp.DtrEnable = false;
@@ -76,6 +85,7 @@ public class SerialMousePort : MonoBehaviour
 #endif
         
 #if UNITY_ANDROID
+		androidSP.Close();
 #endif
 	}
 	
@@ -105,6 +115,14 @@ public class SerialMousePort : MonoBehaviour
 	{
 		DealReceivedData();
 		MoveMouse();
+#if UNITY_ANDROID
+		int[] data = androidSP.ReadData();
+		if (data != null)
+		{
+			foreach (int d in data)
+				queueReadPool.Enqueue((byte)d);
+		}
+#endif
 	}
 
 	/*
