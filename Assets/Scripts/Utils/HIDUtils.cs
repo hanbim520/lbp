@@ -186,7 +186,7 @@ public class HIDUtils : MonoBehaviour
                 DebugConsole.Log(log);
 
                 List<int> col = new List<int>();
-                for (int i = 2; i < 14; ++i)
+                for (int i = 3; i < 17; ++i)
                     col.Add(data[i]);
                 int[] sendData = col.ToArray();
                 IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(sendData);

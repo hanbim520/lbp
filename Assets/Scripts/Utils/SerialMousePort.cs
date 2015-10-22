@@ -37,34 +37,33 @@ public class SerialMousePort : MonoBehaviour
 	{
 		Init();
         RegisterEvents();
-        if (Application.platform == RuntimePlatform.WindowsEditor ||
-            Application.platform == RuntimePlatform.OSXEditor)
+#if UNITY_EDITOR
+        // 端口名称 波特率 奇偶校验位 数据位值 停止位
+        try
         {
-            // 端口名称 波特率 奇偶校验位 数据位值 停止位
-            try
+            sp = new SerialPort(comName, baudRate, parityBit, dataBits, stopBits);
+            if (!sp.IsOpen)
             {
-                sp = new SerialPort(comName, baudRate, parityBit, dataBits, stopBits);
-                if (!sp.IsOpen)
-                {
-                    sp.Open();
-                    sp.DtrEnable = true;
-                    sp.RtsEnable = true;
-                }
-            }
-            catch(Exception ex)
-            {
-                Debug.Log(ex.ToString());
+                sp.Open();
+                sp.DtrEnable = true;
+                sp.RtsEnable = true;
             }
         }
-        else if (Application.platform == RuntimePlatform.Android)
+        catch(Exception ex)
         {
-
+            Debug.Log(ex.ToString());
         }
+#endif
 
+#if UNITY_ANDROID
+#endif
+		
 		StartCoroutine(DetectMouse());
 
-		dealThread = new Thread(DealReceivedData); 
-		dealThread.Start(); 
+		isReadThreadExit = false;
+		isDealTheadExit = false;
+//		dealThread = new Thread(DealReceivedData); 
+//		dealThread.Start(); 
 		readThread = new Thread(ReceiveData);
 		readThread.Start(); 
 	}
@@ -73,58 +72,53 @@ public class SerialMousePort : MonoBehaviour
 	{
         UnregisterEvents();
 		readThread.Abort();
-		dealThread.Abort();
+//		dealThread.Abort();
 		isReadThreadExit = true;
 		isDealTheadExit = true;
 
-
-        if (Application.platform == RuntimePlatform.WindowsEditor ||
-            Application.platform == RuntimePlatform.OSXEditor)
+#if UNITY_EDITOR
+        if (sp.IsOpen)
         {
-            if (sp.IsOpen)
-            {
-                sp.DtrEnable = false;
-                sp.RtsEnable = false;
-                sp.Close();
-            }
+            sp.DtrEnable = false;
+            sp.RtsEnable = false;
+            sp.Close();
         }
-        else if (Application.platform == RuntimePlatform.Android)
-        {
-
-        }
+#endif
+        
+#if UNITY_ANDROID
+#endif
 	}
 
 	void Update()
 	{
 		MoveMouse();
 	}
-
+	
 	private void ReceiveData() 
 	{ 
 		try 
 		{ 
-            if (Application.platform == RuntimePlatform.WindowsEditor ||
-                Application.platform == RuntimePlatform.OSXEditor)
-            {
-    			while (!isReadThreadExit)
-    			{
-    				if (sp != null && sp.IsOpen)
-    				{
-    					byte buf = (byte)sp.ReadByte();
-    					queueReadPool.Enqueue(buf);
-    				}
-    			}
-            }
-            else if (Application.platform == RuntimePlatform.Android)
-            {
-                
-            }
+#if UNITY_EDITOR
+			while (!isReadThreadExit)
+			{
+				if (sp != null && sp.IsOpen)
+				{
+					byte buf = (byte)sp.ReadByte();
+					queueReadPool.Enqueue(buf);
+				}
+			}
+#endif
 		} 
 		catch (Exception ex) 
 		{ 
 			Debug.Log(ex.ToString()); 
 		} 
 	} 
+
+	void FixedUpdate()
+	{
+		DealReceivedData();
+	}
 
 	/*
 Byte1：X 1 LB RB Y7 Y6 X7 X6 
@@ -141,13 +135,17 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 	 */
 	private void DealReceivedData() 
 	{ 
-		while (!isDealTheadExit)
-		{
+//		while (!isDealTheadExit)
+//		{
 			if (queueReadPool.Count >= 3) 
 			{ 
 				if (!bFindMouse)
 					bFindMouse = true;
-				byte data = queueReadPool.Dequeue(); 
+				byte data = queueReadPool.Dequeue();
+				int isHead = data & 0x40;
+//				if (isHead != 1)
+//					return;
+//				print("handle2");
 				int lb = (0x20 & data) >> 5;
 				int rb = (0x10 & data) >> 4;
 				int y7 = (0x08 & data) >> 3;
@@ -184,8 +182,8 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
                     rlAlreadyDown = false;
                 }
 //                Debug.Log(string.Format("{0}, {1}", deltaX, deltaY));
-			} 
-		}
+			}
+//		}
 	} 
 
     private void RegisterEvents()
@@ -242,29 +240,29 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 
     private IEnumerator DetectMouse()
     {
-        if (Application.platform == RuntimePlatform.WindowsEditor ||
-            Application.platform == RuntimePlatform.OSXEditor)
-        {
-            sp.RtsEnable = false;
-            yield return new WaitForSeconds(1.0f);
-            sp.RtsEnable = true;
-        }
-        else if (Application.platform == RuntimePlatform.Android)
-        {
-            
-        }
+#if UNITY_EDITOR
+        sp.RtsEnable = false;
+        yield return new WaitForSeconds(1.0f);
+        sp.RtsEnable = true;
 		yield return new WaitForSeconds(1.0f);
 		// 防止鼠标乱跳
 		bAllowMove = true;
+#endif
+        
+#if UNITY_ANDROID
+#endif
     }
 
 	private void MoveMouse()
 	{
-		if (bFindMouse && bAllowMove && mouse != null)
-		{
-			if (!mouse.activeSelf)
-				mouse.SetActive(true);
-			mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
-		}
+//		if (bFindMouse && bAllowMove && mouse != null)
+//		{
+//			if (!mouse.activeSelf)
+//				mouse.SetActive(true);
+//			mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
+//		}
+		if (!mouse.activeSelf)
+			mouse.SetActive(true);
+		mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
 	}
 }

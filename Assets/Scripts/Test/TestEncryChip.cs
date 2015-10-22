@@ -57,6 +57,10 @@ public class TestEncryChip : MonoBehaviour
 			AndroidJavaObject rev = jo.Call<AndroidJavaObject>("CreateCheckPWString", 
 			                                                   (long)lineId, (long)machineId, (long)maxProfit, (long)profit, (long)checkCount, (long)crc, (long)userInput);
 			byte[] buf = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
+			string log = "c# CreateCheckPWString:";
+			foreach (byte b in buf)
+				log += string.Format("{0:X}", b) + ", ";
+			DebugConsole.Log(log);
 			List<int> data = new List<int>();
 			data.Add(0x42);
 			data.Add(0x5a);
