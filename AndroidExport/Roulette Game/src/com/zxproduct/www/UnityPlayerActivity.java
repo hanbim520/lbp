@@ -51,7 +51,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android_serialport_api.SerialPort;
-import android_serialport_api.SerialPortFinder;
 
 public class UnityPlayerActivity extends Activity
 {
@@ -136,14 +135,10 @@ public class UnityPlayerActivity extends Activity
 	
 	
 	private SerialPort mSerialPort0 = null;
-	
-	private OutputStream mOutputStream0 = null;
 	private InputStream mInputStream0 = null;
 	private ReadThread0 mReadThread0 = null;
-	private SendThread0 mSendThread0 = null;
 	
 	private ConcurrentLinkedQueue<BufferStruct> readSerialQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
-	private ConcurrentLinkedQueue<BufferStruct> writeSerialQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 	private ConcurrentLinkedQueue<BufferStruct> readUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 //	private ConcurrentLinkedQueue<BufferStruct> writeUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 	
@@ -188,51 +183,15 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	private class SendThread0 extends Thread 
-	{
-		@Override
-		public void run()
-		{
-			super.run();
-			while (!isInterrupted())
-			{
-				try
-				{
-					if (!writeSerialQueue0.isEmpty() && mOutputStream0 != null)
-					{
-						BufferStruct buffer = writeSerialQueue0.poll();
-						int count = buffer.buffer.length;
-						byte[] buf = new byte[count];
-						for (int i = 0; i < count; ++i)
-						{
-							buf[i] = (byte)buffer.buffer[i];
-						}
-						mOutputStream0.write(buf);
-					}
-				}
-				catch (Exception e) 
-				{
-					e.printStackTrace();
-					return;
-				}
-			}
-		}
-	}
-	
-	public void openSerialPort(int baudrate)
+	public void openSerialPort(int baudrate, int parity, int dataBits, int stopBits)
 	{
 		try
 		{
-			mSerialPort0 = new SerialPort(new File("/dev/ttyS1"), baudrate, 0);
-			mOutputStream0 = mSerialPort0.getOutputStream();
+			mSerialPort0 = new SerialPort(new File("/dev/ttyS1"), baudrate,  parity, dataBits, stopBits);
 			mInputStream0 = mSerialPort0.getInputStream();
 			
 			mReadThread0 = new ReadThread0();
 			mReadThread0.start();
-
-			mSendThread0 = new SendThread0();
-			mSendThread0.start();
-
 		}
 		catch (Exception e)
 		{
@@ -250,8 +209,6 @@ public class UnityPlayerActivity extends Activity
 		
 		if (mReadThread0 != null)
 			mReadThread0.interrupt();
-		if (mSendThread0 != null)
-			mSendThread0.interrupt();
 	}
 
 	 public int[] readSerialPort(int queueIdx)
@@ -267,15 +224,6 @@ public class UnityPlayerActivity extends Activity
 		 
 		 // Can't return null, otherwise csharp side case exception.
 	     return new int[]{-1};
-	 }
-	 
-	 public boolean writeSerialPort(int[] data, int queueIdx)
-	 {
-		 BufferStruct buffer = new BufferStruct();
-		 buffer.buffer = data;
-		 if (queueIdx == 0)
-			 return writeSerialQueue0.offer(buffer);
-		 return false;
 	 }
 	 
 	 private UsbManager mUsbManager = null;

@@ -104,10 +104,8 @@ public class AndroidSerialPort
     public void Open()
     {
         InitJNI();
-        int stopbits = 0;
-        if (this.stopBits == StopBits.One)
-            stopbits = 1;
-        else if (this.stopBits == StopBits.Two)
+        int stopbits = 1;
+        if (this.stopBits == StopBits.Two)
             stopbits = 2;
 		int _parity = 0;
 		if (this.parity == Parity.Odd)
