@@ -18,9 +18,7 @@ public class SerialMousePort : MonoBehaviour
 	private SerialPort sp; 
 	private Queue<byte> queueReadPool = new Queue<byte>();
 	private Thread readThread; 
-	private Thread dealThread;
 	private bool isReadThreadExit = false;
-	private bool isDealTheadExit = false;
     private bool blAlreadyDown = false;
     private bool rlAlreadyDown = false;
     private float ratio = 1.2f;
@@ -29,7 +27,6 @@ public class SerialMousePort : MonoBehaviour
     private float yMax;
     private float yMin;
 	private bool bFindMouse = false;
-	private bool bAllowMove = false;
 
 	private const int refrenceWidth = 704;
 
@@ -58,12 +55,7 @@ public class SerialMousePort : MonoBehaviour
 #if UNITY_ANDROID
 #endif
 		
-		StartCoroutine(DetectMouse());
-
 		isReadThreadExit = false;
-		isDealTheadExit = false;
-//		dealThread = new Thread(DealReceivedData); 
-//		dealThread.Start(); 
 		readThread = new Thread(ReceiveData);
 		readThread.Start(); 
 	}
@@ -72,9 +64,7 @@ public class SerialMousePort : MonoBehaviour
 	{
         UnregisterEvents();
 		readThread.Abort();
-//		dealThread.Abort();
 		isReadThreadExit = true;
-		isDealTheadExit = true;
 
 #if UNITY_EDITOR
         if (sp.IsOpen)
@@ -88,11 +78,6 @@ public class SerialMousePort : MonoBehaviour
 #if UNITY_ANDROID
 #endif
 	}
-
-	void Update()
-	{
-		MoveMouse();
-	}
 	
 	private void ReceiveData() 
 	{ 
@@ -104,6 +89,7 @@ public class SerialMousePort : MonoBehaviour
 				if (sp != null && sp.IsOpen)
 				{
 					byte buf = (byte)sp.ReadByte();
+//					Debug.Log(buf);
 					queueReadPool.Enqueue(buf);
 				}
 			}
@@ -118,6 +104,7 @@ public class SerialMousePort : MonoBehaviour
 	void FixedUpdate()
 	{
 		DealReceivedData();
+		MoveMouse();
 	}
 
 	/*
@@ -135,55 +122,51 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 	 */
 	private void DealReceivedData() 
 	{ 
-//		while (!isDealTheadExit)
-//		{
-			if (queueReadPool.Count >= 3) 
-			{ 
-				if (!bFindMouse)
-					bFindMouse = true;
-				byte data = queueReadPool.Dequeue();
-				int isHead = data & 0x40;
-//				if (isHead != 1)
-//					return;
-//				print("handle2");
-				int lb = (0x20 & data) >> 5;
-				int rb = (0x10 & data) >> 4;
-				int y7 = (0x08 & data) >> 3;
-				int y6 = (0x04 & data) >> 2;
-				int x7 = (0x02 & data) >> 1;
-				int x6 = 0x01 & data;
-                data = queueReadPool.Dequeue();
+		if (queueReadPool.Count >= 3) 
+		{ 
+			if (!bFindMouse)
+				bFindMouse = true;
+			byte data = queueReadPool.Dequeue();
+			int isHead = data & 0x40;
+			if (isHead == 0)
+				return;
+			int lb = (0x20 & data) >> 5;
+			int rb = (0x10 & data) >> 4;
+			int y7 = (0x08 & data) >> 3;
+			int y6 = (0x04 & data) >> 2;
+			int x7 = (0x02 & data) >> 1;
+			int x6 = 0x01 & data;
+            data = queueReadPool.Dequeue();
 //                sbyte deltaX = (sbyte)(0x3F & data | (x7 << 7) | (x6 << 6));
-				int x = 0x3F & data | (x7 << 7) | (x6 << 6);
-				if (x > 127)
-					x -= 256;
-				sbyte deltaX = (sbyte)x;
-                data = queueReadPool.Dequeue();
+			int x = 0x3F & data | (x7 << 7) | (x6 << 6);
+			if (x > 127)
+				x -= 256;
+			sbyte deltaX = (sbyte)x;
+            data = queueReadPool.Dequeue();
 //				sbyte deltaY = (sbyte)(0x3F & data | (y7 << 7) | (y6 << 6));
-				int y = 0x3F & data | (y7 << 7) | (y6 << 6);
-				if (y > 127)
-					y -= 256;
-				sbyte deltaY = (sbyte)y;
-            	GameEventManager.OnSerialMouseMove(deltaX, deltaY);
-                if (lb == 1)
-                    GameEventManager.OnSMLBDown();
-                else if (lb == 0 && blAlreadyDown)
-                {
-					print("OnSMLBUp");
-                    GameEventManager.OnSMLBUp();
-                    blAlreadyDown = false;
-                }
-                if (rb == 1)
-                    GameEventManager.OnSMRBDown();
-                else if (rb == 0 && rlAlreadyDown)
-                {
-					print("OnSMRBUp");
-                    GameEventManager.OnSMRBUp();
-                    rlAlreadyDown = false;
-                }
+			int y = 0x3F & data | (y7 << 7) | (y6 << 6);
+			if (y > 127)
+				y -= 256;
+			sbyte deltaY = (sbyte)y;
+        	GameEventManager.OnSerialMouseMove(deltaX, deltaY);
+            if (lb == 1)
+                GameEventManager.OnSMLBDown();
+            else if (lb == 0 && blAlreadyDown)
+            {
+				print("OnSMLBUp");
+                GameEventManager.OnSMLBUp();
+                blAlreadyDown = false;
+            }
+            if (rb == 1)
+                GameEventManager.OnSMRBDown();
+            else if (rb == 0 && rlAlreadyDown)
+            {
+				print("OnSMRBUp");
+                GameEventManager.OnSMRBUp();
+                rlAlreadyDown = false;
+            }
 //                Debug.Log(string.Format("{0}, {1}", deltaX, deltaY));
-			}
-//		}
+		}
 	} 
 
     private void RegisterEvents()
@@ -236,33 +219,16 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
         yMax = resolutionHeight / 2;
         yMin = -resolutionHeight / 2;
 		ratio = (float)Screen.width / refrenceWidth * ratio;
-    }
-
-    private IEnumerator DetectMouse()
-    {
-#if UNITY_EDITOR
-        sp.RtsEnable = false;
-        yield return new WaitForSeconds(1.0f);
-        sp.RtsEnable = true;
-		yield return new WaitForSeconds(1.0f);
-		// 防止鼠标乱跳
-		bAllowMove = true;
-#endif
-        
-#if UNITY_ANDROID
-#endif
-    }
+		bFindMouse = false;
+		blAlreadyDown = false;
+		rlAlreadyDown = false;
+	}
 
 	private void MoveMouse()
 	{
-//		if (bFindMouse && bAllowMove && mouse != null)
-//		{
-//			if (!mouse.activeSelf)
-//				mouse.SetActive(true);
-//			mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
-//		}
-		if (!mouse.activeSelf)
-			mouse.SetActive(true);
-		mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
+		if (bFindMouse)
+		{
+			mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
+		}
 	}
 }
