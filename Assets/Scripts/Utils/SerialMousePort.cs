@@ -148,6 +148,8 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 			int isHead = data & 0x40;
 			if (isHead == 0)
 				return;
+            string log = "";
+            log += string.Format("data={0:X}", data);
 			int lb = (0x20 & data) >> 5;
 			int rb = (0x10 & data) >> 4;
 			int y7 = (0x08 & data) >> 3;
@@ -155,12 +157,15 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 			int x7 = (0x02 & data) >> 1;
 			int x6 = 0x01 & data;
             data = queueReadPool.Dequeue();
+            log += string.Format(", {0:X}", data);
 //                sbyte deltaX = (sbyte)(0x3F & data | (x7 << 7) | (x6 << 6));
 			int x = 0x3F & data | (x7 << 7) | (x6 << 6);
 			if (x > 127)
 				x -= 256;
 			sbyte deltaX = (sbyte)x;
             data = queueReadPool.Dequeue();
+            log += string.Format(", {0:X}", data);
+            DebugConsole.Log(log);
 //				sbyte deltaY = (sbyte)(0x3F & data | (y7 << 7) | (y6 << 6));
 			int y = 0x3F & data | (y7 << 7) | (y6 << 6);
 			if (y > 127)

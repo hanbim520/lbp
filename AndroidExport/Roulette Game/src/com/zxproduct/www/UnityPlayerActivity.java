@@ -211,15 +211,14 @@ public class UnityPlayerActivity extends Activity
 			mReadThread0.stop();
 	}
 
-	 public int[] readSerialPort(int queueIdx)
+	 public int[] readSerialPort()
 	 {
-		 if (queueIdx == 0)
+		 if (!readSerialQueue0.isEmpty())
 		 {
-			 if (!readSerialQueue0.isEmpty())
-			 {
-				 BufferStruct buffer = readSerialQueue0.poll();
-				 return buffer.buffer;
-			 }
+			 BufferStruct buffer = readSerialQueue0.poll();
+			 for (int i = 0; i< buffer.buffer.length; ++i)
+			 Log.i(TAG, "" + buffer.buffer[i]);
+			 return buffer.buffer;
 		 }
 		 
 		 // Can't return null, otherwise csharp side case exception.
