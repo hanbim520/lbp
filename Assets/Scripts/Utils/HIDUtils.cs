@@ -107,19 +107,14 @@ public class HIDUtils : MonoBehaviour
 	public void ReadUsbPort()
 	{
 		int[] data = ReadData("readHID");
-		if (data != null && data.Length == kReadDataLength)
-		{
-			if (data[0] == -1)
-			{ 
-				return;
-			}
-//			string log = "data.Length:" + data.Length + "--";
-//			for (int i = 0; i < data.Length; ++i)
-//			{
-//				log += string.Format("{0:X}", data[i]) + ", ";
-//			}
-//			DebugConsole.Log(log);
+		if (data == null || data[0] == -1)
+		{ 
+			return;
+		}
 
+		if (data.Length == kReadDataLength)
+		{
+//			PrintData(ref data);
             // 机芯指令
             if (data[0] == kHeader1 && data[1] == kHeader2)
             {
@@ -185,10 +180,10 @@ public class HIDUtils : MonoBehaviour
                 }
                 DebugConsole.Log(log);
 
-                List<int> col = new List<int>();
+				List<byte> col = new List<byte>();
                 for (int i = 3; i < 17; ++i)
-                    col.Add(data[i]);
-                int[] sendData = col.ToArray();
+                    col.Add((byte)data[i]);
+				byte[] sendData = col.ToArray();
                 IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(sendData);
                 jvalue[] blah = new jvalue[1];
                 blah[0].l = pArr;
@@ -196,6 +191,10 @@ public class HIDUtils : MonoBehaviour
                 IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckPWStringValue");
                 DebugConsole.Log(AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah));
             }
+		}
+		else
+		{
+//			PrintData(ref data);
 		}
 	}
 
@@ -248,4 +247,13 @@ public class HIDUtils : MonoBehaviour
 		}
 	}
 
+	private void PrintData(ref int[] data)
+	{
+		string log = "data.Length:" + data.Length + "--";
+		for (int i = 0; i < data.Length; ++i)
+		{
+			log += string.Format("{0:X}", data[i]) + ", ";
+		}
+		DebugConsole.Log(log);
+	}
 }
