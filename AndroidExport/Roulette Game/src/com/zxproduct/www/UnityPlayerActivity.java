@@ -443,10 +443,8 @@ public class UnityPlayerActivity extends Activity
 		for (int i = 0; i < count; ++i)
 		{
 			buf[i] = (byte)buffer[i];
-//			Log.i(TAG, "writeUsbPort buf[" + i + "]=" + buf[i]);
 		}
-//		Log.i(TAG, "writeUsbPort");
-		return mDeviceConnection.bulkTransfer(epIntEndpointOut, buf, buf.length, 0);
+		return mDeviceConnection.bulkTransfer(epIntEndpointOut, buf, buf.length, 500);
 	}
 	
 	public int[] readHID()
