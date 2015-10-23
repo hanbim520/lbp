@@ -64,6 +64,7 @@ public class TestEncryChip : MonoBehaviour
 			List<int> data = new List<int>();
 			data.Add(0x42);
 			data.Add(0x5a);
+			data.Add(32);
 			foreach(byte b in buf)
 				data.Add((int)b);
 			while (data.Count < 64)

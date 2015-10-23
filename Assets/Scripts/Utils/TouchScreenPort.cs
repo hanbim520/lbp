@@ -14,13 +14,13 @@ public class TouchScreenPort : MonoBehaviour
 	public int dataBits = 8;
 	public StopBits stopBits = StopBits.One;
 
+	private AndroidSerialPort androidSP;
 	private SerialPort sp; 
 	private Queue<byte> queueReadPool = new Queue<byte>();
 	private Thread readThread; 
-	private Thread dealThread;
 	private bool isReadThreadExit = false;
-	private bool isDealTheadExit = false;
-
+	private string portName = "/dev/ttyS1";
+	
 	void OnEnable() 
 	{ 
 #if UNITY_EDITOR
@@ -34,6 +34,9 @@ public class TouchScreenPort : MonoBehaviour
 				sp.DtrEnable = true;
 				sp.RtsEnable = true;
 			}
+			isReadThreadExit = false;
+			readThread = new Thread(ReceiveData);
+			readThread.Start(); 
 		}
 		catch(Exception ex)
 		{
@@ -42,22 +45,23 @@ public class TouchScreenPort : MonoBehaviour
 #endif
 
 #if UNITY_ANDROID
-		
+		try
+		{
+			androidSP = new AndroidSerialPort(portName, baudRate, parityBit, dataBits, stopBits);
+			androidSP.Open();
+		}
+		catch(Exception ex)
+		{
+			Debug.Log(ex.ToString());
+		}
 #endif
-
-		dealThread = new Thread(DealReceivedData); 
-		dealThread.Start(); 
-		readThread = new Thread(ReceiveData);
-		readThread.Start(); 
 	}
 
 	void OnDisable()
 	{
+#if UNITY_EDITOR
 		readThread.Abort();
 		isReadThreadExit = true;
-		isDealTheadExit = true;
-
-#if UNITY_EDITOR
 		if (sp.IsOpen)
 		{
 			sp.DtrEnable = false;
@@ -65,6 +69,15 @@ public class TouchScreenPort : MonoBehaviour
 			sp.Close();
 		}
 #endif
+
+#if UNITY_ANDROID
+		androidSP.Close();
+#endif
+	}
+
+	void FixedUpdate()
+	{
+		DealReceivedData();
 	}
 	
 	private void ReceiveData() 
@@ -81,10 +94,6 @@ public class TouchScreenPort : MonoBehaviour
 				}
 			}
 #endif
-
-#if UNITY_ANDROID
-			
-#endif
 		} 
 		catch (Exception ex) 
 		{ 
@@ -94,49 +103,46 @@ public class TouchScreenPort : MonoBehaviour
 
 	private void DealReceivedData() 
 	{ 
-		while (!isDealTheadExit)
-		{
-			if (queueReadPool.Count >= 10) 
-			{ 
-				byte data = queueReadPool.Dequeue(); 
-				if (data == 0x55)
+		if (queueReadPool.Count >= 10) 
+		{ 
+			byte data = queueReadPool.Dequeue(); 
+			if (data == 0x55)
+			{
+				byte next = queueReadPool.Dequeue();
+				if (next == 0x54)
 				{
-					byte next = queueReadPool.Dequeue();
-					if (next == 0x54)
+					byte flag = queueReadPool.Dequeue();
+					UInt16 x = 0;
+					UInt16 y = 0;
+					for (int i = 0; i < 2; ++i)
 					{
-						byte flag = queueReadPool.Dequeue();
-						UInt16 x = 0;
-						UInt16 y = 0;
-						for (int i = 0; i < 2; ++i)
-						{
-							int count = 2;
-							byte[] element = new byte[count];
-							for (int j = 0; j < count; ++j)
-								element[j] = queueReadPool.Dequeue();
+						int count = 2;
+						byte[] element = new byte[count];
+						for (int j = 0; j < count; ++j)
+							element[j] = queueReadPool.Dequeue();
 
 //							if (System.BitConverter.IsLittleEndian)
 //							{
 //								System.Array.Reverse(element);
 //							}
-							if (i == 0)
-							{
-								x = BitConverter.ToUInt16(element, 0);
-							}
-							else if (i == 1)
-							{
-								y = BitConverter.ToUInt16(element, 0);
-							}
+						if (i == 0)
+						{
+							x = BitConverter.ToUInt16(element, 0);
 						}
-//						Debug.Log("x:" + x + ", y:" +y);
-						if (flag == 0x81)
-							GameEventManager.OnFingerDown(x, y);
-						else if (flag == 0x82)
-							GameEventManager.OnFingerHover(x, y);
-						else if (flag == 0x84)
-							GameEventManager.OnFingerUp(x, y);
+						else if (i == 1)
+						{
+							y = BitConverter.ToUInt16(element, 0);
+						}
 					}
+//						Debug.Log("x:" + x + ", y:" +y);
+					if (flag == 0x81)
+						GameEventManager.OnFingerDown(x, y);
+					else if (flag == 0x82)
+						GameEventManager.OnFingerHover(x, y);
+					else if (flag == 0x84)
+						GameEventManager.OnFingerUp(x, y);
 				}
-			} 
-		}
-	} 
+			}
+		} 
+	}
 }
