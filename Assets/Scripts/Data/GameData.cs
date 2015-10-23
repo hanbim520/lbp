@@ -9,7 +9,7 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = true;
+	public static bool debug = false;
     public static bool controlCode = true;
 
     // Setting menu
@@ -91,7 +91,7 @@ public class GameData
     }
 
     public int deviceIndex;     // 机台序号 1, 2, 3...
-
+	public string deviceGuid;	// 发给加密芯片做验证
 
 	// Serial mouse coordinates
 	public float serialMouseX;
@@ -158,6 +158,14 @@ public class GameData
 
 	private GameData()
 	{
+		// GUID
+		deviceGuid = PlayerPrefs.GetString("deviceGuid", string.Empty);
+		if (string.IsNullOrEmpty(deviceGuid))
+		{
+			deviceGuid = Utils.GuidTo16String();
+			PlayerPrefs.SetString("deviceGuid", deviceGuid);
+			PlayerPrefs.Save();
+		}
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 //		deviceIndex = 1;
 

@@ -7,6 +7,15 @@ using System.Collections;
 
 public static class Utils
 {
+	public static byte[] AsciiToBytes(string str)
+	{
+		byte[] bytes = new byte[str.Length];
+		char[] chars = str.ToCharArray();
+		for (int i = 0; i < bytes.Length; ++i)
+			bytes[i] = (byte)chars[i];
+		return bytes;
+	}
+
 	public static byte[] StringToBytes(string str)
 	{
 		byte[] bytes = new byte[str.Length * sizeof(char)];
@@ -297,4 +306,13 @@ public static class Utils
 	{
 		return DateTime.Now.Date.ToShortDateString() + " " + DateTime.Now.ToString("HH:mm:ss");
 	}
+
+	public static string GuidTo16String()  
+	{  
+		long baseNum = 1;
+		byte[] array = System.Guid.NewGuid().ToByteArray();
+		foreach (byte b in array)
+			baseNum *= ((int)b + 1);  
+		return string.Format("{0:x}", baseNum - System.DateTime.Now.Ticks);  
+	} 
 }
