@@ -7,15 +7,6 @@ using System.Collections;
 
 public static class Utils
 {
-	public static byte[] AsciiToBytes(string str)
-	{
-		byte[] bytes = new byte[str.Length];
-		char[] chars = str.ToCharArray();
-		for (int i = 0; i < bytes.Length; ++i)
-			bytes[i] = (byte)chars[i];
-		return bytes;
-	}
-
 	public static byte[] StringToBytes(string str)
 	{
 		byte[] bytes = new byte[str.Length * sizeof(char)];

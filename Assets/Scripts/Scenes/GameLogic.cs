@@ -362,10 +362,7 @@ public class GameLogic : MonoBehaviour
 		{
 			isPause = true;
 			ui.ClearAllEvent(null);
-			int language = 0;	// EN
-			if (GameData.GetInstance().language == 1)
-				language = 1;	// CN
-			ui.ShowWarning(Notifies.usbDisconnected[language]);
+			ui.ShowWarning(Notifies.usbDisconnected[GameData.GetInstance().language]);
 		}
 	}
 

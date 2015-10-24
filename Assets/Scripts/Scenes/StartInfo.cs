@@ -8,6 +8,7 @@ public class StartInfo : MonoBehaviour
 		GameData.GetInstance().ReadDataFromDisk();
 		LoadUpdateUtils();
 		LoadInputDevice();
+		LoadHIDUtils();
 		if (GameData.GetInstance().deviceIndex > 0)
 		{
 			Application.LoadLevel(Scenes.Main);
@@ -38,5 +39,13 @@ public class StartInfo : MonoBehaviour
 			go.name = "InputDevice";
 			prefab = null;
 		}
+	}
+
+	private void LoadHIDUtils()
+	{
+		Object prefab = (Object)Resources.Load("Input/HIDUtils");
+		GameObject go = (GameObject)Instantiate(prefab);
+		go.name = "HIDUtils";
+		prefab = null;
 	}
 }

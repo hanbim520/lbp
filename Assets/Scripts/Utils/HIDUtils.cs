@@ -35,6 +35,7 @@ public class HIDUtils : MonoBehaviour
 
 	void Start()
 	{
+		DontDestroyOnLoad(this);
 		InitData();
 	}
 
@@ -62,6 +63,7 @@ public class HIDUtils : MonoBehaviour
 
 	public void SetState(string value)
 	{
+		Debug.Log("SetState:" + value.ToString());
 		bool state;
 		if (bool.TryParse(value, out state))
 		{

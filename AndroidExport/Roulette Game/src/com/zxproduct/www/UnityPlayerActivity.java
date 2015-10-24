@@ -79,6 +79,8 @@ public class UnityPlayerActivity extends Activity
 		detectHIDViaTimer();
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+		intentFilter.addAction(Intent.ACTION_MEDIA_EJECT);
+		intentFilter.addDataScheme("file");
         registerReceiver(mReceiver, intentFilter);
 	}
 
@@ -201,14 +203,21 @@ public class UnityPlayerActivity extends Activity
 
 	public void closeSerialPort()
 	{
-		if (mSerialPort0 != null)
+		try
 		{
-			mSerialPort0.close();
-			mSerialPort0 = null;
+			if (mSerialPort0 != null)
+			{
+				mSerialPort0.close();
+				mSerialPort0 = null;
+			}
+			
+			if (mReadThread0 != null)
+				mReadThread0.stop();
 		}
-		
-		if (mReadThread0 != null)
-			mReadThread0.stop();
+		catch(Exception ex)
+		{
+			Log.d(TAG, ex.toString());
+		}
 	}
 
 	 public int[] readSerialPort()
@@ -231,7 +240,6 @@ public class UnityPlayerActivity extends Activity
 	 private UsbDevice mUsbDevice;
 	 private UsbDeviceConnection mDeviceConnection;
 	 private TReadUsb0 mTReadUsb0 = null;
-	 private final long detectHIDIntervalInMs = 2000;
 	 private final int ft232rUartVid = 0x0483;
 	 private final int ft232rUartPid = 0x5750;
 	 private boolean bHIDConnected = false;
@@ -302,10 +310,17 @@ public class UnityPlayerActivity extends Activity
 	 
 	 public void closeUsb()
 	 {
-		 if (mTReadUsb0 != null && mTReadUsb0.isAlive())
+		 try
 		 {
-			 mTReadUsb0.stop();
-			 mTReadUsb0 = null;
+			 if (mTReadUsb0 != null && mTReadUsb0.isAlive())
+			 {
+				 mTReadUsb0.stop();
+				 mTReadUsb0 = null;
+			 }
+		 }
+		 catch(Exception ex)
+		 {
+			 Log.d(TAG, ex.toString());
 		 }
 	 }
 	 
@@ -463,9 +478,6 @@ public class UnityPlayerActivity extends Activity
         TimerTask detectTimerTask = new TimerTask() {
         	@Override
             public void run() {
-            	if (bHIDConnected)
-            		return;
-            	
             	boolean bfound = false;
                 UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
                 HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
@@ -489,7 +501,12 @@ public class UnityPlayerActivity extends Activity
                 }
         }};
          
-        detectTimer.scheduleAtFixedRate(detectTimerTask, 5000, detectHIDIntervalInMs);
+        detectTimer.scheduleAtFixedRate(detectTimerTask, 5000, 2000);
+    }
+    
+    public boolean getUsbConnected()
+    {
+    	return bHIDConnected;
     }
     
     public void CallCSLog(String msg)
@@ -515,6 +532,11 @@ public class UnityPlayerActivity extends Activity
 	   				getFiles(path);
 	   			}
 	   		}
+        	else if (intent.getAction().equals(Intent.ACTION_MEDIA_EJECT))
+        	{
+        		
+        	}
+        	Log.i(TAG, "BroadcastReceiver:" + intent.getAction());
         }
     };
     
