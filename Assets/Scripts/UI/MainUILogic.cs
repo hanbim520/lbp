@@ -16,7 +16,6 @@ public class MainUILogic : MonoBehaviour
 	public GameObject dlgWarning;
     public GameObject dlgCard;
 	public GameObject dlgYesNO;
-	public GameObject dlgPrintCode;
 	public GameObject[] cardExplains;
 
 	public int CurChipIdx
@@ -432,6 +431,7 @@ public class MainUILogic : MonoBehaviour
                     }
                 }
 				gameLogic.totalCredits -= betValue;
+                GameData.GetInstance().ZongYa += betValue;
 				gameLogic.currentBet += betValue;
 				RefreshLblCredits(gameLogic.totalCredits.ToString());
 				RefreshLblBet(gameLogic.currentBet.ToString());
@@ -491,6 +491,7 @@ public class MainUILogic : MonoBehaviour
                     }
                 }
 				gameLogic.totalCredits -= betValue;
+                GameData.GetInstance().ZongYa += betValue;
 				gameLogic.currentBet += betValue;
 				RefreshLblCredits(gameLogic.totalCredits.ToString());
 				RefreshLblBet(gameLogic.currentBet.ToString());
@@ -922,7 +923,7 @@ public class MainUILogic : MonoBehaviour
 
     public bool IsDlgActived()
     {
-		return dlgWarning.activeSelf || dlgCard.activeSelf || dlgYesNO.activeSelf || dlgPrintCode.activeSelf;
+		return dlgWarning.activeSelf || dlgCard.activeSelf || dlgYesNO.activeSelf;
     }
 
 	public void ActiveDlgCard(bool active)
@@ -966,10 +967,4 @@ public class MainUILogic : MonoBehaviour
         backendTip.SetActive(true);
         backendTip.transform.FindChild("Text").GetComponent<Text>().text = tip;
     }
-
-	public void ActiveDlgPrintCode(bool enable)
-	{
-		if (!dlgPrintCode.activeSelf)
-			dlgPrintCode.SetActive(enable);
-	}
 }

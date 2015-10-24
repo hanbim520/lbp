@@ -9,11 +9,11 @@ public class ServerLogic : GameLogic
 
 	private const float kCalcRemainTime = 60.0f;
 	private float remainTimeIntever = 0.0f;
-	private bool isPrintingCode = false;
     
     private void Init()
     {
         host = GetComponent<UHost>();
+        CalcRemainTime();
     }
 
     protected override void Start() 
@@ -43,8 +43,6 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.BallValue += RecBallValue;
 		GameEventManager.CloseGate += CloseGate;
-		GameEventManager.PrintCodeSuccess += PrintCodeSuccess;
-		GameEventManager.PrintCodeFail += PrintCodeFail;
     }
 
     private void UnregisterListener()
@@ -54,8 +52,6 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.BallValue -= RecBallValue;
 		GameEventManager.CloseGate -= CloseGate;
-		GameEventManager.PrintCodeSuccess -= PrintCodeSuccess;
-		GameEventManager.PrintCodeFail -= PrintCodeFail;
     }
 
 	void Update()
@@ -104,7 +100,7 @@ public class ServerLogic : GameLogic
     private IEnumerator Countdown()
     {
 		print("logic countdown");
-		if (isPause || isPrintingCode)
+		if (isPause)
 		{
 			yield return new WaitForSeconds(1);
 			StartCoroutine(Countdown());
@@ -187,6 +183,7 @@ public class ServerLogic : GameLogic
 			}
 		}
 		AppendLast10(totalCredits, totalCredits + win, currentBet, win);
+        GameData.GetInstance().ZongPei += win;
 		currentBet = 0;
 		totalCredits += win;
 		if (totalCredits <= 0)
@@ -247,28 +244,25 @@ public class ServerLogic : GameLogic
 	// 计算跳码时间
 	public void CalcRemainTime()
 	{
-		int remainMins = GameData.GetInstance().remainMins;
-		--remainMins;
-		if (remainMins <= 0)
-		{
-			isPrintingCode = true;
-			GameData.GetInstance().remainMins = 0;
-			ui.ActiveDlgPrintCode(true);
-		}
-		else
-		{
-			GameData.GetInstance().remainMins = remainMins;
-		}
-	}
-
-	private void PrintCodeSuccess()
-	{
-		isPrintingCode = false;
-		ui.ActiveDlgPrintCode(false);
-	}
-
-	private void PrintCodeFail()
-	{
-		isPrintingCode = true;
+        int remainMins = GameData.GetInstance().remainMins;
+        if (remainMins <= 0)
+        {
+            GameData.GetInstance().remainMins = 0;
+            GameEventManager.OnChangeScene(Scenes.Backend);
+            return;
+        }
+        else
+        {
+            --remainMins;
+            if (remainMins <= 0)
+            {
+                GameData.GetInstance().remainMins = 0;
+                GameEventManager.OnChangeScene(Scenes.Backend);
+            }
+            else
+            {
+                GameData.GetInstance().remainMins = remainMins;
+            }
+        }
 	}
 }

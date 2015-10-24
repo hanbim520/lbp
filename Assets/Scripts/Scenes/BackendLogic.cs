@@ -10,6 +10,7 @@ public class BackendLogic : MonoBehaviour
     public GameObject menuAccount;
     public GameObject dlgPassword;
     public GameObject dlgYesNO;
+    public GameObject dlgPrintCode;
     public GameObject warning;
 	public Text[] deviceId;	// 机台序号 0:en 1:cn
 	public GameObject[] btnMouse;
@@ -34,6 +35,7 @@ public class BackendLogic : MonoBehaviour
 	private Dictionary<int, AccountItem> otherDevice = new Dictionary<int, AccountItem>();
 	private Transform accountItemRoot;
 	private Transform loadingRoot;
+    private int printCodeTimes;
     
     private string[] strPassword = new string[]{"Please Input Password", "请输入原密码"};
     private string[] strNewPassword = new string[]{"Please Input New Password", "请输入新密码"};
@@ -47,6 +49,7 @@ public class BackendLogic : MonoBehaviour
 
     void Start()
     {
+        printCodeTimes = 0;
         preInputState = InputEx.inputEnable;
         mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
         calcTitle = GameObject.Find("Canvas/Calc/Input/Title").GetComponent<Text>();
@@ -54,18 +57,27 @@ public class BackendLogic : MonoBehaviour
         calcPassword = GameObject.Find("Canvas/Calc/Input/Password").GetComponent<Text>();
 		dlgCalc = GameObject.Find("Canvas/Calc");
         calcPassword.text = calcTitle.text = calcContent.text = string.Empty;
-        InitMain();
+        if (GameData.GetInstance().remainMins != 0)
+            InitMain();
+        else
+            InitAccount();
 
 		if (GameData.GetInstance().deviceIndex == 1)
 		{
 			host = GetComponent<AccountNetwork>();
 			host.enabled = true;
 		}
+
+        GameEventManager.PrintCodeSuccess += PrintCodeSuccess;
+        GameEventManager.PrintCodeFail += PrintCodeFail;
     }
 
     void OnDestroy()
     {
         InputEx.inputEnable = preInputState;
+
+        GameEventManager.PrintCodeSuccess -= PrintCodeSuccess;
+        GameEventManager.PrintCodeFail -= PrintCodeFail;
     }
 
     void Update()
@@ -461,6 +473,20 @@ public class BackendLogic : MonoBehaviour
 		}
 	}
 
+    public void PrintCodeEvent(Transform hitObject)
+    {
+        if (GameData.controlCode)
+        {
+            // 要打码
+            if (!dlgPrintCode.activeSelf)
+                dlgPrintCode.SetActive(true);
+        }
+        else
+        {
+            ClearAccount();
+        }
+    }
+
 	public void AccountExitEvent(Transform hitObject)
 	{
 		otherDevice.Clear();
@@ -479,8 +505,11 @@ public class BackendLogic : MonoBehaviour
 				Destroy(t.gameObject);
 		}
 
-		timerRefreshAccounts.Stop();
-		timerRefreshAccounts = null;
+        if (timerRefreshAccounts != null)
+        {
+            timerRefreshAccounts.Stop();
+            timerRefreshAccounts = null;
+        }
 
 		menuMain.SetActive(true);
 		menuSetting.SetActive(false);
@@ -747,7 +776,7 @@ public class BackendLogic : MonoBehaviour
 
     private bool IsSettingDlgActived()
     {
-        return dlgPassword.activeSelf || dlgYesNO.activeSelf;
+        return dlgPassword.activeSelf || dlgYesNO.activeSelf || dlgPrintCode.activeSelf;
     }
 
     private void SaveSetting()
@@ -950,4 +979,27 @@ public class BackendLogic : MonoBehaviour
 			}
 		}
 	}
+
+    private void PrintCodeSuccess()
+    {
+        dlgPrintCode.SetActive(false);
+        printCodeTimes += 1;
+        if (printCodeTimes >= 2)
+        {
+            ClearAccount();
+        }
+    }
+
+    private void PrintCodeFail()
+    {
+        Debug.Log("PrintCodeFail");
+    }
+
+    private void ClearAccount()
+    {
+        // 账目归零
+        GameData.GetInstance().ClearAccount();
+        // TODO:clear client account
+        InitAccount();
+    }
 }

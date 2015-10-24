@@ -158,6 +158,7 @@ public class ClientLogic : GameLogic
             }
         }
         AppendLast10(totalCredits, totalCredits + win, currentBet, win);
+        GameData.GetInstance().ZongPei += win;
         currentBet = 0;
         totalCredits += win;
         if (totalCredits <= 0)

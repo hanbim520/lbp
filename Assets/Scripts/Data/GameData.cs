@@ -9,8 +9,8 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = false;
-    public static bool controlCode = true;
+    public static bool debug = false;       // 是否模拟出球
+    public static bool controlCode = true;  // 是否打码
 
     // Setting menu
     public int betTimeLimit;
@@ -38,6 +38,8 @@ public class GameData
     public int zongXia;		// 总下分
     public int zongTou;		// 总投币
     public int zongTui;		// 总退币
+    public int zongYa;      // 总押
+    public int zongPei;     // 总赔
 	public int currentWin;	// 当次赢分（有跳码时候用）
 	public int totalWin;	// 总赢分
 	public int cardCredits;	// 优惠卡送的分
@@ -63,7 +65,24 @@ public class GameData
             PlayerPrefs.Save();
         }
     }
-
+    public int ZongYa
+    {
+        get { return zongYa; }
+        set
+        {
+            CryptoPrefs.SetInt("zongYa", zongYa);
+            CryptoPrefs.Save();
+        }
+    }
+    public int ZongPei
+    {
+        get { return zongPei; }
+        set
+        {
+            CryptoPrefs.SetInt("zongPei", zongPei);
+            CryptoPrefs.Save();
+        }
+    }
 
 
     private int _lineId;        // 线号
@@ -302,6 +321,8 @@ public class GameData
         CryptoPrefs.SetInt("zongXia", zongXia);
         CryptoPrefs.SetInt("zongTou", zongTou);
         CryptoPrefs.SetInt("zongTui", zongTui);
+        CryptoPrefs.SetInt("zongYa", zongYa);
+        CryptoPrefs.SetInt("zongPei", zongPei);
 		CryptoPrefs.SetInt("currentWin", currentWin);
 		CryptoPrefs.SetInt("totalWin", totalWin);
 		CryptoPrefs.SetInt("cardCredits", cardCredits);
@@ -314,10 +335,12 @@ public class GameData
         zongXia = 0;
         zongTou = 0;
         zongTui = 0;
+        zongYa = 0;
+        zongPei = 0;
 		currentWin = 0;
 		totalWin = 0;
 		cardCredits = 0;
-		_printTimes = 0;
+		printTimes = 0;
     }
 
     public void ReadDataFromDisk()
@@ -379,6 +402,8 @@ public class GameData
             zongXia = CryptoPrefs.GetInt("zongXia");
             zongTou = CryptoPrefs.GetInt("zongTou");
             zongTui = CryptoPrefs.GetInt("zongTui");
+            zongYa = CryptoPrefs.GetInt("zongYa");
+            zongPei = CryptoPrefs.GetInt("zongPei");
 			currentWin = CryptoPrefs.GetInt("currentWin");
 			totalWin = CryptoPrefs.GetInt("totalWin");
 			cardCredits = CryptoPrefs.GetInt("cardCredits");
@@ -621,4 +646,18 @@ public class GameData
 		PlayerPrefs.SetInt("inputDevice", inputDevice);
 		PlayerPrefs.Save();
 	}
+
+    public void ClearAccount()
+    {
+        zongShang = 0;
+        zongXia = 0;
+        zongYa = 0;
+        zongPei = 0;
+        zongTou = 0;
+        zongTui = 0;
+        currentWin = 0;
+        totalWin = 0;
+        cardCredits = 0;
+        SaveAccount();
+    }
 }

@@ -34,7 +34,7 @@ public class GameLogic : MonoBehaviour
 		set 
 		{ 
 			_currentBet = value;
-			SaveCurrentBet();
+            SaveCurrentBet();
 		}
 	}
     public int lastWin
@@ -83,11 +83,12 @@ public class GameLogic : MonoBehaviour
     // 断电重启恢复
     protected void FixExitAbnormally()
     {
-        int lastBet = PlayerPrefs.GetInt("currentBet", 0);
-        _totalCredits = PlayerPrefs.GetInt("totalCredits");
+        int lastBet = CryptoPrefs.GetInt("currentBet", 0);
+        _totalCredits = CryptoPrefs.GetInt("totalCredits");
         if (lastBet > 0)
         {
             _totalCredits += lastBet;
+            GameData.GetInstance().ZongYa -= lastBet;
             currentBet = 0;
         }
         SaveTotalCredits();
@@ -96,7 +97,7 @@ public class GameLogic : MonoBehaviour
 		ui.RefreshLblBet("0");
 
 		// Recover remember credits
-		_rememberCredits = PlayerPrefs.GetInt("rememberCredits");
+		_rememberCredits = CryptoPrefs.GetInt("rememberCredits");
 		if (rememberCredits > 0)
 			ui.RefreshLblRemember(rememberCredits.ToString());
 		else
@@ -120,20 +121,20 @@ public class GameLogic : MonoBehaviour
 
     public void SaveTotalCredits()
     {
-        PlayerPrefs.SetInt("totalCredits", totalCredits);
-        PlayerPrefs.Save();
+        CryptoPrefs.SetInt("totalCredits", totalCredits);
+        CryptoPrefs.Save();
     }
 
 	public void SaveCurrentBet()
 	{
-        PlayerPrefs.SetInt("currentBet", currentBet);
-		PlayerPrefs.Save();
+        CryptoPrefs.SetInt("currentBet", currentBet);
+        CryptoPrefs.Save();
 	}
 
 	public void SaveRememberCredits()
 	{
-		PlayerPrefs.SetInt("rememberCredits", rememberCredits);
-		PlayerPrefs.Save();
+		CryptoPrefs.SetInt("rememberCredits", rememberCredits);
+        CryptoPrefs.Save();
 	}
 
     protected virtual void Start()
@@ -269,6 +270,7 @@ public class GameLogic : MonoBehaviour
         {
             totalCredits += item.Value;
         }
+        GameData.GetInstance().ZongYa -= currentBet;
         currentBet = 0;
         betFields.Clear();
         ui.RefreshLblCredits(totalCredits.ToString());
@@ -284,6 +286,7 @@ public class GameLogic : MonoBehaviour
         if (betFields.ContainsKey(fieldName))
         {
             totalCredits += betFields[fieldName];
+            GameData.GetInstance().ZongYa -= betFields[fieldName];
             currentBet -= betFields[fieldName];
             betFields.Remove(fieldName);
         }
@@ -331,6 +334,7 @@ public class GameLogic : MonoBehaviour
 			{
 				betFields.Add(field, betVal);
 			}
+            GameData.GetInstance().ZongYa += betVal;
 			currentBet += betVal;
 			totalCredits -= betVal;
 			ui.RefreshLblCredits(totalCredits.ToString());

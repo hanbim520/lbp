@@ -24,13 +24,6 @@ public class DlgPrintCode : MonoBehaviour
 	private HIDUtils hidUtils;
 	private int checkCodeNum;
 
-    private string[] strMachineId = new string[]{"MachineId: ", "机台号: "};
-    private string[] strCurrentWin = new string[]{"CurrentWin: ", "当次盈利: "};
-    private string[] strTotalWin = new string[]{"TotalWin: ", "总盈利: "};
-    private string[] strPrintTimes = new string[]{"PrintTimes: ", "打码次数: "};
-    private string[] strCheckCode = new string[]{"CheckCode: ", "校验码: "};
-    private string[] strPleaseInput = new string[]{"Input: ", "请输入: "};
-
 	void OnEnable() 
     {
         Init();
@@ -55,14 +48,13 @@ public class DlgPrintCode : MonoBehaviour
         int currentWin = GameData.GetInstance().currentWin;
         int totalWin = GameData.GetInstance().totalWin;
         int printTimes = GameData.GetInstance().printTimes;
-        txtMachineId.text = strMachineId[idx] + machineId.ToString();
-        txtCurrentWin.text = strCurrentWin[idx] + currentWin.ToString();
-        txtTotalWin.text = strTotalWin[idx] + totalWin.ToString();
-        txtPrintTimes.text = strPrintTimes[idx] + printTimes.ToString();
-        lblInput.text = strPleaseInput[idx];
+        txtMachineId.text = machineId.ToString();
+        txtCurrentWin.text = currentWin.ToString();
+        txtTotalWin.text = totalWin.ToString();
+        txtPrintTimes.text = printTimes.ToString();
         string checkCode = GetCheckCode(GameData.GetInstance().lineId, machineId, totalWin, currentWin, printTimes);
         if (checkCode != null)
-			txtCheckCode.text = strCheckCode[idx] + checkCode.ToString();
+			txtCheckCode.text = checkCode.ToString();
         txtInput.text = txtCalcInput.text = string.Empty;
 
         if (Application.platform == RuntimePlatform.Android)
@@ -74,13 +66,11 @@ public class DlgPrintCode : MonoBehaviour
 
     public void CalcDownEvent(Transform hitObject)
     {
-		print("CalcDownEvent:" + hitObject.name);
         SetAlpha(hitObject, 255);
     }
 
     public void CalcUpEvent(Transform hitObject)
     {
-		print("CalcUpEvent:" + hitObject.name);
         SetAlpha(hitObject, 0);
         string name = hitObject.name;
         if (string.Equals(name, "del"))
