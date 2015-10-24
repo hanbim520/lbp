@@ -4,14 +4,16 @@ using System.Collections.Generic;
 
 public class ServerLogic : GameLogic 
 {
-	public HIDUtils hidUtils;
 	private UHost host;
     private float waitSendTime = 0.1f;
+
+	private const float kCalcRemainTime = 60.0f;
+	private float remainTimeIntever = 0.0f;
+	private bool isPrintingCode = false;
     
     private void Init()
     {
         host = GetComponent<UHost>();
-        hidUtils = GameObject.Find("HIDUtils").GetComponent<HIDUtils>();
     }
 
     protected override void Start() 
@@ -41,6 +43,8 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.BallValue += RecBallValue;
 		GameEventManager.CloseGate += CloseGate;
+		GameEventManager.PrintCodeSuccess += PrintCodeSuccess;
+		GameEventManager.PrintCodeFail += PrintCodeFail;
     }
 
     private void UnregisterListener()
@@ -50,6 +54,8 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.BallValue -= RecBallValue;
 		GameEventManager.CloseGate -= CloseGate;
+		GameEventManager.PrintCodeSuccess -= PrintCodeSuccess;
+		GameEventManager.PrintCodeFail -= PrintCodeFail;
     }
 
 	void Update()
@@ -60,6 +66,15 @@ public class ServerLogic : GameLogic
 			ui.ActiveDlgCard(true);
 		}
 #endif
+		if (GameData.controlCode)
+		{
+			remainTimeIntever += Time.deltaTime;
+			if (remainTimeIntever >= kCalcRemainTime)
+			{
+				remainTimeIntever = 0;
+				CalcRemainTime();
+			}
+		}
 	}
 
     private void GameOver()
@@ -89,7 +104,7 @@ public class ServerLogic : GameLogic
     private IEnumerator Countdown()
     {
 		print("logic countdown");
-		if (isPause)
+		if (isPause || isPrintingCode)
 		{
 			yield return new WaitForSeconds(1);
 			StartCoroutine(Countdown());
@@ -228,4 +243,32 @@ public class ServerLogic : GameLogic
             host.SendToPeer(NetInstr.GamePhase + ":" + gamePhase, connectionId);
         }
     }
+
+	// 计算跳码时间
+	public void CalcRemainTime()
+	{
+		int remainMins = GameData.GetInstance().remainMins;
+		--remainMins;
+		if (remainMins <= 0)
+		{
+			isPrintingCode = true;
+			GameData.GetInstance().remainMins = 0;
+			ui.ActiveDlgPrintCode(true);
+		}
+		else
+		{
+			GameData.GetInstance().remainMins = remainMins;
+		}
+	}
+
+	private void PrintCodeSuccess()
+	{
+		isPrintingCode = false;
+		ui.ActiveDlgPrintCode(false);
+	}
+
+	private void PrintCodeFail()
+	{
+		isPrintingCode = true;
+	}
 }

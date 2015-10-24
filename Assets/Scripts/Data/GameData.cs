@@ -52,14 +52,14 @@ public class GameData
 			SavePrintTimes();
 		}
 	}
-    private int _remainSecs; // 剩余打码时间
-    public int remainSecs
-    {
-        get { return _remainSecs; }
+    private int _remainMins; // 剩余打码时间
+	public int remainMins
+	{
+        get { return _remainMins; }
         set
         {
-            _remainSecs = value;
-            PlayerPrefs.SetInt("remainSecs", _remainSecs);
+            _remainMins = value;
+			PlayerPrefs.SetInt("remainMins", _remainMins);
             PlayerPrefs.Save();
         }
     }
@@ -382,7 +382,7 @@ public class GameData
 			currentWin = CryptoPrefs.GetInt("currentWin");
 			totalWin = CryptoPrefs.GetInt("totalWin");
 			cardCredits = CryptoPrefs.GetInt("cardCredits");
-			_printTimes = CryptoPrefs.GetInt("printCodeTime");
+			_printTimes = CryptoPrefs.GetInt("printTimes");
 
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
@@ -612,7 +612,7 @@ public class GameData
 
 	public void SavePrintTimes()
 	{
-		CryptoPrefs.SetInt("printCodeTime", _printTimes);
+		CryptoPrefs.SetInt("printTimes", _printTimes);
 		CryptoPrefs.Save();
 	}
 

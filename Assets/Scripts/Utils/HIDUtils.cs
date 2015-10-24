@@ -17,8 +17,6 @@ public class HIDUtils : MonoBehaviour
 	private const float getDataTime = 0.1f;
 	private float getDataTimeDelta = 0;
 	private const int kReadDataLength = 61;
-	private const int kHeader1 = 0x58;
-	private const int kHeader2 = 0x57;
 	private const int kBlowBall = 0x55;
 	private const int kOpenGate = 0x55;
 	private const int kPreviousValue = 0x55;
@@ -118,7 +116,7 @@ public class HIDUtils : MonoBehaviour
 		{
 //			PrintData(ref data);
             // 机芯指令
-            if (data[0] == kHeader1 && data[1] == kHeader2)
+            if (data[0] == 0x58 && data[1] == 0x57)
             {
                 // 吹风
                 if (data[2] == kBlowBall)
@@ -175,13 +173,7 @@ public class HIDUtils : MonoBehaviour
             // 报账指令
             else if (data[0] == 0x42 && data[1] == 0x5a)
             {
-                string log = "data.Length:" + data.Length + "--";
-                for (int i = 0; i < data.Length; ++i)
-                {
-                    log += string.Format("{0:X}", data[i]) + ", ";
-                }
-                DebugConsole.Log(log);
-
+//                PrintData(ref data);
 				List<byte> col = new List<byte>();
                 for (int i = 3; i < 17; ++i)
                     col.Add((byte)data[i]);
@@ -191,7 +183,24 @@ public class HIDUtils : MonoBehaviour
                 blah[0].l = pArr;
                 
                 IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckPWStringValue");
-                DebugConsole.Log(AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah));
+				// 获取打码结果
+				string result = AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah);
+				char[] split = {':'};
+				string[] word = result.Split(split);
+				if (word.Length >= 2)
+				{
+					int value, days;
+					if (int.TryParse(word[0], out value))
+					{
+						// 打码正确
+						if (value == 1)
+							GameEventManager.OnPrintCodeSuccess();
+						else
+							GameEventManager.OnPrintCodeFail();
+					}
+					if (int.TryParse(word[1], out days))
+						GameData.GetInstance().remainMins = 24 * 60 * days;
+				}
             }
 		}
 		else
@@ -257,5 +266,21 @@ public class HIDUtils : MonoBehaviour
 			log += string.Format("{0:X}", data[i]) + ", ";
 		}
 		DebugConsole.Log(log);
+	}
+
+	public void SendCheckInfo()
+	{
+		char[] arr = GameData.GetInstance().deviceGuid.ToCharArray();
+		List<int> dataList = new List<int>();
+		// 0x595a 验证
+		dataList.Add(0x59);
+		dataList.Add(0x5a);
+		dataList.Add(arr.Length);
+		for (int i = 0; i < arr.Length; ++i)
+		{
+			dataList.Add((int)arr[i]);
+		}
+		int[] data = dataList.ToArray();
+		WriteData(data, "writeUsbPort");
 	}
 }

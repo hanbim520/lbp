@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public class DlgPrintCode : MonoBehaviour
 {
@@ -20,6 +21,8 @@ public class DlgPrintCode : MonoBehaviour
     private GameObject downHitObject;
     private AndroidJavaClass jc;
     private AndroidJavaObject jo;
+	private HIDUtils hidUtils;
+	private int checkCodeNum;
 
     private string[] strMachineId = new string[]{"MachineId: ", "机台号: "};
     private string[] strCurrentWin = new string[]{"CurrentWin: ", "当次盈利: "};
@@ -31,6 +34,7 @@ public class DlgPrintCode : MonoBehaviour
 	void OnEnable() 
     {
         Init();
+		hidUtils = GameObject.Find("HIDUtils").GetComponent<HIDUtils>();
 	}
 
     private void Init()
@@ -58,13 +62,7 @@ public class DlgPrintCode : MonoBehaviour
         lblInput.text = strPleaseInput[idx];
         string checkCode = GetCheckCode(GameData.GetInstance().lineId, machineId, totalWin, currentWin, printTimes);
         if (checkCode != null)
-        {
-            int value;
-            if (int.TryParse(checkCode, out value))
-            {
-                txtCheckCode.text = strCheckCode[idx] + value.ToString();
-            }
-        }
+			txtCheckCode.text = strCheckCode[idx] + checkCode.ToString();
         txtInput.text = txtCalcInput.text = string.Empty;
 
         if (Application.platform == RuntimePlatform.Android)
@@ -76,11 +74,13 @@ public class DlgPrintCode : MonoBehaviour
 
     public void CalcDownEvent(Transform hitObject)
     {
+		print("CalcDownEvent:" + hitObject.name);
         SetAlpha(hitObject, 255);
     }
 
     public void CalcUpEvent(Transform hitObject)
     {
+		print("CalcUpEvent:" + hitObject.name);
         SetAlpha(hitObject, 0);
         string name = hitObject.name;
         if (string.Equals(name, "del"))
@@ -116,7 +116,18 @@ public class DlgPrintCode : MonoBehaviour
 
     private void CalcEnterEvent()
     {
-        print(txtInput.text);
+        Debug.Log(txtInput.text);
+		txtCalcInput.text = string.Empty;
+		int userInput;
+		if (int.TryParse(txtInput.text, out userInput))
+		{
+			int lineId = GameData.GetInstance().lineId;
+			int machineId = GameData.GetInstance().machineId;
+			int currentWin = GameData.GetInstance().currentWin;
+			int totalWin = GameData.GetInstance().totalWin;
+			int printTimes = GameData.GetInstance().printTimes;
+			CheckUserInput(lineId, machineId, totalWin, currentWin, printTimes, checkCodeNum, userInput);
+		}
     }
 
     private void AppendCalcContent(int num)
@@ -193,11 +204,29 @@ public class DlgPrintCode : MonoBehaviour
 
     public string GetCheckCode(long lineId, long machineId, long totalWin, long currentWin, long printTimes)
     {
-        if (Application.platform == RuntimePlatform.Android)
-        {
-            IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckCode");
-            return AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, null);
-        }
+		string strCrc = jo.Call<string>("GetPWCheckValue4", (long)lineId, (long)machineId, (long)totalWin, (long)currentWin, (long)printTimes);
+		int value;
+		if (int.TryParse(strCrc, out value))
+		{
+			checkCodeNum = value;
+			return value.ToString();
+		}
         return null;
     }
+
+	public void CheckUserInput(long lineId, long machineId, long totalWin, long currentWin, long printTimes, long crc, long userInput)
+	{
+		AndroidJavaObject rev = jo.Call<AndroidJavaObject>("CreateCheckPWString", 
+		                                                   (long)lineId, (long)machineId, (long)totalWin, (long)currentWin, (long)printTimes, (long)crc, (long)userInput);
+		byte[] buf = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
+		List<int> data = new List<int>();
+		data.Add(0x42);
+		data.Add(0x5a);
+		data.Add(32);	// 数据长度
+		foreach(byte b in buf)
+			data.Add((int)b);
+		while (data.Count < 64)
+			data.Add(0);
+		hidUtils.WriteData(data.ToArray(), "writeUsbPort");
+	}
 }

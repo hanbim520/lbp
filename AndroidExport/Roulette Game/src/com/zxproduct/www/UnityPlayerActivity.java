@@ -269,7 +269,7 @@ public class UnityPlayerActivity extends Activity
 							{
 								buf.buffer[i] = buffer[i] & 0xff;
 							}
-							while (readUsbQueue0.size() > 5)
+							while (readUsbQueue0.size() > 20)
 							{
 								readUsbQueue0.poll();
 							}
@@ -428,7 +428,6 @@ public class UnityPlayerActivity extends Activity
 				{
 					bHIDConnected = true;
 					UnityPlayer.UnitySendMessage("HIDUtils", "SetState", "True");
-					OpenGate();
 				}
 			} 
 			else 

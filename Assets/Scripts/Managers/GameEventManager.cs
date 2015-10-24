@@ -29,6 +29,7 @@ public static class GameEventManager
 	public static event KeyinEvent Keyin;	// 上分
 	public static event GameEvent Keout;
     public static event ChangeSceneEvent ChangeScene;
+	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
@@ -183,4 +184,14 @@ public static class GameEventManager
     {
         if (ChangeScene != null) ChangeScene(sceneName);
     }
+
+	public static void OnPrintCodeSuccess()
+	{
+		if (PrintCodeSuccess != null) PrintCodeSuccess();
+	}
+
+	public static void OnPrintCodeFail()
+	{
+		if (PrintCodeFail != null) PrintCodeFail();
+	}
 }

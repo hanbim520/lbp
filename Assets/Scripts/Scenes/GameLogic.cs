@@ -78,6 +78,7 @@ public class GameLogic : MonoBehaviour
 	// Field -- Bet
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
     public MainUILogic ui;
+	public HIDUtils hidUtils;
     
     // 断电重启恢复
     protected void FixExitAbnormally()
@@ -138,6 +139,7 @@ public class GameLogic : MonoBehaviour
     protected virtual void Start()
     {
         ui = GameObject.Find("UILogic").GetComponent<MainUILogic>();
+		hidUtils = GameObject.Find("HIDUtils").GetComponent<HIDUtils>();
 		FixExitAbnormally();
         RegisterEvents();
     }
@@ -343,12 +345,10 @@ public class GameLogic : MonoBehaviour
 		{
 			InputEx.inputEnable = true;
 		}
-		
-		if (isPause)
-		{
-			isPause = false;
-			ui.HideWarning();
-		}
+
+		isPause = false;
+		ui.HideWarning();
+		StartCoroutine(AfterConnHID());
 	}
 	
 	protected void HIDDisconnected()
@@ -402,4 +402,26 @@ public class GameLogic : MonoBehaviour
         GameData.GetInstance().NextLevelName = strNextSceneName;
         Application.LoadLevel(Scenes.Loading);
     }
+
+	// 第一次连上机芯应打开一次门
+	protected void OpenGate()
+	{
+		if (GameData.GetInstance().deviceIndex == 1)
+		{
+			hidUtils.OpenGate();
+		}
+	}
+
+	// 发送guid给加密片验证
+	protected void SendCheckInfo()
+	{
+		hidUtils.SendCheckInfo();
+	}
+
+	protected IEnumerator AfterConnHID()
+	{
+		SendCheckInfo();
+		yield return new WaitForSeconds(2);
+		OpenGate();
+	}
 }
