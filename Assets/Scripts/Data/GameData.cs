@@ -40,6 +40,8 @@ public class GameData
     public int zongTui;		// 总退币
     public int zongYa;      // 总押
     public int zongPei;     // 总赔
+	public int currentZongShang;	// 当次总上分
+	public int currentZongXia;		// 当次总下分
 	public int currentWin;	// 当次赢分（有跳码时候用）
 	public int totalWin;	// 总赢分
 	public int cardCredits;	// 优惠卡送的分
@@ -326,6 +328,8 @@ public class GameData
 		CryptoPrefs.SetInt("currentWin", currentWin);
 		CryptoPrefs.SetInt("totalWin", totalWin);
 		CryptoPrefs.SetInt("cardCredits", cardCredits);
+		CryptoPrefs.SetInt("currentZongShang", currentZongShang);
+		CryptoPrefs.SetInt("currentZongXia", currentZongXia);
         CryptoPrefs.Save();
     }
 
@@ -341,6 +345,8 @@ public class GameData
 		totalWin = 0;
 		cardCredits = 0;
 		printTimes = 0;
+		currentZongShang = 0;
+		currentZongXia = 0;
     }
 
     public void ReadDataFromDisk()
@@ -408,6 +414,8 @@ public class GameData
 			totalWin = CryptoPrefs.GetInt("totalWin");
 			cardCredits = CryptoPrefs.GetInt("cardCredits");
 			_printTimes = CryptoPrefs.GetInt("printTimes");
+			currentZongShang = CryptoPrefs.GetInt("currentZongShang");
+			currentZongXia = CryptoPrefs.GetInt("currentZongXia");
 
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
@@ -658,6 +666,8 @@ public class GameData
         currentWin = 0;
         totalWin = 0;
         cardCredits = 0;
+		currentZongShang = 0;
+		currentZongXia = 0;
         SaveAccount();
     }
 }

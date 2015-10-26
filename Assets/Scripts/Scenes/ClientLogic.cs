@@ -45,11 +45,13 @@ public class ClientLogic : GameLogic
     private void RegisterListener()
     {
         GameEventManager.EndCountdown += CountdownComplete;
+		GameEventManager.ClientDisconnect += ClientDisconnect;
     }
     
     private void UnregisterListener()
     {
         GameEventManager.EndCountdown -= CountdownComplete;
+		GameEventManager.ClientDisconnect -= ClientDisconnect;
     }
 	
     public void HandleRecData(ref string[] words)
@@ -60,7 +62,7 @@ public class ClientLogic : GameLogic
             return;
         }
         
-        if (instr == NetInstr.SynData && words.Length > 8)
+        if (instr == NetInstr.SynData)
         {
             SynData(ref words);
         }
@@ -72,6 +74,29 @@ public class ClientLogic : GameLogic
 		{
 			SendAccountToHost();
 		}
+		else if (instr == NetInstr.ClearAccount)
+		{
+			ClearAccount();
+		}
+		else if (instr == NetInstr.ClearCurrentWin)
+		{
+			ClearCurrentWin();
+		}
+	}
+
+	private void ClearCurrentWin()
+	{
+		GameData.GetInstance().currentWin = 0;
+		GameData.GetInstance().currentZongShang = 0;
+		GameData.GetInstance().currentZongXia = 0;
+		GameData.GetInstance().SaveAccount();
+		SendAccountToHost();
+	}
+
+	private void ClearAccount()
+	{
+		GameData.GetInstance().ClearAccount();
+		SendAccountToHost();
 	}
 
 	private void SendAccountToHost()
@@ -274,4 +299,9 @@ public class ClientLogic : GameLogic
         ui.SetDisplay();
         ui.SetBetChips();
     }
+
+	private void ClientDisconnect()
+	{
+		ui.ClearAllEvent(null);
+	}
 }

@@ -13,7 +13,6 @@ public class DlgPrintCode : MonoBehaviour
     public Text txtCheckCode;
     public Text txtCalcInput;
     public Text txtInput;
-    public Text lblInput;
 
     public GameObject en;
     public GameObject cn;

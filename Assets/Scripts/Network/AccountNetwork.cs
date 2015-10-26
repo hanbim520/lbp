@@ -77,7 +77,6 @@ public class AccountNetwork : MonoBehaviour
 		UpdateTimer();
 	}
 	
-	
 	private void SetupServer()
 	{
 		// global config
@@ -114,7 +113,7 @@ public class AccountNetwork : MonoBehaviour
 		CheckAccount(connectionId);
 	}
 	
-	private void CheckAccount(int connectionId)
+	public void CheckAccount(int connectionId)
 	{
 		string msg = NetInstr.CheckAccount.ToString();
 		SendToPeer(msg, connectionId);
@@ -133,7 +132,6 @@ public class AccountNetwork : MonoBehaviour
 			StartBroadcast();
 		}
 	}
-	
 	
 	private void StartConnectClients()
 	{

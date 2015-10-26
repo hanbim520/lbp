@@ -30,6 +30,7 @@ public static class GameEventManager
 	public static event GameEvent Keout;
     public static event ChangeSceneEvent ChangeScene;
 	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
+	public static event GameEvent ClientDisconnect;	// 分机通讯断开
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
@@ -193,5 +194,10 @@ public static class GameEventManager
 	public static void OnPrintCodeFail()
 	{
 		if (PrintCodeFail != null) PrintCodeFail();
+	}
+
+	public static void OnClientDisconnect()
+	{
+		if (ClientDisconnect != null) ClientDisconnect();
 	}
 }

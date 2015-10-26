@@ -199,6 +199,9 @@ public class GameLogic : MonoBehaviour
 
 		GameData.GetInstance().AppendKeyinKeoutRecords(0, totalCredits, 0, 0, 0);
 		GameData.GetInstance().zongXia += totalCredits;
+		GameData.GetInstance().currentZongXia += totalCredits;
+		GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
+		GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
 		GameData.GetInstance().SaveAccount();
 
 		totalCredits = 0;
@@ -223,7 +226,10 @@ public class GameLogic : MonoBehaviour
 				rememberCredits = totalCredits;
 				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, giveCredits);
 				GameData.GetInstance().zongShang += delta;
+				GameData.GetInstance().currentZongShang += delta;
 				GameData.GetInstance().cardCredits += giveCredits;
+				GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
+				GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
 				GameData.GetInstance().SaveAccount();
 			}
 			else
@@ -232,6 +238,9 @@ public class GameLogic : MonoBehaviour
 				totalCredits = temp;
 				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, 0);
 				GameData.GetInstance().zongShang += delta;
+				GameData.GetInstance().currentZongShang += delta;
+				GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
+				GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
 				GameData.GetInstance().SaveAccount();
 			}
 			ui.RefreshLblCredits(totalCredits.ToString());
@@ -245,7 +254,10 @@ public class GameLogic : MonoBehaviour
 			totalCredits = totalCredits + delta;
 			GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, giveCredits);
 			GameData.GetInstance().zongShang += delta;
+			GameData.GetInstance().currentZongShang += delta;
 			GameData.GetInstance().cardCredits += giveCredits;
+			GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
+			GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
 			GameData.GetInstance().SaveAccount();
 
 			ui.RefreshLblCredits(totalCredits.ToString());
@@ -257,6 +269,9 @@ public class GameLogic : MonoBehaviour
 			rememberCredits = 0;
 			GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, 0);
 			GameData.GetInstance().zongShang += delta;
+			GameData.GetInstance().currentZongShang += delta;
+			GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
+			GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
 			GameData.GetInstance().SaveAccount();
 
 			ui.RefreshLblCredits(totalCredits.ToString());

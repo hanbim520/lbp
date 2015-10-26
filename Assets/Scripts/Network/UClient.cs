@@ -132,8 +132,9 @@ public class UClient : MonoBehaviour
 
 	private void HandleDisconnectEvent()
 	{
-		connState = ConnectionState.Disconnected;
 		Debug.Log("HandleDisconnectEvent");
+		connState = ConnectionState.Disconnected;
+		GameEventManager.OnClientDisconnect();
 	}
 
 	public void SendToServer(string msg)

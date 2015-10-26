@@ -24,6 +24,8 @@ public struct NetInstr
     public const int Bet = 3;
     public const int GetGamePhase = 4;
 	public const int CheckAccount = 5;
+	public const int ClearAccount = 6;
+	public const int ClearCurrentWin = 7;
 }
 
 // Use for network
@@ -103,13 +105,13 @@ public struct KeyinKeoutRecord
 }
 
 // 分机账目
-public struct AccountItem
+public class AccountItem
 {
 	public int deviceIndex;
 	public int keyin;
 	public int keout;
-	public int receiveCoin;
-	public int payCoin;
+	public int receiveCoin;	// 总投
+	public int payCoin;		// 总退
 	public int winnings;
 	public int totalWinnings;
 	public int card;

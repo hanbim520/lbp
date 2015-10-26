@@ -15,6 +15,7 @@ public class BackendLogic : MonoBehaviour
 	public Text[] deviceId;	// 机台序号 0:en 1:cn
 	public GameObject[] btnMouse;
 	public GameObject[] btnTouchScreen;
+	public GameObject tipPrintCode;
 
     private RectTransform mouseIcon;
     private GameObject downHitObject;
@@ -46,6 +47,7 @@ public class BackendLogic : MonoBehaviour
 	private string[] strAccountPassword = new string[]{"Input Account Password", "请输入账户密码"};
 	private string[] strDeviceId = new string[]{"Device Id", "请输入设备Id"};
 	private string[] strSetError = new string[]{"Only host device can enter.", "只有主机可以进入"};
+	private string[] strClearAccoutTip = new string[]{"Time's up, please\nreport accounts.", "游戏时间结束，\n请报账打码。"};
 
     void Start()
     {
@@ -57,10 +59,15 @@ public class BackendLogic : MonoBehaviour
         calcPassword = GameObject.Find("Canvas/Calc/Input/Password").GetComponent<Text>();
 		dlgCalc = GameObject.Find("Canvas/Calc");
         calcPassword.text = calcTitle.text = calcContent.text = string.Empty;
-        if (GameData.GetInstance().remainMins != 0)
-            InitMain();
-        else
-            InitAccount();
+		if (GameData.controlCode &&
+		    GameData.GetInstance().remainMins <= 0)
+		{
+			tipPrintCode.SetActive(true);
+			tipPrintCode.transform.FindChild("Text").GetComponent<Text>().text = strClearAccoutTip[GameData.GetInstance().language];
+		}
+		else
+			tipPrintCode.SetActive(false);
+		InitMain();
 
 		if (GameData.GetInstance().deviceIndex == 1)
 		{
@@ -400,20 +407,8 @@ public class BackendLogic : MonoBehaviour
         SetActiveTitles(languageRoot.transform);
 
 		otherDevice.Clear();
-		int deviceIndex = GameData.GetInstance().deviceIndex;
-		if (!otherDevice.ContainsKey(deviceIndex))
-		{
-			AccountItem item = new AccountItem();
-			item.deviceIndex = deviceIndex;
-			item.keyin = GameData.GetInstance().zongShang;
-			item.keout = GameData.GetInstance().zongXia;
-			item.receiveCoin = GameData.GetInstance().zongTou;
-			item.payCoin = GameData.GetInstance().zongTui;
-			item.winnings = GameData.GetInstance().currentWin;
-			item.totalWinnings = GameData.GetInstance().totalWin;
-			item.card = GameData.GetInstance().cardCredits;
-			otherDevice.Add(deviceIndex, item);
-		}
+		UpdateHostAccount();
+		CalcTotalAccount();
 
 		if (accountItemRoot == null)
 			accountItemRoot = menuAccount.transform.FindChild("ItemsRoot");
@@ -436,7 +431,7 @@ public class BackendLogic : MonoBehaviour
 			}
 		}
 
-		timerRefreshAccounts = new Timer(1, 1, TimerType.Loop);
+		timerRefreshAccounts = new Timer(3, 1, TimerType.Loop);
 		timerRefreshAccounts.Tick += RefreshAccounts;
 		timerRefreshAccounts.Start();
     }
@@ -449,7 +444,7 @@ public class BackendLogic : MonoBehaviour
 			if (loadingRoot != null)
 			{
 				Transform t = loadingRoot.FindChild("LoadingText" + (id - 1));
-				if (t != null && accountItemRoot != null)
+				if (t != null)
 				{
 					string prefabName = GameData.controlCode ? "Account/AccountItem CC" : "Account/AccountItem NCC";
 					Object prefab = (Object)Resources.Load(prefabName);
@@ -466,26 +461,28 @@ public class BackendLogic : MonoBehaviour
 						go.transform.FindChild("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
 					go.transform.FindChild("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
 					go.transform.FindChild("card").GetComponent<Text>().text = item.Value.card.ToString();
+					go.name = GameData.controlCode ? "AccountItem CC" + (id - 1) : "AccountItem NCC" + (id - 1);
 					prefab = null;
 					Destroy(t.gameObject);
 				}
+				else
+				{
+					string name = GameData.controlCode ? "AccountItem CC" + (id - 1) : "AccountItem NCC" + (id - 1);
+					t = accountItemRoot.FindChild(name);
+					t.FindChild("idx").GetComponent<Text>().text = item.Value.deviceIndex.ToString();
+					t.FindChild("keyin").GetComponent<Text>().text = item.Value.keyin.ToString();
+					t.FindChild("keout").GetComponent<Text>().text = item.Value.keout.ToString();
+					t.FindChild("tou").GetComponent<Text>().text = item.Value.receiveCoin.ToString();
+					t.FindChild("tui").GetComponent<Text>().text = item.Value.payCoin.ToString();
+					if (GameData.controlCode)
+						t.FindChild("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
+					t.FindChild("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
+					t.FindChild("card").GetComponent<Text>().text = item.Value.card.ToString();
+				}
 			}
 		}
+		CalcTotalAccount();
 	}
-
-    public void PrintCodeEvent(Transform hitObject)
-    {
-        if (GameData.controlCode)
-        {
-            // 要打码
-            if (!dlgPrintCode.activeSelf)
-                dlgPrintCode.SetActive(true);
-        }
-        else
-        {
-            ClearAccount();
-        }
-    }
 
 	public void AccountExitEvent(Transform hitObject)
 	{
@@ -954,10 +951,7 @@ public class BackendLogic : MonoBehaviour
 			int deviceIndex;
 			if (int.TryParse(words[1], out deviceIndex))
 			{
-				if (otherDevice.ContainsKey(deviceIndex))
-					return;
-
-				AccountItem item = new AccountItem();
+				AccountItem item = otherDevice.ContainsKey(deviceIndex) ? otherDevice[deviceIndex] : new AccountItem();
 				item.deviceIndex = deviceIndex;
 				int zongShang, zongXia, zongTou, zongTui, winnings, totalWinnings, card;
 				if (int.TryParse(words[2], out zongShang))
@@ -974,9 +968,24 @@ public class BackendLogic : MonoBehaviour
 					item.totalWinnings = totalWinnings;
 				if (int.TryParse(words[8], out card))
 					item.card = card;
-
-				otherDevice.Add(deviceIndex, item);
+				if (!otherDevice.ContainsKey(deviceIndex))
+					otherDevice.Add(deviceIndex, item);
 			}
+		}
+	}
+
+	// 清账按钮
+	public void PrintCodeEvent(Transform hitObject)
+	{
+		if (GameData.controlCode)
+		{
+			// 要打码
+			if (!dlgPrintCode.activeSelf)
+				dlgPrintCode.SetActive(true);
+		}
+		else
+		{
+			ClearAccount();
 		}
 	}
 
@@ -988,6 +997,16 @@ public class BackendLogic : MonoBehaviour
         {
             ClearAccount();
         }
+		else
+		{
+			GameData.GetInstance().currentWin = 0;
+			GameData.GetInstance().currentZongShang = 0;
+			GameData.GetInstance().currentZongXia = 0;
+			GameData.GetInstance().SaveAccount();
+			UpdateHostAccount();
+			string msg = NetInstr.ClearCurrentWin.ToString();
+			host.SendToAll(msg);
+		}
     }
 
     private void PrintCodeFail()
@@ -999,7 +1018,62 @@ public class BackendLogic : MonoBehaviour
     {
         // 账目归零
         GameData.GetInstance().ClearAccount();
-        // TODO:clear client account
-        InitAccount();
+		UpdateHostAccount();
+		string msg = NetInstr.ClearAccount.ToString();
+		host.SendToAll(msg);
     }
+
+	private void UpdateHostAccount()
+	{
+		int deviceIndex = GameData.GetInstance().deviceIndex;
+
+		AccountItem item = otherDevice.ContainsKey(deviceIndex) ? otherDevice[deviceIndex] : new AccountItem();
+		item.deviceIndex = deviceIndex;
+		item.keyin = GameData.GetInstance().zongShang;
+		item.keout = GameData.GetInstance().zongXia;
+		item.receiveCoin = GameData.GetInstance().zongTou;
+		item.payCoin = GameData.GetInstance().zongTui;
+		item.winnings = GameData.GetInstance().currentWin;
+		item.totalWinnings = GameData.GetInstance().totalWin;
+		item.card = GameData.GetInstance().cardCredits;
+		if (!otherDevice.ContainsKey(deviceIndex))
+			otherDevice.Add(deviceIndex, item);
+	}
+
+	private void CalcTotalAccount()
+	{
+		string goName = GameData.controlCode ? "TotalNum CC" : "TotalNum NCC";
+		Transform totalNum = accountItemRoot.FindChild(goName);
+		if (totalNum == null)
+		{
+			string prefabName = GameData.controlCode ? "Account/TotalNum CC" : "Account/TotalNum NCC";
+			Object prefab = (Object)Resources.Load(prefabName);
+			GameObject go = (GameObject)Instantiate(prefab);
+			go.transform.SetParent(accountItemRoot);
+			go.transform.localScale = Vector3.one;
+			go.transform.localPosition = new Vector3(0, -60, 0);
+			go.name = goName;
+			prefab = null;
+			totalNum = go.transform;
+		}
+		int keyin = 0, keout = 0, tou = 0, tui = 0, winnings = 0, totalWin = 0, card = 0;
+		foreach (AccountItem item in otherDevice.Values)
+		{
+			keyin += item.keyin;
+			keout += item.keout;
+			tou += item.receiveCoin;
+			tui += item.payCoin;
+			winnings += item.winnings;
+			totalWin += item.totalWinnings;
+			card += item.card;
+		}
+		totalNum.FindChild("keyin").GetComponent<Text>().text = keyin.ToString();
+		totalNum.FindChild("keout").GetComponent<Text>().text = keout.ToString();
+		totalNum.FindChild("tou").GetComponent<Text>().text = tou.ToString();
+		totalNum.FindChild("tui").GetComponent<Text>().text = tui.ToString();
+		if (GameData.controlCode)
+			totalNum.FindChild("winnings").GetComponent<Text>().text = winnings.ToString();
+		totalNum.FindChild("total winnings").GetComponent<Text>().text = totalWin.ToString();
+		totalNum.FindChild("card").GetComponent<Text>().text = card.ToString();
+	}
 }
