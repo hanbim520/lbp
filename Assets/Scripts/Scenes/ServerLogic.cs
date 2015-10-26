@@ -13,7 +13,7 @@ public class ServerLogic : GameLogic
     private void Init()
     {
         host = GetComponent<UHost>();
-        CalcRemainTime();
+//        CalcRemainTime();
     }
 
     protected override void Start() 

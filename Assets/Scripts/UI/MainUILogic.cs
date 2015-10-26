@@ -676,6 +676,13 @@ public class MainUILogic : MonoBehaviour
             strField = strField.Substring(1);
         }
 		bet = GameEventManager.OnFieldClick(strField, bet);
+		// Play sfx
+		char[] splits = {'-'};
+		string[] words = strField.Split(splits);
+		int num;
+		if (words.Length == 1 && int.TryParse(words[0], out num))
+			AudioController.Play(words[0]);
+
 		if (bet <= 0)
 			return;
 
@@ -816,6 +823,7 @@ public class MainUILogic : MonoBehaviour
 		t.Tick += CountdownTick;
 		t.OnComplete += CountdownComplete;
 		t.Start();
+		AudioController.Play("makeyourbets");
 	}
 
 	private void CountdownTick()
@@ -829,6 +837,7 @@ public class MainUILogic : MonoBehaviour
 	{
 		print("ui CountdownComplete");
 		GameEventManager.OnEndCountdown();
+		AudioController.Play("nomorebets");
 	}
 
 	public void ResetCountdown()
