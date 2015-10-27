@@ -271,6 +271,8 @@ public class GameLogic : MonoBehaviour
 		if (payCoinCount >= expectedPayCoinCount)
 		{
 			hidUtils.StopPayCoin();
+            timerPayCoin.Stop();
+            timerPayCoin = null;
 			// 剩余分数
 			totalCredits -= scoreNum;
 
@@ -283,8 +285,6 @@ public class GameLogic : MonoBehaviour
 			GameData.GetInstance().SaveAccount();
 			
 			ui.RefreshLblCredits(totalCredits.ToString());
-			timerPayCoin.Stop();
-			timerPayCoin = null;
 			return;
 		}
 		// 剩余分数
