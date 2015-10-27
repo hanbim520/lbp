@@ -11,6 +11,8 @@ public class GameLogic : MonoBehaviour
         set
         {
             _totalCredits = value;
+            if (_totalCredits < 0)
+                _totalCredits = 0;
             // Save
             SaveTotalCredits();
 
