@@ -78,6 +78,8 @@ public class GameLogic : MonoBehaviour
     protected bool bChangeScene = false;    // From main scene to anothers
     protected string strNextSceneName;
 	protected Timer timerPayCoin;
+    protected int payCoinCount = 0;             // 已退币的个数
+    protected int expectedPayCoinCount = 0;     // 期望要退币的个数
 
 	// Field -- Bet
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
@@ -256,9 +258,7 @@ public class GameLogic : MonoBehaviour
 			}
 		}
 	}
-
-	protected int payCoinCount = 0;				// 已退币的个数
-	protected int expectedPayCoinCount = 0;		// 期望要退币的个数
+	
 	protected void PayCoinCallback(int count)
 	{
 		if (timerPayCoin != null)

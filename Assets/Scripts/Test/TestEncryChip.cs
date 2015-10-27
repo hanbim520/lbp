@@ -35,10 +35,6 @@ public class TestEncryChip : MonoBehaviour
 	int userInput = 44579057;
 	List<byte> sendToChip = new List<byte>();
 
-	private const float getDataTime = 0.1f;
-	private float getDataTimeDelta = 0;
-	private const int kReadDataLength = 61;
-
 	void OnGUI()
 	{
 		if (GUI.Button(new Rect(200, 10, 200, 100), "GetPWCheckValue4"))

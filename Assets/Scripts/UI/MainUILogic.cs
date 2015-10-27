@@ -43,7 +43,6 @@ public class MainUILogic : MonoBehaviour
     private Timer timerHideWarning;
     private string[] strCardError = new string[]{"If you want to use Presented\nCredits, you have to use up all\ncredits, and then keyin agian.",
         "要使用优惠卡，\n须从0分开始充值。"};
-	protected string[] strTuiBroken = new string[]{"Ticket back device is broken,\nplease contact assistance.", "退币器故障，\n请联系服务员。"};
 	
     void Awake()
     {
