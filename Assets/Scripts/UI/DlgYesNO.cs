@@ -115,6 +115,6 @@ public class DlgYesNO : MonoBehaviour
 	// 退币功能
 	private void BackTicket()
 	{
-		// TODO:退分退币
+		GameEventManager.OnPayCoin();
 	}
 }

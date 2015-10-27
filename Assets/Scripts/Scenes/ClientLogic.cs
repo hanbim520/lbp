@@ -32,8 +32,10 @@ public class ClientLogic : GameLogic
         UnregisterListener();
     }
 
-    void Update()
+    protected override void Update()
     {
+		base.Update();
+		
         #if UNITY_EDITOR
         if (Input.GetKeyUp(KeyCode.Escape))
         {

@@ -12,7 +12,9 @@ public static class GameEventManager
     public delegate int FieldClickEvent(string fieldName, int bet);
     public delegate void ClearEvent(string fieldName);
 	public delegate void BallValueEvent(int ballValue);
-    public delegate void KeyinEvent(int delta);
+    public delegate void KeyinEvent(int delta, int coinNum);
+	public delegate void ReceiveCoinEvent(int count);
+	public delegate void PayCoinEvent(int count);
     public delegate void NetworkReadyEvent(bool value);
     public delegate void ChangeSceneEvent(string sceneName);
     public static event GameEvent ObtainInput;
@@ -27,7 +29,10 @@ public static class GameEventManager
     public static event RefreshRecordEvent RefreshRecord;
     public static event FieldClickEvent FieldClick;
 	public static event KeyinEvent Keyin;	// 上分
-	public static event GameEvent Keout;
+	public static event GameEvent Keout;	// 下分
+	public static event ReceiveCoinEvent ReceiveCoin;	// 投币
+	public static event GameEvent PayCoin;				// 退币
+	public static event PayCoinEvent PayCoinCallback;	// 退币机发来的退币数
     public static event ChangeSceneEvent ChangeScene;
 	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
 	public static event GameEvent ClientDisconnect;	// 分机通讯断开
@@ -170,9 +175,9 @@ public static class GameEventManager
 	}
 
 	// 上分
-    public static void OnKeyin(int delta)
+    public static void OnKeyin(int delta, int coinNum = 0)
     {
-        if (Keyin != null) Keyin(delta);
+        if (Keyin != null) Keyin(delta, coinNum);
     }
 
 	// 下分
@@ -199,5 +204,20 @@ public static class GameEventManager
 	public static void OnClientDisconnect()
 	{
 		if (ClientDisconnect != null) ClientDisconnect();
+	}
+
+	public static void OnReceiveCoin(int count)
+	{
+		if (ReceiveCoin != null) ReceiveCoin(count);
+	}
+
+	public static void OnPayCoin()
+	{
+		if (PayCoin != null) PayCoin();
+	}
+
+	public static void OnPayCoinCallback(int count)
+	{
+		if (PayCoinCallback != null) PayCoinCallback(count);
 	}
 }

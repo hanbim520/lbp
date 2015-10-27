@@ -437,19 +437,6 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	public void OpenGate()
-	{
-		int[] buffer = new int[]{0x58, 0x57, 0x02, 0x0E, 0xA6, 0, 0, 0, 
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0};
-		writeUsbPort(buffer);
-	}
-	
 	public int writeUsbPort(int[] buffer)
 	{
 		int count = buffer.length;

@@ -72,14 +72,27 @@ public class GameLogic : MonoBehaviour
 	protected int ballValue = -1;
 	protected string[] strBaoji = new string[]{"Please contact the assistant,\ndevice can't pay more.", "请联系服务员，\n该机台达到赢分上限。"};
 	protected string[] strKeoutError = new string[]{"Can't keout now.Total Credits \nshould be greater than {0}.", "现在不能退分。\n总分必须大于 {0}"};
+	protected string[] strTuiBroken = new string[]{"Ticket back device is broken,\nplease contact assistance.", "退币器故障，请\n联系服务员。"};
     protected bool bChangeScene = false;    // From main scene to anothers
     protected string strNextSceneName;
+	protected Timer timerPayCoin;
 
 	// Field -- Bet
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
     public MainUILogic ui;
 	public HIDUtils hidUtils;
     
+	protected virtual void Update()
+	{
+		UpdateTimer();
+	}
+
+	protected void UpdateTimer()
+	{
+		if (timerPayCoin != null)
+			timerPayCoin.Update(Time.deltaTime);
+	}
+
     // 断电重启恢复
     protected void FixExitAbnormally()
     {
@@ -154,6 +167,9 @@ public class GameLogic : MonoBehaviour
     {
         GameEventManager.Keyin += Keyin;
 		GameEventManager.Keout += Keout;
+		GameEventManager.ReceiveCoin += ReceiveCoin;
+		GameEventManager.PayCoin += PayCoin;
+		GameEventManager.PayCoinCallback += PayCoinCallback;
         GameEventManager.ClearAll += ClearAll;
         GameEventManager.Clear += Clear;
         GameEventManager.CleanAll += CleanAll;
@@ -167,6 +183,9 @@ public class GameLogic : MonoBehaviour
     {
         GameEventManager.Keyin -= Keyin;
 		GameEventManager.Keout -= Keout;
+		GameEventManager.ReceiveCoin -= ReceiveCoin;
+		GameEventManager.PayCoin -= PayCoin;
+		GameEventManager.PayCoinCallback -= PayCoinCallback;
         GameEventManager.ClearAll -= ClearAll;
         GameEventManager.Clear -= Clear;
         GameEventManager.CleanAll -= CleanAll;
@@ -175,6 +194,101 @@ public class GameLogic : MonoBehaviour
 		GameEventManager.HIDDisconnected -= HIDDisconnected;
         GameEventManager.ChangeScene -= ReadyToChangeScene;
     }
+
+	// 投币
+	protected void ReceiveCoin(int count)
+	{
+		int score = count * GameData.GetInstance().coinToScore;
+		GameEventManager.OnKeyin(score, count);
+	}
+
+	// 退币
+	protected void PayCoin()
+	{
+		if (totalCredits <= 0)
+			return;
+
+		if (GameData.GetInstance().IsCardMode == CardMode.YES)
+		{
+			int couponsKeout = GameData.GetInstance().couponsKeoutRatio * rememberCredits;
+			if (totalCredits < couponsKeout)
+			{
+				string str = string.Format(strKeoutError[GameData.GetInstance().language], couponsKeout);
+				ui.ShowWarning(str, true);
+				return;
+			}
+			
+			GameData.GetInstance().IsCardMode = CardMode.NO;
+			ui.DisableCardMode();
+		}
+
+		// 退币个数
+		int coinNum = totalCredits / GameData.GetInstance().coinToScore;
+		payCoinCount = 0;
+		expectedPayCoinCount = coinNum;
+		timerPayCoin = new Timer(3, 1);
+		timerPayCoin.OnComplete += DetectPayCoinComplete;
+		timerPayCoin.Start();
+		hidUtils.PayCoin(coinNum);
+	}
+
+	protected void DetectPayCoinComplete()
+	{
+		timerPayCoin = null;
+		hidUtils.StopPayCoin();
+		// 处理异常情况
+		if (payCoinCount < expectedPayCoinCount)
+		{
+			ui.ShowWarning(strTuiBroken[GameData.GetInstance().language], true, 3);
+			if (payCoinCount > 0)
+			{
+				int scoreNum = payCoinCount * GameData.GetInstance().coinToScore;
+				totalCredits -= scoreNum;
+				GameData.GetInstance().AppendKeyinKeoutRecords(0, scoreNum, 0, payCoinCount, 0);
+				GameData.GetInstance().zongTui += payCoinCount;
+				GameData.GetInstance().zongXia += scoreNum;
+				GameData.GetInstance().currentZongXia += scoreNum;
+				GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
+				GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
+				GameData.GetInstance().SaveAccount();
+			}
+		}
+	}
+
+	protected int payCoinCount = 0;				// 已退币的个数
+	protected int expectedPayCoinCount = 0;		// 期望要退币的个数
+	protected void PayCoinCallback(int count)
+	{
+		if (timerPayCoin != null)
+		{
+			timerPayCoin.Restart();
+		}
+		payCoinCount += count;
+		// 退分量
+		int scoreNum = payCoinCount * GameData.GetInstance().coinToScore;
+		if (payCoinCount >= expectedPayCoinCount)
+		{
+			hidUtils.StopPayCoin();
+			// 剩余分数
+			totalCredits -= scoreNum;
+
+			GameData.GetInstance().AppendKeyinKeoutRecords(0, scoreNum, 0, payCoinCount, 0);
+			GameData.GetInstance().zongTui += payCoinCount;
+			GameData.GetInstance().zongXia += scoreNum;
+			GameData.GetInstance().currentZongXia += scoreNum;
+			GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
+			GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
+			GameData.GetInstance().SaveAccount();
+			
+			ui.RefreshLblCredits(totalCredits.ToString());
+			timerPayCoin.Stop();
+			timerPayCoin = null;
+			return;
+		}
+		// 剩余分数
+		int residue = totalCredits - scoreNum;
+		ui.RefreshLblCredits(residue.ToString());
+	}
 
 	// 下分
 	protected void Keout()
@@ -209,7 +323,7 @@ public class GameLogic : MonoBehaviour
 	}
 
 	// 上分
-    protected void Keyin(int delta)
+    protected void Keyin(int delta, int coinNum = 0)
     {
 		if (delta <= 0)
 			return;
@@ -224,7 +338,8 @@ public class GameLogic : MonoBehaviour
 				temp += giveCredits;
 				totalCredits = temp;
 				rememberCredits = totalCredits;
-				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, giveCredits);
+				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, coinNum, 0, giveCredits);
+				GameData.GetInstance().zongTou += coinNum;
 				GameData.GetInstance().zongShang += delta;
 				GameData.GetInstance().currentZongShang += delta;
 				GameData.GetInstance().cardCredits += giveCredits;
@@ -236,7 +351,8 @@ public class GameLogic : MonoBehaviour
 			{
 				rememberCredits = 0;
 				totalCredits = temp;
-				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, 0);
+				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, coinNum, 0, 0);
+				GameData.GetInstance().zongTou += coinNum;
 				GameData.GetInstance().zongShang += delta;
 				GameData.GetInstance().currentZongShang += delta;
 				GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
@@ -252,7 +368,8 @@ public class GameLogic : MonoBehaviour
 			delta = delta + giveCredits;
 			rememberCredits = rememberCredits + delta;
 			totalCredits = totalCredits + delta;
-			GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, giveCredits);
+			GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, coinNum, 0, giveCredits);
+			GameData.GetInstance().zongTou += coinNum;
 			GameData.GetInstance().zongShang += delta;
 			GameData.GetInstance().currentZongShang += delta;
 			GameData.GetInstance().cardCredits += giveCredits;
@@ -267,7 +384,8 @@ public class GameLogic : MonoBehaviour
 		{
 			totalCredits += delta;
 			rememberCredits = 0;
-			GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, 0);
+			GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, coinNum, 0, 0);
+			GameData.GetInstance().zongTou += coinNum;
 			GameData.GetInstance().zongShang += delta;
 			GameData.GetInstance().currentZongShang += delta;
 			GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;

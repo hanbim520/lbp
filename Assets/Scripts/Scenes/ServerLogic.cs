@@ -54,8 +54,9 @@ public class ServerLogic : GameLogic
 		GameEventManager.CloseGate -= CloseGate;
     }
 
-	void Update()
+	protected override void Update()
     {
+		base.Update();
 #if UNITY_EDITOR
 		if (Input.GetKeyUp(KeyCode.Escape))
 		{

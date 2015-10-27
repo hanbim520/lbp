@@ -16,10 +16,13 @@ public class HIDUtils : MonoBehaviour
 	// In seconds
 	private const float getDataTime = 0.1f;
 	private float getDataTimeDelta = 0;
+	private const float kReceiveFromHIDTime = 0.1f;
+	private float receiveFromHIDInterver = 0.0f;
 	private const int kReadDataLength = 61;
 	private const int kBlowBall = 0x55;
 	private const int kOpenGate = 0x55;
 	private const int kPreviousValue = 0x55;
+	private int flagPayCoin = 0;
 
 	private bool bBlowedBall = false;
 	private bool bOpenGate = false;
@@ -46,6 +49,13 @@ public class HIDUtils : MonoBehaviour
 			{
 				getDataTimeDelta = 0;
 				ReadUsbPort();
+			}
+
+			receiveFromHIDInterver += Time.deltaTime;
+			if (receiveFromHIDInterver >= kReceiveFromHIDTime)
+			{
+				receiveFromHIDInterver = 0;
+				ReceiveDataFromHID();
 			}
 		}
 	}
@@ -114,7 +124,7 @@ public class HIDUtils : MonoBehaviour
 
 		if (data.Length == kReadDataLength)
 		{
-//			PrintData(ref data);
+			PrintData(ref data);
             // 机芯指令
             if (data[0] == 0x58 && data[1] == 0x57)
             {
@@ -169,6 +179,14 @@ public class HIDUtils : MonoBehaviour
                     else if (GameData.GetInstance().maxNumberOfFields == 37)
                         GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
                 }
+				if (data[9] != 0)
+				{
+					GameEventManager.OnReceiveCoin(data[9]);
+				}
+				if (data[10] != 0)
+				{
+					GameEventManager.OnPayCoinCallback(data[10]);
+				}
             }
             // 报账指令
             else if (data[0] == 0x42 && data[1] == 0x5a)
@@ -205,7 +223,7 @@ public class HIDUtils : MonoBehaviour
 		}
 		else
 		{
-//			PrintData(ref data);
+			PrintData(ref data);
 		}
 	}
 
@@ -227,7 +245,7 @@ public class HIDUtils : MonoBehaviour
 	{
 		if (Application.platform == RuntimePlatform.Android)
 		{
-			int[] data = new int[]{0x58, 0x57, 0x02, 0x0E, 0xA6, 0, 0, 0, 
+			int[] data = new int[]{0x58, 0x57, 0x02, 0x0E, 0xA6, flagPayCoin, 0, 0, 
 				0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0,
@@ -246,7 +264,7 @@ public class HIDUtils : MonoBehaviour
 			int hight = blowTime >> 8 & 0xff;
 			int low = blowTime & 0xff;
 
-			int[] data = new int[]{0x58, 0x57, 0x03, hight, low, 0, 0, 0,
+			int[] data = new int[]{0x58, 0x57, 0x03, hight, low, flagPayCoin, 0, 0, 
 				0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0,
@@ -282,5 +300,43 @@ public class HIDUtils : MonoBehaviour
 		}
 		int[] data = dataList.ToArray();
 		WriteData(data, "writeUsbPort");
+	}
+
+	private void ReceiveDataFromHID()
+	{
+		int[] data = new int[]{0x58, 0x57, 0, 0, 0, flagPayCoin, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0};
+		WriteData(data, "writeUsbPort");
+	}
+
+	// 设置退币指令位
+	public void PayCoin(int count)
+	{
+		if (Application.platform == RuntimePlatform.Android)
+		{
+			flagPayCoin = 1;
+			int hight = count >> 8 & 0xff;
+			int low = count & 0xff;
+			int[] data = new int[]{0x58, 0x57, 0, 0, 0, flagPayCoin, hight, low,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0};
+			WriteData(data, "writeUsbPort");
+		}
+	}
+
+	public void StopPayCoin()
+	{
+		flagPayCoin = 0;
 	}
 }
