@@ -231,7 +231,7 @@ public class GameLogic : MonoBehaviour
 		payCoinCount = 0;
 		expectedPayCoinCount = coinNum;
 		timerPayCoin = new Timer(3, 1);
-		timerPayCoin.OnComplete += DetectPayCoinComplete;
+		timerPayCoin.Tick += DetectPayCoinComplete;
 		timerPayCoin.Start();
 		hidUtils.PayCoin(coinNum);
 	}
