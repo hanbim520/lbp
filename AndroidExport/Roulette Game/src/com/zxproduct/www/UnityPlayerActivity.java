@@ -36,6 +36,7 @@ import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
 import android.util.Log;
@@ -533,6 +534,7 @@ public class UnityPlayerActivity extends Activity
     	File root = new File(filePath);
 	    File[] files = root.listFiles();
 	    String fileName = "update";
+	    String apkName = "update.apk";
 	    for(File file:files)
 	    {     
 	    	if(!file.isDirectory())
@@ -541,6 +543,10 @@ public class UnityPlayerActivity extends Activity
 	    		{
 	    			CallCSLog("File name:" + file.getName());
 	    			decryFile(file);
+	    		}
+	    		else if (file.getName().equals(apkName))
+	    		{
+	    			installAPK(filePath + "/" + apkName);
 	    		}
 	    	}  
 	    }
@@ -617,6 +623,17 @@ public class UnityPlayerActivity extends Activity
 		   file.delete();
 	   }
 	}
+    
+    public void installAPK(String filePath)
+    {  
+    	CallCSLog("installAPK:" + filePath);
+        // 创建Intent意图  
+        Intent intent = new Intent(Intent.ACTION_VIEW);  
+        // 设置Uri和类型  
+        intent.setDataAndType(Uri.parse("file://" + filePath), "application/vnd.android.package-archive");  
+        // 执行意图进行安装  
+        startActivity(intent);  
+    }  
     
     static {
         System.loadLibrary("hello-jni");
