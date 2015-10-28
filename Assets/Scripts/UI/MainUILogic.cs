@@ -78,11 +78,13 @@ public class MainUILogic : MonoBehaviour
     private void RegisterEvents()
     {
 		GameEventManager.CloseGate += StopFlash;
+		GameEventManager.OpenKey += OpenKey;
     }
 
     private void UnregisterEvents()
     {
 		GameEventManager.CloseGate -= StopFlash;
+		GameEventManager.OpenKey -= OpenKey;
     }
 
 	private void Init()
@@ -937,7 +939,15 @@ public class MainUILogic : MonoBehaviour
 
 	public void ActiveDlgCard(bool active)
 	{
-		dlgCard.SetActive(active);
+		if (active)
+		{
+			if (!dlgCard.activeSelf)
+				dlgCard.SetActive(true);
+		}
+		else
+		{
+			dlgCard.SetActive(false);
+		}
 	}
 
 	public void ActiveDlgYesNO(bool active)

@@ -43,9 +43,12 @@ public class StartInfo : MonoBehaviour
 
 	private void LoadHIDUtils()
 	{
-		Object prefab = (Object)Resources.Load("Input/HIDUtils");
-		GameObject go = (GameObject)Instantiate(prefab);
-		go.name = "HIDUtils";
-		prefab = null;
+		if (GameObject.Find("HIDUtils") == null)
+		{
+			Object prefab = (Object)Resources.Load("Input/HIDUtils");
+			GameObject go = (GameObject)Instantiate(prefab);
+			go.name = "HIDUtils";
+			prefab = null;
+		}
 	}
 }

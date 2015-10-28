@@ -179,13 +179,21 @@ public class HIDUtils : MonoBehaviour
                     else if (GameData.GetInstance().maxNumberOfFields == 37)
                         GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
                 }
-				if (data[9] != 0)
+				if (data[9] != 0)	// 投币
 				{
 					GameEventManager.OnReceiveCoin(data[9]);
 				}
-				if (data[10] != 0)
+				if (data[10] != 0)	// 退币
 				{
 					GameEventManager.OnPayCoinCallback(data[10]);
+				}
+				if (data[54] != 0)	// 物理钥匙(原上分)
+				{
+					GameEventManager.OnOpenKey();
+				}
+				if (data[55] != 0)	// 触摸屏校验(原下分)
+				{
+					GameEventManager.OnChangeScene(Scenes.TouchCheck);
 				}
             }
             // 报账指令

@@ -33,6 +33,7 @@ public static class GameEventManager
 	public static event ReceiveCoinEvent ReceiveCoin;	// 投币
 	public static event GameEvent PayCoin;				// 退币
 	public static event PayCoinEvent PayCoinCallback;	// 退币机发来的退币数
+	public static event GameEvent OpenKey;				// 旋转物理钥匙
     public static event ChangeSceneEvent ChangeScene;
 	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
 	public static event GameEvent ClientDisconnect;	// 分机通讯断开
@@ -219,5 +220,10 @@ public static class GameEventManager
 	public static void OnPayCoinCallback(int count)
 	{
 		if (PayCoinCallback != null) PayCoinCallback(count);
+	}
+
+	public static void OnOpenKey()
+	{
+		if (OpenKey != null) OpenKey();
 	}
 }

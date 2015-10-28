@@ -23,7 +23,17 @@ public class TestCoinDevice : MonoBehaviour
 		
 		if (GUI.Button(new Rect(200, 150, 200, 100), "退币"))
 		{
-			hidUtils.PayCoin(123);
+			hidUtils.PayCoin(10);
+		}
+
+		if (GUI.Button(new Rect(200, 300, 200, 100), "换场景"))
+		{
+			Application.LoadLevel("TestEncryChip 1");
+		}
+
+		if (GUI.Button(new Rect(200, 300, 200, 100), "回主景"))
+		{
+			Application.LoadLevel("TestEncryChip");
 		}
 	}
 }

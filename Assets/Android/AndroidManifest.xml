@@ -10,8 +10,10 @@
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />  
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" /> 
+  <!--
   <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE"/>
   <uses-permission android:name="android.permission.READ_MEDIA_STORAGE"/>
+  -->
   <uses-feature android:name="android.hardware.usb.host" android:required="true" />  
   <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
   <uses-feature android:name="android.hardware.touchscreen.multitouch" android:required="false" />
