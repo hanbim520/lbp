@@ -28,4 +28,17 @@ public class UpdateUtils : MonoBehaviour
 			PlayerPrefs.Save();
 		}
 	}
+
+	public void DebugLog(string msg)
+	{
+		DebugConsole.Log(msg);
+	}
+
+	void OnGUI()
+	{
+		if (GUI.Button(new Rect(200, 10, 200, 100), "Exit"))
+		{
+			Application.Quit();
+		}
+	}
 }

@@ -510,9 +510,11 @@ public class UnityPlayerActivity extends Activity
         @Override
         public void onReceive(Context context, Intent intent) 
         {
+        	CallCSLog("BroadcastReceiver:" + intent.getAction());
         	if (intent.getAction().equals(Intent.ACTION_MEDIA_MOUNTED))
 	   		{
 	   			String path = intent.getData().getPath();
+	   			CallCSLog("Path:" + path);
 	   			if (path.contains("/mnt/usbhost"))
 	   			{
 	   				getFiles(path);
@@ -522,12 +524,12 @@ public class UnityPlayerActivity extends Activity
         	{
         		
         	}
-        	Log.i(TAG, "BroadcastReceiver:" + intent.getAction());
         }
     };
     
     private void getFiles(String filePath)
 	{
+    	CallCSLog("getFiles:" + filePath);
     	File root = new File(filePath);
 	    File[] files = root.listFiles();
 	    String fileName = "update";
@@ -537,6 +539,7 @@ public class UnityPlayerActivity extends Activity
 	    	{
 	    		if (file.getName().equals(fileName))
 	    		{
+	    			CallCSLog("File name:" + file.getName());
 	    			decryFile(file);
 	    		}
 	    	}  
@@ -544,12 +547,14 @@ public class UnityPlayerActivity extends Activity
 	}
     
     private void decryFile(File file) {
+    	CallCSLog("decryFile:" + file.getPath());
 		InputStream in = null;
 		OutputStream out = null;
 		encryIndex = 0;
+		String tmpPath = "/mnt/sdcard/Download/update_temp.xml";
 		try {
 			in = new FileInputStream(file);
-			out = new FileOutputStream(file.getAbsolutePath() + "_temp");
+			out = new FileOutputStream(tmpPath);
 			byte[] buff = new byte[1024]; // 缓冲区
 			int n = -1;
 			while ((n = in.read(buff)) != -1) {
@@ -559,16 +564,15 @@ public class UnityPlayerActivity extends Activity
 				out.write(buff, 0, n);
 				out.flush();
 			}
-		} catch (FileNotFoundException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			CallCSLog("decryFile exception:" + e.toString());
 		} finally {
 			try {
 				in.close();
 				out.close();
-				parseUpdateFile(file.getAbsolutePath() + "_temp");
-			} catch (IOException e) {
+				parseUpdateFile(tmpPath);
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -582,11 +586,12 @@ public class UnityPlayerActivity extends Activity
     
     private void parseUpdateFile(String filePath)
 	{
+    	CallCSLog("parseUpdateFile:" + filePath);
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();  
 	    try  
 	    {  
 	    	DocumentBuilder db = dbf.newDocumentBuilder();  
-            Document doc = db.parse(filePath);  
+            Document doc = db.parse("file://" + filePath);  
   
             NodeList infoList = doc.getElementsByTagName("update");  
             Node info = infoList.item(0);  
@@ -597,12 +602,14 @@ public class UnityPlayerActivity extends Activity
                     String name = node.getNodeName();  
                     String value = node.getFirstChild().getNodeValue();
                     UnityPlayer.UnitySendMessage("UpdateUtils", "UpdateInfos", name + ":" + value);
+                    CallCSLog("name:" + name + ", value:" + value);
                 }  
             }
        }  
        catch (Exception e)  
        {  
            e.printStackTrace();  
+           CallCSLog("parseUpdateFile exception:" + e.toString());
        }  
 	   finally 
 	   {
