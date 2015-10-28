@@ -104,7 +104,7 @@ public class ServerLogic : GameLogic
 		if (isPause)
 		{
 			yield return new WaitForSeconds(1);
-			StartCoroutine(Countdown());
+			Countdown();
 			yield break;
 		}
 		gamePhase = GamePhase.Countdown;
