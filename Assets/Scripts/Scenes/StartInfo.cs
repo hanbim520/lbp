@@ -11,7 +11,9 @@ public class StartInfo : MonoBehaviour
 		LoadHIDUtils();
 		if (GameData.GetInstance().deviceIndex > 0)
 		{
-			Application.LoadLevel(Scenes.Main);
+//			Application.LoadLevel(Scenes.Main);
+			GameData.GetInstance().NextLevelName = Scenes.Main;
+			Application.LoadLevel(Scenes.Loading);
 		}
 		else
 		{
