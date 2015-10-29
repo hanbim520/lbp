@@ -630,7 +630,8 @@ public class UnityPlayerActivity extends Activity
         // 创建Intent意图  
         Intent intent = new Intent(Intent.ACTION_VIEW);  
         // 设置Uri和类型  
-        intent.setDataAndType(Uri.parse("file://" + filePath), "application/vnd.android.package-archive");  
+        intent.setDataAndType(Uri.parse("file://" + filePath), "application/vnd.android.package-archive");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // 执行意图进行安装  
         startActivity(intent);  
     }  
