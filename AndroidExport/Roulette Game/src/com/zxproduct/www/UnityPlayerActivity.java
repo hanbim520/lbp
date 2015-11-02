@@ -1,5 +1,6 @@
 package com.zxproduct.www;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,6 +40,7 @@ import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -78,6 +80,7 @@ public class UnityPlayerActivity extends Activity
 		setContentView(mUnityPlayer);
 		mUnityPlayer.requestFocus();
 		detectHIDViaTimer();
+		simulateClick();
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
 		intentFilter.addAction(Intent.ACTION_MEDIA_EJECT);
@@ -136,6 +139,27 @@ public class UnityPlayerActivity extends Activity
 	@Override public boolean onTouchEvent(MotionEvent event)          { return mUnityPlayer.injectEvent(event); }
 	/*API12*/ public boolean onGenericMotionEvent(MotionEvent event)  { return mUnityPlayer.injectEvent(event); }
 	
+	public void setSimulateClick(String cmd){
+        try{  
+            //权限设置
+            Process p = Runtime.getRuntime().exec("su");  
+            //获取输出流
+            OutputStream outputStream = p.getOutputStream();
+            DataOutputStream dataOutputStream=new DataOutputStream(outputStream);
+            //将命令写入
+            dataOutputStream.writeBytes(cmd);
+            //提交命令
+            dataOutputStream.flush();
+            //关闭流操作
+            dataOutputStream.close();
+            outputStream.close();
+       }  
+       catch(Exception e)  
+       {  
+    	   Log.i(TAG, "setSimulateClick exception:" + e.toString());
+    	   CallCSLog(e.toString());
+       } 
+    }
 	
 	private SerialPort mSerialPort0 = null;
 	private InputStream mInputStream0 = null;
@@ -429,6 +453,8 @@ public class UnityPlayerActivity extends Activity
 				{
 					bHIDConnected = true;
 					UnityPlayer.UnitySendMessage("HIDUtils", "SetState", "True");
+					// TODO:模拟点击
+
 				}
 			} 
 			else 
@@ -491,6 +517,18 @@ public class UnityPlayerActivity extends Activity
         detectTimer.scheduleAtFixedRate(detectTimerTask, 5000, 2000);
     }
     
+    public void simulateClick()
+    {
+    	final Timer clickTimer = new Timer();
+    	TimerTask timerTask = new TimerTask() {
+        	@Override
+            public void run() {
+        		setSimulateClick("adb shell input touchscreen tap 640 500");
+        		CallCSLog("simulateClick");
+        }};
+        clickTimer.scheduleAtFixedRate(timerTask, 5000, 2000);
+    }
+    
     public boolean getUsbConnected()
     {
     	return bHIDConnected;
@@ -498,7 +536,7 @@ public class UnityPlayerActivity extends Activity
     
     public void CallCSLog(String msg)
 	{
-//		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
+		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
 	}
     
     //  线号          机号          总利润              当前利润            算码次数 
@@ -635,6 +673,8 @@ public class UnityPlayerActivity extends Activity
         // 执行意图进行安装  
         startActivity(intent);  
     }  
+    
+    
     
     static {
         System.loadLibrary("hello-jni");
