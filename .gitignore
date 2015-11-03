@@ -8,3 +8,4 @@ AndroidExport/Roulette Game/gen
 *.csproj
 *.sln
 libs/
+bin/
