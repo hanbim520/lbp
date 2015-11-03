@@ -20,7 +20,7 @@
 #ifdef USE_LIBLOG
 #define LOG_TAG "usbhost"
 #include "utils/Log.h"
-#define D ALOGD(
+#define D ALOGD
 #else
 #define D printf
 #endif
@@ -53,11 +53,11 @@
 #include <android/log.h>
 
 #define LOG_TAG "Unity"
-#define LOGV(...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, __VA_ARGS__) 
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
-#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
-#define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
-#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
+#define LOGV(fmt, args...) __android_log_print(ANDROID_LOG_VERBOSE, LOG_TAG, fmt, ##args) 
+#define LOGD(fmt, args...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, fmt, ##args)
+#define LOGI(fmt, args...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, fmt, ##args)
+#define LOGW(fmt, args...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, fmt, ##args)
+#define LOGE(fmt, args...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, fmt, ##args)
 
 #define DEV_DIR             "/dev"
 #define DEV_BUS_DIR         DEV_DIR "/bus"
@@ -716,12 +716,26 @@ int usb_request_cancel(struct usb_request *req)
     return ioctl(req->dev->fd, USBDEVFS_DISCARDURB, urb);
 }
 
-jint Java_com_zxproduct_www_UnityPlayerActivity_usbOpen(JNIEnv* env, jobject thiz, jstring deviceName)
+JNIEXPORT jint JNICALL Java_android_1usb_1api_UsbPort_open(JNIEnv* env, jobject thiz, jstring deviceName)
 {
-	usb_device_open();
+    const char *strDevName = (*env)->GetStringUTFChars(env, deviceName, 0);
+
+    struct usb_device *usbDevice = usb_device_open(strDevName);
+    int status = usb_device_claim_interface(usbDevice, 0);
+    if (status < 0) {
+        LOGD("usb_device_claim_interface 0 failed.");
+    }
+    status = usb_device_claim_interface(usbDevice, 0x80);
+    if (status < 0) {
+        LOGD("usb_device_claim_interface 0x80 failed.");
+    }
+
+   (*env)->ReleaseStringUTFChars(env, deviceName, strDevName);
+   return (jint)usbDevice;
 }
 
-void Java_com_zxproduct_www_UnityPlayerActivity_usbClose(JNIEnv* env, jobject thiz)
+JNIEXPORT void JNICALL Java_android_1usb_1api_UsbPort_close(JNIEnv* env, jobject thiz, jint usb_device)
 {
-	usb_device_close();
+    struct usb_device *usbDevice = (struct usb_device *)usb_device;
+	usb_device_close(usbDevice);
 }
