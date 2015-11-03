@@ -1,34 +1,30 @@
 package com.zxproduct.www;
 
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.security.InvalidParameterException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.unity3d.player.*;
-
 import android.app.Activity;
-import android.app.Instrumentation;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.hardware.usb.UsbConstants;
@@ -39,21 +35,15 @@ import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
-import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android_serialport_api.SerialPort;
+import android_usb_api.UsbPort;
+
+import com.unity3d.player.UnityPlayer;
 
 public class UnityPlayerActivity extends Activity
 {
@@ -61,7 +51,10 @@ public class UnityPlayerActivity extends Activity
 	private String TAG = "Unity";
 	private char[] encryKey = new char[]{'W', '3', 'c', 'd', '9', 'X'};
     private int encryIndex = 0;
-	    
+    private UsbPort usbPort = new UsbPort();
+    private boolean bNativeUsb = true;	// JNI访问usb
+    private int usbHandle = 0;
+    
 	// Setup activity layout
 	@Override protected void onCreate (Bundle savedInstanceState)
 	{
@@ -257,12 +250,10 @@ public class UnityPlayerActivity extends Activity
 			{
 				try
 				{
-					if (mDeviceConnection != null && epIntEndpointIn != null)
+					if (bNativeUsb)
 					{
-						byte[] buffer = new byte[64];
-						for (int i = 0; i < buffer.length; ++i)
-							buffer[i] = 0;
-						int count = mDeviceConnection.bulkTransfer(epIntEndpointIn, buffer, buffer.length, 0);
+						byte[] buffer = usbPort.read(usbHandle);
+						int count = buffer.length;
 						if (count > 0)
 						{
 							BufferStruct buf = new BufferStruct();
@@ -277,6 +268,30 @@ public class UnityPlayerActivity extends Activity
 							}
 							readUsbQueue0.offer(buf);
 						}
+					} 
+					else 
+					{
+						if (mDeviceConnection != null && epIntEndpointIn != null)
+						{
+							byte[] buffer = new byte[64];
+							for (int i = 0; i < buffer.length; ++i)
+								buffer[i] = 0;
+							int count = mDeviceConnection.bulkTransfer(epIntEndpointIn, buffer, buffer.length, 0);
+							if (count > 0)
+							{
+								BufferStruct buf = new BufferStruct();
+								buf.buffer = new int[count];
+								for (int i = 0; i < count; ++i)
+								{
+									buf.buffer[i] = buffer[i] & 0xff;
+								}
+								while (readUsbQueue0.size() > 20)
+								{
+									readUsbQueue0.poll();
+								}
+								readUsbQueue0.offer(buf);
+							}
+						}
 					}
 				}
 				catch(Exception e)
@@ -286,34 +301,52 @@ public class UnityPlayerActivity extends Activity
 			}
 		}
 	}
-	 
+	
 	 public void openUsb()
 	 {
 		 bHIDConnecting = true;
-		 mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-		 if(mUsbManager == null)
-			 return;
-		 // 枚举设备  
-         enumerateDevice(mUsbManager);  
-         // 查找设备接口  
-         UsbInterface usbInterface = getDeviceInterface(); 
-         if (usbInterface != null)
-         {
-             // 获取设备endpoint  
-             assignEndpoint(usbInterface);
-             // 打开conn连接通道  
-             openDevice(usbInterface);  
-         }
-        
-         mTReadUsb0 = new TReadUsb0();
-         mTReadUsb0.start();
+		 if (bNativeUsb)
+		 {
+			 usbHandle = usbPort.open(usbPort.vid, usbPort.pid);
+			 if (usbHandle > 0)
+			 {
+				 bHIDConnected = true;
+				 UnityPlayer.UnitySendMessage("HIDUtils", "SetState", "True");
+				 mTReadUsb0 = new TReadUsb0();
+		         mTReadUsb0.start();
+			 }
+		 }
+		 else
+		 {
+			 mUsbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+			 if(mUsbManager == null)
+				 return;
+			 // 枚举设备  
+	         enumerateDevice(mUsbManager);  
+	         // 查找设备接口  
+	         UsbInterface usbInterface = getDeviceInterface(); 
+	         if (usbInterface != null)
+	         {
+	             // 获取设备endpoint  
+	             assignEndpoint(usbInterface);
+	             // 打开conn连接通道  
+	             openDevice(usbInterface);  
+	         } 
+	         mTReadUsb0 = new TReadUsb0();
+	         mTReadUsb0.start();
+		 }
          bHIDConnecting = false;
 	 }
-	 
+
 	 public void closeUsb()
 	 {
 		 try
 		 {
+			 if (bNativeUsb)
+			 {
+				 if (bHIDConnected)
+					 usbPort.close(usbHandle); 
+			 }
 			 if (mTReadUsb0 != null && mTReadUsb0.isAlive())
 			 {
 				 mTReadUsb0.stop();
@@ -384,20 +417,6 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	// 模拟键盘按键，Keycode对应Android键盘按键的的keycode
-	public void setKeyPress(int keycode){
-	        try
-	        {
-	            String keyCommand = "input keyevent " + keycode;
-	            Runtime runtime = Runtime.getRuntime();
-	            Process proc = runtime.exec(keyCommand);
-	        }
-	        catch (IOException e)
-	        {
-	            e.printStackTrace();
-	        }
-	    }
-	
 	// 打开设备
 	public void openDevice(UsbInterface usbInterface)
 	{
@@ -430,8 +449,6 @@ public class UnityPlayerActivity extends Activity
 				{
 					bHIDConnected = true;
 					UnityPlayer.UnitySendMessage("HIDUtils", "SetState", "True");
-					// TODO:模拟点击
-
 				}
 			} 
 			else 
@@ -443,11 +460,17 @@ public class UnityPlayerActivity extends Activity
 	
 	public int writeUsbPort(int[] buffer)
 	{
+		if (!bHIDConnected)
+			return 0;
+		
 		int count = buffer.length;
 		byte[] buf = new byte[count];
 		for (int i = 0; i < count; ++i)
 		{
 			buf[i] = (byte)buffer[i];
+		}
+		if (bNativeUsb) {
+			return usbPort.write(usbHandle, buf);
 		}
 		return mDeviceConnection.bulkTransfer(epIntEndpointOut, buf, buf.length, 500);
 	}
