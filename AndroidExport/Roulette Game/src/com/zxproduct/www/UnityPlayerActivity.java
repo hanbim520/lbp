@@ -52,7 +52,7 @@ public class UnityPlayerActivity extends Activity
     private int encryIndex = 0;
     private UsbPort usbPort = new UsbPort();
     private boolean bNativeUsb = true;	// JNI访问usb
-    private boolean bEncryUsbTranfer = false;	// 加密传给金手指的数据
+    private boolean bEncryUsbTranfer = true;	// 加密传给金手指的数据
     
 	// Setup activity layout
 	@Override protected void onCreate (Bundle savedInstanceState)
@@ -255,6 +255,11 @@ public class UnityPlayerActivity extends Activity
 						int count = buffer.length;
 						if (count > 0)
 						{
+							if (bEncryUsbTranfer)
+							{
+								buffer = DecryptIOData(buffer, count);
+								count -= 2;
+							}
 							BufferStruct buf = new BufferStruct();
 							buf.buffer = new int[count];
 							for (int i = 0; i < count; ++i)
@@ -278,6 +283,11 @@ public class UnityPlayerActivity extends Activity
 							int count = mDeviceConnection.bulkTransfer(epIntEndpointIn, buffer, buffer.length, 0);
 							if (count > 0)
 							{
+								if (bEncryUsbTranfer)
+								{
+									buffer = DecryptIOData(buffer, count);
+									count -= 2;
+								}
 								BufferStruct buf = new BufferStruct();
 								buf.buffer = new int[count];
 								for (int i = 0; i < count; ++i)
@@ -464,7 +474,7 @@ public class UnityPlayerActivity extends Activity
 		
 		if (bEncryUsbTranfer) 
 		{
-			int count = buffer.length - 2; 
+			int count = buffer.length - 3; 
 			byte[] buf = new byte[count];
 			for (int i = 0; i < count; ++i)
 			{
@@ -548,6 +558,7 @@ public class UnityPlayerActivity extends Activity
     public native byte[] CreateCheckPWString(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in);
     public native String GetCheckPWStringValue(byte[] recv_buff);
     public native byte[] EncryptIOData(byte[] inputArray);
+    public native byte[] DecryptIOData(byte[] inputArray, int len);
     
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() 
 	{

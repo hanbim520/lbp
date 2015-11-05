@@ -312,6 +312,7 @@ jstring Java_com_zxproduct_www_UnityPlayerActivity_GetCheckPWStringValue(JNIEnv*
 	Number |= temp;
 	return  Number;
 }
+
 unsigned short int   ShiftByte1( unsigned short int Number )
 {
 	unsigned short int  temp = 0;
@@ -321,6 +322,7 @@ unsigned short int   ShiftByte1( unsigned short int Number )
 	Number |= temp;
 	return  Number;
 }
+
 // 解密从加密芯片传回来的数据
 int   DecryptIODataFromChip( unsigned char *Input, unsigned short int in_len, unsigned char *Output,  unsigned short int  *EnCryptKey )
 {
@@ -402,13 +404,14 @@ int EncryptIOData( U8 *Input, U16  in_len, U8 *Output ,U16 EnCryptKey)
 {
 	U16  Temp = 0;
 	U16  leng = 0;
-	U16  KeyConst = 0x5975;
+	U16  KeyConst = 0x5a5a;
 	Temp = EnCryptKey;
 	U8    Key1 = 0, Key2 = 0, data = 0;
 	int    Count = 2, i = 0, j = 0;
-	unsigned char XorKey[] = {0x3F,0x2E,0x8A,0xA4,0x5F,0x80,0x17,0xD7,0xDE,0x5B,0x91,0xEF,0x29,0x94,0x77,0xA2,0xAB,0x13,0x1B,0x7A,0x78,0xCF,0x37,0x39,
+	U8 XorKey[] = {0x3F,0x2E,0x8A,0xA4,0x5F,0x80,0x17,0xD7,0xDE,0x5B,0x91,0xEF,0x29,0x94,0x77,0xA2,0xAB,0x13,0x1B,0x7A,0x78,0xCF,0x37,0x39,
 		                   0x9E,0x4F,0xA1,0x34,0x71,0xDC,0xBE,0x10,0x96,0xEF,0x1F,0x52,0x70,0x63,0x33,0x1B,0xF3,0xDB,0x9E,0x84,0x49,0xB4,0x8C,0xB8,
 						   0xE9,0xA4,0x18,0x68,0x4B,0xFB,0x76,0xC5,0x8C,0x5B,0x65,0xBD,0x8E,0xB9,0xA3,0x4E};
+
 	do
 	{
 		Key1 = (U8)(EnCryptKey&0x00FF);
@@ -472,6 +475,80 @@ JNIEXPORT jbyteArray JNICALL Java_com_zxproduct_www_UnityPlayerActivity_EncryptI
 	U8 *output = (U8*)malloc(output_len);
 	memset(output, 0, output_len);
 	EncryptIOData(input, input_len, output, EnCryptKey);
+
+	jbyteArray outputArray = (*env)->NewByteArray(env, output_len);
+  	(*env)->SetByteArrayRegion(env, outputArray, 0, output_len, (jbyte*)output);
+
+	(*env)->ReleaseByteArrayElements(env, inputArray, input, 0);
+	free(output);
+
+	return outputArray;
+}
+
+// 解密从金手指传回来的数据
+int   DecryptIOData( unsigned char *Input, unsigned short int in_len, unsigned char *Output,  unsigned short int  *EnCryptKey )
+{
+	U16  Temp = 0;
+	U16  leng = 0;
+	U16  KeyConst = 0x5a5a;
+	U8 XorKey[] = {0x3F,0x2E,0x8A,0xA4,0x5F,0x80,0x17,0xD7,0xDE,0x5B,0x91,0xEF,0x29,0x94,0x77,0xA2,0xAB,0x13,0x1B,0x7A,0x78,0xCF,0x37,0x39,
+		                   0x9E,0x4F,0xA1,0x34,0x71,0xDC,0xBE,0x10,0x96,0xEF,0x1F,0x52,0x70,0x63,0x33,0x1B,0xF3,0xDB,0x9E,0x84,0x49,0xB4,0x8C,0xB8,
+						   0xE9,0xA4,0x18,0x68,0x4B,0xFB,0x76,0xC5,0x8C,0x5B,0x65,0xBD,0x8E,0xB9,0xA3,0x4E};
+	U8    Key1 = 0, Key2 = 0, data = 0;
+	int    Count = 2, i = 0;//, j = 0;
+//	KeyConst ^= (U16)result_A;
+//	KeyConst ^= (U16)result_B;
+//	KeyConst ^= (U16)result_C;
+//	KeyConst ^= (U16)result_D;
+	for(  i = 0; i < in_len; i ++ )
+	{
+		Input[i] ^= XorKey[i];
+	}
+
+	Key1 = (U8)(KeyConst&0x00FF);
+	Key2 = (U8)((KeyConst>>8)&0x00FF);
+	for(  i = 0; i < in_len; i ++ )
+	{
+		data = Input[ i ];
+		data = data^Key2;
+		data = data^Key1;
+		Input[i] = data;
+	}
+
+    Temp = ((U16)Input[in_len - 1]<<8)|((U16)Input[in_len - 2]);
+	*EnCryptKey = Temp;
+	do
+	{
+		*EnCryptKey= ShiftByte1( *EnCryptKey );
+		Key1 = (U8)(*EnCryptKey&0x00FF);
+		Key2 = (U8)((*EnCryptKey>>8)&0x00FF);
+		for(  i = 0; i < in_len - 2; i ++ )
+		{
+			data = Input[ i ];
+			data = data^Key2;
+			data = data^Key1;
+			Input[i] = data;
+		}
+		Count --;
+	}while( Count > 0 );
+
+	leng = in_len - 2;
+	for(  i = 0; i < leng; i ++ )
+	{
+		Output[i] = Input[ i ];
+	}
+	return leng;
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_zxproduct_www_UnityPlayerActivity_DecryptIOData(JNIEnv* env, jobject thiz, jbyteArray inputArray, jint len)
+{
+	unsigned short int input_len = len;
+	unsigned short int output_len = input_len - 2;
+	unsigned short int  EnCryptKey = 0;
+	unsigned char *input = (unsigned char*)(*env)->GetByteArrayElements(env, inputArray, 0);
+	unsigned char *output = (unsigned char*)malloc(output_len);
+	memset(output, 0, output_len);
+	DecryptIOData(input, input_len, output, &EnCryptKey);
 
 	jbyteArray outputArray = (*env)->NewByteArray(env, output_len);
   	(*env)->SetByteArrayRegion(env, outputArray, 0, output_len, (jbyte*)output);
