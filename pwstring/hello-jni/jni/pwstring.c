@@ -4,6 +4,7 @@
 #include <math.h>
 #include <jni.h>
 #include <android/log.h>
+#include <sys/time.h>   
 //#include "JMD5.h"
 //#include "JMD5.c"
 
@@ -320,7 +321,8 @@ unsigned short int   ShiftByte1( unsigned short int Number )
 	Number |= temp;
 	return  Number;
 }
-int   DecryptIOData( unsigned char *Input, unsigned short int in_len, unsigned char *Output,  unsigned short int  *EnCryptKey )
+// 解密从加密芯片传回来的数据
+int   DecryptIODataFromChip( unsigned char *Input, unsigned short int in_len, unsigned char *Output,  unsigned short int  *EnCryptKey )
 {
 	U16  Temp = 0;
 	U16  leng = 0;
@@ -382,7 +384,7 @@ int  GetCheckPWStringValue( char *pwstring_in, char *day4byte, char *altstatus4b
 	unsigned short int  Encrypt = 0;
 	//for (i = 0; i < 14; ++i)
 	//	LOGD("pwstring_in[%d]=%02X", i, pwstring_in[i]);
-	DecryptIOData( (U8*)pwstring_in, 14, decrypt_buff,  &Encrypt );
+	DecryptIODataFromChip( (U8*)pwstring_in, 14, decrypt_buff,  &Encrypt );
 	//for (i = 0; i < 20; ++i)
 	//	LOGD("decrypt_buff[%d]=%02X", i, decrypt_buff[i]);
 	day = BUFFTODWORD(  (U8*)&decrypt_buff[0]);
@@ -391,4 +393,91 @@ int  GetCheckPWStringValue( char *pwstring_in, char *day4byte, char *altstatus4b
 	memcpy( day4byte, &day, 4 );
 	memcpy( altstatus4byte, &bom, 4 );
 	return flag;
+}
+
+// 传给金手指的数据，先通过它来加密。
+// Input: 62个字节数组
+// Output: 64个字节数组
+int EncryptIOData( U8 *Input, U16  in_len, U8 *Output ,U16 EnCryptKey)
+{
+	U16  Temp = 0;
+	U16  leng = 0;
+	U16  KeyConst = 0x5975;
+	Temp = EnCryptKey;
+	U8    Key1 = 0, Key2 = 0, data = 0;
+	int    Count = 2, i = 0, j = 0;
+	unsigned char XorKey[] = {0x3F,0x2E,0x8A,0xA4,0x5F,0x80,0x17,0xD7,0xDE,0x5B,0x91,0xEF,0x29,0x94,0x77,0xA2,0xAB,0x13,0x1B,0x7A,0x78,0xCF,0x37,0x39,
+		                   0x9E,0x4F,0xA1,0x34,0x71,0xDC,0xBE,0x10,0x96,0xEF,0x1F,0x52,0x70,0x63,0x33,0x1B,0xF3,0xDB,0x9E,0x84,0x49,0xB4,0x8C,0xB8,
+						   0xE9,0xA4,0x18,0x68,0x4B,0xFB,0x76,0xC5,0x8C,0x5B,0x65,0xBD,0x8E,0xB9,0xA3,0x4E};
+	do
+	{
+		Key1 = (U8)(EnCryptKey&0x00FF);
+		Key2 = (U8)((EnCryptKey>>8)&0x00FF);
+		for(  i = 0; i < in_len; i ++ )
+		{
+			data = Input[ i ];
+			data = data^Key1;
+			data = data^Key2;
+			Input[i] = data;
+		}
+		EnCryptKey = ShiftByte( EnCryptKey );
+		Count --;
+	}while( Count > 0 );
+
+	Key1 = (U8)(EnCryptKey&0x00FF);
+	Key2 = (U8)((EnCryptKey>>8)&0x00FF);
+	for(  i = 0; i < in_len; i ++ )
+	{
+		Output[i] = Input[ i ];
+	}
+    Output[ in_len ] = Key1;
+    Output[ in_len + 1 ] = Key2; 
+	leng = in_len + 2;
+	Key1 = (U8)(KeyConst&0x00FF);
+	Key2 = (U8)((KeyConst>>8)&0x00FF);
+	for(  i = 0; i < leng; i ++ )
+	{
+		data = Output[ i ];
+		data = data^Key1;
+		data = data^Key2;
+		Output[i] = data;
+	}
+	for(  i = 0; i < leng; i ++ )
+	{
+		Output[i] ^= XorKey[i];
+	}
+
+	return leng;
+}
+
+long Random_Seed()
+{
+	struct timeval tv;    
+   	gettimeofday(&tv,NULL);    
+  	return tv.tv_sec * 1000L + tv.tv_usec / 1000L;    
+}
+
+long Random_Int(int min, int max, long g_seed)
+{
+	g_seed=214013*g_seed+2531011;
+	return min+(g_seed ^ g_seed>>15)%(max-min+1);
+}
+
+JNIEXPORT jbyteArray JNICALL Java_com_zxproduct_www_UnityPlayerActivity_EncryptIOData(JNIEnv* env, jobject thiz, jbyteArray inputArray)
+{
+	U16 EnCryptKey = (U16)Random_Int(0, 0xffff, Random_Seed());
+	U8* input = (U8*)(*env)->GetByteArrayElements(env, inputArray, 0);
+	U16 input_len = (U16)(*env)->GetArrayLength(env, inputArray);
+	U16 output_len = input_len + 2;
+	U8 *output = (U8*)malloc(output_len);
+	memset(output, 0, output_len);
+	EncryptIOData(input, input_len, output, EnCryptKey);
+
+	jbyteArray outputArray = (*env)->NewByteArray(env, output_len);
+  	(*env)->SetByteArrayRegion(env, outputArray, 0, output_len, (jbyte*)output);
+
+	(*env)->ReleaseByteArrayElements(env, inputArray, input, 0);
+	free(output);
+
+	return outputArray;
 }

@@ -52,7 +52,7 @@ public class UnityPlayerActivity extends Activity
     private int encryIndex = 0;
     private UsbPort usbPort = new UsbPort();
     private boolean bNativeUsb = true;	// JNI访问usb
-    private int usbHandle = 0;
+    private boolean bEncryUsbTranfer = false;	// 加密传给金手指的数据
     
 	// Setup activity layout
 	@Override protected void onCreate (Bundle savedInstanceState)
@@ -251,7 +251,7 @@ public class UnityPlayerActivity extends Activity
 				{
 					if (bNativeUsb)
 					{
-						byte[] buffer = usbPort.read(usbHandle);
+						byte[] buffer = usbPort.read();
 						int count = buffer.length;
 						if (count > 0)
 						{
@@ -306,8 +306,8 @@ public class UnityPlayerActivity extends Activity
 		 bHIDConnecting = true;
 		 if (bNativeUsb)
 		 {
-			 usbHandle = usbPort.open(usbPort.vid, usbPort.pid);
-			 if (usbHandle > 0)
+			 int status = usbPort.open(usbPort.vid, usbPort.pid);
+			 if (status > 0)
 			 {
 				 bHIDConnected = true;
 				 UnityPlayer.UnitySendMessage("HIDUtils", "SetState", "True");
@@ -344,7 +344,7 @@ public class UnityPlayerActivity extends Activity
 			 if (bNativeUsb)
 			 {
 				 if (bHIDConnected)
-					 usbPort.close(usbHandle); 
+					 usbPort.close(); 
 			 }
 			 if (mTReadUsb0 != null && mTReadUsb0.isAlive())
 			 {
@@ -462,16 +462,33 @@ public class UnityPlayerActivity extends Activity
 		if (!bHIDConnected)
 			return 0;
 		
-		int count = buffer.length;
-		byte[] buf = new byte[count];
-		for (int i = 0; i < count; ++i)
+		if (bEncryUsbTranfer) 
 		{
-			buf[i] = (byte)buffer[i];
+			int count = buffer.length - 2; 
+			byte[] buf = new byte[count];
+			for (int i = 0; i < count; ++i)
+			{
+				buf[i] = (byte)buffer[i];
+			}
+			byte[] encryData = EncryptIOData(buf);
+			if (bNativeUsb) {
+				return usbPort.write(encryData);
+			}
+			return mDeviceConnection.bulkTransfer(epIntEndpointOut, encryData, encryData.length, 500);
 		}
-		if (bNativeUsb) {
-			return usbPort.write(usbHandle, buf);
+		else
+		{
+			int count = buffer.length;
+			byte[] buf = new byte[count];
+			for (int i = 0; i < count; ++i)
+			{
+				buf[i] = (byte)buffer[i];
+			}
+			if (bNativeUsb) {
+				return usbPort.write(buf);
+			}
+			return mDeviceConnection.bulkTransfer(epIntEndpointOut, buf, buf.length, 500);
 		}
-		return mDeviceConnection.bulkTransfer(epIntEndpointOut, buf, buf.length, 500);
 	}
 	
 	public int[] readHID()
@@ -530,6 +547,7 @@ public class UnityPlayerActivity extends Activity
     public native String GetPWCheckValue4(long LineID, long CilentID,  long  MaxProfit, long Profit, long CheckCount);
     public native byte[] CreateCheckPWString(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in);
     public native String GetCheckPWStringValue(byte[] recv_buff);
+    public native byte[] EncryptIOData(byte[] inputArray);
     
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() 
 	{
