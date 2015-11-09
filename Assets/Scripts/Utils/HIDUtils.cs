@@ -18,7 +18,7 @@ public class HIDUtils : MonoBehaviour
 	private float getDataTimeDelta = 0;
 	private const float kReceiveFromHIDTime = 0.1f;
 	private float receiveFromHIDInterver = 0.0f;
-	private const int kReadDataLength = 61;
+	private const int kReadDataLength = 59;
 	private const int kBlowBall = 0x55;
 	private const int kOpenGate = 0x55;
 	private const int kPreviousValue = 0x55;
@@ -122,9 +122,9 @@ public class HIDUtils : MonoBehaviour
 			return;
 		}
 
-		if (data.Length == kReadDataLength)
+		if (data.Length >= kReadDataLength)
 		{
-			PrintData(ref data);
+//			PrintData(ref data);
             // 机芯指令
             if (data[0] == 0x58 && data[1] == 0x57)
             {
@@ -231,7 +231,7 @@ public class HIDUtils : MonoBehaviour
 		}
 		else
 		{
-			PrintData(ref data);
+//			PrintData(ref data);
 		}
 	}
 

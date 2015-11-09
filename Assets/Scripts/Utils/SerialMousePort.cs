@@ -254,4 +254,12 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 			mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
 		}
 	}
+
+    // void OnGUI()
+    // {
+    //     if (GUI.Button(new Rect(200, 10, 200, 100), "Exit"))
+    //     {
+    //         Application.Quit();
+    //     }
+    // }
 }
