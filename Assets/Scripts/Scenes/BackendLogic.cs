@@ -251,6 +251,8 @@ public class BackendLogic : MonoBehaviour
 				dlgCalc.SetActive(true);
 				dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
 				calcTitle.text = strAccountPassword[GameData.GetInstance().language];
+				calcContent.text = string.Empty;
+				calcPassword.text = string.Empty;
 				passwordMode = 2;
 			}
 			else
@@ -265,6 +267,8 @@ public class BackendLogic : MonoBehaviour
 			dlgCalc.SetActive(true);
 			dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
 			calcTitle.text = strDeviceId[GameData.GetInstance().language];
+			calcContent.text = string.Empty;
+			calcPassword.text = string.Empty;
 			passwordMode = 0;
 		}
 		else if (string.Equals(name, "ts2"))
@@ -363,6 +367,8 @@ public class BackendLogic : MonoBehaviour
         menuAccount.SetActive(false);
 		dlgCalc.SetActive(true);
 		dlgCalc.transform.localPosition = Vector3.zero;
+		calcContent.text = string.Empty;
+		calcPassword.text = string.Empty;
 
         SetLanguage(menuSetting);
 
@@ -398,6 +404,11 @@ public class BackendLogic : MonoBehaviour
 
     private void InitAccount()
     {
+		if (accountItemRoot == null)
+			accountItemRoot = menuAccount.transform.FindChild("ItemsRoot");
+		if (loadingRoot == null)
+			loadingRoot = menuAccount.transform.FindChild("LoadingTextRoot");
+
         menuMain.SetActive(false);
         menuSetting.SetActive(false);
         menuAccount.SetActive(true);
@@ -410,10 +421,6 @@ public class BackendLogic : MonoBehaviour
 		UpdateHostAccount();
 		CalcTotalAccount();
 
-		if (accountItemRoot == null)
-			accountItemRoot = menuAccount.transform.FindChild("ItemsRoot");
-		if (loadingRoot == null)
-			loadingRoot = menuAccount.transform.FindChild("LoadingTextRoot");
 		if (loadingRoot != null)
 		{
 			float basePosY = 325;
