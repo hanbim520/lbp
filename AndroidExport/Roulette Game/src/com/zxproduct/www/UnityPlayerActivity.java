@@ -219,8 +219,6 @@ public class UnityPlayerActivity extends Activity
 		 if (!readSerialQueue0.isEmpty())
 		 {
 			 BufferStruct buffer = readSerialQueue0.poll();
-			 for (int i = 0; i< buffer.buffer.length; ++i)
-			 Log.i(TAG, "" + buffer.buffer[i]);
 			 return buffer.buffer;
 		 }
 		 

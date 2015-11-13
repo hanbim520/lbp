@@ -117,7 +117,7 @@ public class SerialMousePort : MonoBehaviour
 		MoveMouse();
 #if UNITY_ANDROID
 		int[] data = androidSP.ReadData();
-		if (data != null)
+		if (data != null && data.Length > 0 && data[0] >= 0)
 		{
 			foreach (int d in data)
 				queueReadPool.Enqueue((byte)d);
@@ -254,4 +254,12 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 			mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
 		}
 	}
+
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(200, 10, 200, 100), "Exit"))
+//		{
+//			Application.Quit();
+//		}
+//	}
 }
