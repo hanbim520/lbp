@@ -34,18 +34,18 @@
         <action android:name="android.intent.action.BOOT_COMPLETED" />
         <category android:name="android.intent.category.HOME" />
         </intent-filter>
-    </receiver>
-    <receiver android:name=".USBBroadcastReceiver">
-        <intent-filter android:priority="1000">
-            <action android:name="android.intent.action.MEDIA_EJECT"/>
+	</receiver>
+	<receiver android:name=".USBBroadcastReceiver">
+		<intent-filter android:priority="1000">
+			<action android:name="android.intent.action.MEDIA_EJECT"/>
             <action android:name="android.intent.action.MEDIA_REMOVED"/>
-            <action android:name="android.intent.action.MEDIA_BAD_REMOVAL"/>
-            <action android:name="android.intent.action.MEDIA_MOUNTED"/>
-            <action android:name="android.intent.action.MEDIA_CHECKING"/>
-            <data android:scheme="file"/>   
-        </intent-filter>
-    </receiver>
-    -->
+          	<action android:name="android.intent.action.MEDIA_BAD_REMOVAL"/>
+			<action android:name="android.intent.action.MEDIA_MOUNTED"/>
+			<action android:name="android.intent.action.MEDIA_CHECKING"/>
+			<data android:scheme="file"/>	
+		</intent-filter>
+	</receiver>
+	-->
   </application>
   
 </manifest>
