@@ -1,0 +1,4 @@
+TestEncryChip
+HIDUtils
+AndroidSerialPort
+DlgPrintCode

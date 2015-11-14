@@ -10,6 +10,7 @@ using System.Collections.Generic;
  */
 public class TestEncryChip : MonoBehaviour
 {
+#if UNITY_ANDROID
 	protected AndroidJavaClass jc;
 	protected AndroidJavaObject jo;
     protected HIDUtils hidUtils;
@@ -79,4 +80,5 @@ public class TestEncryChip : MonoBehaviour
 			DebugConsole.Log(AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah));
 		}
     }
+#endif
 }

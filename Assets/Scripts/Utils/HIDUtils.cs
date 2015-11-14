@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 public class HIDUtils : MonoBehaviour
 {
@@ -11,8 +12,10 @@ public class HIDUtils : MonoBehaviour
 	public const int kPhaseCloseGate = 4;
 	public const int kPhaseDetectBallValue = 5;
 
+#if UNITY_ANDROID
 	private AndroidJavaClass jc;
 	private AndroidJavaObject jo;
+#endif
 	// In seconds
 	private const float getDataTime = 0.1f;
 	private float getDataTimeDelta = 0;
@@ -40,33 +43,39 @@ public class HIDUtils : MonoBehaviour
 		InitData();
 	}
 
+	void OnDestroy()
+	{
+		CloseUSB();
+	}
+
 	void Update()
 	{
-		if (Application.platform == RuntimePlatform.Android)
+		getDataTimeDelta += Time.deltaTime;
+		if (getDataTimeDelta >= getDataTime)
 		{
-			getDataTimeDelta += Time.deltaTime;
-			if (getDataTimeDelta >= getDataTime)
-			{
-				getDataTimeDelta = 0;
-				ReadUsbPort();
-			}
+			getDataTimeDelta = 0;
+			ReadUsbPort();
+		}
 
-			receiveFromHIDInterver += Time.deltaTime;
-			if (receiveFromHIDInterver >= kReceiveFromHIDTime)
-			{
-				receiveFromHIDInterver = 0;
-				ReceiveDataFromHID();
-			}
+		receiveFromHIDInterver += Time.deltaTime;
+		if (receiveFromHIDInterver >= kReceiveFromHIDTime)
+		{
+			receiveFromHIDInterver = 0;
+			ReceiveDataFromHID();
 		}
 	}
 
 	private void InitData()
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
+	
+#if UNITY_ANDROID
 			jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
 			jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-		}
+#endif
+		
+#if UNITY_STANDALONE_WIN
+			OpenUSB();
+#endif
 	}
 
 	public void SetState(string value)
@@ -85,18 +94,24 @@ public class HIDUtils : MonoBehaviour
 
 	public void OpenUSB()
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			jo.Call("openUsb");
-		}
+#if UNITY_ANDROID
+		jo.Call("openUsb");
+#endif
+
+#if UNITY_STANDALONE_WIN
+		WinUsbPortOpen();
+#endif
 	}
 
 	public void CloseUSB()
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			jo.Call("closeUsb");
-		}
+#if UNITY_ANDROID
+		jo.Call("closeUsb");
+#endif
+
+#if UNITY_STANDALONE_WIN
+		WinUsbPortClose();
+#endif
 	}
 
 	public void DebugLog(string msg)
@@ -106,17 +121,22 @@ public class HIDUtils : MonoBehaviour
 
 	public int[] ReadData(string methodName)
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
+#if UNITY_ANDROID
 			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
 			return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
-		}
+#endif
 		return null;
 	}
 
 	public void ReadUsbPort()
 	{
+#if UNITY_ANDROID
 		int[] data = ReadData("readHID");
+#endif
+#if UNITY_STANDALONE_WIN
+		int[] data = WinUsbPortRead();
+		PrintData(ref data);
+#endif
 		if (data == null || data[0] == -1)
 		{ 
 			return;
@@ -200,6 +220,7 @@ public class HIDUtils : MonoBehaviour
             else if (data[0] == 0x42 && data[1] == 0x5a)
             {
 //                PrintData(ref data);
+#if UNITY_ANDROID
 				List<byte> col = new List<byte>();
                 for (int i = 3; i < 17; ++i)
                     col.Add((byte)data[i]);
@@ -207,10 +228,15 @@ public class HIDUtils : MonoBehaviour
                 IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(sendData);
                 jvalue[] blah = new jvalue[1];
                 blah[0].l = pArr;
-                
+
                 IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckPWStringValue");
 				// 获取打码结果
 				string result = AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah);
+#endif
+
+#if UNITY_STANDALONE_WIN
+				string result = "";
+#endif
 				char[] split = {':'};
 				string[] word = result.Split(split);
 				if (word.Length >= 2)
@@ -237,15 +263,19 @@ public class HIDUtils : MonoBehaviour
 
 	public int WriteData(int[] data, string methodName)
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
-			jvalue[] blah = new jvalue[1];
-			blah[0].l = pArr;
-			
-			IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), methodName);
-			return AndroidJNI.CallIntMethod(jo.GetRawObject(), methodId, blah);
-		}
+#if UNITY_ANDROID
+		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
+		jvalue[] blah = new jvalue[1];
+		blah[0].l = pArr;
+		
+		IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), methodName);
+		return AndroidJNI.CallIntMethod(jo.GetRawObject(), methodId, blah);
+#endif
+
+#if UNITY_STANDALONE_WIN
+		print("write:" + WinUsbPortWrite(data));
+#endif
+
 		return -1;
 	}
 
@@ -346,5 +376,46 @@ public class HIDUtils : MonoBehaviour
 	public void StopPayCoin()
 	{
 		flagPayCoin = 0;
+	}
+
+	[DllImport ("libusb-1.0")]  
+	private static extern int Win_UsbPort_open(UInt16 vid, UInt16 pid); 
+	[DllImport ("libusb-1.0")]  
+	private static extern void Win_UsbPort_close();
+	[DllImport ("libusb-1.0")]  
+	private static extern int Win_UsbPort_write(byte[] buffer, int size);
+	[DllImport ("libusb-1.0")]  
+	private static extern IntPtr Win_UsbPort_read();
+
+	public int WinUsbPortOpen()
+	{
+		UInt16 vid = 0x0483;
+		UInt16 pid = 0x5750;
+		return Win_UsbPort_open(vid, pid);
+	}
+
+	public void WinUsbPortClose()
+	{
+		Win_UsbPort_close();
+	}
+
+	public int[] WinUsbPortRead()
+	{
+		int len = 61;
+		int[] array = new int[len];
+		IntPtr inputPtr = Win_UsbPort_read();
+		for (int i = 0; i < len; ++i)
+			array[i] = Marshal.ReadByte(inputPtr, i);
+		Marshal.FreeCoTaskMem(inputPtr);
+		return array;
+	}
+
+	public int WinUsbPortWrite(int[] data)
+	{
+		int len = data.Length;
+		byte[] buffer = new byte[len];
+		for (int i = 0; i < len; ++i)
+			buffer[i] = (byte)data[i];
+		return Win_UsbPort_write(buffer, len);
 	}
 }

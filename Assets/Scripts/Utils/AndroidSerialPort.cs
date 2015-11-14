@@ -6,6 +6,7 @@ using System.Threading;
 
 public class AndroidSerialPort
 {
+#if UNITY_ANDROID
 	protected string portName;
 	protected int baudRate;
 	protected int dataBits;
@@ -74,4 +75,5 @@ public class AndroidSerialPort
         jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
         jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
     }
+#endif
 }

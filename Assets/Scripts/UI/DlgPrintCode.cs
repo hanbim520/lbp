@@ -18,8 +18,10 @@ public class DlgPrintCode : MonoBehaviour
     public GameObject cn;
 
     private GameObject downHitObject;
+#if UNITY_ANDROID
     private AndroidJavaClass jc;
     private AndroidJavaObject jo;
+#endif
 	private HIDUtils hidUtils;
 	private int checkCodeNum;
 
@@ -56,11 +58,10 @@ public class DlgPrintCode : MonoBehaviour
 			txtCheckCode.text = checkCode.ToString();
         txtInput.text = txtCalcInput.text = string.Empty;
 
-        if (Application.platform == RuntimePlatform.Android)
-        {
+#if UNITY_ANDROID
             jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
             jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-        }
+#endif
     }
 
     public void CalcDownEvent(Transform hitObject)
@@ -193,7 +194,13 @@ public class DlgPrintCode : MonoBehaviour
 
     public string GetCheckCode(long lineId, long machineId, long totalWin, long currentWin, long printTimes)
     {
+#if UNITY_ANDROID
 		string strCrc = jo.Call<string>("GetPWCheckValue4", (long)lineId, (long)machineId, (long)totalWin, (long)currentWin, (long)printTimes);
+#endif
+
+#if UNITY_STANDALONE_WIN
+		string strCrc = "";
+#endif
 		int value;
 		if (int.TryParse(strCrc, out value))
 		{
@@ -205,9 +212,16 @@ public class DlgPrintCode : MonoBehaviour
 
 	public void CheckUserInput(long lineId, long machineId, long totalWin, long currentWin, long printTimes, long crc, long userInput)
 	{
+#if UNITY_ANDROID
 		AndroidJavaObject rev = jo.Call<AndroidJavaObject>("CreateCheckPWString", 
 		                                                   (long)lineId, (long)machineId, (long)totalWin, (long)currentWin, (long)printTimes, (long)crc, (long)userInput);
 		byte[] buf = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
+#endif
+
+#if UNITY_STANDALONE_WIN
+		byte[] buf = new byte[61];
+#endif
+
 		List<int> data = new List<int>();
 		data.Add(0x42);
 		data.Add(0x5a);
