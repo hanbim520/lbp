@@ -5,6 +5,13 @@ using System.Runtime.InteropServices;
 
 public static class WinNative
 {
+	[DllImport ("libusb0")]
+	public extern static void usb_init();
+	[DllImport ("libusb0")]
+	public extern static int usb_find_busses();
+	[DllImport ("libusb0")]
+	public extern static int usb_find_devices();
+
 	// 解密从金手指传回来的数据
 	[DllImport ("EncryChip")]  
 	private extern static int EncryptIOData(byte[] input, ushort inputSize, out IntPtr output);
