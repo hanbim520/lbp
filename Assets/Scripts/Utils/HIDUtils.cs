@@ -144,7 +144,7 @@ public class HIDUtils : MonoBehaviour
 
 		if (data.Length >= kReadDataLength)
 		{
-//			PrintData(ref data);
+			PrintData(ref data);
             // 机芯指令
             if (data[0] == 0x58 && data[1] == 0x57)
             {
@@ -257,7 +257,7 @@ public class HIDUtils : MonoBehaviour
 		}
 		else
 		{
-//			PrintData(ref data);
+			PrintData(ref data);
 		}
 	}
 

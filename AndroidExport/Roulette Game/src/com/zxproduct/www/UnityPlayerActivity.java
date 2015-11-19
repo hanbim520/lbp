@@ -85,6 +85,7 @@ public class UnityPlayerActivity extends Activity
 		mUnityPlayer.quit();
 		super.onDestroy();
 		closeUsb();
+		closeSerialPort();
 	}
 
 	// Pause Unity
@@ -159,10 +160,10 @@ public class UnityPlayerActivity extends Activity
 						int size = mInputStream0.read(buffer);
 						if (size > 0)
 						{
+							Log.d(TAG, "mInputStream0 size:" + size);
 							BufferStruct buf = new BufferStruct();
-							int count = buffer.length;
-							buf.buffer = new int[count];
-							for (int i = 0; i < count; ++i)
+							buf.buffer = new int[size];
+							for (int i = 0; i < size; ++i)
 							{
 								buf.buffer[i] = buffer[i] & 0xff;
 							}

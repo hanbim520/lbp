@@ -7,5 +7,12 @@ AndroidExport/Roulette Game/gen
 *.apk
 *.csproj
 *.sln
+*.sdf
+*.suo
+*.ipch
 libs/
 bin/
+EncryChip/Debug/
+EncryChip/Release/
+EncryChip/EncryChip/Debug/
+EncryChip/EncryChip/Release/
