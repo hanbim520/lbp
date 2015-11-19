@@ -398,8 +398,8 @@ int  GetCheckPWStringValue( char *pwstring_in, char *day4byte, char *altstatus4b
 }
 
 // 传给金手指的数据，先通过它来加密。
-// Input: 62个字节数组
-// Output: 64个字节数组
+// Input: 61个字节数组
+// Output: 63个字节数组
 int EncryptIOData( U8 *Input, U16  in_len, U8 *Output ,U16 EnCryptKey)
 {
 	U16  Temp = 0;
