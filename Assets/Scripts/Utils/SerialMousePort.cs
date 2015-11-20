@@ -99,7 +99,7 @@ public class SerialMousePort : MonoBehaviour
 				if (sp != null && sp.IsOpen)
 				{
 					byte buf = (byte)sp.ReadByte();
-//					Debug.Log(buf);
+					DebugConsole.Log(buf.ToString());
 					queueReadPool.Enqueue(buf);
 				}
 			}
@@ -114,13 +114,18 @@ public class SerialMousePort : MonoBehaviour
 	void FixedUpdate()
 	{
 		DealReceivedData();
-		MoveMouse();
+//		MoveMouse();
 #if UNITY_ANDROID
 		int[] data = androidSP.ReadData();
 		if (data != null && data.Length > 0 && data[0] >= 0)
 		{
+			string log = "";
 			foreach (int d in data)
+			{
+				log += d.ToString() + ", ";
 				queueReadPool.Enqueue((byte)d);
+			}
+			DebugConsole.Log("FixedUpdate received:" + log);
 		}
 #endif
 	}
@@ -231,6 +236,7 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
             GameData.GetInstance().serialMouseY = yMax;
         else if (GameData.GetInstance().serialMouseY <= yMin)
             GameData.GetInstance().serialMouseY = yMin;
+		MoveMouse();
     }
 
     private void Init()
@@ -255,12 +261,12 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 		}
 	}
 
-//	void OnGUI()
-//	{
-//		if (GUI.Button(new Rect(200, 10, 200, 100), "Exit"))
-//		{
-//			Application.Quit();
-//		}
-//	}
+	void OnGUI()
+	{
+		if (GUI.Button(new Rect(200, 10, 200, 100), "Exit"))
+		{
+			Application.Quit();
+		}
+	}
 
 }
