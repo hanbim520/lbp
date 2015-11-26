@@ -2,7 +2,10 @@ using UnityEngine;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 using UsbHid.USB.Classes;
+using UsbHid.USB.Classes.DllWrappers;
 using UsbHid.USB.Classes.Messaging;
 using UsbHid.USB.Structures;
 
@@ -10,6 +13,14 @@ namespace UsbHid
 {
 	public class UsbHidDevice : IDisposable
 	{
+		[DllImport("kernel32", SetLastError = true)]
+		internal static extern bool ReadFile(
+			SafeFileHandle hFile,
+			Byte[] aBuffer,
+			UInt32 cbToRead,
+			ref UInt32 cbThatWereRead,
+			IntPtr pOverlapped);
+
 		#region Variables
 		
 		private DeviceInformationStructure _deviceInformation;
@@ -168,7 +179,16 @@ namespace UsbHid
 		
 		private void WorkerDoWork(object sender, DoWorkEventArgs e)
 		{
-			_fsDeviceRead = new FileStream(_deviceInformation.ReadHandle, FileAccess.Read, 0x1000, true);
+			try
+			{
+				_fsDeviceRead = new FileStream(_deviceInformation.ReadHandle, FileAccess.Read, 0x1000, true);
+			}
+			catch(Exception ex)
+			{
+				Debug.Log(ex.ToString());
+			}
+
+			
 			BeginAsyncRead(ref _fsDeviceRead, _deviceInformation.Capabilities.InputReportByteLength);
 		}
 		
@@ -195,5 +215,20 @@ namespace UsbHid
 		}
 		
 		#endregion
+
+		public uint Read(byte[] buffer, uint cbToRead) {
+			// returns bytes read
+			uint cbThatWereRead = 0;
+			if (!ReadFile(_deviceInformation.ReadHandle, buffer, cbToRead,
+			              ref cbThatWereRead, IntPtr.Zero))
+				ThrowLastWin32Err();
+			return cbThatWereRead;
+		}
+
+		private void ThrowLastWin32Err() {
+			Marshal.ThrowExceptionForHR(
+				Marshal.GetHRForLastWin32Error());
+		}
+
 	}
 }

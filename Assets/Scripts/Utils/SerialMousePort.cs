@@ -34,6 +34,7 @@ public class SerialMousePort : MonoBehaviour
 
 	void OnEnable()
 	{
+		print("serialmouseport onenable");
 		Init();
         RegisterEvents();
 #if UNITY_EDITOR
@@ -72,6 +73,7 @@ public class SerialMousePort : MonoBehaviour
 
 	void OnDisable()
 	{
+		print("serialmouseport disable");
         UnregisterEvents();
 #if UNITY_EDITOR
 		readThread.Abort();
@@ -99,7 +101,7 @@ public class SerialMousePort : MonoBehaviour
 				if (sp != null && sp.IsOpen)
 				{
 					byte buf = (byte)sp.ReadByte();
-					DebugConsole.Log(buf.ToString());
+//					DebugConsole.Log(buf.ToString());
 					queueReadPool.Enqueue(buf);
 				}
 			}
@@ -114,18 +116,15 @@ public class SerialMousePort : MonoBehaviour
 	void FixedUpdate()
 	{
 		DealReceivedData();
-//		MoveMouse();
 #if UNITY_ANDROID
 		int[] data = androidSP.ReadData();
 		if (data != null && data.Length > 0 && data[0] >= 0)
 		{
-			string log = "";
 			foreach (int d in data)
 			{
-				log += d.ToString() + ", ";
 				queueReadPool.Enqueue((byte)d);
 			}
-			DebugConsole.Log("FixedUpdate received:" + log);
+//			DebugConsole.Log("FixedUpdate received:" + log);
 		}
 #endif
 	}
@@ -153,8 +152,8 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 			int isHead = data & 0x40;
 			if (isHead == 0)
 				return;
-            string log = "";
-            log += string.Format("data={0:X}", data);
+//            string log = "";
+//            log += string.Format("data={0:X}", data);
 			int lb = (0x20 & data) >> 5;
 			int rb = (0x10 & data) >> 4;
 			int y7 = (0x08 & data) >> 3;
@@ -162,15 +161,15 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 			int x7 = (0x02 & data) >> 1;
 			int x6 = 0x01 & data;
             data = queueReadPool.Dequeue();
-            log += string.Format(", {0:X}", data);
+//            log += string.Format(", {0:X}", data);
 //                sbyte deltaX = (sbyte)(0x3F & data | (x7 << 7) | (x6 << 6));
 			int x = 0x3F & data | (x7 << 7) | (x6 << 6);
 			if (x > 127)
 				x -= 256;
 			sbyte deltaX = (sbyte)x;
             data = queueReadPool.Dequeue();
-            log += string.Format(", {0:X}", data);
-            DebugConsole.Log(log);
+//            log += string.Format(", {0:X}", data);
+//            DebugConsole.Log(log);
 //				sbyte deltaY = (sbyte)(0x3F & data | (y7 << 7) | (y6 << 6));
 			int y = 0x3F & data | (y7 << 7) | (y6 << 6);
 			if (y > 127)
@@ -241,6 +240,7 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 
     private void Init()
     {
+		InitMouseIcon();
         int resolutionWidth = GameData.GetInstance().resolutionWidth;
         int resolutionHeight = GameData.GetInstance().resolutionHeight;
         xMax = resolutionWidth / 2;
@@ -257,7 +257,18 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 	{
 		if (bFindMouse)
 		{
-			mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
+			if (mouse == null)
+				InitMouseIcon();
+			else
+				mouse.transform.localPosition = new Vector3(GameData.GetInstance().serialMouseX, GameData.GetInstance().serialMouseY, 0);
+		}
+	}
+
+	private void InitMouseIcon()
+	{
+		if (mouse == null)
+		{
+			mouse = GameObject.Find("mouse icon");
 		}
 	}
 

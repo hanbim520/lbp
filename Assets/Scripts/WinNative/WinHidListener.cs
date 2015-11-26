@@ -10,7 +10,7 @@ using UsbHid.USB.Classes;
 
 public delegate IntPtr WndProcDelegate(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam);
 
-public class MYWMListener : MonoBehaviour
+public class WinHidListener : MonoBehaviour
 {
 	public IntPtr interactionWindow;
 	IntPtr hMainWindow;
@@ -40,6 +40,39 @@ public class MYWMListener : MonoBehaviour
 		newWndProc = new WndProcDelegate(WndProc);
 		newWndProcPtr = Marshal.GetFunctionPointerForDelegate(newWndProc);
 		oldWndProcPtr = SetWindowLong(hMainWindow, -4, newWndProcPtr);
+		print("openHid: " + WinHidPort.OpenHid(0x0483, 0x5750));
+
+		byte[] data = new byte[61];
+		data[0] = 0x58;
+		data[1] = 0x57;
+
+
+		byte[] dest = new byte[63];
+		WinHidPort.EncryptInputData(data, 61, ref dest);
+		string logg = "";
+		for (int i = 0; i < dest.Length; ++i)
+		{
+			logg += dest[i].ToString() + ", ";
+		}
+		print("write data: " + logg);
+
+		print("writeHid: " + WinHidPort.WriteHid(dest, 63));
+
+		IntPtr input;
+		int inputsize;
+		WinHidPort.ReadHid(out input, out inputsize);
+		byte[] source = new byte[61];
+		byte[] source2 = new byte[59];
+		Marshal.Copy(input, source, 0, 61);
+		WinHidPort.DecryptOutputData(source, 61, ref source2);
+
+//		WinHid.FreeByteArray(input);
+		print("ReadHid: " + inputsize);
+		string log = "";
+		for (int i = 0; i < source2.Length; ++i)
+			log += source2[i].ToString() + ", ";
+		print("Receive Data: " + log);
+		WinHidPort.CloseHid();
 		isrunning = true;
 	}
 	

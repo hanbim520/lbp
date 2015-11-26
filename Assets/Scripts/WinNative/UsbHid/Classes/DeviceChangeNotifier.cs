@@ -2,8 +2,10 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using UsbHid;
 using UsbHid.USB.Classes;
 using UsbHid.USB.Classes.DllWrappers;
+using UsbHid.USB.Classes.Messaging;
 using UsbHid.USB.Structures;
 
 public class DeviceChangeNotifier : MonoBehaviour
@@ -17,6 +19,7 @@ public class DeviceChangeNotifier : MonoBehaviour
     public IntPtr DeviceNotificationHandle;
 	
     private static string devicepath;
+	private UsbHidDevice device;
 
 	IntPtr hMainWindow;
 	IntPtr oldWndProcPtr;
@@ -44,6 +47,9 @@ public class DeviceChangeNotifier : MonoBehaviour
 		newWndProc = new WndProcDelegate(WndProc);
 		newWndProcPtr = Marshal.GetFunctionPointerForDelegate(newWndProc);
 		oldWndProcPtr = SetWindowLong(hMainWindow, -4, newWndProcPtr);
+		device = new UsbHidDevice(0x0483, 0x5750);
+		device.DataReceived += DeviceDataReceived;
+		print("device.Connect: " + device.Connect());
 		isrunning = true;
     }
 
@@ -157,4 +163,29 @@ public class DeviceChangeNotifier : MonoBehaviour
     {
         if (DeviceAttached != null) DeviceAttached();
     }
+
+	private void DeviceDataReceived(byte[] data)
+	{
+		string log =  "";
+		foreach (byte b in data)
+			log += b.ToString() + ", ";
+		print(log);
+	}
+
+	void OnGUI()
+	{
+		if (GUI.Button(new Rect(10, 10, 200, 150), "Send Data"))
+		{
+			byte[] data = new byte[] { 0x58, 0x57, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0};
+			var command = new CommandMessage(0x86, data);
+			print(device.SendMessage(command));
+		}
+	}
 }

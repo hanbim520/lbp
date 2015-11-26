@@ -135,7 +135,7 @@ public class HIDUtils : MonoBehaviour
 #endif
 #if UNITY_STANDALONE_WIN
 		int[] data = WinUsbPortRead();
-		PrintData(ref data);
+//		PrintData(ref data);
 #endif
 		if (data == null || data[0] == -1)
 		{ 
@@ -144,7 +144,7 @@ public class HIDUtils : MonoBehaviour
 
 		if (data.Length >= kReadDataLength)
 		{
-			PrintData(ref data);
+//			PrintData(ref data);
             // 机芯指令
             if (data[0] == 0x58 && data[1] == 0x57)
             {
@@ -257,7 +257,7 @@ public class HIDUtils : MonoBehaviour
 		}
 		else
 		{
-			PrintData(ref data);
+//			PrintData(ref data);
 		}
 	}
 
@@ -378,44 +378,34 @@ public class HIDUtils : MonoBehaviour
 		flagPayCoin = 0;
 	}
 
-	[DllImport ("libusb-1.0")]  
-	private static extern int Win_UsbPort_open(UInt16 vid, UInt16 pid); 
-	[DllImport ("libusb-1.0")]  
-	private static extern void Win_UsbPort_close();
-	[DllImport ("libusb-1.0")]  
-	private static extern int Win_UsbPort_write(byte[] buffer, int size);
-	[DllImport ("libusb-1.0")]  
-	private static extern IntPtr Win_UsbPort_read();
-
-	public int WinUsbPortOpen()
+	private int WinUsbPortOpen()
 	{
-		UInt16 vid = 0x0483;
-		UInt16 pid = 0x5750;
-		return Win_UsbPort_open(vid, pid);
+		int vid = 0x0483;
+		int pid = 0x5750;
+		return WinHidPort.OpenHid(vid, pid);
 	}
 
-	public void WinUsbPortClose()
+	private void WinUsbPortClose()
 	{
-		Win_UsbPort_close();
+		WinHidPort.CloseHid();
 	}
 
-	public int[] WinUsbPortRead()
+	private int[] WinUsbPortRead()
 	{
-		int len = 61;
+		byte[] data = WinHidPort.Read();
+		int len = data.Length;
 		int[] array = new int[len];
-		IntPtr inputPtr = Win_UsbPort_read();
 		for (int i = 0; i < len; ++i)
-			array[i] = Marshal.ReadByte(inputPtr, i);
-		Marshal.FreeCoTaskMem(inputPtr);
+			array[i] = data[i];
 		return array;
 	}
 
-	public int WinUsbPortWrite(int[] data)
+	private int WinUsbPortWrite(int[] data)
 	{
-		int len = data.Length;
+		int len = data.Length - 3;
 		byte[] buffer = new byte[len];
 		for (int i = 0; i < len; ++i)
 			buffer[i] = (byte)data[i];
-		return Win_UsbPort_write(buffer, len);
+		return WinHidPort.Write(ref buffer, len);
 	}
 }

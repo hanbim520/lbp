@@ -489,7 +489,8 @@ long Random_Int(int min, int max, long g_seed)
 int EncryptIOData(U8 *Input, U16  in_len, U8 **Output)
 {
 	U16 EnCryptKey = (U16)Random_Int(0, 0xffff, Random_Seed());
-	*Output = new U8[in_len + 2];
+	U8 *retOutput = new U8[in_len + 2];
+	
 	U16  Temp = 0;
 	U16  leng = 0;
 	U16  KeyConst = 0x5a5a;
@@ -519,25 +520,26 @@ int EncryptIOData(U8 *Input, U16  in_len, U8 **Output)
 	Key2 = (U8)((EnCryptKey >> 8) & 0x00FF);
 	for (i = 0; i < in_len; i++)
 	{
-		*Output[i] = Input[i];
+		retOutput[i] = Input[i];
 	}
-	*Output[in_len] = Key1;
-	*Output[in_len + 1] = Key2;
+	retOutput[in_len] = Key1;
+	retOutput[in_len + 1] = Key2;
 	leng = in_len + 2;
 	Key1 = (U8)(KeyConst & 0x00FF);
 	Key2 = (U8)((KeyConst >> 8) & 0x00FF);
 	for (i = 0; i < leng; i++)
 	{
-		data = *Output[i];
+		data = retOutput[i];
 		data = data^Key1;
 		data = data^Key2;
-		*Output[i] = data;
+		retOutput[i] = data;
 	}
 	for (i = 0; i < leng; i++)
 	{
-		*Output[i] ^= XorKey[i];
+		retOutput[i] ^= XorKey[i];
 	}
 
+	*Output = retOutput;
 	return leng;
 }
 
@@ -545,7 +547,7 @@ int EncryptIOData(U8 *Input, U16  in_len, U8 **Output)
 int DecryptIOData(unsigned char *Input, unsigned short int in_len, unsigned char **Output)
 {
 	unsigned short int EnCryptKey = 0;
-	*Output = new U8[in_len - 2];
+	U8 *retOutput = new U8[in_len - 2];
 	U16  Temp = 0;
 	U16  leng = 0;
 	U16  KeyConst = 0x5a5a;
@@ -593,8 +595,9 @@ int DecryptIOData(unsigned char *Input, unsigned short int in_len, unsigned char
 	leng = in_len - 2;
 	for (i = 0; i < leng; i++)
 	{
-		*Output[i] = Input[i];
+		retOutput[i] = Input[i];
 	}
+	*Output = retOutput;
 	return leng;
 }
 
