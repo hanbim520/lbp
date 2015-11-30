@@ -9,8 +9,8 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = true;       // 是否模拟出球
-    public static bool controlCode = true;  // 是否打码
+	public static bool debug = false;       // 是否模拟出球
+	public static bool controlCode = false;  // 是否打码
 
     // Setting menu
     public int betTimeLimit;
@@ -90,7 +90,14 @@ public class GameData
     private int _lineId;        // 线号
     public int lineId
     {
-        get { return _lineId; }
+        get 
+		{
+			if (_lineId == 0)
+			{
+				_lineId = PlayerPrefs.GetInt("lineId");
+			}
+			return _lineId; 
+		}
         set
         {
             _lineId = value;
@@ -102,7 +109,14 @@ public class GameData
     private int _machineId;		// 机台号 8位
     public int machineId
     {
-        get { return _machineId; }
+        get 
+		{
+			if (_machineId == 0)
+			{
+				_machineId = PlayerPrefs.GetInt("machineId");
+			}
+			return _machineId;
+		}
         set 
         { 
             _machineId = value;

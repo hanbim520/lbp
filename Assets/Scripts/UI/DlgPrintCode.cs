@@ -33,6 +33,11 @@ public class DlgPrintCode : MonoBehaviour
 
     private void Init()
     {
+#if UNITY_ANDROID
+		jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
+		jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
+#endif
+
         int idx = GameData.GetInstance().language;
         if (idx == 0)
         {
@@ -57,11 +62,6 @@ public class DlgPrintCode : MonoBehaviour
         if (checkCode != null)
 			txtCheckCode.text = checkCode.ToString();
         txtInput.text = txtCalcInput.text = string.Empty;
-
-#if UNITY_ANDROID
-            jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
-            jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-#endif
     }
 
     public void CalcDownEvent(Transform hitObject)
@@ -141,7 +141,7 @@ public class DlgPrintCode : MonoBehaviour
 	
 	void Update ()
     {
-        DetectInputEvents();
+//        DetectInputEvents();
 	}
     
     private void DetectInputEvents()

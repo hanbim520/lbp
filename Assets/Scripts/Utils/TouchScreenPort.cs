@@ -145,4 +145,9 @@ public class TouchScreenPort : MonoBehaviour
 			}
 		} 
 	}
+
+	public void Close()
+	{
+		androidSP.Close();
+	}
 }

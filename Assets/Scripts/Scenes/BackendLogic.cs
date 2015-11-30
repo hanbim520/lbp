@@ -89,8 +89,8 @@ public class BackendLogic : MonoBehaviour
 
     void Update()
     {
-        UpdateTimer();
         DetectInputEvents();
+        UpdateTimer();
     }
     
     private void DetectInputEvents()
@@ -298,19 +298,28 @@ public class BackendLogic : MonoBehaviour
 		GameObject go = GameObject.Find("InputDevice");
 		if (go != null)
 		{
+			SerialMousePort mouse = gameObject.GetComponent<SerialMousePort>();
+			TouchScreenPort touchScreen = gameObject.GetComponent<TouchScreenPort>();
 			if (GameData.GetInstance().inputDevice == 0)
 			{
-				if (go.GetComponent<TouchScreenPort>() == null)
-					go.AddComponent<TouchScreenPort>();
-				if (go.GetComponent<SerialMousePort>() != null)
-					Destroy(go.GetComponent<SerialMousePort>());
+				if (mouse != null)
+				{
+					mouse.Close();
+					Destroy(mouse);
+				}
+				if (touchScreen == null)
+					gameObject.AddComponent<TouchScreenPort>();
 			}
 			else
 			{
-				if (go.GetComponent<SerialMousePort>() == null)
-					go.AddComponent<SerialMousePort>();
-				if (go.GetComponent<TouchScreenPort>() != null)
-					Destroy(go.GetComponent<TouchScreenPort>());
+				
+				if (touchScreen != null)
+				{
+					touchScreen.Close();
+					Destroy(touchScreen);
+				}
+				if (mouse == null)
+					gameObject.AddComponent<SerialMousePort>();
 			}
 		}
 	}
@@ -519,6 +528,7 @@ public class BackendLogic : MonoBehaviour
 		menuSetting.SetActive(false);
 		menuAccount.SetActive(false);
 		dlgCalc.SetActive(false);
+		dlgPrintCode.SetActive(false);
 	}
 
     private void InitPasswordDlg()
@@ -706,6 +716,7 @@ public class BackendLogic : MonoBehaviour
 		{
 			if (string.Equals(txtPassword, GameData.GetInstance().accountPassword))
 			{
+				txtPassword = "";
 				InitAccount();
 			}
 			else
@@ -780,7 +791,7 @@ public class BackendLogic : MonoBehaviour
 
     private bool IsSettingDlgActived()
     {
-        return dlgPassword.activeSelf || dlgYesNO.activeSelf || dlgPrintCode.activeSelf;
+        return dlgPassword.activeSelf || dlgYesNO.activeSelf;
     }
 
     private void SaveSetting()
@@ -1019,6 +1030,7 @@ public class BackendLogic : MonoBehaviour
     private void PrintCodeFail()
     {
         Debug.Log("PrintCodeFail");
+		ShowWarning(strError[GameData.GetInstance().language], true);
     }
 
     private void ClearAccount()

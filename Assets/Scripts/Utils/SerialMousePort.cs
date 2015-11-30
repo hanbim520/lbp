@@ -22,7 +22,7 @@ public class SerialMousePort : MonoBehaviour
 	private bool isReadThreadExit = false;
     private bool blAlreadyDown = false;
     private bool rlAlreadyDown = false;
-    private float ratio = 1.2f;
+    private float ratio = 0.8f;
     private float xMax;
     private float xMin;
     private float yMax;
@@ -34,7 +34,6 @@ public class SerialMousePort : MonoBehaviour
 
 	void OnEnable()
 	{
-		print("serialmouseport onenable");
 		Init();
         RegisterEvents();
 #if UNITY_EDITOR
@@ -73,7 +72,6 @@ public class SerialMousePort : MonoBehaviour
 
 	void OnDisable()
 	{
-		print("serialmouseport disable");
         UnregisterEvents();
 #if UNITY_EDITOR
 		readThread.Abort();
@@ -120,9 +118,11 @@ public class SerialMousePort : MonoBehaviour
 		int[] data = androidSP.ReadData();
 		if (data != null && data.Length > 0 && data[0] >= 0)
 		{
+//			string log = "";
 			foreach (int d in data)
 			{
 				queueReadPool.Enqueue((byte)d);
+//				log += string.Format("{0:X}, ", (byte)d);
 			}
 //			DebugConsole.Log("FixedUpdate received:" + log);
 		}
@@ -272,12 +272,17 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 		}
 	}
 
-	void OnGUI()
+	public void Close()
 	{
-		if (GUI.Button(new Rect(200, 10, 200, 100), "Exit"))
-		{
-			Application.Quit();
-		}
+		androidSP.Close();
 	}
+
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(200, 10, 200, 100), "Exit"))
+//		{
+//			Application.Quit();
+//		}
+//	}
 
 }

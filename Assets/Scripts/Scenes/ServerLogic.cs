@@ -101,11 +101,10 @@ public class ServerLogic : GameLogic
     private IEnumerator Countdown()
     {
 		print("logic countdown");
-		if (isPause)
+		while (isPause || bFirstOpenGate)
 		{
 			yield return new WaitForSeconds(1);
 			Countdown();
-			yield break;
 		}
 		gamePhase = GamePhase.Countdown;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
@@ -215,11 +214,22 @@ public class ServerLogic : GameLogic
     private void CloseGate()
     {
 		print("CloseGate");
+		if (bFirstOpenGate)
+		{
+			StartCoroutine(WaitAfterOpenGate());
+			return;
+		}
         gamePhase = GamePhase.GameEnd;
         host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
 		ClearVariables();
 		GameEventManager.TriggerGameOver();
     }
+
+	private IEnumerator WaitAfterOpenGate()
+	{
+		yield return new WaitForSeconds(5);
+		bFirstOpenGate = false;
+	}
 
     private void ClearVariables()
     {

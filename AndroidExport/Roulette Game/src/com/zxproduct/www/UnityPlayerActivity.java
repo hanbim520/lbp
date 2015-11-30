@@ -160,7 +160,7 @@ public class UnityPlayerActivity extends Activity
 						int size = mInputStream0.read(buffer);
 						if (size > 0)
 						{
-							Log.d(TAG, "mInputStream0 size:" + size);
+//							Log.d(TAG, "mInputStream0 size:" + size);
 							BufferStruct buf = new BufferStruct();
 							buf.buffer = new int[size];
 							for (int i = 0; i < size; ++i)

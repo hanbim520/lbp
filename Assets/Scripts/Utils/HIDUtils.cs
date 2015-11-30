@@ -80,16 +80,35 @@ public class HIDUtils : MonoBehaviour
 
 	public void SetState(string value)
 	{
-		Debug.Log("SetState:" + value.ToString());
+		Debug.Log("SetState:" + value);
 		bool state;
 		if (bool.TryParse(value, out state))
 		{
 			isOpen = state;
 			if (isOpen)
-				GameEventManager.OnHIDConnected();
+			{
+				StartCoroutine(AfterConnHID());
+			}
 			else
+			{
 				GameEventManager.OnHIDDisconnected();
+			}
 		}
+	}
+
+	protected IEnumerator AfterConnHID()
+	{
+		if (GameData.GetInstance().deviceIndex <= 0)
+			yield break;
+
+		string name = GameData.GetInstance().deviceIndex == 1 ? "ServerLogic" : "ClientLogic";
+		GameObject logic = GameObject.Find(name);
+		while(logic == null)
+		{
+			logic = GameObject.Find(name);
+			yield return new WaitForSeconds(1);
+		}
+		GameEventManager.OnHIDConnected();
 	}
 
 	public void OpenUSB()
@@ -144,7 +163,7 @@ public class HIDUtils : MonoBehaviour
 
 		if (data.Length >= kReadDataLength)
 		{
-//			PrintData(ref data);
+			PrintData(ref data);
             // 机芯指令
             if (data[0] == 0x58 && data[1] == 0x57)
             {
@@ -321,7 +340,8 @@ public class HIDUtils : MonoBehaviour
 		{
 			log += string.Format("{0:X}", data[i]) + ", ";
 		}
-		DebugConsole.Log(log);
+		Debug.Log(log);
+//		DebugConsole.Log(log);
 	}
 
 	public void SendCheckInfo()
@@ -408,4 +428,12 @@ public class HIDUtils : MonoBehaviour
 			buffer[i] = (byte)data[i];
 		return WinHidPort.Write(ref buffer, len);
 	}
+
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(10, 10, 100, 50), "Touch Check"))
+//		{
+//			Application.LoadLevel("TouchCheck");
+//		}
+//	}
 }

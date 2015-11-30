@@ -17,19 +17,28 @@ public class InputDevice : MonoBehaviour
 	// 判断加载的脚本
 	private void LoadDeviceComponent()
 	{
+		SerialMousePort mouse = gameObject.GetComponent<SerialMousePort>();
+		TouchScreenPort touchScreen = gameObject.GetComponent<TouchScreenPort>();
 		if (GameData.GetInstance().inputDevice == 0)
 		{
-			if (gameObject.GetComponent<TouchScreenPort>() == null)
+			if (mouse != null)
+			{
+				mouse.Close();
+				Destroy(mouse);
+			}
+			if (touchScreen == null)
 				gameObject.AddComponent<TouchScreenPort>();
-			if (gameObject.GetComponent<SerialMousePort>() != null)
-				Destroy(gameObject.GetComponent<SerialMousePort>());
 		}
 		else
 		{
-			if (gameObject.GetComponent<SerialMousePort>() == null)
+
+			if (touchScreen != null)
+			{
+				touchScreen.Close();
+				Destroy(touchScreen);
+			}
+			if (mouse == null)
 				gameObject.AddComponent<SerialMousePort>();
-			if (gameObject.GetComponent<TouchScreenPort>() != null)
-				Destroy(gameObject.GetComponent<TouchScreenPort>());
 		}
 	}
 }
