@@ -274,7 +274,9 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 
 	public void Close()
 	{
+#if UNITY_ANDROID
 		androidSP.Close();
+#endif
 	}
 
 //	void OnGUI()

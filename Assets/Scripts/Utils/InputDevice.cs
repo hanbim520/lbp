@@ -31,7 +31,6 @@ public class InputDevice : MonoBehaviour
 		}
 		else
 		{
-
 			if (touchScreen != null)
 			{
 				touchScreen.Close();

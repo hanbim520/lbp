@@ -57,9 +57,9 @@ public class AndroidSerialPort
 
     public void Close()
     {
-        jo.Call(strCloseMethod);
         if (jo != null)
         {
+       		jo.Call(strCloseMethod);
             jo.Dispose();
             jo = null;
         }

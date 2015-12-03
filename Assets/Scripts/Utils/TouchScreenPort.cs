@@ -8,7 +8,7 @@ using System.Threading;
 
 public class TouchScreenPort : MonoBehaviour
 {
-	public string comName = "COM1";
+	public string comName = "COM4";
 	public int baudRate = 9600;
 	public Parity parityBit = Parity.None;
 	public int dataBits = 8;
@@ -20,9 +20,14 @@ public class TouchScreenPort : MonoBehaviour
 	private Thread readThread; 
 	private bool isReadThreadExit = false;
 	private string portName = "/dev/ttyS1";
-	
+	private int iCorrectNum = 0;
+	private int[] filtedArray = new int[10];
+
 	void OnEnable() 
 	{ 
+		filtedArray[0] = 0x55;
+		filtedArray[1] = 0x54;
+
 #if UNITY_EDITOR
 		// 端口名称 波特率 奇偶校验位 数据位值 停止位
 		try
@@ -75,9 +80,13 @@ public class TouchScreenPort : MonoBehaviour
 #endif
 	}
 
-	void FixedUpdate()
+	void Update()
 	{
 		DealReceivedData();
+#if UNITY_ANDROID
+		int[] data = androidSP.ReadData();
+		FilterData(ref data);
+#endif
 	}
 	
 	private void ReceiveData() 
@@ -103,7 +112,7 @@ public class TouchScreenPort : MonoBehaviour
 
 	private void DealReceivedData() 
 	{ 
-		if (queueReadPool.Count >= 10) 
+		while (queueReadPool.Count >= 10) 
 		{ 
 			byte data = queueReadPool.Dequeue(); 
 			if (data == 0x55)
@@ -112,6 +121,9 @@ public class TouchScreenPort : MonoBehaviour
 				if (next == 0x54)
 				{
 					byte flag = queueReadPool.Dequeue();
+					// 过滤0x82悬停的部分
+					if (flag == 0x82)
+						continue;
 					UInt16 x = 0;
 					UInt16 y = 0;
 					for (int i = 0; i < 2; ++i)
@@ -134,7 +146,7 @@ public class TouchScreenPort : MonoBehaviour
 							y = BitConverter.ToUInt16(element, 0);
 						}
 					}
-//						Debug.Log("x:" + x + ", y:" +y);
+//					Debug.Log("x:" + x + ", y:" +y);
 					if (flag == 0x81)
 						GameEventManager.OnFingerDown(x, y);
 					else if (flag == 0x82)
@@ -148,6 +160,46 @@ public class TouchScreenPort : MonoBehaviour
 
 	public void Close()
 	{
+#if UNITY_ANDROID
 		androidSP.Close();
+#endif
+	}
+
+	protected void FilterData(ref int[] data)
+	{
+		if (data != null && data.Length > 0 && data[0] >= 0)
+		{
+			for (int i = 0; i < data.Length; ++i)
+			{
+				if (data[i] == 0x82)
+				{
+					iCorrectNum = 0;
+					continue;
+				}
+				if (data[i] == 0x55 && iCorrectNum == 0)
+					iCorrectNum = 1;
+				else if (data[i] == 0x54 && iCorrectNum == 1)
+					iCorrectNum = 2;
+				else if (data[i] != 0x82 && iCorrectNum == 2)
+					iCorrectNum = 3;
+				if (iCorrectNum >= 3 && iCorrectNum <= 10)
+				{
+					filtedArray[iCorrectNum - 1] = data[i];
+					++iCorrectNum;
+				}
+
+				if (iCorrectNum > 10)
+				{
+					iCorrectNum = 0;
+//					string log = "";
+					foreach (int d in filtedArray)
+					{
+						queueReadPool.Enqueue((byte)d);
+//						log += string.Format("{0:X}, ", (byte)d);
+					}
+//					DebugConsole.Log("FilterData received:" + log);
+				}
+			}
+		}
 	}
 }

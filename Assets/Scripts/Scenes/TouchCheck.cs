@@ -35,6 +35,7 @@ public class TouchCheck : MonoBehaviour
 		txtFailure.SetActive(false);
 		txtSuccess.SetActive(false);
 		cross.SetActive(true);
+		LoadInputDevice();
 		RegisterEvents();
 	}
 
@@ -234,5 +235,30 @@ public class TouchCheck : MonoBehaviour
 		GameData.GetInstance().TD = (float)td;
 		GameData.GetInstance().TE = (float)te;
 		GameData.GetInstance().TF = (float)tf;
+	}
+
+	private void LoadInputDevice()
+	{
+		GameObject inputDevice = GameObject.Find("InputDevice");
+		if (inputDevice == null)
+		{
+			UnityEngine.Object prefab = (UnityEngine.Object)Resources.Load("Input/InputDevice");
+			GameObject go = (GameObject)Instantiate(prefab);
+			go.name = "InputDevice";
+			go.AddComponent<TouchScreenPort>();
+			prefab = null;
+		}
+		else
+		{
+			SerialMousePort mouse = inputDevice.GetComponent<SerialMousePort>();
+			TouchScreenPort touchScreen = inputDevice.GetComponent<TouchScreenPort>();
+			if (mouse != null)
+			{
+				mouse.Close();
+				Destroy(mouse);
+			}
+			if (touchScreen == null)
+				inputDevice.AddComponent<TouchScreenPort>();
+		}
 	}
 }

@@ -646,67 +646,74 @@ public class MainUILogic : MonoBehaviour
 
 	public void FieldClickEvent(Transform hitObject)
 	{
-		if (eraser.activeSelf)
+		try
 		{
-			Destroy(fieldChipsRoot.transform.FindChild(hitObject.name).gameObject);
-			GameEventManager.OnClear(hitObject.name);
-			eraser.SetActive(false);
-			mouseIcon.gameObject.SetActive(true);
-			return;
+			if (eraser.activeSelf)
+			{
+				Destroy(fieldChipsRoot.transform.FindChild(hitObject.name).gameObject);
+				GameEventManager.OnClear(hitObject.name);
+				eraser.SetActive(false);
+				mouseIcon.gameObject.SetActive(true);
+				return;
+			}
+			
+			// Clear light effects
+			foreach (Transform t in lightEffects)
+			{
+				Color c = t.GetComponent<Image>().color;
+				c.a = 0;
+				t.GetComponent<Image>().color = c;
+			}
+			lightEffects.Clear();
+			
+			if (curChipIdx == -1 || 
+			    gameLogic.LogicPhase != GamePhase.Countdown ||
+			    GameData.GetInstance().IsCardMode == CardMode.Ready ||
+			    gameLogic.IsLock)
+				return;
+			
+			string strField = hitObject.name;
+			int bet = GameData.GetInstance().betChipValues[curChipIdx];
+			// Ellipse
+			if (string.Equals(strField.Substring(0, 1), "e"))
+			{
+				strField = strField.Substring(1);
+			}
+			bet = GameEventManager.OnFieldClick(strField, bet);
+			// Play sfx
+			char[] splits = {'-'};
+			string[] words = strField.Split(splits);
+			int num;
+			if (words.Length == 1 && int.TryParse(words[0], out num))
+				AudioController.Play(words[0]);
+			
+			if (bet <= 0)
+				return;
+			
+			string prefabPath = "BigChip/BC";
+			if (string.Equals(hitObject.parent.name, "Valid Fields") && 
+			    string.Equals(hitObject.parent.parent.name, "Ellipse"))
+				prefabPath = "SmallChip/SC";
+			Object prefab = (Object)Resources.Load(prefabPath + curChipIdx);
+			GameObject chip = (GameObject)Instantiate(prefab);
+			chip.transform.SetParent(fieldChipsRoot.transform);
+			chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
+			chip.transform.localScale = Vector3.one;
+			chip.name = hitObject.name + " temp";
+			prefab = null;
+			
+			chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
+			
+			Vector3 targetPos = new Vector3(hitObject.localPosition.x * hitObject.parent.localScale.x,
+			                                hitObject.localPosition.y * hitObject.parent.localScale.y,
+			                                0);
+			iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
+			                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
 		}
-
-		// Clear light effects
-		foreach (Transform t in lightEffects)
+		catch(System.Exception ex)
 		{
-			Color c = t.GetComponent<Image>().color;
-			c.a = 0;
-			t.GetComponent<Image>().color = c;
+			Debug.Log(ex.ToString());
 		}
-		lightEffects.Clear();
-
-		if (curChipIdx == -1 || 
-		    gameLogic.LogicPhase != GamePhase.Countdown ||
-		    GameData.GetInstance().IsCardMode == CardMode.Ready ||
-		    gameLogic.IsLock)
-			return;
-
-        string strField = hitObject.name;
-		int bet = GameData.GetInstance().betChipValues[curChipIdx];
-        // Ellipse
-        if (string.Equals(strField.Substring(0, 1), "e"))
-        {
-            strField = strField.Substring(1);
-        }
-		bet = GameEventManager.OnFieldClick(strField, bet);
-		// Play sfx
-		char[] splits = {'-'};
-		string[] words = strField.Split(splits);
-		int num;
-		if (words.Length == 1 && int.TryParse(words[0], out num))
-			AudioController.Play(words[0]);
-
-		if (bet <= 0)
-			return;
-
-		string prefabPath = "BigChip/BC";
-        if (string.Equals(hitObject.parent.name, "Valid Fields") && 
-            string.Equals(hitObject.parent.parent.name, "Ellipse"))
-			prefabPath = "SmallChip/SC";
-		Object prefab = (Object)Resources.Load(prefabPath + curChipIdx);
-		GameObject chip = (GameObject)Instantiate(prefab);
-		chip.transform.SetParent(fieldChipsRoot.transform);
-		chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
-		chip.transform.localScale = Vector3.one;
-		chip.name = hitObject.name + " temp";
-		prefab = null;
-
-		chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
-
-		Vector3 targetPos = new Vector3(hitObject.localPosition.x * hitObject.parent.localScale.x,
-		                                hitObject.localPosition.y * hitObject.parent.localScale.y,
-		                                0);
-		iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
-		                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
 	}
 
 	private void FieldChipMoveComplete(string param)

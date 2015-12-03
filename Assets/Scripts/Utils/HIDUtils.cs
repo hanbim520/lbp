@@ -152,7 +152,7 @@ public class HIDUtils : MonoBehaviour
 #if UNITY_ANDROID
 		int[] data = ReadData("readHID");
 #endif
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 		int[] data = WinUsbPortRead();
 //		PrintData(ref data);
 #endif
@@ -163,7 +163,7 @@ public class HIDUtils : MonoBehaviour
 
 		if (data.Length >= kReadDataLength)
 		{
-			PrintData(ref data);
+//			PrintData(ref data);
             // 机芯指令
             if (data[0] == 0x58 && data[1] == 0x57)
             {
@@ -253,7 +253,7 @@ public class HIDUtils : MonoBehaviour
 				string result = AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah);
 #endif
 
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 				string result = "";
 #endif
 				char[] split = {':'};
@@ -429,11 +429,11 @@ public class HIDUtils : MonoBehaviour
 		return WinHidPort.Write(ref buffer, len);
 	}
 
-//	void OnGUI()
-//	{
-//		if (GUI.Button(new Rect(10, 10, 100, 50), "Touch Check"))
-//		{
-//			Application.LoadLevel("TouchCheck");
-//		}
-//	}
+	void OnGUI()
+	{
+		if (GUI.Button(new Rect(10, 10, 100, 50), "Touch Check"))
+		{
+			Application.LoadLevel("TouchCheck");
+		}
+	}
 }

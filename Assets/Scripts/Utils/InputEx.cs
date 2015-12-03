@@ -11,9 +11,9 @@ public class InputEx : MonoBehaviour
 	private static Queue<InputInfo> mouseUp;
 	private static Queue<InputInfo> mouseDown;
 
-	private const int kMaxPointNumber = 5;
-	private const float kDeleteTouchTime = 0.03f;
-	private const float kDeleteMouseTime = 0.03f;
+	private const int kMaxPointNumber = 20;
+	private const float kDeleteTouchTime = 0.05f;
+	private const float kDeleteMouseTime = 0.05f;
 
 	void Start()
 	{
@@ -143,6 +143,7 @@ public class InputEx : MonoBehaviour
 		info.time = Time.realtimeSinceStartup;
 		info.state = 0;
 		touchUp.Enqueue(info);
+//		Debug.Log("FingerUp x:" + x + ", y:" + y);
 	}
 
 	private void FingerDown(UInt16 x, UInt16 y)
@@ -157,6 +158,7 @@ public class InputEx : MonoBehaviour
 		info.time = Time.realtimeSinceStartup;
 		info.state = 1;
 		touchDown.Enqueue(info);
+//		Debug.Log("FingerDown x:" + x + ", y:" + y);
 	}
 
 	public static bool GetMouseUp()
@@ -226,6 +228,7 @@ public class InputEx : MonoBehaviour
 		float lcdx, lcdy;
 		Utils.TouchScreenToLCD(pos.x, pos.y, out lcdx, out lcdy);
 		touchPosition = new Vector2(lcdx, lcdy);
+//		Debug.Log("TouchUpPosition x:" + touchPosition.x + ", y:" + touchPosition.y);
 	}
 
 	public static void TouchDownPosition(out Vector2 touchPosition)
@@ -240,6 +243,7 @@ public class InputEx : MonoBehaviour
 		float lcdx, lcdy;
 		Utils.TouchScreenToLCD(pos.x, pos.y, out lcdx, out lcdy);
 		touchPosition = new Vector2(lcdx, lcdy);
+//		Debug.Log("TouchDownPosition x:" + touchPosition.x + ", y:" + touchPosition.y);
 	}
 
 	public static void InputUpPosition(out Vector2 inputPosition)

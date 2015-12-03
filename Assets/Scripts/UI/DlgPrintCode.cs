@@ -198,7 +198,7 @@ public class DlgPrintCode : MonoBehaviour
 		string strCrc = jo.Call<string>("GetPWCheckValue4", (long)lineId, (long)machineId, (long)totalWin, (long)currentWin, (long)printTimes);
 #endif
 
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 		string strCrc = "";
 #endif
 		int value;
@@ -218,7 +218,7 @@ public class DlgPrintCode : MonoBehaviour
 		byte[] buf = AndroidJNIHelper.ConvertFromJNIArray<byte[]>(rev.GetRawObject());
 #endif
 
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 		byte[] buf = new byte[61];
 #endif
 
