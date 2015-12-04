@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1448962152 source:/home/cx/workplace/projects/EncryChip/main.cpp
+
+1449208800 source:/home/cx/workplace/projects/EncryChip/encrychip.cpp
+	<stdio.h>
+	<string.h>
+	<math.h>
+	<sys/time.h>
+

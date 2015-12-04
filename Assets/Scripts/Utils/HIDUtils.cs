@@ -6,6 +6,9 @@ using System.Runtime.InteropServices;
 
 public class HIDUtils : MonoBehaviour
 {
+	private int vid = 0x0483;
+	private int pid = 0x5750;
+
 	public const int kPhaseStartBlowBall = 1;
 	public const int kPhaseEndBlowBall = 2;
 	public const int kPhaseOpenGate = 3;
@@ -120,6 +123,10 @@ public class HIDUtils : MonoBehaviour
 #if UNITY_STANDALONE_WIN
 		WinUsbPortOpen();
 #endif
+
+#if UNITY_STANDALONE_LINUX
+		LinuxUsbPortOpen();
+#endif
 	}
 
 	public void CloseUSB()
@@ -130,6 +137,10 @@ public class HIDUtils : MonoBehaviour
 
 #if UNITY_STANDALONE_WIN
 		WinUsbPortClose();
+#endif
+
+#if UNITY_STANDALONE_LINUX
+		LinuxUsbPortClose();
 #endif
 	}
 
@@ -152,9 +163,13 @@ public class HIDUtils : MonoBehaviour
 #if UNITY_ANDROID
 		int[] data = ReadData("readHID");
 #endif
-#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
+#if UNITY_STANDALONE_WIN
 		int[] data = WinUsbPortRead();
 //		PrintData(ref data);
+#endif
+
+#if UNITY_STANDALONE_LINUX
+		int[] data = LinuxUsbPortRead();
 #endif
 		if (data == null || data[0] == -1)
 		{ 
@@ -292,7 +307,12 @@ public class HIDUtils : MonoBehaviour
 #endif
 
 #if UNITY_STANDALONE_WIN
-		print("write:" + WinUsbPortWrite(data));
+//		print("write:" + WinUsbPortWrite(data));
+		return WinUsbPortWrite(data);
+#endif
+
+#if UNITY_STANDALONE_LINUX
+		return LinuxUsbPortWrite(data);
 #endif
 
 		return -1;
@@ -400,8 +420,6 @@ public class HIDUtils : MonoBehaviour
 
 	private int WinUsbPortOpen()
 	{
-		int vid = 0x0483;
-		int pid = 0x5750;
 		return WinHidPort.OpenHid(vid, pid);
 	}
 
@@ -427,6 +445,35 @@ public class HIDUtils : MonoBehaviour
 		for (int i = 0; i < len; ++i)
 			buffer[i] = (byte)data[i];
 		return WinHidPort.Write(ref buffer, len);
+	}
+
+	private int LinuxUsbPortOpen()
+	{
+		return LinuxHidPort.Open(vid, pid);
+	}
+
+	private void LinuxUsbPortClose()
+	{
+		LinuxHidPort.Close();
+	}
+
+	private int[] LinuxUsbPortRead()
+	{
+		byte[] data = LinuxHidPort.Read();
+		int len = data.Length;
+		int[] array = new int[len];
+		for (int i = 0; i < len; ++i)
+			array[i] = data[i];
+		return array;
+	}
+
+	private int LinuxUsbPortWrite(int[] data)
+	{
+		int len = data.Length - 3;
+		byte[] buffer = new byte[len];
+		for (int i = 0; i < len; ++i)
+			buffer[i] = (byte)data[i];
+		return LinuxHidPort.Write(ref buffer, len);
 	}
 
 	void OnGUI()
