@@ -5,16 +5,6 @@ using System.Runtime.InteropServices;
 
 public static class WinHidPort
 {
-	// 传给金手指的数据，先通过它来加密。
-	[DllImport ("EncryChip")]  
-	private extern static int EncryptIOData(byte[] input, ushort inputSize, out IntPtr output);
-	// 解密从金手指传回来的数据
-	[DllImport ("EncryChip")]  
-	private extern static int DecryptIOData(byte[] input, ushort inputSize, out IntPtr output);
-	// 释放byte数组指针
-	[DllImport ("EncryChip")]  
-	private extern static void FreeByteArray(IntPtr array);
-
 	[DllImport ("UsbWrapper")]  
 	public extern static int OpenHid(int vid, int pid);
 	[DllImport ("UsbWrapper")]  
@@ -73,18 +63,18 @@ public static class WinHidPort
 	public static int EncryptInputData(byte[] source, int sourceSize, ref byte[] dest)
 	{
 		IntPtr outputPtr;
-		int ret = EncryptIOData(source, (ushort)sourceSize, out outputPtr);
+		int ret = EncryChip.EncryptIOData(source, (ushort)sourceSize, out outputPtr);
 		Marshal.Copy(outputPtr, dest, 0, dest.Length);
-		FreeByteArray(outputPtr);
+		EncryChip.FreeByteArray(outputPtr);
 		return ret;
 	}
 
 	public static int DecryptOutputData(byte[] source, int sourceSize, ref byte[] dest)
 	{
 		IntPtr outputPtr;
-		int ret = DecryptIOData(source, (ushort)sourceSize, out outputPtr);
+		int ret = EncryChip.DecryptIOData(source, (ushort)sourceSize, out outputPtr);
 		Marshal.Copy(outputPtr, dest, 0, dest.Length);
-		FreeByteArray(outputPtr);
+		EncryChip.FreeByteArray(outputPtr);
 		return ret;
 	}
 }

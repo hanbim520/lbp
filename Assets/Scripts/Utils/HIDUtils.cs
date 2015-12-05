@@ -76,7 +76,7 @@ public class HIDUtils : MonoBehaviour
 			jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
 #endif
 		
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 			OpenUSB();
 #endif
 	}
@@ -117,7 +117,11 @@ public class HIDUtils : MonoBehaviour
 	public void OpenUSB()
 	{
 #if UNITY_ANDROID
-		jo.Call("openUsb");
+		int ret = jo.Call("openUsb");
+		if (ret > 0)
+		{
+			SetState("True");
+		}
 #endif
 
 #if UNITY_STANDALONE_WIN
@@ -125,7 +129,12 @@ public class HIDUtils : MonoBehaviour
 #endif
 
 #if UNITY_STANDALONE_LINUX
-		LinuxUsbPortOpen();
+		int ret = LinuxUsbPortOpen();
+		Debug.Log("LinuxUsbPortOpen: " + ret);
+		if (ret > 0)
+		{
+			SetState("True");
+		}
 #endif
 	}
 
@@ -163,12 +172,18 @@ public class HIDUtils : MonoBehaviour
 #if UNITY_ANDROID
 		int[] data = ReadData("readHID");
 #endif
+
 #if UNITY_STANDALONE_WIN
+		if (!isOpen)
+			return;
+
 		int[] data = WinUsbPortRead();
-//		PrintData(ref data);
 #endif
 
 #if UNITY_STANDALONE_LINUX
+		if (!isOpen)
+			return;
+
 		int[] data = LinuxUsbPortRead();
 #endif
 		if (data == null || data[0] == -1)
@@ -178,7 +193,7 @@ public class HIDUtils : MonoBehaviour
 
 		if (data.Length >= kReadDataLength)
 		{
-//			PrintData(ref data);
+			PrintData(ref data);
             // 机芯指令
             if (data[0] == 0x58 && data[1] == 0x57)
             {
@@ -291,7 +306,7 @@ public class HIDUtils : MonoBehaviour
 		}
 		else
 		{
-//			PrintData(ref data);
+			PrintData(ref data);
 		}
 	}
 
@@ -308,14 +323,16 @@ public class HIDUtils : MonoBehaviour
 
 #if UNITY_STANDALONE_WIN
 //		print("write:" + WinUsbPortWrite(data));
+		if (!isOpen)
+			return;
 		return WinUsbPortWrite(data);
 #endif
 
 #if UNITY_STANDALONE_LINUX
+		if (!isOpen)
+			return -1;
 		return LinuxUsbPortWrite(data);
 #endif
-
-		return -1;
 	}
 
 	public void OpenGate()
@@ -476,11 +493,11 @@ public class HIDUtils : MonoBehaviour
 		return LinuxHidPort.Write(ref buffer, len);
 	}
 
-	void OnGUI()
-	{
-		if (GUI.Button(new Rect(10, 10, 100, 50), "Touch Check"))
-		{
-			Application.LoadLevel("TouchCheck");
-		}
-	}
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(10, 10, 100, 50), "Touch Check"))
+//		{
+//			Application.LoadLevel("TouchCheck");
+//		}
+//	}
 }
