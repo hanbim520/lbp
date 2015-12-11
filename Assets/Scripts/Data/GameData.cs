@@ -30,9 +30,13 @@ public class GameData
 	public int couponsKeyinRatio;	// 1%~100%
 	public int couponsKeoutRatio;	
 	public int maxNumberOfFields; 	// 37 or 38
-	public int beginSessions;	// 起始场次
+	public int beginSessions;		// 起始场次
 	public int maxNumberOfChips;	// 1 ~ 6
-	
+	public int lotteryCondition;	// 彩金条件(1-10000)
+	public int lotteryBase;			// 起始彩金(0-100000)
+	public int lotteryRate;			// 彩金累计千分比(1-100)
+	public int lotteryAllocation; 	// 彩金分配(可设置范围0-100)
+
     // Account
     public int zongShang;	// 总上分
     public int zongXia;		// 总下分
@@ -281,6 +285,10 @@ public class GameData
 		PlayerPrefs.SetInt("couponsKeyinRatio", couponsKeyinRatio);
 		PlayerPrefs.SetInt("couponsKeoutRatio", couponsKeoutRatio);
 		PlayerPrefs.SetInt("beginSessions", beginSessions);
+		PlayerPrefs.SetInt("lotteryCondition", lotteryCondition);
+		PlayerPrefs.SetInt("lotteryBase", lotteryBase);
+		PlayerPrefs.SetInt("lotteryRate", lotteryRate);
+		PlayerPrefs.SetInt("lotteryAllocation", lotteryAllocation);
         PlayerPrefs.Save();
     }
 
@@ -308,6 +316,11 @@ public class GameData
 		couponsStart = 100;
 		couponsKeyinRatio = 10;	// 1%~100%
 		couponsKeoutRatio = 4;	
+		beginSessions = 100;
+		lotteryCondition = 1000;
+		lotteryBase = 1000;
+		lotteryRate = 10;
+		lotteryAllocation = 40;
     }
 
 	public void DefaultCustom()
@@ -416,6 +429,10 @@ public class GameData
 			couponsKeoutRatio = PlayerPrefs.GetInt("couponsKeoutRatio");
 			beginSessions = PlayerPrefs.GetInt("beginSessions");
 			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
+			lotteryCondition = PlayerPrefs.GetInt("lotteryCondition");
+			lotteryBase = PlayerPrefs.GetInt("lotteryBase");
+			lotteryRate = PlayerPrefs.GetInt("lotteryRate");
+			lotteryAllocation = PlayerPrefs.GetInt("lotteryAllocation");
 
             // Check account menu 
             zongShang = CryptoPrefs.GetInt("zongShang");

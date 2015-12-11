@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 public class HIDUtils : MonoBehaviour
 {
@@ -18,6 +19,10 @@ public class HIDUtils : MonoBehaviour
 #if UNITY_ANDROID
 	private AndroidJavaClass jc;
 	private AndroidJavaObject jo;
+#endif
+#if UNITY_STANDALONE_LINUX
+	private Queue<int> readQueue = new Queue<int>();
+	private bool isReadThreadExit = false;
 #endif
 	// In seconds
 	private const float getDataTime = 0.1f;
@@ -134,6 +139,9 @@ public class HIDUtils : MonoBehaviour
 		if (ret > 0)
 		{
 			SetState("True");
+			isReadThreadExit = false;
+			Thread tRead = new Thread(LinuxQueueStore);
+			tRead.Start();
 		}
 #endif
 	}
@@ -149,6 +157,7 @@ public class HIDUtils : MonoBehaviour
 #endif
 
 #if UNITY_STANDALONE_LINUX
+		isReadThreadExit = true;
 		LinuxUsbPortClose();
 #endif
 	}
@@ -184,7 +193,7 @@ public class HIDUtils : MonoBehaviour
 		if (!isOpen)
 			return;
 
-		int[] data = LinuxUsbPortRead();
+		int[] data = LinuxQueueRead();
 #endif
 		if (data == null || data[0] == -1)
 		{ 
@@ -438,6 +447,41 @@ public class HIDUtils : MonoBehaviour
 	private int WinUsbPortOpen()
 	{
 		return WinHidPort.OpenHid(vid, pid);
+	}
+
+	private void LinuxQueueStore()
+	{
+#if UNITY_STANDALONE_LINUX
+		try
+		{
+			while(!isReadThreadExit)
+			{
+				int[] data = LinuxUsbPortRead();
+				if (data == null || data[0] == -1)
+					continue;
+				foreach (int d in data)
+					readQueue.Enqueue(d);
+			}
+		}
+		catch(Exception ex)
+		{
+			Debug.Log(ex.ToString());
+		}
+#endif
+	}
+
+	private int[] LinuxQueueRead()
+	{
+#if UNITY_STANDALONE_LINUX
+		if (readQueue.Count > 0)
+		{
+			int[] data = readQueue.ToArray();
+			readQueue.Clear();
+			return data;
+		}
+		else
+			return null;
+#endif
 	}
 
 	private void WinUsbPortClose()
