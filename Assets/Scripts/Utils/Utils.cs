@@ -306,4 +306,15 @@ public static class Utils
 			baseNum *= ((int)b + 1);  
 		return string.Format("{0:x}", baseNum - System.DateTime.Now.Ticks);  
 	} 
+
+	/// <summary>
+	/// 求num在n位上的数字,取个位,取十位
+	/// </summary>
+	/// <param name="num">正整数</param>
+	/// <param name="n">所求数字位置(个位 1,十位 2 依此类推)</param>
+	public static int FindNum(int num, int n)
+	{
+		int power = (int)Math.Pow(10, n);
+		return (num - num / power * power) * 10 / power;
+	}
 }

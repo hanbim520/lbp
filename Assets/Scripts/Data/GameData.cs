@@ -154,6 +154,7 @@ public class GameData
     public string accountPassword;
     public int passwordLength = 6;
 	public int inputDevice;			// 0:touch screen 1:serial mouse
+	public int lotteryDigit;		// 累计彩金
 
     // 记录最近10场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
@@ -331,6 +332,7 @@ public class GameData
 		accountPassword = "888888";
 		isCardMode = CardMode.NO;
 		inputDevice = 0;
+		lotteryDigit = 1000;
 	}
 
 	public void SaveCustom()
@@ -341,6 +343,7 @@ public class GameData
 		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.SetInt("isCardMode", isCardMode);
 		PlayerPrefs.SetInt("inputDevice", inputDevice);
+		CryptoPrefs.SetInt("lotteryDigit", lotteryDigit);
 		PlayerPrefs.Save();
 	}
 
@@ -455,6 +458,7 @@ public class GameData
 			accountPassword = CryptoPrefs.GetString("accountPassword");
 			isCardMode = PlayerPrefs.GetInt("isCardMode");
 			inputDevice = PlayerPrefs.GetInt("inputDevice");
+			lotteryDigit = CryptoPrefs.GetInt("lotteryDigit");
         }
         ReadTouchMatrix();
         ReadRecords();
@@ -622,6 +626,12 @@ public class GameData
 	{
 		PlayerPrefs.SetInt("deviceIndex", deviceIndex);
 		PlayerPrefs.Save();
+	}
+
+	public void SaveLotteryDigit()
+	{
+		CryptoPrefs.SetInt("lotteryDigit", lotteryDigit);
+		CryptoPrefs.Save();
 	}
 
 	public void AppendKeyinKeoutRecords(int keyin, int keout, int receiveCoin, int payCoin, int card)

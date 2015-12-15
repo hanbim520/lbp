@@ -17,6 +17,7 @@ public static class GameEventManager
 	public delegate void PayCoinEvent(int count);
     public delegate void NetworkReadyEvent(bool value);
     public delegate void ChangeSceneEvent(string sceneName);
+	public delegate void LotteryChangeEvent(int digit);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
@@ -37,6 +38,7 @@ public static class GameEventManager
     public static event ChangeSceneEvent ChangeScene;
 	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
 	public static event GameEvent ClientDisconnect;	// 分机通讯断开
+	public static event LotteryChangeEvent LotteryChange;
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
@@ -225,5 +227,10 @@ public static class GameEventManager
 	public static void OnOpenKey()
 	{
 		if (OpenKey != null) OpenKey();
+	}
+
+	public static void OnLotteryChange(int value)
+	{
+		if (LotteryChange != null) LotteryChange(value); 
 	}
 }
