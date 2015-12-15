@@ -333,7 +333,7 @@ public class HIDUtils : MonoBehaviour
 #if UNITY_STANDALONE_WIN
 //		print("write:" + WinUsbPortWrite(data));
 		if (!isOpen)
-			return;
+			return 0;
 		return WinUsbPortWrite(data);
 #endif
 
@@ -470,9 +470,10 @@ public class HIDUtils : MonoBehaviour
 #endif
 	}
 
+#if UNITY_STANDALONE_LINUX
 	private int[] LinuxQueueRead()
 	{
-#if UNITY_STANDALONE_LINUX
+
 		if (readQueue.Count > 0)
 		{
 			int[] data = readQueue.ToArray();
@@ -481,8 +482,8 @@ public class HIDUtils : MonoBehaviour
 		}
 		else
 			return null;
-#endif
 	}
+#endif
 
 	private void WinUsbPortClose()
 	{

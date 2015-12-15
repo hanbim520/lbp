@@ -9,6 +9,7 @@ public class RecordCircle : MonoBehaviour
 	public Sprite[] bgs;
 	private Image[] triangles;
 	private Image bgBall;
+	private Text txtNum;
 
 	void Start()
 	{
@@ -30,6 +31,7 @@ public class RecordCircle : MonoBehaviour
 			triangles[i] = transform.FindChild("T" + i).GetComponent<Image>();
 		}
 		bgBall = transform.FindChild("Bg").GetComponent<Image>();
+		txtNum = transform.FindChild("Text").GetComponent<Text>();
 	}
 
 	private void HandleRefreshRecord(int result = -1)
@@ -54,11 +56,11 @@ public class RecordCircle : MonoBehaviour
 		}
 		foreach (var item in dict)
 		{
-			triangles[item.Key].fillAmount = (float)item.Value / sum;
+			triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
 			if (triangles[item.Key].fillAmount >= 0.5f)
 				triangles[item.Key].color = Color.green;
 			else if (triangles[item.Key].fillAmount < 0.5f && triangles[item.Key].fillAmount >= 0.2f)
-				triangles[item.Key].color = new Color(150f, 150f, 255f);
+				triangles[item.Key].color = Color.cyan;
 			else if (triangles[item.Key].fillAmount < 0.2f)
 				triangles[item.Key].color = Color.red;
 		}
@@ -69,5 +71,6 @@ public class RecordCircle : MonoBehaviour
 			bgBall.overrideSprite = bgs[1];
 		else
 			bgBall.overrideSprite = bgs[2];
+		txtNum.text = currentValue.ToString();
 	}
 }
