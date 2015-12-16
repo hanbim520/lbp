@@ -946,6 +946,9 @@ public class MainUILogic : MonoBehaviour
 		{
 			string name = flashObject.name;
 			Destroy(flashObject.GetComponent<FlashImage>());
+			Color c = flashObject.GetComponent<Image>().color;
+			c.a = 0;
+			flashObject.GetComponent<Image>().color = c;
 			if (string.Equals(name.Substring(0, 1), "e"))
 			{
 				int value;
