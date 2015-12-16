@@ -58,11 +58,11 @@ public class RecordCircle : MonoBehaviour
 		{
 			triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
 			if (triangles[item.Key].fillAmount >= 0.5f)
-				triangles[item.Key].color = Color.green;
+				triangles[item.Key].color = new Color(0.812f, 0.992f, 0.078f);
 			else if (triangles[item.Key].fillAmount < 0.5f && triangles[item.Key].fillAmount >= 0.2f)
-				triangles[item.Key].color = Color.cyan;
+				triangles[item.Key].color = new Color(1f, 0.690f, 0.125f);
 			else if (triangles[item.Key].fillAmount < 0.2f)
-				triangles[item.Key].color = Color.red;
+				triangles[item.Key].color = new Color(0.992f, 0.322f, 0.110f);
 		}
 		int currentValue = records[count - 1];
 		if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)

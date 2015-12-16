@@ -180,17 +180,18 @@ public class MainUILogic : MonoBehaviour
 			if (displayEllipse == null) displayEllipse = GameObject.Find("Canvas/38 Fields/Ellipse");
 		}
 
-		if (GameData.GetInstance().displayType == 0)	// classic
+		if (GameData.GetInstance().displayType == 0)	// 显示classic
 		{
 			if (displayClassic != null) displayClassic.SetActive(true);
 			if (displayEllipse != null) displayEllipse.SetActive(false);
 		}
-		else if (GameData.GetInstance().displayType == 1)	// ellipse
+		else if (GameData.GetInstance().displayType == 1)	// 显示ellipse
 		{
 			if (displayClassic != null) displayClassic.SetActive(false);
 			if (displayEllipse != null) displayEllipse.SetActive(true);
 		}
 
+		// 还原压分区筹码
 		if (fieldChipsRoot.transform.childCount > 0)
 		{
 			int childCount = fieldChipsRoot.transform.childCount;
@@ -212,6 +213,7 @@ public class MainUILogic : MonoBehaviour
 			foreach (Transform t in fieldChipsRoot.transform)
 				Destroy(t.gameObject);
 
+			// 还原经典压分区筹码
 			if (displayClassic.activeSelf)
 			{
 				string rootPath = "Canvas/38 Fields/Classic/Valid Fields";
@@ -243,7 +245,8 @@ public class MainUILogic : MonoBehaviour
 					}
 				}
 			}
-			else
+			// 还原椭圆压分区筹码
+			else 
 			{
 				string vfRootPath = "Canvas/38 Fields/Ellipse/Valid Fields";
 				string ceRootPath = "Canvas/38 Fields/Ellipse/Choose Effect";
@@ -259,34 +262,45 @@ public class MainUILogic : MonoBehaviour
 				{
 					foreach (KeyValuePair<string, int> item in betFields)
 					{
-						string prefabPath = "SmallChip/SC" + curChipIdx;
-						Transform target;
+						List<string> prefabPath = new List<string>();
+						prefabPath.Add("SmallChip/SC" + curChipIdx.ToString());
+						List<Transform> target = new List<Transform>();
 						int fieldName;
-						string name = item.Key;
+						List<string> name = new List<string>();
+						name.Add(item.Key);
+
+						// 设置小筹码
+						Transform tmpTarget = vfRoot.transform.FindChild(item.Key);
+						if (tmpTarget != null)
+							target.Add(tmpTarget);
+
+						// 设置大筹码
 						if (int.TryParse(item.Key, out fieldName) || string.Equals(item.Key, "00"))
 						{
-							prefabPath = "BigChip/BC" + curChipIdx;
-							name = "e" + name;
-							target = ceRoot.transform.FindChild(name);
-						}
-						else
-						{
-							target = vfRoot.transform.FindChild(item.Key);
+							prefabPath.Add("BigChip/BC" + curChipIdx.ToString());
+							string eName = "e" + item.Key;
+							name.Add(eName);
+							tmpTarget = ceRoot.transform.FindChild(eName);
+							if (tmpTarget != null)
+								target.Add(tmpTarget);
 						}
 
-						if (target != null)
+						if (target.Count > 0)
 						{
-							Object prefab = (Object)Resources.Load(prefabPath);
-							GameObject chip = (GameObject)Instantiate(prefab);
-							chip.transform.SetParent(fieldChipsRoot.transform);
-							chip.transform.localScale = Vector3.one;
-							prefab = null;
-							Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
-							                                target.localPosition.y * target.parent.localScale.y,
-							                                0);
-							chip.transform.localPosition = targetPos;
-							chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
-							chip.name = name;
+							for (int i = 0; i < prefabPath.Count; ++i)
+							{
+								Object prefab = (Object)Resources.Load(prefabPath[i]);
+								GameObject chip = (GameObject)Instantiate(prefab);
+								chip.transform.SetParent(fieldChipsRoot.transform);
+								chip.transform.localScale = Vector3.one;
+								prefab = null;
+								Vector3 targetPos = new Vector3(target[i].localPosition.x * target[i].parent.localScale.x,
+								                                target[i].localPosition.y * target[i].parent.localScale.y,
+								                                0);
+								chip.transform.localPosition = targetPos;
+								chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
+								chip.name = name[i];
+							}
 						}
 					}
 				}
@@ -337,15 +351,17 @@ public class MainUILogic : MonoBehaviour
 			int value = GameData.GetInstance().betChipValues[i];
 			if (value > 0)
 			{
-				if (j == 0)
-				{
-					// 默认第一个筹码是选中的
-					curChipIdx = i;
-				}
 				Object prefab = (Object)Resources.Load(path + "BetChip" + i);
 				GameObject betChip = (GameObject)Instantiate(prefab);
 				betChip.transform.SetParent(betChipsRoot.transform);
 				betChip.transform.localPosition = new Vector3(start + j * dist, y, 0);
+				if (j == 0)
+				{
+					// 默认第一个筹码是选中的
+					curChipIdx = i;
+					if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
+					chooseBetEffect.transform.localPosition = betChip.transform.localPosition + new Vector3(0, 10f, 0);
+				}
 				++j;
 				betChip.transform.localScale = Vector3.one;
 				betChip.GetComponent<ButtonEvent>().receiver = gameObject;
@@ -676,12 +692,14 @@ public class MainUILogic : MonoBehaviour
 			    GameData.GetInstance().IsCardMode == CardMode.Ready ||
 			    gameLogic.IsLock)
 				return;
-			
+
+			bool isEllipse = false;
 			string strField = hitObject.name;
 			int bet = GameData.GetInstance().betChipValues[curChipIdx];
 			// Ellipse
 			if (string.Equals(strField.Substring(0, 1), "e"))
 			{
+				isEllipse = true;
 				strField = strField.Substring(1);
 			}
 			bet = GameEventManager.OnFieldClick(strField, bet);
@@ -714,6 +732,28 @@ public class MainUILogic : MonoBehaviour
 			                                0);
 			iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
 			                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
+
+			if (isEllipse)
+			{
+				Transform targetObject = hitObject.parent.parent.FindChild("Valid Fields/" + strField);
+				if (targetObject == null)
+					return;
+				prefabPath = "SmallChip/SC";
+				prefab = (Object)Resources.Load(prefabPath + curChipIdx);
+				chip = (GameObject)Instantiate(prefab);
+				chip.transform.SetParent(fieldChipsRoot.transform);
+				chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
+				chip.transform.localScale = Vector3.one;
+				chip.name = targetObject.name + " temp";
+				prefab = null;
+				chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
+				
+				targetPos = new Vector3(targetObject.localPosition.x * targetObject.parent.localScale.x,
+				                        targetObject.localPosition.y * targetObject.parent.localScale.y,
+				                        0);
+				iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
+				                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", targetObject.name + ":" + bet.ToString()));
+			}
 		}
 		catch(System.Exception ex)
 		{
