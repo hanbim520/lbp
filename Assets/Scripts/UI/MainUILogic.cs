@@ -202,7 +202,7 @@ public class MainUILogic : MonoBehaviour
 				string betValue = child.GetChild(0).GetComponent<Text>().text;
 				string name = child.name;
 				if (string.Equals(name.Substring(0, 1), "e"))
-					name = name.Substring(1);
+					continue;
 
 				if (betFields.ContainsKey(name))
 					betFields[name] += int.Parse(betValue);
@@ -870,7 +870,7 @@ public class MainUILogic : MonoBehaviour
 
 	public void Countdown()
 	{
-		print("ui Countdown");
+		Debug.Log("ui Countdown");
 		timeLimit = GameData.GetInstance().betTimeLimit;
 		ResetCountdown();
 		Timer t = TimerManager.GetInstance().CreateTimer(1, TimerType.Loop, timeLimit);
@@ -889,7 +889,7 @@ public class MainUILogic : MonoBehaviour
 
 	private void CountdownComplete()
 	{
-		print("ui CountdownComplete");
+		Debug.Log("ui CountdownComplete");
 		GameEventManager.OnEndCountdown();
 		AudioController.Play("nomorebets");
 	}

@@ -19,7 +19,7 @@ public class FlashImage : MonoBehaviour
 		if (bDestroyFlash)
 		{
 			bStopFlash = true;
-			StartCoroutine(DelayDestroy());
+			DestroyItself();
 			return;
 		}
 
@@ -38,7 +38,7 @@ public class FlashImage : MonoBehaviour
 				if (curFlashCount >= flashCount)
 				{
 					bStopFlash = true;
-					StartCoroutine(DelayDestroy());
+					DestroyItself();
 				}
 			}
 		}
@@ -47,6 +47,11 @@ public class FlashImage : MonoBehaviour
 	private IEnumerator DelayDestroy()
 	{
 		yield return new WaitForSeconds(3.0f);
+		DestroyItself();
+	}
+
+	private void DestroyItself()
+	{
 		SetAlpha(0);
 		Destroy(this);
 	}
