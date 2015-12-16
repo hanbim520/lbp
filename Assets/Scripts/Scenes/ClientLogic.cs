@@ -163,14 +163,21 @@ public class ClientLogic : GameLogic
 
     private void ShowResult()
     {
-        print("Client ShowResult");
-        ui.FlashResult(ballValue);
+        Debug.Log("Client ShowResult");
+		// 切换回经典压分区
+		if (GameData.GetInstance().displayType == 1)
+		{
+			GameData.GetInstance().displayType = 0;
+			GameData.GetInstance().SaveDisplayType();
+			ui.SetDisplay();
+		}
+		ui.FlashResult(ballValue);
         StartCoroutine(Compensate());
     }
 
     private IEnumerator Compensate()
     {
-        print("Client Compensate");
+        Debug.Log("Client Compensate");
         // TODO: Compensate
         // TODO: Save account
         // TODO: UI

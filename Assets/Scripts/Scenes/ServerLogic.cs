@@ -100,7 +100,7 @@ public class ServerLogic : GameLogic
 	
     private IEnumerator Countdown()
     {
-		print("logic countdown");
+		Debug.Log("logic countdown");
 		while (isPause || bFirstOpenGate)
 		{
 			yield return new WaitForSeconds(1);
@@ -124,7 +124,7 @@ public class ServerLogic : GameLogic
 
     private void BlowBall()
     {
-		print("BlowBall");
+		Debug.Log("BlowBall");
 		gamePhase = GamePhase.Run;
 		int time = GameData.GetInstance().gameDifficulty + Random.Range(1200, 1500);
         if (!GameData.debug)
@@ -138,7 +138,7 @@ public class ServerLogic : GameLogic
 	{
 		yield return new WaitForSeconds(2);
 		ballValue = value;
-		print("SimulateBallValue: " + ballValue);
+		Debug.Log("SimulateBallValue: " + ballValue);
         GameData.GetInstance().SaveRecord(ballValue);
 		GameEventManager.OnRefreshRecord(ballValue);
 		StartCoroutine(ShowResult());
@@ -148,7 +148,7 @@ public class ServerLogic : GameLogic
 	private void RecBallValue(int value)
 	{
 		ballValue = value;
-		print("RecBallValue: " + ballValue);
+		Debug.Log("RecBallValue: " + ballValue);
         GameData.GetInstance().SaveRecord(ballValue);
         GameEventManager.OnRefreshRecord(ballValue);
 		StartCoroutine(ShowResult());
@@ -156,18 +156,24 @@ public class ServerLogic : GameLogic
 
 	private IEnumerator ShowResult()
 	{
-		print("ShowResult");
+		Debug.Log("ShowResult");
 		gamePhase = GamePhase.ShowResult;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue);
         yield return new WaitForSeconds(waitSendTime);
-        
-        ui.FlashResult(ballValue);
+		// 切换回经典压分区
+		if (GameData.GetInstance().displayType == 1)
+		{
+			GameData.GetInstance().displayType = 0;
+			GameData.GetInstance().SaveDisplayType();
+			ui.SetDisplay();
+		}
+		ui.FlashResult(ballValue);
 		StartCoroutine(Compensate());
 	}
 
 	private IEnumerator Compensate()
     {
-		print("Compensate");
+		Debug.Log("Compensate");
         gamePhase = GamePhase.Compensate;
 
         // TODO: Compensate
@@ -213,7 +219,7 @@ public class ServerLogic : GameLogic
 
     private void CloseGate()
     {
-		print("CloseGate");
+		Debug.Log("CloseGate");
 		if (bFirstOpenGate)
 		{
 			StartCoroutine(WaitAfterOpenGate());

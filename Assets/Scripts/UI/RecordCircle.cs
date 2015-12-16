@@ -56,7 +56,7 @@ public class RecordCircle : MonoBehaviour
 		}
 		foreach (var item in dict)
 		{
-			triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
+			triangles[item.Key].fillAmount = (float)item.Value * 5 / sum;
 			if (triangles[item.Key].fillAmount >= 0.5f)
 				triangles[item.Key].color = new Color(0.812f, 0.992f, 0.078f);
 			else if (triangles[item.Key].fillAmount < 0.5f && triangles[item.Key].fillAmount >= 0.2f)
@@ -71,6 +71,9 @@ public class RecordCircle : MonoBehaviour
 			bgBall.overrideSprite = bgs[1];
 		else
 			bgBall.overrideSprite = bgs[2];
-		txtNum.text = currentValue.ToString();
+		if (currentValue != 37)
+			txtNum.text = currentValue.ToString();
+		else
+			txtNum.text = "00";
 	}
 }

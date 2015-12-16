@@ -150,6 +150,9 @@ public class MainUILogic : MonoBehaviour
 
 	public void ChangeDisplay()
 	{
+		if (gameLogic.LogicPhase >= GamePhase.ShowResult)
+			return;
+
 		if (GameData.GetInstance().displayType == 0)	// classic
 		{
 			GameData.GetInstance().displayType = 1;
@@ -949,18 +952,25 @@ public class MainUILogic : MonoBehaviour
 			Color c = flashObject.GetComponent<Image>().color;
 			c.a = 0;
 			flashObject.GetComponent<Image>().color = c;
-			if (string.Equals(name.Substring(0, 1), "e"))
+			if (string.Equals(name, "00") || string.Equals(name, "e00"))
 			{
-				int value;
-				string strField = name.Substring(1);
-				if (int.TryParse(strField, out value))
-				    FlashResult(value);
+				FlashResult(37);
 			}
 			else
 			{
-				int value;
-				if (int.TryParse(name, out value))
-					FlashResult(value);
+				if (string.Equals(name.Substring(0, 1), "e"))
+				{
+					int value;
+					string strField = name.Substring(1);
+					if (int.TryParse(strField, out value))
+						FlashResult(value);
+				}
+				else
+				{
+					int value;
+					if (int.TryParse(name, out value))
+						FlashResult(value);
+				}
 			}
 		}
 	}

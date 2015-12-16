@@ -10,11 +10,11 @@ public enum ConnectionState
 public struct GamePhase
 {
 	public const int GameStart = 1;
-	public const int GameEnd = 2;
-	public const int Countdown = 3;
-    public const int Run = 4;
-    public const int ShowResult = 5;
-    public const int Compensate = 6;
+	public const int Countdown = 2;
+    public const int Run = 3;
+    public const int ShowResult = 4;
+    public const int Compensate = 5;
+	public const int GameEnd = 6;
 }
 
 public struct NetInstr
