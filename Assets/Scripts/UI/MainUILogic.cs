@@ -337,6 +337,11 @@ public class MainUILogic : MonoBehaviour
 			int value = GameData.GetInstance().betChipValues[i];
 			if (value > 0)
 			{
+				if (j == 0)
+				{
+					// 默认第一个筹码是选中的
+					curChipIdx = i;
+				}
 				Object prefab = (Object)Resources.Load(path + "BetChip" + i);
 				GameObject betChip = (GameObject)Instantiate(prefab);
 				betChip.transform.SetParent(betChipsRoot.transform);

@@ -9,7 +9,6 @@ public class ScrollingImage : MonoBehaviour
 	private Image image;
 	private RectTransform rt;
 	private float deltaTime = 0.01f;	// 移动一个像素花费的时间
-	private float destX;
 	private int direction = 1;
 
 	void Start()
@@ -18,22 +17,21 @@ public class ScrollingImage : MonoBehaviour
 		rt = GetComponent<RectTransform>();
 	}
 
-	public void MoveToX(float _destX)
+	public void MoveToX(float destX)
 	{
-		destX = _destX;
 		Vector2 pos = transform.localPosition;
-		if (pos.x > _destX)
+		if (pos.x > destX)
 		{
-			_destX += rt.rect.width / 2;
+			destX += rt.rect.width / 2;
 			direction = -1;
 		}
 		else
 		{
-			_destX -= rt.rect.width / 2;
+			destX -= rt.rect.width / 2;
 			direction = 1;
 		}
-		float time = Mathf.Abs(_destX - pos.x) * deltaTime;
-		iTween.MoveBy(gameObject, iTween.Hash("x", _destX - pos.x, "time", time, "easetype", iTween.EaseType.linear, "oncomplete" , "OnCompleteTween", "oncompletetarget", gameObject));
+		float time = Mathf.Abs(destX - pos.x) * deltaTime;
+		iTween.MoveBy(gameObject, iTween.Hash("x", destX - pos.x, "time", time, "easetype", iTween.EaseType.linear, "oncomplete" , "OnCompleteTween", "oncompletetarget", gameObject));
 	}
 
 	private void OnCompleteTween()
