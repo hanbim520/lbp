@@ -318,7 +318,7 @@ public class GameData
 		couponsKeyinRatio = 10;	// 1%~100%
 		couponsKeoutRatio = 4;	
 		beginSessions = 100;
-		lotteryCondition = 1000;
+		lotteryCondition = 100;
 		lotteryBase = 1000;
 		lotteryRate = 10;
 		lotteryAllocation = 40;

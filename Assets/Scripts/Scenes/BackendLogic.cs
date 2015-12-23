@@ -8,6 +8,7 @@ public class BackendLogic : MonoBehaviour
     public GameObject menuMain;
     public GameObject menuSetting;
     public GameObject menuAccount;
+	public GameObject menuLottery;
     public GameObject dlgPassword;
     public GameObject dlgYesNO;
     public GameObject dlgPrintCode;
@@ -183,7 +184,10 @@ public class BackendLogic : MonoBehaviour
         }
         else if (string.Equals(hitObject.name, "save"))
         {
-            SaveSetting();
+			if (menuSetting.activeSelf)
+            	SaveSetting();
+			else if (menuLottery.activeSelf)
+				SaveLottery();
         }
         else if (string.Equals(hitObject.name, "password"))
         {
@@ -237,14 +241,14 @@ public class BackendLogic : MonoBehaviour
     {
         SetAlpha(hitObject, 0);
         string name = hitObject.name;
-        if (string.Equals(name, "setting"))
+        if (string.Equals(name, "setting2"))
 		{
 			if (GameData.GetInstance().deviceIndex == 1)
             	InitSetting();
 			else
 				ShowWarning(strSetError[GameData.GetInstance().language], true);
 		}
-        else if (string.Equals(name, "account"))
+        else if (string.Equals(name, "account2"))
 		{
 			if (GameData.GetInstance().deviceIndex == 1)
 			{
@@ -258,7 +262,14 @@ public class BackendLogic : MonoBehaviour
 			else
 				ShowWarning(strSetError[GameData.GetInstance().language], true);
 		}
-        else if (string.Equals(name, "exit"))
+		else if (string.Equals(name, "lottery2"))
+		{
+			if (GameData.GetInstance().deviceIndex == 1)
+				InitLotterySetting();
+			else
+				ShowWarning(strSetError[GameData.GetInstance().language], true);
+		}
+        else if (string.Equals(name, "exit2"))
 		{
             Application.LoadLevel(Scenes.StartInfo);
 		}
@@ -352,6 +363,7 @@ public class BackendLogic : MonoBehaviour
         menuMain.SetActive(true);
         menuSetting.SetActive(false);
         menuAccount.SetActive(false);
+		menuLottery.SetActive(false);
 		dlgCalc.SetActive(false);
         SetLanguage(menuMain);
 		SetInputDevice();
@@ -364,6 +376,43 @@ public class BackendLogic : MonoBehaviour
 			deviceId[idx].text = GameData.GetInstance().deviceIndex.ToString();
     }
 
+	private void InitLotterySetting()
+	{
+		if (GameData.GetInstance().deviceIndex > 1)
+		{
+			ShowWarning(strSetError[GameData.GetInstance().language], true);
+			return;
+		}
+
+		menuMain.SetActive(false);
+		menuSetting.SetActive(false);
+		menuAccount.SetActive(false);
+		menuLottery.SetActive(true);
+		dlgCalc.SetActive(true);
+		dlgCalc.transform.localPosition = Vector3.zero;
+		calcContent.text = string.Empty;
+		calcPassword.text = string.Empty;
+
+		SetLanguage(menuLottery);
+
+		GameData ga = GameData.GetInstance();
+		string[] datas = new string[]{ga.lotteryCondition.ToString(), ga.lotteryBase.ToString(), ga.lotteryRate.ToString(), ga.lotteryAllocation.ToString()};
+
+		Transform root = menuLottery.transform.FindChild("Valid Fields");
+		if (root != null)
+		{
+			int count = root.childCount;
+			for (int i = 0; i < count; ++i)
+			{
+				Transform str = root.GetChild(i).FindChild("Text");
+				if (str != null)
+				{
+					str.GetComponent<Text>().text = datas[i];
+				}
+			}
+		}
+	}
+
     private void InitSetting()
     {
 		if (GameData.GetInstance().deviceIndex > 1)
@@ -374,6 +423,7 @@ public class BackendLogic : MonoBehaviour
         menuMain.SetActive(false);
         menuSetting.SetActive(true);
         menuAccount.SetActive(false);
+		menuLottery.SetActive(false);
 		dlgCalc.SetActive(true);
 		dlgCalc.transform.localPosition = Vector3.zero;
 		calcContent.text = string.Empty;
@@ -421,6 +471,7 @@ public class BackendLogic : MonoBehaviour
         menuMain.SetActive(false);
         menuSetting.SetActive(false);
         menuAccount.SetActive(true);
+		menuLottery.SetActive(false);
         dlgCalc.SetActive(false);
 
         GameObject languageRoot = SetLanguage(menuAccount.gameObject);
@@ -527,6 +578,7 @@ public class BackendLogic : MonoBehaviour
 		menuMain.SetActive(true);
 		menuSetting.SetActive(false);
 		menuAccount.SetActive(false);
+		menuLottery.SetActive(false);
 		dlgCalc.SetActive(false);
 		dlgPrintCode.SetActive(false);
 	}
@@ -794,6 +846,37 @@ public class BackendLogic : MonoBehaviour
         return dlgPassword.activeSelf || dlgYesNO.activeSelf;
     }
 
+	private void SaveLottery()
+	{
+		List<int> values = new List<int>();
+		Transform root = menuLottery.transform.FindChild("Valid Fields");
+		if (root != null)
+		{
+			int count = root.childCount;
+			for (int i = 0; i < count; ++i)
+			{
+				Transform str = root.GetChild(i).FindChild("Text");
+				if (str != null)
+				{
+					int value;
+					string content = str.GetComponent<Text>().text;
+					if (int.TryParse(content, out value))
+					{
+						values.Add(value);
+					}
+				}
+			}
+
+			GameData.GetInstance().lotteryCondition = values[0];
+			GameData.GetInstance().lotteryBase = values[1];
+			GameData.GetInstance().lotteryRate = values[2];
+			GameData.GetInstance().lotteryAllocation = values[3];
+			GameData.GetInstance().SaveSetting();
+            int idx = GameData.GetInstance().language;
+			ShowWarning(Notifies.saveSuccess[idx], true);
+		}
+	}
+
     private void SaveSetting()
     {
         List<int> values = new List<int>();
@@ -908,13 +991,12 @@ public class BackendLogic : MonoBehaviour
                 value = 1;
         }
         else if (string.Equals(name, "chip0") || string.Equals(name, "chip1") || string.Equals(name, "chip2") || string.Equals(name, "chip3") ||
-                 string.Equals(name, "chip4") || string.Equals(name, "chip5"))
+		         string.Equals(name, "chip4") || string.Equals(name, "chip5") || string.Equals(name, "bonus limit"))
         {
-            if (value > 100000)
-                value = 100000;
+			value = Mathf.Clamp(value, 0, 100000);
         }
         else if (string.Equals(name, "x36") || string.Equals(name, "x18") || string.Equals(name, "x12") || string.Equals(name, "x9") ||
-                 string.Equals(name, "x6") || string.Equals(name, "x3") || string.Equals(name, "x2"))
+		         string.Equals(name, "x6") || string.Equals(name, "x3") || string.Equals(name, "x2"))
         {
             if (value > 100000)
                 value = 100000;
@@ -956,6 +1038,18 @@ public class BackendLogic : MonoBehaviour
             else if (value < 37)
                 value = 37;
         }
+		else if (string.Equals(name, "bet limit"))
+		{
+			value = Mathf.Clamp(value, 1, 100000);
+		}
+		else if (string.Equals(name, "rate"))
+		{
+			value = Mathf.Clamp(value, 1, 100);
+		}
+		else if (string.Equals(name, "allocation"))
+		{
+			value = Mathf.Clamp(value, 0, 100);
+		}
     }
 
 	public void HandleRecData(ref string[] words, int connectionId)

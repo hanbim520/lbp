@@ -253,6 +253,7 @@ public class ClientLogic : GameLogic
         int couponsStart, couponsKeyinRatio, couponsKeoutRatio;
         int maxNumberOfFields;
         int lineId, machineId;
+		int lotteryCondition, lotteryBase, lotteryRate, lotteryAlloc;
 
         if(int.TryParse(words[1], out betTimeLimit))
             GameData.GetInstance().betTimeLimit = betTimeLimit;
@@ -303,6 +304,14 @@ public class ClientLogic : GameLogic
             GameData.GetInstance().lineId = lineId;
         if(int.TryParse(words[22], out machineId))
             GameData.GetInstance().machineId = machineId;
+		if(int.TryParse(words[23], out lotteryCondition))
+		    GameData.GetInstance().lotteryCondition = lotteryCondition;
+		if(int.TryParse(words[24], out lotteryBase))
+			GameData.GetInstance().lotteryBase= lotteryBase;
+		if(int.TryParse(words[25], out lotteryRate))
+			GameData.GetInstance().lotteryRate= lotteryRate;
+		if(int.TryParse(words[26], out lotteryAlloc))
+			GameData.GetInstance().lotteryAllocation= lotteryAlloc;
 
         GameData.GetInstance().SaveSetting();
         ui.SetDisplay();
