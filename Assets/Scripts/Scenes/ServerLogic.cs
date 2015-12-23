@@ -120,7 +120,31 @@ public class ServerLogic : GameLogic
     {
 		ui.chooseBetEffect.SetActive(false);
 		BlowBall();
+//		if (!GameData.GetInstance().lotteryEnable)
+//			BlowBall();
+//		else
+//			CalcLottery();
     }
+
+	// 计算彩金号码
+	private void CalcLottery()
+	{
+		++GameData.GetInstance().lotteryMatchCount;
+		if (GameData.GetInstance().lotteryMatchCount >= GameData.GetInstance().lotteryMaxMatch)
+		{
+			GameData.GetInstance().CalcLotteryIdx();
+			GameData.GetInstance().lotteryMatchCount = 1;
+		}
+		// TODO: 收集其他机台的压分情况
+		if (GameData.GetInstance().lotteryMatchIdx.Contains(GameData.GetInstance().lotteryMatchCount))
+		{
+			// 中彩金
+		}
+		else
+		{
+			// TODO: 判断要不要出彩金，出的话不能中。
+		}
+	}
 
     private void BlowBall()
     {
@@ -159,6 +183,7 @@ public class ServerLogic : GameLogic
 		Debug.Log("ShowResult");
 		gamePhase = GamePhase.ShowResult;
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue);
+		GameData.GetInstance().AddBeginSessions();
         yield return new WaitForSeconds(waitSendTime);
 		// 切换回经典压分区
 		if (GameData.GetInstance().displayType == 1)

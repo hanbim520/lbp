@@ -129,6 +129,20 @@ public class GameData
         }
     }
 
+	private int _lotteryMatchCount;		// 彩金场次记数
+	public int lotteryMatchCount
+	{
+		get { return _lotteryMatchCount; }
+		set
+		{
+			_lotteryMatchCount = value;
+			PlayerPrefs.SetInt("lotteryMatchCount", _lotteryMatchCount);
+			PlayerPrefs.Save();
+		}
+	}
+	public int lotteryMaxMatch;			// 彩金场次的最大序号
+	public List<int> lotteryMatchIdx = new List<int>();	// 会中的彩金场次
+
     public int deviceIndex;     // 机台序号 1, 2, 3...
 	public string deviceGuid;	// 发给加密芯片做验证
 
@@ -194,6 +208,12 @@ public class GameData
 			PlayerPrefs.SetInt("isCardMode", isCardMode);
 			PlayerPrefs.Save();
 		}
+	}
+
+	// 彩金功能开关
+	public bool lotteryEnable
+	{
+		get { return lotteryAllocation > 0; }
 	}
 
 	private GameData()
@@ -464,6 +484,7 @@ public class GameData
         ReadRecords();
         ReadBetRecords();
 		ReadKeyinKeoutRecords();
+		ReadLotteryParams();
     }
 
 	private void SaveRecords()
@@ -663,6 +684,7 @@ public class GameData
 		PlayerPrefs.Save();
 	}
 
+	// 读取流水账
 	public void ReadKeyinKeoutRecords()
 	{
 		if (keyinKeoutRecords.Count > 0)
@@ -682,6 +704,22 @@ public class GameData
 			record.card = PlayerPrefs.GetInt("daybook_card" + i);
 			keyinKeoutRecords.Enqueue(record);
 		}
+	}
+
+	// 读取彩金相关参数
+	public void ReadLotteryParams()
+	{
+		_lotteryMatchCount = PlayerPrefs.GetInt("lotteryMatchCount", 0);
+		lotteryMaxMatch = CryptoPrefs.GetInt("lotteryMaxMatch", 0);
+		lotteryMatchIdx.Clear();
+		for (int i = 0; i < 10; ++i)
+		{
+			string key = "lotteryMatchIdx" + i.ToString();
+			if (CryptoPrefs.HasKey(key))
+				lotteryMatchIdx.Add(CryptoPrefs.GetInt(key));
+		}
+		if (lotteryMaxMatch == 0 && lotteryEnable)
+			CalcLotteryIdx();
 	}
 
 	public void SavePrintTimes()
@@ -711,4 +749,44 @@ public class GameData
 		currentZongXia = 0;
         SaveAccount();
     }
+
+	// 开始场次加一
+	public void AddBeginSessions()
+	{
+		++GameData.GetInstance().beginSessions;
+		if (GameData.GetInstance().beginSessions > 100000)
+			GameData.GetInstance().beginSessions = 1;
+		PlayerPrefs.SetInt("beginSessions", beginSessions);
+		PlayerPrefs.Save();
+	}
+
+	// 计算会中彩金的场次序号
+	public void CalcLotteryIdx()
+	{
+		UnityEngine.Random.seed = (int)SystemTime.time;
+		int count = UnityEngine.Random.Range(0, 10);		// 共有多少场出彩金
+		int sumMatch = 24 * 60 * 60 * 2 / betTimeLimit;		// 2天内的场次数
+		lotteryMatchIdx.Clear();
+		for (int i = 0; i < 10; ++i)
+		{
+			string key = "lotteryMatchIdx" + i.ToString();
+			if (CryptoPrefs.HasKey(key))
+				CryptoPrefs.DeleteKey(key);
+		}
+		while (lotteryMatchIdx.Count >= count)
+		{
+			int index = UnityEngine.Random.Range(1, sumMatch);
+			if (!lotteryMatchIdx.Contains(index))
+				lotteryMatchIdx.Add(index);
+		}
+		// Save to disk
+		for (int i = 0; i < lotteryMatchIdx.Count; ++i)
+		{
+			string key = "lotteryMatchIdx" + i.ToString();
+			CryptoPrefs.SetInt(key, lotteryMatchIdx[i]);
+		}
+		lotteryMaxMatch = count;
+		CryptoPrefs.SetInt("lotteryMaxMatch", lotteryMaxMatch);
+		CryptoPrefs.Save();
+	}
 }

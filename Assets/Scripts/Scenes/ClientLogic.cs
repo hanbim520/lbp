@@ -164,6 +164,7 @@ public class ClientLogic : GameLogic
     private void ShowResult()
     {
         Debug.Log("Client ShowResult");
+		GameData.GetInstance().AddBeginSessions();
 		// 切换回经典压分区
 		if (GameData.GetInstance().displayType == 1)
 		{
