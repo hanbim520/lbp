@@ -26,6 +26,7 @@ public struct NetInstr
 	public const int CheckAccount = 5;
 	public const int ClearAccount = 6;
 	public const int ClearCurrentWin = 7;
+	public const int GetBetRecords = 8;
 }
 
 // Use for network

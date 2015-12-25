@@ -141,7 +141,7 @@ public class GameData
 		}
 	}
 	public int lotteryMaxMatch;			// 彩金场次的最大序号
-	public List<int> lotteryMatchIdx = new List<int>();	// 会中的彩金场次
+	public List<int> lotteryWinIdx = new List<int>();	// 会中的彩金场次
 
     public int deviceIndex;     // 机台序号 1, 2, 3...
 	public string deviceGuid;	// 发给加密芯片做验证
@@ -711,15 +711,18 @@ public class GameData
 	{
 		_lotteryMatchCount = PlayerPrefs.GetInt("lotteryMatchCount", 0);
 		lotteryMaxMatch = CryptoPrefs.GetInt("lotteryMaxMatch", 0);
-		lotteryMatchIdx.Clear();
+		lotteryWinIdx.Clear();
 		for (int i = 0; i < 10; ++i)
 		{
 			string key = "lotteryMatchIdx" + i.ToString();
 			if (CryptoPrefs.HasKey(key))
-				lotteryMatchIdx.Add(CryptoPrefs.GetInt(key));
+				lotteryWinIdx.Add(CryptoPrefs.GetInt(key));
 		}
 		if (lotteryMaxMatch == 0 && lotteryEnable)
+		{
 			CalcLotteryIdx();
+			lotteryMatchCount = 0;
+		}
 	}
 
 	public void SavePrintTimes()
@@ -764,28 +767,28 @@ public class GameData
 	public void CalcLotteryIdx()
 	{
 		UnityEngine.Random.seed = (int)SystemTime.time;
-		int count = UnityEngine.Random.Range(0, 10);		// 共有多少场出彩金
+		int count = UnityEngine.Random.Range(1, 10);		// 共有多少场出彩金
 		int sumMatch = 24 * 60 * 60 * 2 / betTimeLimit;		// 2天内的场次数
-		lotteryMatchIdx.Clear();
+		lotteryWinIdx.Clear();
 		for (int i = 0; i < 10; ++i)
 		{
 			string key = "lotteryMatchIdx" + i.ToString();
 			if (CryptoPrefs.HasKey(key))
 				CryptoPrefs.DeleteKey(key);
 		}
-		while (lotteryMatchIdx.Count >= count)
+		while (lotteryWinIdx.Count >= count)
 		{
 			int index = UnityEngine.Random.Range(1, sumMatch);
-			if (!lotteryMatchIdx.Contains(index))
-				lotteryMatchIdx.Add(index);
+			if (!lotteryWinIdx.Contains(index))
+				lotteryWinIdx.Add(index);
 		}
 		// Save to disk
-		for (int i = 0; i < lotteryMatchIdx.Count; ++i)
+		for (int i = 0; i < lotteryWinIdx.Count; ++i)
 		{
 			string key = "lotteryMatchIdx" + i.ToString();
-			CryptoPrefs.SetInt(key, lotteryMatchIdx[i]);
+			CryptoPrefs.SetInt(key, lotteryWinIdx[i]);
 		}
-		lotteryMaxMatch = count;
+		lotteryMaxMatch = sumMatch;
 		CryptoPrefs.SetInt("lotteryMaxMatch", lotteryMaxMatch);
 		CryptoPrefs.Save();
 	}

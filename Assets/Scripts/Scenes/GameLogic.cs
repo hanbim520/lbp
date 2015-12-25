@@ -72,7 +72,7 @@ public class GameLogic : MonoBehaviour
 	protected bool isLock = false;	// true:不能押分
 	protected int gamePhase = GamePhase.GameEnd;
 	protected int ballValue = -1;
-	protected int lotteryValue = -1;
+	protected List<int> lotteryValues = new List<int>();	// 彩票值
 	protected string[] strBaoji = new string[]{"Please contact the assistant,\ndevice can't pay more.", "请联系服务员，\n该机台达到赢分上限。"};
 	protected string[] strKeoutError = new string[]{"Can't keout now.Total Credits \nshould be greater than {0}.", "现在不能退分。\n总分必须大于 {0}"};
 	protected string[] strTuiBroken = new string[]{"Ticket back device is broken,\nplease contact assistance.", "退币器故障，请\n联系服务员。"};

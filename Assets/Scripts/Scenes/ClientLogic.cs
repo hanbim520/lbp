@@ -84,6 +84,23 @@ public class ClientLogic : GameLogic
 		{
 			ClearCurrentWin();
 		}
+		else if (instr == NetInstr.GetBetRecords)
+		{
+			SendBetRecords();
+		}
+	}
+
+	// 发送当前局的压分记录
+	private void SendBetRecords()
+	{
+		string items = "";
+		foreach (KeyValuePair<string, int> item in betFields)
+		{
+			string str = string.Format(":{0}:{1}", item.Key, item.Value);
+			items += str;
+		}
+		string msg = NetInstr.GetBetRecords.ToString() + items;
+		uclient.SendToServer(msg);
 	}
 
 	private void ClearCurrentWin()
@@ -219,6 +236,7 @@ public class ClientLogic : GameLogic
     {
         ballValue = -1;
         betFields.Clear();
+		lotteryValues.Clear();
         ui.StopFlash();
     }
 

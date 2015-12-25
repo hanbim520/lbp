@@ -9,6 +9,8 @@ public class ServerLogic : GameLogic
 
 	private const float kCalcRemainTime = 60.0f;
 	private float remainTimeIntever = 0.0f;
+	// 保存其他客户端在当前局的压分记录
+	private Dictionary<string, int> clientBetFields = new Dictionary<string, int>();
     
     private void Init()
     {
@@ -119,32 +121,10 @@ public class ServerLogic : GameLogic
     private void CountdownComplete()
     {
 		ui.chooseBetEffect.SetActive(false);
+		// 收集其他机台的压分情况
+		host.SendToAll(NetInstr.GetBetRecords.ToString());
 		BlowBall();
-//		if (!GameData.GetInstance().lotteryEnable)
-//			BlowBall();
-//		else
-//			CalcLottery();
     }
-
-	// 计算彩金号码
-	private void CalcLottery()
-	{
-		++GameData.GetInstance().lotteryMatchCount;
-		if (GameData.GetInstance().lotteryMatchCount >= GameData.GetInstance().lotteryMaxMatch)
-		{
-			GameData.GetInstance().CalcLotteryIdx();
-			GameData.GetInstance().lotteryMatchCount = 1;
-		}
-		// TODO: 收集其他机台的压分情况
-		if (GameData.GetInstance().lotteryMatchIdx.Contains(GameData.GetInstance().lotteryMatchCount))
-		{
-			// 中彩金
-		}
-		else
-		{
-			// TODO: 判断要不要出彩金，出的话不能中。
-		}
-	}
 
     private void BlowBall()
     {
@@ -178,11 +158,115 @@ public class ServerLogic : GameLogic
 		StartCoroutine(ShowResult());
 	}
 
+	// 计算彩金号码
+	private int[] CalcLottery()
+	{
+		clientBetFields.Clear();
+		foreach (KeyValuePair<string, int> item in betFields)
+		{
+			clientBetFields.Add(item.Key, item.Value);
+		}
+		// 单点压分号码
+		List<int> betSingle = new List<int>();
+		foreach (KeyValuePair<string, int> item in clientBetFields)
+		{
+			int key;
+			if (int.TryParse(item.Key, out key))
+				betSingle.Add(key);
+		}
+		// 没压的单点号码
+		List<int> noBetSingle = new List<int>();
+		for (int i = 0; i < GameData.GetInstance().maxNumberOfFields; ++i)
+		{
+			if (!betSingle.Contains(i))
+				noBetSingle.Add(i);
+		}
+		if (betSingle.Count > 0)
+		{
+			++GameData.GetInstance().lotteryMatchCount;
+			if (GameData.GetInstance().lotteryMatchCount >= GameData.GetInstance().lotteryMaxMatch)
+			{
+				GameData.GetInstance().CalcLotteryIdx();
+				GameData.GetInstance().lotteryMatchCount = 1;
+			}
+		}
+
+		if (GameData.GetInstance().lotteryWinIdx.Contains(GameData.GetInstance().lotteryMatchCount) &&
+		    betSingle.Count > 0)
+		{
+			int betCount = betSingle.Count;
+			int noBetCount = noBetSingle.Count;
+			// 中彩金
+			if (betCount > 0)
+			{
+				List<int> retArray = new List<int>();
+				int lotteryCount = 1;	// 彩金最多个数
+				Random.seed = (int)SystemTime.time;
+				lotteryCount = Random.Range(1, Mathf.Min(betCount, 6));
+				int winCount = Random.Range(1, lotteryCount);
+				int loseCount = lotteryCount - winCount;
+				for (int i = 0; i < winCount;)
+				{
+					int idx = Random.Range(0, betCount);
+					int value = betSingle[idx];
+					if (!retArray.Contains(value))
+					{
+						retArray.Add(value);
+						++i;
+					}
+				}
+				for (int i = 0; i < loseCount;)
+				{
+					int idx = Random.Range(0, noBetCount);
+					int value = noBetSingle[idx];
+					if (!retArray.Contains(value))
+					{
+						retArray.Add(value);
+						++i;
+					}
+				}
+				return retArray.ToArray();
+			}
+		}
+		else
+		{
+			int noBetCount = noBetSingle.Count;
+			// 判断要不要出彩金，出的话不中。
+			Random.seed = (int)SystemTime.time;
+			int ret = Random.Range(0, 20);
+			// 出彩金
+			if (ret == 12 && noBetCount > 0)
+			{
+				List<int> retArray = new List<int>();
+				int lotteryCount = Random.Range(1, Mathf.Min(noBetCount, 6));
+				for (int i = 0; i < lotteryCount;)
+				{
+					int idx = Random.Range(0, noBetCount);
+					int value = noBetSingle[idx];
+					if (!retArray.Contains(value))
+					{
+						retArray.Add(value);
+						++i;
+					}
+				}
+				return retArray.ToArray();
+			}
+		}
+		return new int[0];
+	}
+
 	private IEnumerator ShowResult()
 	{
 		Debug.Log("ShowResult");
 		gamePhase = GamePhase.ShowResult;
-		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue);
+		string msg = NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue;
+		if (GameData.GetInstance().lotteryEnable)
+		{
+			int[] lotteries = CalcLottery();
+			foreach (int num in lotteries)
+				msg += string.Format(":{0}", num);
+		}
+		host.SendToAll(msg);
 		GameData.GetInstance().AddBeginSessions();
         yield return new WaitForSeconds(waitSendTime);
 		// 切换回经典压分区
@@ -265,7 +349,9 @@ public class ServerLogic : GameLogic
     private void ClearVariables()
     {
         ballValue = -1;
+		lotteryValues.Clear();
         betFields.Clear();
+		clientBetFields.Clear();
 		ui.StopFlash();
     }
 
@@ -281,7 +367,38 @@ public class ServerLogic : GameLogic
         {
             host.SendToPeer(NetInstr.GamePhase + ":" + gamePhase, connectionId);
         }
+		else if (instr == NetInstr.GetBetRecords)
+		{
+			if (gamePhase >= GamePhase.ShowResult)
+				return;
+			CollectBetRecords(ref words);
+		}
     }
+
+	// 保存其他客户端在当前局的压分情况
+	private void CollectBetRecords(ref string[] words)
+	{
+		for (int idx = 0; idx < words.Length; idx += 2)
+		{
+			if (clientBetFields.ContainsKey(words[idx]))
+			{
+				int value;
+				if (int.TryParse(words[idx + 1], out value))
+				{
+					clientBetFields[words[idx]] += value;
+				}
+			}
+			else
+			{
+				int value;
+				if (int.TryParse(words[idx + 1], out value))
+				{
+					string key = words[idx];
+					clientBetFields.Add(key, value);
+				}
+			}
+		}
+	}
 
 	// 计算跳码时间
 	public void CalcRemainTime()
