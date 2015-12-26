@@ -1,0 +1,18 @@
+# depslib dependency file v1.0
+1451122397 source:/home/cx/workplace/projects/AutoStart/main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	<sys/un.h>
+	<sys/ioctl.h>
+	<sys/socket.h>
+	<linux/types.h>
+	<linux/netlink.h>
+	<errno.h>
+	<unistd.h>
+	<arpa/inet.h>
+	<netinet/in.h>
+	<dirent.h>
+	<unistd.h>
+

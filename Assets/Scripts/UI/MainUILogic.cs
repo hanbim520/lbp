@@ -31,6 +31,7 @@ public class MainUILogic : MonoBehaviour
 	private GameObject displayClassic;
 	private GameObject displayEllipse;
 	private GameObject eraser;
+	private GameObject crown;
 	private GameObject betChipsRoot;
 	private GameObject fieldChipsRoot;
 	private GameObject countdown;
@@ -91,6 +92,8 @@ public class MainUILogic : MonoBehaviour
 	{
 		eraser = GameObject.Find("Canvas/eraser");
 		eraser.SetActive(false);
+		crown = GameObject.Find("Canvas/crown");
+		crown.SetActive(false);
 		mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
 		mouseIcon.localPosition = Vector3.zero;
 		fieldChipsRoot = GameObject.Find("Canvas/FieldChipsRoot");
@@ -920,6 +923,8 @@ public class MainUILogic : MonoBehaviour
 				fo.flashCount = 0;
 				fo.interval = 0.5f;
 			}
+			crown.SetActive(true);
+			crown.transform.localPosition = target.localPosition;
 		}
 		else
 		{
@@ -931,6 +936,8 @@ public class MainUILogic : MonoBehaviour
 				fo.flashCount = 0;
 				fo.interval = 0.5f;
 			}
+			crown.SetActive(true);
+			crown.transform.localPosition = target.localPosition;
 		}
 	}
 
@@ -941,6 +948,7 @@ public class MainUILogic : MonoBehaviour
 			flashObject.GetComponent<FlashImage>().StopFlash();
 			flashObject = null;
 		}
+		crown.SetActive(false);
 	}
 
 	public void ChangeFlash()
