@@ -15,18 +15,94 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <ftw.h>
+#include <fcntl.h>
+#include <limits.h>
+#include <dirent.h>
+
 #define UEVENT_BUFFER_SIZE 2048
 #define ROOT_DIR "/media/root"
 
-int readFileList(char *basePath)
+#define BUFSIZE 1024
+#define PERMS 0666
+#define DUMMY 0
+
+typedef enum { false, true }bool;
+
+int cpfile(char *source_file,char *target_file)
+{
+  int source,target,num;
+  char iobuffer[BUFSIZE];
+  if((source=open(source_file,O_RDONLY,DUMMY))==-1)
+     {
+      printf("Source file open error!\n");
+      return 1;
+     }
+  if((target=open(target_file,O_WRONLY|O_CREAT,PERMS))==-1)
+    {
+      printf("Target file open error!\n");
+      return 2;
+     }
+  while((num=read(source,iobuffer,BUFSIZE))>0)
+     if(write(target,iobuffer,num)!=num)
+       {
+         printf("Target file write error!\n");
+         return 3;
+       }
+   close(source);
+   close(target);
+   return 0;
+}
+
+
+int cpdir(char *source_dir,char *target_dir){
+
+     DIR *source=NULL;
+     DIR *target=NULL;
+     struct dirent *ent=NULL;
+     char  name1[100],name2[100];
+
+     source=opendir(source_dir);
+     mkdir(target_dir,S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH);
+     target=opendir(target_dir);
+     if(source!=NULL&&target!=NULL)
+        {
+          while((ent=readdir(source))!= NULL)
+          {
+             if( strcmp(ent->d_name,"..")!=0 && strcmp(ent->d_name,".")!=0)
+                {
+                   strcpy(name1,"\0");
+                   strcat(name1,source_dir);
+                   strcat(name1,"/");
+                   strcat(name1,ent->d_name);
+                   strcpy(name2,"\0");
+                   strcat(name2,target_dir);
+                   strcat(name2,"/");
+                   strcat(name2,ent->d_name);
+                   if(ent->d_type==4)
+                       cpdir(name1,name2);
+                   if(ent->d_type==8)
+                       cpfile(name1,name2);
+
+                }
+           }
+         closedir(source);
+         closedir(target);
+       }
+ return 0;
+}
+
+int readFileList(char *basePath, bool findUpdate)
 {
     DIR *dir;
     struct dirent *ptr;
-    char base[1000];
 
     if ((dir=opendir(basePath)) == NULL)
     {
         perror("Open dir error...");
+        printf("%s\n", basePath);
         exit(1);
     }
 
@@ -40,15 +116,25 @@ int readFileList(char *basePath)
             printf("d_name:%s/%s\n", basePath, ptr->d_name);
         else if(ptr->d_type == 4)    ///dir
         {
-            continue;
-            /*
-            memset(base,'\0',sizeof(base));
-            strcpy(base,basePath);
-            strcat(base,"/");
-            strcat(base,ptr->d_name);
-            readFileList(base);
-            */
-            // TODO: Copy dir to disk
+            // find u disk
+            if (!findUpdate)
+            {
+                char path[256];
+                memset(path, 0, strlen(path));
+                strcat(path, "/media/root/");
+                strcat(path, ptr->d_name);
+                readFileList(path, true);
+            }
+            // copy update dir
+            else if (findUpdate && strcmp(ptr->d_name, "update") == 0)
+            {
+                char path[256];
+                memset(path, 0, strlen(path));
+                strcat(path, basePath);
+                strcat(path, "/update");
+                cpdir(path, "/home/update");
+                break;
+            }
         }
     }
     closedir(dir);
@@ -96,11 +182,10 @@ int main(int argc, char* argv[])
         recv(hotplug_sock, &buf, sizeof(buf), 0);
         printf("%s\n", buf);
 
-        /* USB 设备的插拔会出现字符信息，通过比较不同的信息确定特定设备的插拔，在这添加比较代码 */
-        if(!memcmp(buf, "change@", 4) && !memcmp(&buf[strlen(buf) - 4],"/sdb",4))
+        if(!memcmp(buf, "add@", 4) && !memcmp(&buf[strlen(buf) - 4], "/sdb", 4))
         {
-            sleep(1);
-            readFileList(ROOT_DIR);
+            sleep(2);
+            readFileList(ROOT_DIR, false);
         }
     }
     return 0;
