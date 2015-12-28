@@ -171,22 +171,56 @@ static int init_hotplug_sock()
     return s;
 }
 
+// return: numbers of usb
+int getUsbNum(char *basePath)
+{
+    DIR *dir;
+    struct dirent *ptr;
+    int num = 0;
+
+    if ((dir=opendir(basePath)) == NULL)
+    {
+        perror("Open dir error...");
+        exit(1);
+    }
+
+    while ((ptr=readdir(dir)) != NULL)
+    {
+        if(strcmp(ptr->d_name, ".")==0 || strcmp(ptr->d_name, "..")==0)    ///current dir OR parrent dir
+            continue;
+        else if(ptr->d_type == 8)    ///file
+            printf("d_name:%s/%s\n", basePath, ptr->d_name);
+        else if(ptr->d_type == 10)    ///link file
+            printf("d_name:%s/%s\n", basePath, ptr->d_name);
+        else if(ptr->d_type == 4)    ///dir
+        {
+            ++num;
+        }
+    }
+    closedir(dir);
+    return num;
+}
+
 int main(int argc, char* argv[])
 {
-    int hotplug_sock = init_hotplug_sock();
+//    int hotplug_sock = init_hotplug_sock();
+//    while(1)
+//    {
+//        /* Netlink message buffer */
+//        char buf[UEVENT_BUFFER_SIZE * 2] = {0};
+//        recv(hotplug_sock, &buf, sizeof(buf), 0);
+//        printf("%s\n", buf);
+//
+//        if(!memcmp(buf, "add@", 4) && !memcmp(&buf[strlen(buf) - 4], "/sdb", 4))
+//        {
+//            sleep(2);
+//            readFileList(ROOT_DIR, false);
+//        }
+//    }
 
-    while(1)
+    if (getUsbNum(ROOT_DIR) > 0)
     {
-        /* Netlink message buffer */
-        char buf[UEVENT_BUFFER_SIZE * 2] = {0};
-        recv(hotplug_sock, &buf, sizeof(buf), 0);
-        printf("%s\n", buf);
-
-        if(!memcmp(buf, "add@", 4) && !memcmp(&buf[strlen(buf) - 4], "/sdb", 4))
-        {
-            sleep(2);
-            readFileList(ROOT_DIR, false);
-        }
+        readFileList(ROOT_DIR, false);
     }
     return 0;
 }
