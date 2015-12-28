@@ -220,7 +220,13 @@ int main(int argc, char* argv[])
 
     if (getUsbNum(ROOT_DIR) > 0)
     {
+        // scan u disk for updating
         readFileList(ROOT_DIR, false);
+    }
+    else
+    {
+        // open game
+        system("/usr/games/gnome-mines");
     }
     return 0;
 }
