@@ -34,3 +34,8 @@ TODO:
 测试数据：
 yanSeXianHong ＝ 1000
 totalCredits ＝ 10000
+
+第三方库：
+Linux：libusb-1.0.20（D:\Projects\libusb-1.0.20）
+Windows：libusb-win32（D:\Projects\libusb-win32\libusb-win32-src-1.2.6.0）
+Android：android-serialport-api（D:\Projects\android-serialport-api）

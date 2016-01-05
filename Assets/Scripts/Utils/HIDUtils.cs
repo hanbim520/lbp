@@ -20,10 +20,10 @@ public class HIDUtils : MonoBehaviour
 	private AndroidJavaClass jc;
 	private AndroidJavaObject jo;
 #endif
-#if UNITY_STANDALONE_LINUX
-	private Queue<int> readQueue = new Queue<int>();
 	private bool isReadThreadExit = false;
-#endif
+	private Thread tRead;
+//	private Queue<int> readQueue = new Queue<int>();
+	private SafedQueue<int> readQueue = new SafedQueue<int>();
 	// In seconds
 	private const float getDataTime = 0.1f;
 	private float getDataTimeDelta = 0;
@@ -130,24 +130,37 @@ public class HIDUtils : MonoBehaviour
 #endif
 
 #if UNITY_STANDALONE_WIN
-		WinUsbPortOpen();
+		int ret = WinUsbPortOpen();
+		Debug.Log("WinUsbPortOpen:" + ret);
+		Debug.Log("GUID:" + GameData.GetInstance().deviceGuid);
+		if (ret == 0)
+		{
+			SetState("True");
+			isReadThreadExit = false;
+			tRead = new Thread(QueueStore);
+			tRead.Start();
+			SendCheckInfo();
+		}
 #endif
 
 #if UNITY_STANDALONE_LINUX
 		int ret = LinuxUsbPortOpen();
 		Debug.Log("LinuxUsbPortOpen: " + ret);
-		if (ret > 0)
+		if (ret == 1)
 		{
 			SetState("True");
 			isReadThreadExit = false;
-			Thread tRead = new Thread(LinuxQueueStore);
+			tRead = new Thread(QueueStore);
 			tRead.Start();
+			SendCheckInfo();
 		}
 #endif
 	}
 
 	public void CloseUSB()
 	{
+		isReadThreadExit = true;
+		tRead.Abort();
 #if UNITY_ANDROID
 		jo.Call("closeUsb");
 #endif
@@ -157,7 +170,6 @@ public class HIDUtils : MonoBehaviour
 #endif
 
 #if UNITY_STANDALONE_LINUX
-		isReadThreadExit = true;
 		LinuxUsbPortClose();
 #endif
 	}
@@ -182,18 +194,11 @@ public class HIDUtils : MonoBehaviour
 		int[] data = ReadData("readHID");
 #endif
 
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_LINUX || UNITY_STANDALONE_WIN
 		if (!isOpen)
 			return;
 
-		int[] data = WinUsbPortRead();
-#endif
-
-#if UNITY_STANDALONE_LINUX
-		if (!isOpen)
-			return;
-
-		int[] data = LinuxQueueRead();
+		int[] data = QueueRead();
 #endif
 		if (data == null || data[0] == -1)
 		{ 
@@ -386,12 +391,13 @@ public class HIDUtils : MonoBehaviour
 		{
 			log += string.Format("{0:X}", data[i]) + ", ";
 		}
-		Debug.Log(log);
-//		DebugConsole.Log(log);
+//		Debug.Log(log);
+		DebugConsole.Log(log);
 	}
 
 	public void SendCheckInfo()
 	{
+		int minCapacity = 64;
 		char[] arr = GameData.GetInstance().deviceGuid.ToCharArray();
 		List<int> dataList = new List<int>();
 		// 0x595a 验证
@@ -401,6 +407,10 @@ public class HIDUtils : MonoBehaviour
 		for (int i = 0; i < arr.Length; ++i)
 		{
 			dataList.Add((int)arr[i]);
+		}
+		while (dataList.Count < minCapacity)
+		{
+			dataList.Add(0);
 		}
 		int[] data = dataList.ToArray();
 		WriteData(data, "writeUsbPort");
@@ -444,36 +454,40 @@ public class HIDUtils : MonoBehaviour
 		flagPayCoin = 0;
 	}
 
+	// return: 0 success
 	private int WinUsbPortOpen()
 	{
 		return WinHidPort.OpenHid(vid, pid);
 	}
 
-	private void LinuxQueueStore()
+	private void QueueStore()
 	{
-#if UNITY_STANDALONE_LINUX
 		try
 		{
 			while(!isReadThreadExit)
 			{
+				#if UNITY_STANDALONE_LINUX
 				int[] data = LinuxUsbPortRead();
+				#endif
+				#if UNITY_STANDALONE_WIN
+				int[] data = WinUsbPortRead();
+				#endif
 				if (data == null || data[0] == -1)
 					continue;
 				foreach (int d in data)
+				{
 					readQueue.Enqueue(d);
+				}
 			}
 		}
 		catch(Exception ex)
 		{
 			Debug.Log(ex.ToString());
 		}
-#endif
 	}
 
-#if UNITY_STANDALONE_LINUX
-	private int[] LinuxQueueRead()
+	private int[] QueueRead()
 	{
-
 		if (readQueue.Count > 0)
 		{
 			int[] data = readQueue.ToArray();
@@ -483,7 +497,6 @@ public class HIDUtils : MonoBehaviour
 		else
 			return null;
 	}
-#endif
 
 	private void WinUsbPortClose()
 	{

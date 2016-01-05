@@ -12,7 +12,7 @@ public static class LinuxHidPort
 	[DllImport ("usb-1.0")]  
 	private extern static void Linux_UsbPort_Close();
 	[DllImport ("usb-1.0")]  
-	private extern static int Linux_UsbPort_Read(out IntPtr data, out int len);
+	private extern static IntPtr Linux_UsbPort_Read();
 	[DllImport ("usb-1.0")]  
 	private extern static int Linux_UsbPort_Write(byte[] data, int len);
 	[DllImport ("usb-1.0")]  
@@ -55,9 +55,8 @@ public static class LinuxHidPort
 
 	public static byte[] Read()
 	{
-		IntPtr data;
-		int len;
-		Linux_UsbPort_Read(out data, out len);
+		IntPtr data = Linux_UsbPort_Read();
+		int len = 61;
 		byte[] source = new byte[len];
 		Marshal.Copy(data, source, 0, len);
 		Linux_UsbPort_FreePtr(data);
