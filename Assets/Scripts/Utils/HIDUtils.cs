@@ -386,13 +386,13 @@ public class HIDUtils : MonoBehaviour
 
 	private void PrintData(ref int[] data)
 	{
-		string log = "data.Length:" + data.Length + "--";
-		for (int i = 0; i < data.Length; ++i)
-		{
-			log += string.Format("{0:X}", data[i]) + ", ";
-		}
+//		string log = "data.Length:" + data.Length + "--";
+//		for (int i = 0; i < data.Length; ++i)
+//		{
+//			log += string.Format("{0:X}", data[i]) + ", ";
+//		}
 //		Debug.Log(log);
-		DebugConsole.Log(log);
+//		DebugConsole.Log(log);
 	}
 
 	public void SendCheckInfo()
