@@ -134,7 +134,10 @@ public class ServerLogic : GameLogic
         if (!GameData.debug)
 		    hidUtils.BlowBall(time);
 		if (GameData.debug)
+		{
+			Random.seed = (int)SystemTime.time;
             StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
+		}
     }
 
 	// 模拟收到球的号码
@@ -183,6 +186,7 @@ public class ServerLogic : GameLogic
 		}
 		if (betSingle.Count > 0)
 		{
+			// 有单点压分的情况下场次计数加一
 			++GameData.GetInstance().lotteryMatchCount;
 			if (GameData.GetInstance().lotteryMatchCount >= GameData.GetInstance().lotteryMaxMatch)
 			{
@@ -190,7 +194,7 @@ public class ServerLogic : GameLogic
 				GameData.GetInstance().lotteryMatchCount = 1;
 			}
 		}
-
+		// 有单点压分 且能中彩金
 		if (GameData.GetInstance().lotteryWinIdx.Contains(GameData.GetInstance().lotteryMatchCount) &&
 		    betSingle.Count > 0)
 		{
@@ -200,11 +204,11 @@ public class ServerLogic : GameLogic
 			if (betCount > 0)
 			{
 				List<int> retArray = new List<int>();
-				int lotteryCount = 1;	// 彩金最多个数
+				int lotteryCount = 1;	// 彩金个数
 				Random.seed = (int)SystemTime.time;
-				lotteryCount = Random.Range(1, Mathf.Min(betCount, 6));
-				int winCount = Random.Range(1, lotteryCount);
-				int loseCount = lotteryCount - winCount;
+				lotteryCount = Random.Range(1, Mathf.Min(betCount, 6));		// 彩金个数 1~5
+				int winCount = Random.Range(1, lotteryCount);				// 中奖个数 1~4
+				int loseCount = lotteryCount - winCount;					// 没中奖个数 1~3
 				for (int i = 0; i < winCount;)
 				{
 					int idx = Random.Range(0, betCount);
@@ -228,6 +232,7 @@ public class ServerLogic : GameLogic
 				return retArray.ToArray();
 			}
 		}
+		// 没有单点压分 或没有到中彩金的场次
 		else
 		{
 			int noBetCount = noBetSingle.Count;
@@ -264,7 +269,10 @@ public class ServerLogic : GameLogic
 		{
 			int[] lotteries = CalcLottery();
 			foreach (int num in lotteries)
+			{
 				msg += string.Format(":{0}", num);
+				lotteryValues.Add(num);
+			}
 		}
 		host.SendToAll(msg);
 		GameData.GetInstance().AddBeginSessions();
@@ -277,6 +285,8 @@ public class ServerLogic : GameLogic
 			ui.SetDisplay();
 		}
 		ui.FlashResult(ballValue);
+		if (GameData.GetInstance().lotteryEnable)
+			ui.FlashLotteries(ref lotteryValues);
 		StartCoroutine(Compensate());
 	}
 
