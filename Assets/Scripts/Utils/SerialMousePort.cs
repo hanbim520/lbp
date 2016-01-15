@@ -36,7 +36,7 @@ public class SerialMousePort : MonoBehaviour
 	{
 		Init();
         RegisterEvents();
-#if UNITY_EDITOR
+#if UNITY_STANDALONE_WIN
         // 端口名称 波特率 奇偶校验位 数据位值 停止位
         try
         {
@@ -68,32 +68,39 @@ public class SerialMousePort : MonoBehaviour
 			Debug.Log(ex.ToString());
 		}
 #endif
+
+#if UNITY_STANDALONE_LINUX
+		try
+		{
+			if (!LinuxSerialPort.IsOpen())
+			{
+				int state = LinuxSerialPort.Open(1200, 7, 1, 0, 0);
+				if (state == 0)
+				{
+					isReadThreadExit = false;
+					readThread = new Thread(ReceiveData);
+					readThread.Start(); 
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			Debug.Log(ex.ToString());
+		}
+#endif
 	}
 
 	void OnDisable()
 	{
-        UnregisterEvents();
-#if UNITY_EDITOR
-		readThread.Abort();
-		isReadThreadExit = true;
-        if (sp.IsOpen)
-        {
-            sp.DtrEnable = false;
-            sp.RtsEnable = false;
-            sp.Close();
-        }
-#endif
-        
-#if UNITY_ANDROID
-		androidSP.Close();
-#endif
+        UnregisterEvents();        
+		Close();
 	}
 	
 	private void ReceiveData() 
 	{ 
 		try 
 		{ 
-#if UNITY_EDITOR
+#if UNITY_STANDALONE_WIN
 			while (!isReadThreadExit)
 			{
 				if (sp != null && sp.IsOpen)
@@ -104,6 +111,20 @@ public class SerialMousePort : MonoBehaviour
 				}
 			}
 #endif
+#if UNITY_STANDALONE_LINUX
+			Thread.Sleep(3000);	// linux需要等2秒才能读
+			while (!isReadThreadExit)
+			{
+				if (LinuxSerialPort.IsOpen())
+				{
+					byte[] buf = LinuxSerialPort.Read();
+					if (buf.Length <= 0)
+						continue;
+					foreach(byte b in buf)
+						queueReadPool.Enqueue(b);
+				}
+			}
+#endif
 		} 
 		catch (Exception ex) 
 		{ 
@@ -111,7 +132,7 @@ public class SerialMousePort : MonoBehaviour
 		} 
 	} 
 
-	void FixedUpdate()
+	void Update()
 	{
 		DealReceivedData();
 #if UNITY_ANDROID
@@ -274,9 +295,40 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
 
 	public void Close()
 	{
-#if UNITY_ANDROID
-		androidSP.Close();
-#endif
+		try
+		{
+			#if UNITY_STANDALONE_WIN
+			isReadThreadExit = true;
+			if (sp.IsOpen)
+			{
+				sp.DtrEnable = false;
+				sp.RtsEnable = false;
+				sp.Close();
+			}
+			readThread.Abort();
+			#endif
+			
+			#if UNITY_ANDROID
+			androidSP.Close();
+			#endif
+			
+			#if UNITY_STANDALONE_LINUX
+			isReadThreadExit = true;
+			if (LinuxSerialPort.IsOpen())
+			{
+				LinuxSerialPort.Close();
+			}
+			if (readThread != null)
+			{
+				readThread.Abort();
+				readThread = null;
+			}
+			#endif
+		}
+		catch(Exception ex)
+		{
+			Debug.Log(ex.ToString());
+		}
 	}
 
 //	void OnGUI()

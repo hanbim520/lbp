@@ -288,9 +288,9 @@ public class BackendLogic : MonoBehaviour
 				i.SetActive(true);
 			foreach (GameObject i in btnTouchScreen)
 				i.SetActive(false);
-			GameData.GetInstance().inputDevice = 1;
+			GameData.GetInstance().inputDevice = 0;
 			GameData.GetInstance().SaveInputDevice();
-			ChangeInputHanlde();
+			StartCoroutine(ChangeInputHanlde());
 		}
 		else if (string.Equals(name, "mouse2"))
 		{
@@ -298,19 +298,19 @@ public class BackendLogic : MonoBehaviour
 				i.SetActive(false);
 			foreach (GameObject i in btnTouchScreen)
 				i.SetActive(true);
-			GameData.GetInstance().inputDevice = 0;
+			GameData.GetInstance().inputDevice = 1;
 			GameData.GetInstance().SaveInputDevice();
-			ChangeInputHanlde();
+			StartCoroutine(ChangeInputHanlde());
 		}
     }
 
-	private void ChangeInputHanlde()
+	private IEnumerator ChangeInputHanlde()
 	{
 		GameObject go = GameObject.Find("InputDevice");
 		if (go != null)
 		{
-			SerialMousePort mouse = gameObject.GetComponent<SerialMousePort>();
-			TouchScreenPort touchScreen = gameObject.GetComponent<TouchScreenPort>();
+			SerialMousePort mouse = go.GetComponent<SerialMousePort>();
+			TouchScreenPort touchScreen = go.GetComponent<TouchScreenPort>();
 			if (GameData.GetInstance().inputDevice == 0)
 			{
 				if (mouse != null)
@@ -318,19 +318,24 @@ public class BackendLogic : MonoBehaviour
 					mouse.Close();
 					Destroy(mouse);
 				}
+				yield return new WaitForSeconds(2.0f);
 				if (touchScreen == null)
-					gameObject.AddComponent<TouchScreenPort>();
+				{
+					go.AddComponent<TouchScreenPort>();
+				}
 			}
 			else
 			{
-				
 				if (touchScreen != null)
 				{
 					touchScreen.Close();
 					Destroy(touchScreen);
 				}
+				yield return new WaitForSeconds(2.0f);
 				if (mouse == null)
-					gameObject.AddComponent<SerialMousePort>();
+				{
+					go.AddComponent<SerialMousePort>();
+				}
 			}
 		}
 	}
@@ -614,16 +619,16 @@ public class BackendLogic : MonoBehaviour
 		if (GameData.GetInstance().inputDevice == 0)
 		{
 			foreach (GameObject i in btnMouse)
-				i.SetActive(false);
-			foreach (GameObject i in btnTouchScreen)
 				i.SetActive(true);
+			foreach (GameObject i in btnTouchScreen)
+				i.SetActive(false);
 		}
 		else
 		{
 			foreach (GameObject i in btnMouse)
-				i.SetActive(true);
-			foreach (GameObject i in btnTouchScreen)
 				i.SetActive(false);
+			foreach (GameObject i in btnTouchScreen)
+				i.SetActive(true);
 		}
 	}
 

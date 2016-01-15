@@ -213,8 +213,8 @@ public class CardDlg : MonoBehaviour
 			{
                 if (string.Equals(txtPassword, GameData.GetInstance().systemPassword))
                 {
-                    print("sys p : " + GameData.GetInstance().systemPassword);
-                    print("txtpassword : " + txtPassword);
+//                    print("sys p : " + GameData.GetInstance().systemPassword);
+//                    print("txtpassword : " + txtPassword);
                     GameEventManager.OnChangeScene(Scenes.Backend);
                     gameObject.SetActive(false);
                 }
@@ -258,7 +258,7 @@ public class CardDlg : MonoBehaviour
 			{
 				text += "*";
 				txtPassword += num.ToString();
-				print(txtPassword);
+//				print(txtPassword);
 				SetCalcContent(text, Color.white);
 			}
 		}

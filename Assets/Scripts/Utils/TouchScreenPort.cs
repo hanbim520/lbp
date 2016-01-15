@@ -28,7 +28,7 @@ public class TouchScreenPort : MonoBehaviour
 		filtedArray[0] = 0x55;
 		filtedArray[1] = 0x54;
 
-#if UNITY_EDITOR
+#if UNITY_STANDALONE_WIN
 		// 端口名称 波特率 奇偶校验位 数据位值 停止位
 		try
 		{
@@ -60,24 +60,32 @@ public class TouchScreenPort : MonoBehaviour
 			Debug.Log(ex.ToString());
 		}
 #endif
+
+#if UNITY_STANDALONE_LINUX
+		try
+		{
+			if (!LinuxSerialPort.IsOpen())
+			{
+				int state = LinuxSerialPort.Open(9600, 8, 1, 0, 0);
+				if (state == 0)
+				{
+					isReadThreadExit = false;
+					readThread = new Thread(ReceiveData);
+					readThread.Start(); 
+				}
+			}
+		}
+		catch(Exception ex)
+		{
+			Debug.Log(ex.ToString());
+		}
+#endif
 	}
 
 	void OnDisable()
 	{
-#if UNITY_EDITOR
-		readThread.Abort();
-		isReadThreadExit = true;
-		if (sp.IsOpen)
-		{
-			sp.DtrEnable = false;
-			sp.RtsEnable = false;
-			sp.Close();
-		}
-#endif
+		Close();
 
-#if UNITY_ANDROID
-		androidSP.Close();
-#endif
 	}
 
 	void Update()
@@ -93,13 +101,27 @@ public class TouchScreenPort : MonoBehaviour
 	{ 
 		try 
 		{ 
-#if UNITY_EDITOR
+#if UNITY_STANDALONE_WIN
 			while (!isReadThreadExit)
 			{
 				if (sp != null && sp.IsOpen)
 				{
 					byte buf = (byte)sp.ReadByte();
 					queueReadPool.Enqueue(buf);
+				}
+			}
+#endif
+#if UNITY_STANDALONE_LINUX
+			Thread.Sleep(3000);	// linux需要等2秒才能读
+			while (!isReadThreadExit)
+			{
+				if (LinuxSerialPort.IsOpen())
+				{
+					byte[] buf = LinuxSerialPort.Read();
+					if (buf.Length <= 0)
+						continue;
+					foreach(byte b in buf)
+						queueReadPool.Enqueue(b);
 				}
 			}
 #endif
@@ -160,9 +182,40 @@ public class TouchScreenPort : MonoBehaviour
 
 	public void Close()
 	{
-#if UNITY_ANDROID
-		androidSP.Close();
-#endif
+		try
+		{
+			#if UNITY_STANDALONE_WIN
+			isReadThreadExit = true;
+			if (sp.IsOpen)
+			{
+				sp.DtrEnable = false;
+				sp.RtsEnable = false;
+				sp.Close();
+			}
+			readThread.Abort();
+			#endif
+			
+			#if UNITY_ANDROID
+			androidSP.Close();
+			#endif
+			
+			#if UNITY_STANDALONE_LINUX
+			isReadThreadExit = true;
+			if (LinuxSerialPort.IsOpen())
+			{
+				LinuxSerialPort.Close();
+			}
+			if (readThread != null)
+			{
+				readThread.Abort();
+				readThread = null;
+			}
+			#endif
+		}
+		catch(Exception ex)
+		{
+			Debug.Log(ex.ToString());
+		}
 	}
 
 	protected void FilterData(ref int[] data)

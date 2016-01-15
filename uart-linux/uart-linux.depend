@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1452757043 source:/home/cx/workplace/projects/uart-linux/uart-linux.c
+	<termios.h>
+	<unistd.h>
+	<fcntl.h>
+	<sys/ioctl.h>
+	<sys/select.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"uart-linux.h"
+
+1452677983 /home/cx/workplace/projects/uart-linux/uart-linux.h
+
