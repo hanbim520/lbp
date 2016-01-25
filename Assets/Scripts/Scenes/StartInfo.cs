@@ -9,6 +9,7 @@ public class StartInfo : MonoBehaviour
 		LoadUpdateUtils();
 		LoadInputDevice();
 		LoadHIDUtils();
+//		TextDB.LoadFile();
 		if (GameData.GetInstance().deviceIndex > 0)
 		{
 //			Application.LoadLevel(Scenes.Main);

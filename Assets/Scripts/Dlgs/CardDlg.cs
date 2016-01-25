@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
@@ -132,6 +132,7 @@ public class CardDlg : MonoBehaviour
 		passwordType = 1;
 		int idx = GameData.GetInstance().language;
 		SetCalcTitle(strSysPassword[idx], Color.black);
+//		SetCalcTitle(TextDB.CardDlg_SysPassword[idx], Color.black);
 	}
 
 	private void Last10()

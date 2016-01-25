@@ -17,6 +17,13 @@ public class MainUILogic : MonoBehaviour
     public GameObject dlgCard;
 	public GameObject dlgYesNO;
 	public GameObject[] cardExplains;
+	// Particles for lottery mode
+	public GameObject win0;				// 大0中奖粒子
+	public GameObject winSmall;			// 小00 0~36 中奖粒子
+	public GameObject rectSpark0;		// 0框粒子
+	public GameObject rectSpark00;		// 00框粒子
+	public GameObject bigRectSpark;		// 大方框粒子
+	public GameObject smallRectSpark;	// 小方框粒子
 
 	public int CurChipIdx
 	{
@@ -904,6 +911,21 @@ public class MainUILogic : MonoBehaviour
 	{
 		countdown.transform.FindChild("Text").GetComponent<Text>().text = GameData.GetInstance().betTimeLimit.ToString();
 		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = 1;
+	}
+
+	// 显示彩金号码
+	public void FlashLotteries(ref List<int> lotteries)
+	{
+		if (lotteries.Count == 0)
+			return;
+
+		List<GameObject> particles = new List<GameObject>();
+
+	}
+
+	public void StopFlashLotteries()
+	{
+
 	}
 
 	public void FlashResult(int result)

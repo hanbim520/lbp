@@ -40,4 +40,16 @@ public class InputDevice : MonoBehaviour
 				gameObject.AddComponent<SerialMousePort>();
 		}
 	}
+
+	void Update()
+	{
+		if (Input.GetKeyUp(KeyCode.S))	// Check touch
+		{
+			GameEventManager.OnChangeScene(Scenes.TouchCheck);
+		}
+		else if (Input.GetKeyUp(KeyCode.Space))	// Main menu
+		{
+			GameEventManager.OnOpenKey();
+		}
+	}
 }

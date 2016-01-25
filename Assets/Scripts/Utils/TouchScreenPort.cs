@@ -120,8 +120,7 @@ public class TouchScreenPort : MonoBehaviour
 					byte[] buf = LinuxSerialPort.Read();
 					if (buf.Length <= 0)
 						continue;
-					foreach(byte b in buf)
-						queueReadPool.Enqueue(b);
+					FilterData(ref buf);
 				}
 			}
 #endif
@@ -218,7 +217,7 @@ public class TouchScreenPort : MonoBehaviour
 		}
 	}
 
-	protected void FilterData(ref int[] data)
+	protected void FilterData(ref byte[] data)
 	{
 		if (data != null && data.Length > 0 && data[0] >= 0)
 		{
@@ -244,13 +243,13 @@ public class TouchScreenPort : MonoBehaviour
 				if (iCorrectNum > 10)
 				{
 					iCorrectNum = 0;
-//					string log = "";
+					string log = "";
 					foreach (int d in filtedArray)
 					{
 						queueReadPool.Enqueue((byte)d);
-//						log += string.Format("{0:X}, ", (byte)d);
+						log += string.Format("{0:X}, ", (byte)d);
 					}
-//					DebugConsole.Log("FilterData received:" + log);
+					DebugConsole.Log("FilterData received:" + log);
 				}
 			}
 		}

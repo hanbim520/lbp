@@ -154,6 +154,10 @@ public class HIDUtils : MonoBehaviour
 			tRead.Start();
 			SendCheckInfo();
 		}
+		else
+		{
+			SetState("False");
+		}
 #endif
 	}
 
@@ -270,6 +274,28 @@ public class HIDUtils : MonoBehaviour
 				{
 					GameEventManager.OnPayCoinCallback(data[10]);
 				}
+				if (data[11] != 0)	// 投币
+				{
+					int coin = 0;
+					int sign = data[11];
+					if (sign == 0x40)
+						coin = 1;
+					else if (sign == 0x41)
+						coin = 5;
+					else if (sign == 0x42)
+						coin = 10;
+					else if (sign == 0x43)
+						coin = 20;
+					else if (sign == 0x44)
+						coin = 100;
+					else if (sign == 0x45)
+						coin = 50;
+					GameEventManager.OnReceiveCoin(coin);
+				}
+				if (data[12] != 0)	// 纸币器error号
+				{
+					Debug.Log("Bill Acceptor Happen Exception:" + data[12]);
+				}
 				if (data[54] != 0)	// 物理钥匙(原上分)
 				{
 					GameEventManager.OnOpenKey();
@@ -351,37 +377,31 @@ public class HIDUtils : MonoBehaviour
 
 	public void OpenGate()
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			int[] data = new int[]{0x58, 0x57, 0x02, 0x0E, 0xA6, flagPayCoin, 0, 0, 
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0};
-			WriteData(data, "writeUsbPort");
-		}
+		int[] data = new int[]{0x58, 0x57, 0x02, 0x0E, 0xA6, flagPayCoin, 0, 0, 
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0};
+		WriteData(data, "writeUsbPort");
 	}
 
 	public void BlowBall(int blowTime)
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			int hight = blowTime >> 8 & 0xff;
-			int low = blowTime & 0xff;
+		int hight = blowTime >> 8 & 0xff;
+		int low = blowTime & 0xff;
 
-			int[] data = new int[]{0x58, 0x57, 0x03, hight, low, flagPayCoin, 0, 0, 
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0};
-			WriteData(data, "writeUsbPort");
-		}
+		int[] data = new int[]{0x58, 0x57, 0x03, hight, low, flagPayCoin, 0, 0, 
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0};
+		WriteData(data, "writeUsbPort");
 	}
 
 	private void PrintData(ref int[] data)
@@ -432,21 +452,18 @@ public class HIDUtils : MonoBehaviour
 	// 设置退币指令位
 	public void PayCoin(int count)
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			flagPayCoin = 1;
-			int hight = count >> 8 & 0xff;
-			int low = count & 0xff;
-			int[] data = new int[]{0x58, 0x57, 0, 0, 0, flagPayCoin, hight, low,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0};
-			WriteData(data, "writeUsbPort");
-		}
+		flagPayCoin = 1;
+		int hight = count >> 8 & 0xff;
+		int low = count & 0xff;
+		int[] data = new int[]{0x58, 0x57, 0, 0, 0, flagPayCoin, hight, low,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0,
+			0, 0, 0, 0, 0, 0, 0, 0};
+		WriteData(data, "writeUsbPort");
 	}
 
 	public void StopPayCoin()
