@@ -135,8 +135,9 @@ public class ServerLogic : GameLogic
 		    hidUtils.BlowBall(time);
 		if (GameData.debug)
 		{
-			Random.seed = (int)SystemTime.time;
-            StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
+//			Random.seed = (int)SystemTime.time;
+//            StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
+            StartCoroutine(SimulateBallValue(LinuxUtils.GetRandom(0, GameData.GetInstance().maxNumberOfFields)));
 		}
     }
 
