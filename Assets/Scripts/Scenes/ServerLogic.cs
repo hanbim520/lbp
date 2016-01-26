@@ -130,14 +130,13 @@ public class ServerLogic : GameLogic
     {
 		Debug.Log("BlowBall");
 		gamePhase = GamePhase.Run;
-		int time = GameData.GetInstance().gameDifficulty + Random.Range(1200, 1500);
+		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 1500);
         if (!GameData.debug)
 		    hidUtils.BlowBall(time);
 		if (GameData.debug)
 		{
-//			Random.seed = (int)SystemTime.time;
-//            StartCoroutine(SimulateBallValue(Random.Range(0, GameData.GetInstance().maxNumberOfFields)));
-            StartCoroutine(SimulateBallValue(LinuxUtils.GetRandom(0, GameData.GetInstance().maxNumberOfFields)));
+			Utils.SetSeed();
+			StartCoroutine(SimulateBallValue(Utils.GetRandom(0, GameData.GetInstance().maxNumberOfFields)));
 		}
     }
 
@@ -206,13 +205,13 @@ public class ServerLogic : GameLogic
 			{
 				List<int> retArray = new List<int>();
 				int lotteryCount = 1;	// 彩金个数
-				Random.seed = (int)SystemTime.time;
-				lotteryCount = Random.Range(1, Mathf.Min(betCount, 6));		// 彩金个数 1~5
-				int winCount = Random.Range(1, lotteryCount);				// 中奖个数 1~4
+				Utils.SetSeed();
+				lotteryCount = Utils.GetRandom(1, Mathf.Min(betCount, 6));		// 彩金个数 1~5
+				int winCount = Utils.GetRandom(1, lotteryCount);				// 中奖个数 1~4
 				int loseCount = lotteryCount - winCount;					// 没中奖个数 1~3
 				for (int i = 0; i < winCount;)
 				{
-					int idx = Random.Range(0, betCount);
+					int idx = Utils.GetRandom(0, betCount);
 					int value = betSingle[idx];
 					if (!retArray.Contains(value))
 					{
@@ -222,7 +221,7 @@ public class ServerLogic : GameLogic
 				}
 				for (int i = 0; i < loseCount;)
 				{
-					int idx = Random.Range(0, noBetCount);
+					int idx = Utils.GetRandom(0, noBetCount);
 					int value = noBetSingle[idx];
 					if (!retArray.Contains(value))
 					{
@@ -238,16 +237,16 @@ public class ServerLogic : GameLogic
 		{
 			int noBetCount = noBetSingle.Count;
 			// 判断要不要出彩金，出的话不中。
-			Random.seed = (int)SystemTime.time;
-			int ret = Random.Range(0, 20);
+			Utils.SetSeed();
+			int ret = Utils.GetRandom(0, 20);
 			// 出彩金
 			if (ret == 12 && noBetCount > 0)
 			{
 				List<int> retArray = new List<int>();
-				int lotteryCount = Random.Range(1, Mathf.Min(noBetCount, 6));
+				int lotteryCount = Utils.GetRandom(1, Mathf.Min(noBetCount, 6));
 				for (int i = 0; i < lotteryCount;)
 				{
-					int idx = Random.Range(0, noBetCount);
+					int idx = Utils.GetRandom(0, noBetCount);
 					int value = noBetSingle[idx];
 					if (!retArray.Contains(value))
 					{

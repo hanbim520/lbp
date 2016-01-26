@@ -6,4 +6,7 @@ public static class LinuxUtils
 {
 	[DllImport ("LinuxUtils")] 
 	public extern static int GetRandom(int min, int max);
+
+	[DllImport ("LinuxUtils")] 
+	public extern static void SetSeed();
 }

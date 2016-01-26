@@ -317,4 +317,27 @@ public static class Utils
 		int power = (int)Math.Pow(10, n);
 		return (num - num / power * power) * 10 / power;
 	}
+
+	public static void SetSeed()
+	{
+		if (Application.platform == RuntimePlatform.LinuxPlayer)
+		{
+			LinuxUtils.SetSeed();
+		}
+		else
+		{
+			int seed = (int)System.DateTime.Now.ToUniversalTime().ToBinary();
+			UnityEngine.Random.seed = seed;
+		}
+	}
+
+	// Returns a random integer number between min[inclusive] and max[exclusive]
+	public static int GetRandom(int min, int max)
+	{
+		if (Application.platform == RuntimePlatform.LinuxPlayer)
+		{
+			return LinuxUtils.GetRandom(min, max);
+		}
+		return UnityEngine.Random.Range(min, max);
+	}
 }
