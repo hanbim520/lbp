@@ -9,7 +9,7 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = false;       // 是否模拟出球
+	public static bool debug = true;       // 是否模拟出球
 	public static bool controlCode = false;  // 是否打码
 
     // Setting menu
@@ -766,8 +766,8 @@ public class GameData
 	// 计算会中彩金的场次序号
 	public void CalcLotteryIdx()
 	{
-		UnityEngine.Random.seed = (int)SystemTime.time;
-		int count = UnityEngine.Random.Range(1, 10);		// 共有多少场出彩金
+		Utils.SetSeed();
+		int count = Utils.GetRandom(1, 10);					// 共有多少场出彩金
 		int sumMatch = 24 * 60 * 60 * 2 / betTimeLimit;		// 2天内的场次数
 		lotteryWinIdx.Clear();
 		for (int i = 0; i < 10; ++i)
@@ -778,7 +778,7 @@ public class GameData
 		}
 		while (lotteryWinIdx.Count >= count)
 		{
-			int index = UnityEngine.Random.Range(1, sumMatch);
+			int index = Utils.GetRandom(1, sumMatch);
 			if (!lotteryWinIdx.Contains(index))
 				lotteryWinIdx.Add(index);
 		}
