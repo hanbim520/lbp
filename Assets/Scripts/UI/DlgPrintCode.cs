@@ -192,7 +192,7 @@ public class DlgPrintCode : MonoBehaviour
         }
     }
 
-    public string GetCheckCode(long lineId, long machineId, long totalWin, long currentWin, long printTimes)
+	public string GetCheckCode(int lineId, int machineId, int totalWin, int currentWin, int printTimes)
     {
 #if UNITY_ANDROID
 		string strCrc = jo.Call<string>("GetPWCheckValue4", (long)lineId, (long)machineId, (long)totalWin, (long)currentWin, (long)printTimes);
@@ -201,7 +201,7 @@ public class DlgPrintCode : MonoBehaviour
 #if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 //		string strCrc = "";
 		IntPtr ret = EncryChip.ReturnCheckCode(lineId, machineId, totalWin, currentWin, printTimes);
-		string strCrc = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(ret);
+		string strCrc = System.Runtime.InteropServices.Marshal.PtrToStringAuto(ret);
 		EncryChip.FreeByteArray(ret);
 #endif
 		int value;

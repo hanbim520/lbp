@@ -13,7 +13,7 @@ extern "C"
 {
 // 获取四位的报账码校验码.
 // 线号	机号		总利润	当前利润		算码次数
-char* ReturnCheckCode(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount);
+char* ReturnCheckCode(int LineID, int CilentID, int MaxProfit, int Profit, int CheckCount);
 // 生成报账数据, 传给加密片.
 // crc: 校验码
 // pwstring_in: 用户输入的码(8个字节)

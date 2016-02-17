@@ -16,7 +16,7 @@ public static class EncryChip
 	public extern static void FreeByteArray(IntPtr array);
 	// 获取校验码，显示在屏幕上。
 	[DllImport ("EncryChip")]  
-	public extern static IntPtr ReturnCheckCode(long LineID, long CilentID,  long  MaxProfit, long Profit, long CheckCount);
+	public extern static IntPtr ReturnCheckCode(int LineID, int CilentID, int MaxProfit, int Profit, int CheckCount);
 	/// <summary>
 	/// 生成报账数据, 传给加密片.
 	/// </summary>

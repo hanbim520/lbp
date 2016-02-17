@@ -565,11 +565,12 @@ void FreeByteArray(unsigned char* ptr)
 	delete[] ptr;
 }
 
-char* ReturnCheckCode(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount)
+char* ReturnCheckCode(int LineID, int CilentID, int MaxProfit, int Profit, int CheckCount)
 {
     char *checkString = new char[10];
     strcpy(checkString, "123456789");
     GetPWCheckValue4((long)LineID, (long)CilentID, (long)MaxProfit, (long)Profit, (long)CheckCount, 1, 2, 12345678, checkString);
+
     return checkString;
 }
 
