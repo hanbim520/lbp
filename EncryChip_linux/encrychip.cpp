@@ -564,3 +564,41 @@ void FreeByteArray(unsigned char* ptr)
 {
 	delete[] ptr;
 }
+
+char* ReturnCheckCode(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount)
+{
+    char *checkString = new char[10];
+    strcpy(checkString, "123456789");
+    GetPWCheckValue4((long)LineID, (long)CilentID, (long)MaxProfit, (long)Profit, (long)CheckCount, 1, 2, 12345678, checkString);
+    return checkString;
+}
+
+char* CreateReportBytes(long LineID, long CilentID, long  MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in)
+{
+	char *checkstr_out = new char[32];
+	CreateCheckPWString((long)LineID, (long)CilentID, (long)MaxProfit, (long)Profit, (long)CheckCount, (long)crc, (long)pwstring_in, checkstr_out);
+	return checkstr_out;
+}
+
+char* ParserCheckData(char *recv_buff)
+{
+	char* day4byte = new char[10];
+	char* altstatus4byte = new char[10];
+	int flag = GetCheckPWStringValue(recv_buff, day4byte, altstatus4byte);	// 0:错误 1:正确
+	int *day = new int[4];
+	memcpy(day, day4byte, 4);
+
+	char* result = new char[32];
+	char* strDay = new char[10];
+	sprintf(result, "%d", flag);
+	sprintf(strDay, "%d", *day);
+	strcat(result, ":");
+	strcat(result, strDay);
+
+	delete[] day4byte;
+	delete[] altstatus4byte;
+	delete[] day;
+	delete[] strDay;
+	return result;
+}
+

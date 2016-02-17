@@ -133,7 +133,7 @@ public class ServerLogic : GameLogic
 		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 1500);
         if (!GameData.debug)
 		    hidUtils.BlowBall(time);
-		if (GameData.debug)
+		else
 		{
 			Utils.SetSeed();
 			StartCoroutine(SimulateBallValue(Utils.GetRandom(0, GameData.GetInstance().maxNumberOfFields)));
@@ -326,7 +326,7 @@ public class ServerLogic : GameLogic
 
         if (!GameData.debug)
 		    hidUtils.OpenGate();
-		if (GameData.debug)
+		else
 			StartCoroutine(SimulateCloseGate());
     }
 

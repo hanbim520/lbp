@@ -16,9 +16,9 @@ public static class EncryChip
 	public extern static void FreeByteArray(IntPtr array);
 	// 获取校验码，显示在屏幕上。
 	[DllImport ("EncryChip")]  
-	public extern static String GetPWCheckValue4(long LineID, long CilentID,  long  MaxProfit, long Profit, long CheckCount);
+	public extern static IntPtr ReturnCheckCode(long LineID, long CilentID,  long  MaxProfit, long Profit, long CheckCount);
 	/// <summary>
-	/// 验证用户输入的码是否正确
+	/// 生成报账数据, 传给加密片.
 	/// </summary>
 	/// <returns>把返回的数组传给加密片.</returns>
 	/// <param name="LineID">线号.</param>
@@ -29,13 +29,13 @@ public static class EncryChip
 	/// <param name="crc">校验码.</param>
 	/// <param name="pwstring_in">用户输入.</param>
 	[DllImport ("EncryChip")]  
-	public extern static byte[] CreateCheckPWString(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in);
+	public extern static IntPtr CreateReportBytes(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in);
 	/// <summary>
 	/// 解析加密片传回的打码结果
 	/// </summary>
 	/// <returns>解析的结果.</returns>
 	/// <param name="recv_buff">加密片传回的数据.</param>
 	[DllImport ("EncryChip")]  
-	public extern static String GetCheckPWStringValue(byte[] recv_buff);
-
+//	public extern static String GetCheckPWStringValue(byte[] recv_buff);
+	public extern static IntPtr ParserCheckData(byte[] recvBuff);
 }

@@ -11,16 +11,17 @@ void  DWORDTOBUFF(unsigned char *buff, unsigned long vlaue);
 unsigned long  BUFFTODWORD(unsigned char *buff);
 extern "C"
 {
-//报账码校验, 获取四位的校验码.
-//线号	机号		总利润	当前利润		算码次数		是否PC	机器类别		公式
-int GetPWCheckValue4(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount, BOOL IsPC, char Type, long UserFunc, char *checkString);
+// 获取四位的报账码校验码.
+// 线号	机号		总利润	当前利润		算码次数
+char* ReturnCheckCode(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount);
+// 生成报账数据, 传给加密片.
 // crc: 校验码
 // pwstring_in: 用户输入的码(8个字节)
-// checkstr_out: 要传给加密片的数据(32个字节)
-void CreateCheckPWString(long LineID, long CilentID, long  MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in, char *checkstr_out);
+// return: 要传给加密片的数据(32个字节)
+char* CreateReportBytes(long LineID, long CilentID, long  MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in);
+// 解析加密片传回的打码结果
 // recv_buff: 从加密片得到的数据(有效字节12个——去掉指令头和尾部无用字节)
-// day4byte: 4个字节的天数(long型)
-int GetCheckPWStringValue(char *recv_buff, char *day4byte, char *altstatus4byte);
+char* ParserCheckData(char *recv_buff);
 // 解密从金手指传回来的数据
 // Input: 61个字节数组
 // Output: 59个字节数组

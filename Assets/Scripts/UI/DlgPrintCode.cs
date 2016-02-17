@@ -199,7 +199,10 @@ public class DlgPrintCode : MonoBehaviour
 #endif
 
 #if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
-		string strCrc = "";
+//		string strCrc = "";
+		IntPtr ret = EncryChip.ReturnCheckCode(lineId, machineId, totalWin, currentWin, printTimes);
+		string strCrc = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(ret);
+		EncryChip.FreeByteArray(ret);
 #endif
 		int value;
 		if (int.TryParse(strCrc, out value))
@@ -212,6 +215,7 @@ public class DlgPrintCode : MonoBehaviour
 
 	public void CheckUserInput(long lineId, long machineId, long totalWin, long currentWin, long printTimes, long crc, long userInput)
 	{
+		int dataSize = 32;
 #if UNITY_ANDROID
 		AndroidJavaObject rev = jo.Call<AndroidJavaObject>("CreateCheckPWString", 
 		                                                   (long)lineId, (long)machineId, (long)totalWin, (long)currentWin, (long)printTimes, (long)crc, (long)userInput);
@@ -219,13 +223,17 @@ public class DlgPrintCode : MonoBehaviour
 #endif
 
 #if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
-		byte[] buf = new byte[61];
+//		byte[] buf = new byte[61];
+		IntPtr ret = EncryChip.CreateReportBytes(lineId, machineId, totalWin, currentWin, printTimes, crc, userInput);
+		byte[] buf = new byte[dataSize];
+		System.Runtime.InteropServices.Marshal.Copy(ret, buf, 0, dataSize);
+		EncryChip.FreeByteArray(ret);
 #endif
 
 		List<int> data = new List<int>();
 		data.Add(0x42);
 		data.Add(0x5a);
-		data.Add(32);	// 数据长度
+		data.Add(dataSize);	// 数据长度
 		foreach(byte b in buf)
 			data.Add((int)b);
 		while (data.Count < 64)

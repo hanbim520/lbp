@@ -309,12 +309,12 @@ public class HIDUtils : MonoBehaviour
             else if (data[0] == 0x42 && data[1] == 0x5a)
             {
 //                PrintData(ref data);
-#if UNITY_ANDROID
 				List<byte> col = new List<byte>();
-                for (int i = 3; i < 17; ++i)
-                    col.Add((byte)data[i]);
+				for (int i = 3; i < 17; ++i)
+					col.Add((byte)data[i]);
 				byte[] sendData = col.ToArray();
-                IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(sendData);
+#if UNITY_ANDROID
+				IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(sendData);
                 jvalue[] blah = new jvalue[1];
                 blah[0].l = pArr;
 
@@ -324,7 +324,9 @@ public class HIDUtils : MonoBehaviour
 #endif
 
 #if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
-				string result = "";
+				IntPtr ret = EncryChip.ParserCheckData(sendData);
+				string result = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(ret);
+				EncryChip.FreeByteArray(ret);
 #endif
 				char[] split = {':'};
 				string[] word = result.Split(split);
