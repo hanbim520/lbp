@@ -574,7 +574,7 @@ char* ReturnCheckCode(int LineID, int CilentID, int MaxProfit, int Profit, int C
     return checkString;
 }
 
-char* CreateReportBytes(long LineID, long CilentID, long  MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in)
+char* CreateReportBytes(int LineID, int CilentID, int  MaxProfit, int Profit, int CheckCount, int crc, int pwstring_in)
 {
 	char *checkstr_out = new char[32];
 	CreateCheckPWString((long)LineID, (long)CilentID, (long)MaxProfit, (long)Profit, (long)CheckCount, (long)crc, (long)pwstring_in, checkstr_out);
@@ -595,6 +595,7 @@ char* ParserCheckData(char *recv_buff)
 	sprintf(strDay, "%d", *day);
 	strcat(result, ":");
 	strcat(result, strDay);
+	printf("\nflag:%d\nday:%s\n", flag, strDay);
 
 	delete[] day4byte;
 	delete[] altstatus4byte;

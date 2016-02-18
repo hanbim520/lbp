@@ -18,7 +18,7 @@ char* ReturnCheckCode(int LineID, int CilentID, int MaxProfit, int Profit, int C
 // crc: 校验码
 // pwstring_in: 用户输入的码(8个字节)
 // return: 要传给加密片的数据(32个字节)
-char* CreateReportBytes(long LineID, long CilentID, long  MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in);
+char* CreateReportBytes(int LineID, int CilentID, int  MaxProfit, int Profit, int CheckCount, int crc, int pwstring_in);
 // 解析加密片传回的打码结果
 // recv_buff: 从加密片得到的数据(有效字节12个——去掉指令头和尾部无用字节)
 char* ParserCheckData(char *recv_buff);

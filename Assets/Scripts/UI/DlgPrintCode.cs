@@ -213,7 +213,7 @@ public class DlgPrintCode : MonoBehaviour
         return null;
     }
 
-	public void CheckUserInput(long lineId, long machineId, long totalWin, long currentWin, long printTimes, long crc, long userInput)
+	public void CheckUserInput(int lineId, int machineId, int totalWin, int currentWin, int printTimes, int crc, int userInput)
 	{
 		int dataSize = 32;
 #if UNITY_ANDROID

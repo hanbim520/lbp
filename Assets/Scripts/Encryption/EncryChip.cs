@@ -29,7 +29,7 @@ public static class EncryChip
 	/// <param name="crc">校验码.</param>
 	/// <param name="pwstring_in">用户输入.</param>
 	[DllImport ("EncryChip")]  
-	public extern static IntPtr CreateReportBytes(long LineID, long CilentID, long MaxProfit, long Profit, long CheckCount, long crc, long pwstring_in);
+	public extern static IntPtr CreateReportBytes(int LineID, int CilentID, int MaxProfit, int Profit, int CheckCount, int crc, int pwstring_in);
 	/// <summary>
 	/// 解析加密片传回的打码结果
 	/// </summary>

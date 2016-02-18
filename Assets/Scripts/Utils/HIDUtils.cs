@@ -337,12 +337,14 @@ public class HIDUtils : MonoBehaviour
 					{
 						// 打码正确
 						if (value == 1)
+						{
+							if (int.TryParse(word[1], out days))
+								GameData.GetInstance().remainMins = 24 * 60 * days;
 							GameEventManager.OnPrintCodeSuccess();
+						}
 						else
 							GameEventManager.OnPrintCodeFail();
 					}
-					if (int.TryParse(word[1], out days))
-						GameData.GetInstance().remainMins = 24 * 60 * days;
 				}
             }
 		}
