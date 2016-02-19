@@ -44,9 +44,9 @@ public class RecordBar : MonoBehaviour
 		int count = GameData.GetInstance().records.Count;
 		if (count == 0)
 		{
-			imgRed.fillAmount = 0;
-			imgBlue.fillAmount = 0;
-			imgGreen.fillAmount = 0;
+			imgRed.fillAmount = 0.42f;
+			imgBlue.fillAmount = 0.42f;
+			imgGreen.fillAmount = 0.16f + 0.42f;
 			imgRed.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(0);
 			imgBlue.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(0);
 //			imgGreen.transform.GetChild(0).GetComponent<RecordBarText>().Refresh(0);
@@ -91,9 +91,11 @@ public class RecordBar : MonoBehaviour
 		float rPersentage = (float)sumRed / count;
 		float gPersentage = (float)sumGreen / count;
 		float bPersentage = (float)sumBlue / count;
-		imgRed.fillAmount = rPersentage;
-		imgBlue.fillAmount = bPersentage;
-		imgGreen.fillAmount = gPersentage + rPersentage;
+        float minFillAmount = 0.16f;
+        float maxFillAmount = 0.68f;
+        imgRed.fillAmount = Mathf.Clamp(rPersentage - minFillAmount / 2, minFillAmount, maxFillAmount);
+        imgBlue.fillAmount = Mathf.Clamp(bPersentage - minFillAmount / 2, minFillAmount, maxFillAmount);
+        imgGreen.fillAmount = Mathf.Clamp(minFillAmount + gPersentage + imgRed.fillAmount, minFillAmount * 2, 1.0f - minFillAmount);
 
 		int r = Mathf.RoundToInt(rPersentage * 100);
 		int g = Mathf.RoundToInt(gPersentage * 100);

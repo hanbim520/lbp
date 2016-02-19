@@ -8,27 +8,25 @@ public class RecordBarText : MonoBehaviour
 
 	public void Refresh(int persentage)
 	{
-		if (persentage > 0)
-			GetComponent<Text>().text = persentage.ToString() + "%";
-		else
-		{
-			GetComponent<Text>().text = string.Empty;
-			return;
-		}
+        // 更新数字
+        GetComponent<Text>().text = string.Format("{0}%", Mathf.Max(persentage, 0));
 
-		float fillAccount = bar.fillAmount;
+        // 更新数字位置
+        float minAccount = 0.16f;
+        float fillAccount = Mathf.Max(bar.fillAmount, minAccount);
 		float parentWidth = transform.parent.GetComponent<RectTransform>().rect.width;
-		if (bar.gameObject.name == "Red")
+//		if (bar.gameObject.name == "Red")
+//		{
+//			transform.localPosition = new Vector3(-parentWidth * (1.0f - fillAccount) * 0.50f, 0, 0);
+//		}
+//		else if (bar.gameObject.name == "Blue")
+//		{
+//			transform.localPosition = new Vector3(parentWidth * (1.0f - fillAccount) * 0.50f, 0, 0);
+//		}
+//        else if (bar.gameObject.name == "Green")
+		if (bar.gameObject.name == "Green")
 		{
-			transform.localPosition = new Vector3(-parentWidth * (1.0f - fillAccount) * 0.50f, 0, 0);
-		}
-		else if (bar.gameObject.name == "Blue")
-		{
-			transform.localPosition = new Vector3(parentWidth * (1.0f - fillAccount) * 0.50f, 0, 0);
-		}
-		else if (bar.gameObject.name == "Green")
-		{
-			float redFillAcount = transform.parent.parent.FindChild("Red").GetComponent<Image>().fillAmount;
+            float redFillAcount = Mathf.Max(transform.parent.parent.FindChild("Red").GetComponent<Image>().fillAmount, minAccount);
 			float x = -parentWidth * (1.0f - redFillAcount) * 0.50f + fillAccount * 0.50f * parentWidth;
 			transform.localPosition = new Vector3(x, 0, 0);
 		}
