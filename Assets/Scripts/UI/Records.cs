@@ -46,15 +46,18 @@ public class Records : MonoBehaviour
 
             if (!records[j].activeSelf)
                 records[j].SetActive(true);
+			float redPosY = 24.0f;
+			float greenPosY = 12.0f;
+			float blackPosY = 1.0f;
             if (GameData.GetInstance().colorTable[r[i]] == ResultType.Red)
             {
 				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[0];
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
 				if (j != 0)
-					records[j].transform.localPosition = new Vector3(pos.x, 21.9f, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, redPosY, 0);
 				else
-					records[j].transform.localPosition = new Vector3(pos.x, 7.9f, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, greenPosY, 0);
             }
             else if (GameData.GetInstance().colorTable[r[i]] == ResultType.Black)
             {
@@ -62,19 +65,19 @@ public class Records : MonoBehaviour
                 records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
 				if (j != 0)
-					records[j].transform.localPosition = new Vector3(pos.x, -6.1f, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, blackPosY, 0);
 				else
-					records[j].transform.localPosition = new Vector3(pos.x, 7.9f, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, greenPosY, 0);
             }
             else
             {
-				if (r[i] == 0)
-					records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[2];
-				else
-					records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[3];
-                records[j].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
+				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[2];
+				string text = "0";
+				if (r[i] != 0)
+					text = "00";
+                records[j].transform.FindChild("Text").GetComponent<Text>().text = text;
 				Vector3 pos = records[j].transform.localPosition;
-				records[j].transform.localPosition = new Vector3(pos.x, 7.9f, 0);
+				records[j].transform.localPosition = new Vector3(pos.x, greenPosY, 0);
             }
         }
     }
