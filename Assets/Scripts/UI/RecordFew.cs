@@ -8,7 +8,7 @@ public class RecordFew : MonoBehaviour
 {
     public GameObject[] fewGO;
     public Sprite[] images;
-	private List<int> fewValues = new List<int>();
+	private Dictionary<int, int> fewValues = new Dictionary<int, int>();
     private int fixedCount;
 
 	void Start()
@@ -48,40 +48,42 @@ public class RecordFew : MonoBehaviour
         lst.Sort(delegate(KeyValuePair<int, int> s1, KeyValuePair<int, int> s2) {return s1.Value.CompareTo(s2.Value);});
 
         fewValues.Clear();
-        for (int i = 0; i < fixedCount; ++i)
-        {
-            fewValues.Add(lst[i].Key);
-        }
+		foreach(KeyValuePair<int, int> kvp in lst)
+			fewValues.Add(kvp.Key, kvp.Value);
+
         RefreshView();
 	}
 
 	public void RefreshView()
 	{
-        for (int i = 0; i < fewValues.Count; ++i)
+		int count = 0;
+		foreach (int key in fewValues.Keys)
         {
-            if (i > fixedCount)
+            if (count >= fixedCount)
                 break;
 
-            if (!fewGO[i].activeSelf)
-                fewGO[i].SetActive(true);
-            if (GameData.GetInstance().colorTable[fewValues[i]] == ResultType.Red)
+            if (!fewGO[count].activeSelf)
+				fewGO[count].SetActive(true);
+			if (GameData.GetInstance().colorTable[key] == ResultType.Red)
             {
-				fewGO[i].transform.FindChild("Image").GetComponent<Image>().overrideSprite = images[0];
-                fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = fewValues[i].ToString();
+				fewGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[0];
+				fewGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = key.ToString();
             }
-            else if (GameData.GetInstance().colorTable[fewValues[i]] == ResultType.Black)
+			else if (GameData.GetInstance().colorTable[key] == ResultType.Black)
             {
-				fewGO[i].transform.FindChild("Image").GetComponent<Image>().overrideSprite = images[1];
-                fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = fewValues[i].ToString();
+				fewGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[1];
+				fewGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = key.ToString();
             }
             else
             {
-				if (fewValues[i] == 0)
-					fewGO[i].transform.FindChild("Image").GetComponent<Image>().overrideSprite = images[2];
+				fewGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[2];
+				if (key == 0)
+					fewGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = "0";
 				else
-					fewGO[i].transform.FindChild("Image").GetComponent<Image>().overrideSprite = images[3];
-				fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
+					fewGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = "00";
             }
+			fewGO[count].transform.GetChild(1).FindChild("Text").GetComponent<Text>().text = string.Format("x{0}", fewValues[key]);
+			++count;
         }
 	}
 }

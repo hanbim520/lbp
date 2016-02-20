@@ -6,14 +6,14 @@ using System.Collections.Generic;
 // 出现最多的5个号
 public class RecordMost : MonoBehaviour
 {
-    public GameObject[] fewGO;
+    public GameObject[] mostGO;
     public Sprite[] images;
-    private List<int> fewValues = new List<int>();
+	private Dictionary<int, int> mostValues = new Dictionary<int, int>();
     private int fixedCount;
     
     void Start()
     {
-        fixedCount = fewGO.Length;
+        fixedCount = mostGO.Length;
         HandleRefreshRecord();
         GameEventManager.RefreshRecord += HandleRefreshRecord;
     }
@@ -27,64 +27,63 @@ public class RecordMost : MonoBehaviour
     {
         if (GameData.GetInstance().records.Count == 0)
         {
-            foreach (GameObject item in fewGO)
+            foreach (GameObject item in mostGO)
             {
                 item.SetActive(false);
             }
             return;
         }
         
-        Dictionary<int, int> dict = new Dictionary<int, int>();
+		mostValues.Clear();
 		int num = GameData.GetInstance().maxNumberOfFields;
 		for (int i = 0; i < num; ++i)
         {
-            dict.Add(i, 0);
+			mostValues.Add(i, 0);
         }
         foreach (int item in GameData.GetInstance().records)
         {
-            dict[item] += 1;
+			mostValues[item] += 1;
         }
-        List<KeyValuePair<int, int>> lst = new List<KeyValuePair<int, int>>(dict);
+		List<KeyValuePair<int, int>> lst = new List<KeyValuePair<int, int>>(mostValues);
         lst.Sort(delegate(KeyValuePair<int, int> s1, KeyValuePair<int, int> s2) {return s2.Value.CompareTo(s1.Value);});
-        
-        fewValues.Clear();
-        for (int i = 0; i < fixedCount; ++i)
-        {
-			if (lst[i].Value > 0)
-            	fewValues.Add(lst[i].Key);
-			else
-				break;
-        }
+
+		mostValues.Clear();
+		foreach(KeyValuePair<int, int> kvp in lst)
+			mostValues.Add(kvp.Key, kvp.Value);
+
         RefreshView();
     }
     
     public void RefreshView()
     {
-        for (int i = 0; i < fewValues.Count; ++i)
+		int count = 0;
+		foreach (int key in mostValues.Keys)
         {
-			if (i > fixedCount || fewValues[i] == 0)
+			if (count >= fixedCount || mostValues[key] == 0)
                 break;
 
-            if (!fewGO[i].activeSelf)
-                fewGO[i].SetActive(true);
-            if (GameData.GetInstance().colorTable[fewValues[i]] == ResultType.Red)
+            if (!mostGO[count].activeSelf)
+				mostGO[count].SetActive(true);
+            if (GameData.GetInstance().colorTable[key] == ResultType.Red)
             {
-				fewGO[i].transform.FindChild("Image").GetComponent<Image>().overrideSprite = images[0];
-                fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = fewValues[i].ToString();
+				mostGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[0];
+				mostGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = key.ToString();
             }
-            else if (GameData.GetInstance().colorTable[fewValues[i]] == ResultType.Black)
+            else if (GameData.GetInstance().colorTable[key] == ResultType.Black)
             {
-				fewGO[i].transform.FindChild("Image").GetComponent<Image>().overrideSprite = images[1];
-                fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = fewValues[i].ToString();
+				mostGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[1];
+				mostGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = key.ToString();
             }
             else
             {
-				if (fewValues[i] == 0)
-					fewGO[i].transform.FindChild("Image").GetComponent<Image>().overrideSprite = images[2];
-                else
-					fewGO[i].transform.FindChild("Image").GetComponent<Image>().overrideSprite = images[3];
-				fewGO[i].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
+				mostGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[2];
+				if (key == 0)
+					mostGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = "0";
+				else
+					mostGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = "00";
             }
+			mostGO[count].transform.GetChild(1).FindChild("Text").GetComponent<Text>().text = string.Format("x{0}", mostValues[key]);
+			++count;
         }
     }
 }
