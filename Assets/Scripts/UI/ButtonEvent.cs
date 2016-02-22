@@ -9,6 +9,9 @@ public class ButtonEvent : MonoBehaviour
 	public string inputDownEvent;
 	public Sprite normalSprite;
 	public Sprite pressedSprite;
+	public bool autoDownAnim = false;
+
+	private bool alreadyDownAnim = false;
 
 	public void OnInputUp(Transform hitObject)
 	{
@@ -19,6 +22,11 @@ public class ButtonEvent : MonoBehaviour
 		if (normalSprite != null)
 		{
 			hitObject.GetComponent<Image>().sprite = normalSprite;
+		}
+		if (autoDownAnim && alreadyDownAnim)
+		{
+			alreadyDownAnim = false;
+			transform.localPosition -= new Vector3(0, -2.0f, 0);
 		}
 	}
 
@@ -31,6 +39,12 @@ public class ButtonEvent : MonoBehaviour
 		if (pressedSprite != null)
 		{
 			hitObject.GetComponent<Image>().sprite = pressedSprite;
+
+		}
+		if (autoDownAnim && !alreadyDownAnim)
+		{
+			alreadyDownAnim = true;
+			transform.localPosition += new Vector3(0, -2.0f, 0);
 		}
 	}
 }

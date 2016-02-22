@@ -325,32 +325,32 @@ public class MainUILogic : MonoBehaviour
 	{
 		betChipsRoot = GameObject.Find("BetChips");
 		string path = "Bet Chips/";
-		float y = -508.0f;
+		float y = -502.0f;
 		float start = 0.0f, dist = 0.0f;
 		int num = GameData.GetInstance().maxNumberOfChips;
 		if (num == 6)
 		{
-			start = -614.0f;
-			dist = 93;
+			start = -627.5f;
+			dist = 86;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 5)
 		{
-			start = -577.0f;
+			start = -620.0f;
 			dist = 100;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 4)
 		{
-			start = -577.0f;
+			start = -600.0f;
 			dist = 130;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 3)
 		{
-			start = -537.0f;
+			start = -580.0f;
 			dist = 160;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 2)
 		{
-			start = -457.0f;
+			start = -500.0f;
 			dist = 160;
 		}
 		else if (GameData.GetInstance().maxNumberOfChips == 1)
@@ -387,6 +387,12 @@ public class MainUILogic : MonoBehaviour
 
 	public void ClearEvent(Transform hitObject)
 	{
+		if (eraser.activeSelf)
+		{
+			eraser.SetActive(false);
+			mouseIcon.gameObject.SetActive(true);
+			return;
+		}
 		if (fieldChipsRoot.transform.childCount == 0 || gameLogic.LogicPhase != GamePhase.Countdown)
 			return;
 
@@ -401,6 +407,11 @@ public class MainUILogic : MonoBehaviour
 	// 清除桌面筹码 并返还给玩家
 	public void ClearAllEvent(Transform hitObject)
 	{
+		if (eraser.activeSelf)
+		{
+			eraser.SetActive(false);
+			mouseIcon.gameObject.SetActive(true);
+		}
 		if (fieldChipsRoot.transform.childCount == 0 || gameLogic.LogicPhase != GamePhase.Countdown)
 			return;
 
@@ -797,6 +808,11 @@ public class MainUILogic : MonoBehaviour
 
 	public void ChipButtonEvent(Transform hitObject)
 	{
+		if (eraser.activeSelf)
+		{
+			eraser.SetActive(false);
+			mouseIcon.gameObject.SetActive(true);
+		}
 		if (gameLogic.LogicPhase != GamePhase.Countdown)
 			return;
 
@@ -857,6 +873,7 @@ public class MainUILogic : MonoBehaviour
 			}
 
 			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+			eraser.transform.localPosition = mouseIcon.localPosition;
 		}
 		else if (InputEx.GetInputUp())
 		{
@@ -866,6 +883,7 @@ public class MainUILogic : MonoBehaviour
 				return;
 
             mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+			eraser.transform.localPosition = mouseIcon.localPosition;
 
             if (downHitObject != null)
             {
@@ -884,6 +902,11 @@ public class MainUILogic : MonoBehaviour
 	public void Countdown()
 	{
 		Debug.Log("ui Countdown");
+		if (eraser.activeSelf)
+		{
+			eraser.SetActive(false);
+			mouseIcon.gameObject.SetActive(true);
+		}
 		timeLimit = GameData.GetInstance().betTimeLimit;
 		ResetCountdown();
 		Timer t = TimerManager.GetInstance().CreateTimer(1, TimerType.Loop, timeLimit);
@@ -930,6 +953,11 @@ public class MainUILogic : MonoBehaviour
 
 	public void FlashResult(int result)
 	{
+		if (eraser.activeSelf)
+		{
+			eraser.SetActive(false);
+			mouseIcon.gameObject.SetActive(true);
+		}
         string strResult = "";
         if (result != 37)
             strResult = result.ToString();
