@@ -18,6 +18,7 @@ public static class GameEventManager
     public delegate void NetworkReadyEvent(bool value);
     public delegate void ChangeSceneEvent(string sceneName);
 	public delegate void LotteryChangeEvent(int digit);
+	public delegate void PromptEvent(int digit);
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
@@ -42,6 +43,7 @@ public static class GameEventManager
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
+	public static event PromptEvent Prompt;
 
 	public static void TriggerOpenSerial()
 	{
@@ -232,5 +234,10 @@ public static class GameEventManager
 	public static void OnLotteryChange(int value)
 	{
 		if (LotteryChange != null) LotteryChange(value); 
+	}
+
+	public static void OnPrompt(int promptId)
+	{
+		if (Prompt != null) Prompt(promptId);
 	}
 }

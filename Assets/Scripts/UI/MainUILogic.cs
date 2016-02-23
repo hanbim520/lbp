@@ -914,6 +914,7 @@ public class MainUILogic : MonoBehaviour
 		t.OnComplete += CountdownComplete;
 		t.Start();
 		AudioController.Play("makeyourbets");
+		GameEventManager.OnPrompt(PromptId.PleaseBet);
 	}
 
 	private void CountdownTick()
@@ -928,6 +929,7 @@ public class MainUILogic : MonoBehaviour
 		Debug.Log("ui CountdownComplete");
 		GameEventManager.OnEndCountdown();
 		AudioController.Play("nomorebets");
+		GameEventManager.OnPrompt(PromptId.NoMoreBet);
 	}
 
 	public void ResetCountdown()

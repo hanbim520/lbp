@@ -117,3 +117,10 @@ public class AccountItem
 	public int totalWinnings;
 	public int card;
 }
+
+public struct PromptId
+{
+	public static int None 		= -1;
+	public static int PleaseBet = 0;
+	public static int NoMoreBet = 1;
+}
