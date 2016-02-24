@@ -859,7 +859,7 @@ public class MainUILogic : MonoBehaviour
 			{
 				for (int i = 0; i < hit.Length; ++i)
 				{
-					if (hit[i].collider.tag == "Dialog")
+					if (hit[i].collider.tag == "Dialog")	// 弹出框按钮 相当于Dialog button
 					{
 						idx = i;
 						break;
