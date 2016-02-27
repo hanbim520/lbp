@@ -167,6 +167,7 @@ public class ServerLogic : GameLogic
 		clientBetFields.Clear();
 		foreach (KeyValuePair<string, int> item in betFields)
 		{
+			// 保存主机台的压分情况
 			clientBetFields.Add(item.Key, item.Value);
 		}
 		// 单点压分号码
@@ -267,12 +268,18 @@ public class ServerLogic : GameLogic
 		string msg = NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue;
 		if (GameData.GetInstance().lotteryEnable)
 		{
+			Debug.Log("lottery able");
 			int[] lotteries = CalcLottery();
 			foreach (int num in lotteries)
 			{
+				print("lottery:" + num);
 				msg += string.Format(":{0}", num);
 				lotteryValues.Add(num);
 			}
+		}
+		else
+		{
+			Debug.Log("lottery disable");
 		}
 		host.SendToAll(msg);
 		GameData.GetInstance().AddBeginSessions();
