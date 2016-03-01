@@ -30,6 +30,14 @@ public class ServerLogic : GameLogic
             GetComponent<UHost>().enabled = true;
         Init();
         RegisterListener();
+
+		List<int> l = new List<int>();
+		l.Add(1);
+		l.Add(2);
+		l.Add(36);
+		l.Add(0);
+		l.Add(37);
+		StartCoroutine(ui.FlashLotteries(l));
 	}
 
     protected override void OnDestroy()
@@ -293,7 +301,9 @@ public class ServerLogic : GameLogic
 		}
 		ui.FlashResult(ballValue);
 		if (GameData.GetInstance().lotteryEnable)
-			ui.FlashLotteries(ref lotteryValues);
+		{
+			StartCoroutine(ui.FlashLotteries(lotteryValues));
+		}
 		StartCoroutine(Compensate());
 	}
 

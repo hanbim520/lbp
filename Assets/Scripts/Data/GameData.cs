@@ -9,7 +9,7 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = true;       // 是否模拟出球
+	public static bool debug = false;       // 是否模拟出球
 	public static bool controlCode = false;  // 是否打码
 
     // Setting menu
@@ -91,7 +91,7 @@ public class GameData
     }
 
 
-    private int _lineId;        // 线号
+    private int _lineId = 586;        // 线号
     public int lineId
     {
         get 
@@ -110,7 +110,7 @@ public class GameData
         }
     }
 
-    private int _machineId;		// 机台号 8位
+	private int _machineId = 88111127;		// 机台号 8位
     public int machineId
     {
         get 

@@ -11,7 +11,10 @@ public class MouseRay : MonoBehaviour
 		Utils.UISpaceToScreenSpace(pos.x, pos.y, out sx, out sy);
 		RaycastHit2D[] hit = Physics2D.RaycastAll(new Vector2(sx, sy), Vector2.zero);
 		if (hit.Length == 0)
+		{
+			GameEventManager.OnOddsPrompt(0);
 			return;
+		}
 
 		bool bFound = false;
 		for (int i = 0; i < hit.Length; ++i)

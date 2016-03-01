@@ -939,18 +939,90 @@ public class MainUILogic : MonoBehaviour
 	}
 
 	// 显示彩金号码
-	public void FlashLotteries(ref List<int> lotteries)
+	public IEnumerator FlashLotteries(List<int> lotteries)
 	{
+		print("FlashLotteries");
 		if (lotteries.Count == 0)
-			return;
+			yield break;
 
 		List<GameObject> particles = new List<GameObject>();
 
+		GameObject root = GameObject.Find("Canvas/LotteryEffectRoot");
+		string resPath = "Effects/";
+		Object prefab = (Object)Resources.Load(resPath + "BigRectSpark");
+		GameObject bigRect = (GameObject)Instantiate(prefab);
+		bigRect.transform.SetParent(root.transform);
+		bigRect.transform.localPosition = new Vector3(-40, 0, 0);
+		bigRect.transform.localScale = Vector3.one;
+
+		yield return new WaitForSeconds(3.0f);
+		Destroy(bigRect);
+
+		List<GameObject> lights = new List<GameObject>();
+		prefab = (Object)Resources.Load(resPath + "blue light");
+		foreach (int num in lotteries)
+		{
+			string refrenceName = num.ToString();
+			if (num == 37)
+				refrenceName = "00";
+			string chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Classic/Choose Effect/" : "Canvas/38 Fields/Classic/Choose Effect/";
+			Vector3 endPos = GameObject.Find(chooseEffectPath + refrenceName).transform.localPosition;
+			print("endpos:" + endPos);
+			Vector3 startPos = new Vector3(-673, 239, 0);
+			GameObject bluelight = (GameObject)Instantiate(prefab);
+			bluelight.transform.SetParent(root.transform);
+			bluelight.transform.localPosition = startPos;
+			bluelight.transform.localScale = Vector3.one;
+			float angle = Vector3.Angle(endPos - startPos, Vector3.down);	
+			bluelight.transform.localEulerAngles = new Vector3(0, 0, angle);
+			float width = bluelight.GetComponent<RectTransform>().rect.width;
+			bluelight.GetComponent<RectTransform>().sizeDelta = new Vector2(width, Vector3.Distance(endPos, startPos));
+			bluelight.name = num + "_light";
+			lights.Add(bluelight);
+		}
+
+		yield return new WaitForSeconds(1.0f);
+		foreach (GameObject light in lights)
+		{
+			light.SetActive(false);
+			Destroy(light);
+		}
+
+		foreach (int num in lotteries)
+		{
+			string prefabname = "SmallRectSpark";
+			string refrenceName = num.ToString();
+			if (num == 0)
+			{
+				if (GameData.GetInstance().maxNumberOfFields == 37)
+					prefabname = "RectSpark0";
+				else
+					prefabname = "RectSpark00";
+			}
+			else if (num == 37)
+			{
+				prefabname = "RectSpark00";
+				refrenceName = "00";
+			}
+			prefab = (Object)Resources.Load(resPath + prefabname);
+			GameObject smallRect = (GameObject)Instantiate(prefab);
+			smallRect.transform.SetParent(root.transform);
+			string chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Classic/Choose Effect/" : "Canvas/38 Fields/Classic/Choose Effect/";
+			smallRect.transform.localPosition = GameObject.Find(chooseEffectPath + refrenceName).transform.localPosition;
+			smallRect.transform.localScale = Vector3.one;
+		}
+
+		prefab = null;
 	}
 
 	public void StopFlashLotteries()
 	{
-
+		GameObject root = GameObject.Find("Canvas/LotteryEffectRoot");
+		foreach (Transform t in root.transform)
+		{
+			t.gameObject.SetActive(false);
+			Destroy(t.gameObject);
+		}
 	}
 
 	public void FlashResult(int result)
