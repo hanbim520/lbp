@@ -21,7 +21,8 @@ public class GoldenRain : MonoBehaviour
 			GameObject gold = (GameObject)Instantiate(prefab);
 			gold.transform.SetParent(transform);
 			gold.transform.localScale = Vector3.one;
-			float x = Utils.GetRandom(-664, 664);
+            Random.seed = i;
+            float x = Random.Range(-664.0f, 664.0f);
 			float y = Random.Range(320.0f, 480.0f);
 			gold.transform.localPosition = new Vector3(x, y, 0);
 			golds.Add(gold);
@@ -36,6 +37,7 @@ public class GoldenRain : MonoBehaviour
 		for (int i = 0; i < transform.childCount; ++i)
 		{
 			Transform t = transform.GetChild(i);
+            Random.seed = i;
 			iTween.MoveTo(t.gameObject, iTween.Hash("y", -460, "islocal", true, "time", Random.Range(3.0f, 5.0f), "easetype", iTween.EaseType.easeInCubic,
 			                                "oncomplete", "OnComplete", "oncompletetarget", gameObject, "oncompleteparams", t.gameObject));
 		}

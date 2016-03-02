@@ -88,6 +88,10 @@ public class ClientLogic : GameLogic
 		{
 			SendBetRecords();
 		}
+        else if (instr == NetInstr.LotteryNum)
+        {
+            HandleLotteryNums(ref words);
+        }
 	}
 
 	// 发送当前局的压分记录
@@ -238,6 +242,7 @@ public class ClientLogic : GameLogic
         betFields.Clear();
 		lotteryValues.Clear();
         ui.StopFlash();
+        ui.StopFlashLotteries();
     }
 
     private void NotifyMsg(ref string msg)
@@ -335,6 +340,20 @@ public class ClientLogic : GameLogic
         GameData.GetInstance().SaveSetting();
         ui.SetDisplay();
         ui.SetBetChips();
+    }
+
+    private void HandleLotteryNums(ref string[] words)
+    {
+        List<int> nums = new List<int>();
+        for (int i = 1; i < words.Length; ++i)
+        {
+            int num;
+            if (int.TryParse(words[i], out num))
+            {
+                nums.Add(num);
+            }
+        }
+        ui.FlashLotteries(nums);
     }
 
 	private void ClientDisconnect()

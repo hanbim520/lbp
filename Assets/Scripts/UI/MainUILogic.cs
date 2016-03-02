@@ -945,8 +945,6 @@ public class MainUILogic : MonoBehaviour
 		if (lotteries.Count == 0)
 			yield break;
 
-		List<GameObject> particles = new List<GameObject>();
-
 		GameObject root = GameObject.Find("Canvas/LotteryEffectRoot");
 		string resPath = "Effects/";
 		Object prefab = (Object)Resources.Load(resPath + "BigRectSpark");

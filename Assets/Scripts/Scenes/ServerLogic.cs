@@ -131,7 +131,36 @@ public class ServerLogic : GameLogic
 		ui.chooseBetEffect.SetActive(false);
 		// 收集其他机台的压分情况
 		host.SendToAll(NetInstr.GetBetRecords.ToString());
+        StartCoroutine(StartLottery());
 		BlowBall();
+    }
+
+    private IEnumerator StartLottery()
+    {
+        yield return new WaitForSeconds(3.0f);
+        if (GameData.GetInstance().lotteryEnable)
+        {
+            Debug.Log("lottery able");
+            int[] lotteries = CalcLottery();
+            if (lotteries.Length > 0)
+            {
+                string msg = NetInstr.LotteryNum + ":";
+                foreach (int num in lotteries)
+                {
+                    Debug.Log("lottery:" + num);
+                    msg += string.Format(":{0}", num);
+                    lotteryValues.Add(num);
+                }
+                // 通知分机彩票号码
+                host.SendToAll(msg);
+                // ui
+                StartCoroutine(ui.FlashLotteries(lotteryValues));
+            }
+        }
+        else
+        {
+            Debug.Log("lottery disable");
+        }
     }
 
     private void BlowBall()
@@ -172,7 +201,6 @@ public class ServerLogic : GameLogic
 	// 计算彩金号码
 	private int[] CalcLottery()
 	{
-		clientBetFields.Clear();
 		foreach (KeyValuePair<string, int> item in betFields)
 		{
 			// 保存主机台的压分情况
@@ -274,21 +302,6 @@ public class ServerLogic : GameLogic
 		Debug.Log("ShowResult");
 		gamePhase = GamePhase.ShowResult;
 		string msg = NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue;
-		if (GameData.GetInstance().lotteryEnable)
-		{
-			Debug.Log("lottery able");
-			int[] lotteries = CalcLottery();
-			foreach (int num in lotteries)
-			{
-				print("lottery:" + num);
-				msg += string.Format(":{0}", num);
-				lotteryValues.Add(num);
-			}
-		}
-		else
-		{
-			Debug.Log("lottery disable");
-		}
 		host.SendToAll(msg);
 		GameData.GetInstance().AddBeginSessions();
         yield return new WaitForSeconds(waitSendTime);
@@ -300,10 +313,18 @@ public class ServerLogic : GameLogic
 			ui.SetDisplay();
 		}
 		ui.FlashResult(ballValue);
-		if (GameData.GetInstance().lotteryEnable)
-		{
-			StartCoroutine(ui.FlashLotteries(lotteryValues));
-		}
+        // 判断有没有中彩票 应放在Compensate中
+        if (GameData.GetInstance().lotteryEnable)
+        {
+            foreach (KeyValuePair<string, int> bet in betFields)
+            {
+                int peilv = Utils.IsBingo(bet.Key, ballValue);
+                if (peilv == 36)
+                {
+                    // 中彩票
+                }
+            }
+        }
 		StartCoroutine(Compensate());
 	}
 
@@ -380,6 +401,7 @@ public class ServerLogic : GameLogic
         betFields.Clear();
 		clientBetFields.Clear();
 		ui.StopFlash();
+        ui.StopFlashLotteries();
     }
 
     public void HandleRecData(ref string[] words, int connectionId)

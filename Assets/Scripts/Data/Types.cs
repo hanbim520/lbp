@@ -19,14 +19,15 @@ public struct GamePhase
 
 public struct NetInstr
 {
-	public const int SynData = 1;
-	public const int GamePhase = 2;
-    public const int Bet = 3;
-    public const int GetGamePhase = 4;
-	public const int CheckAccount = 5;
-	public const int ClearAccount = 6;
-	public const int ClearCurrentWin = 7;
-	public const int GetBetRecords = 8;
+	public const int SynData            = 1;
+	public const int GamePhase          = 2;
+    public const int Bet                = 3;
+    public const int GetGamePhase       = 4;
+	public const int CheckAccount       = 5;
+	public const int ClearAccount       = 6;
+	public const int ClearCurrentWin    = 7;
+	public const int GetBetRecords      = 8;
+    public const int LotteryNum         = 9;
 }
 
 // Use for network
