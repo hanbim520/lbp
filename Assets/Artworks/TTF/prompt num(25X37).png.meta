@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: d37640584b64f3a478d54d3cac9190ab
-timeCreated: 1456474795
+guid: 87bf72d11dd141a41a4732820d4a1151
+timeCreated: 1456904227
 licenseType: Pro
 TextureImporter:
   fileIDToRecycleName: {}
@@ -49,7 +49,7 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites: []
-  spritePackingTag: lottery_effect
+  spritePackingTag: ttf
   userData: 
   assetBundleName: 
   assetBundleVariant: 

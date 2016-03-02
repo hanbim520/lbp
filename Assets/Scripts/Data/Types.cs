@@ -123,4 +123,5 @@ public struct PromptId
 	public static int None 		= -1;
 	public static int PleaseBet = 0;
 	public static int NoMoreBet = 1;
+	public static int Result 	= 2;
 }

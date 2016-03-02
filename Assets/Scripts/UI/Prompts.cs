@@ -10,11 +10,13 @@ public class Prompts : MonoBehaviour
 	{
 		currentPrompt = GetComponent<Image>();
 		GameEventManager.Prompt += Prompt;
+		GameEventManager.ResultPrompt += ResultPrompt;
 	}
 
 	void OnDestroy()
 	{
 		GameEventManager.Prompt -= Prompt;
+		GameEventManager.ResultPrompt -= ResultPrompt;
 	}
 
 	private void Prompt(int promptId)
@@ -25,7 +27,12 @@ public class Prompts : MonoBehaviour
 			StartCoroutine(SetPrompt(1));
 	}
 
-	private IEnumerator SetPrompt(int arrayIdx)
+	private void ResultPrompt(int result)
+	{
+		StartCoroutine(SetPrompt(2, result));
+	}
+
+	private IEnumerator SetPrompt(int arrayIdx, int result = -1)
 	{
 		if (Mathf.Approximately(0, currentPrompt.rectTransform.localPosition.x))
 		{
@@ -41,6 +48,10 @@ public class Prompts : MonoBehaviour
 		Vector3 pos = currentPrompt.rectTransform.localPosition;
 		pos.x = pivodX + width * 0.5f;
 		currentPrompt.rectTransform.localPosition = pos;
+		if (result != -1)
+			currentPrompt.transform.GetChild(0).GetComponent<Text>().text = result != 37 ? result.ToString() : "00";
+		else
+			currentPrompt.transform.GetChild(0).GetComponent<Text>().text = string.Empty;
 		iTween.MoveTo(currentPrompt.gameObject,
 		              iTween.Hash("x", 0.0f, "time", 2.5f, "islocal", true, "easetype", iTween.EaseType.linear));
 	}

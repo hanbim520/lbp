@@ -967,7 +967,6 @@ public class MainUILogic : MonoBehaviour
 				refrenceName = "00";
 			string chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Classic/Choose Effect/" : "Canvas/38 Fields/Classic/Choose Effect/";
 			Vector3 endPos = GameObject.Find(chooseEffectPath + refrenceName).transform.localPosition;
-			print("endpos:" + endPos);
 			Vector3 startPos = new Vector3(-673, 239, 0);
 			GameObject bluelight = (GameObject)Instantiate(prefab);
 			bluelight.transform.SetParent(root.transform);
@@ -1063,6 +1062,7 @@ public class MainUILogic : MonoBehaviour
 			crown.SetActive(true);
 			crown.transform.localPosition = target.localPosition;
 		}
+		GameEventManager.OnResultPrompt(result);
 	}
 
 	public void StopFlash()

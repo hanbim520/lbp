@@ -44,7 +44,7 @@ public static class GameEventManager
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
-	public static event PromptEvent Prompt;
+	public static event PromptEvent Prompt, ResultPrompt;
 	public static event OddsPromptEvent OddsPrompt;
 
 	public static void TriggerOpenSerial()
@@ -241,6 +241,11 @@ public static class GameEventManager
 	public static void OnPrompt(int promptId)
 	{
 		if (Prompt != null) Prompt(promptId);
+	}
+
+	public static void OnResultPrompt(int result)
+	{
+		if (ResultPrompt != null) ResultPrompt(result);
 	}
 
 	public static void OnOddsPrompt(int odds)
