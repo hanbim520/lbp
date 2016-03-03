@@ -208,7 +208,13 @@ public static class Utils
                 foreach(string f in fields)
                 {
                     int v;
-                    if (int.TryParse(f, out v))
+					if (string.Compare(f, "00") == 0)
+					{
+						v = 37;
+						if (v == value)
+							return 36;
+					}
+					else if (int.TryParse(f, out v))
                     {
                         if (v == value)
                             return 36;
@@ -224,7 +230,13 @@ public static class Utils
                 foreach(string f in fields)
                 {
                     int v;
-                    if (int.TryParse(f, out v))
+					if (string.Compare(f, "00") == 0)
+					{
+						v = 37;
+						if (v == value)
+							return 36;
+					}
+                    else if (int.TryParse(f, out v))
                     {
                         if (v == value)
 							return 36 / fields.Length;

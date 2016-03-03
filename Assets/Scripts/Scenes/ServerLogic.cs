@@ -31,13 +31,13 @@ public class ServerLogic : GameLogic
         Init();
         RegisterListener();
 
-		List<int> l = new List<int>();
-		l.Add(1);
-		l.Add(2);
-		l.Add(36);
-		l.Add(0);
-		l.Add(37);
-		StartCoroutine(ui.FlashLotteries(l));
+//		List<int> l = new List<int>();
+//		l.Add(1);
+//		l.Add(2);
+//		l.Add(36);
+//		l.Add(0);
+//		l.Add(37);
+//		StartCoroutine(ui.FlashLotteries(l));
 	}
 
     protected override void OnDestroy()
@@ -131,7 +131,7 @@ public class ServerLogic : GameLogic
 		ui.chooseBetEffect.SetActive(false);
 		// 收集其他机台的压分情况
 		host.SendToAll(NetInstr.GetBetRecords.ToString());
-        StartCoroutine(StartLottery());
+//        StartCoroutine(StartLottery());
 		BlowBall();
     }
 
