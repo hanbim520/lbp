@@ -122,13 +122,13 @@ public static class Utils
     {
         if (string.Equals(fieldName, "Even"))
         {
-            if (value % 2 == 0) return 2;
+            if (value % 2 == 0 && value != 0) return 2;
             else                return 0;
 
         }
         else if (string.Equals(fieldName, "odd"))
         {
-            if (value % 2 == 1) return 2;
+            if (value % 2 == 1 && value != 37) return 2;
             else                return 0;
         }
         else if (string.Equals(fieldName, "red"))
