@@ -62,11 +62,11 @@ public class LastTenRecords : MonoBehaviour
 			}
 			else
 			{
+				records[j].transform.GetComponent<Image>().overrideSprite = imgs[2];
 				if (r[i] == 0)
-					records[j].transform.GetComponent<Image>().overrideSprite = imgs[2];
-				else
-					records[j].transform.GetComponent<Image>().overrideSprite = imgs[3];
-				records[j].transform.FindChild("Text").GetComponent<Text>().text = string.Empty;
+					records[j].transform.FindChild("Text").GetComponent<Text>().text = "0";
+				else if (r[i] == 37)
+					records[j].transform.FindChild("Text").GetComponent<Text>().text = "00";
 				Vector3 pos = records[j].transform.localPosition;
                 if (j == 0)
                     records[j].transform.localPosition = new Vector3(pos.x, -480, 0);
