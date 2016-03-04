@@ -875,7 +875,7 @@ public class MainUILogic : MonoBehaviour
 			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
 			eraser.transform.localPosition = mouseIcon.localPosition;
 		}
-		else if (InputEx.GetInputUp())
+		if (InputEx.GetInputUp())
 		{
 			Vector2 pos;
 			InputEx.InputUpPosition(out pos);

@@ -19,7 +19,7 @@
 	<DebugType>full</DebugType>
 	<Optimize>false</Optimize>
 	<OutputPath>Temp\bin\Debug\</OutputPath>
-	<DefineConstants>DEBUG;TRACE;UNITY_5_1_2;UNITY_5_1;UNITY_5;ENABLE_NEW_BUGREPORTER;ENABLE_2D_PHYSICS;ENABLE_4_6_FEATURES;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_FRAME_DEBUGGER;ENABLE_GENERICS;ENABLE_HOME_SCREEN;ENABLE_IMAGEEFFECTS;ENABLE_LIGHT_PROBES_LEGACY;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_PHYSICS_PHYSX3;ENABLE_PLUGIN_INSPECTOR;ENABLE_SHADOWS;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_UNET;ENABLE_UNITYEVENTS;ENABLE_VR;ENABLE_WEBCAM;ENABLE_WWW;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_UNET;ENABLE_CLOUD_LICENSE;ENABLE_AUDIOMIXER_SUSPEND;ENABLE_EDITOR_METRICS;INCLUDE_DYNAMIC_GI;INCLUDE_GI;INCLUDE_IL2CPP;INCLUDE_DIRECTX12;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;ENABLE_LOCALIZATION;UNITY_ANDROID;UNITY_ANDROID_API;ENABLE_SUBSTANCE;ENABLE_TEXTUREID_MAP;ENABLE_EGL;ENABLE_NETWORK;ENABLE_RUNTIME_GI;ENABLE_CRUNCH_TEXTURE_COMPRESSION;ENABLE_MONO;ENABLE_PROFILER;DEBUG;TRACE;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_OSX;UNITY_TEAM_LICENSE;UNITY_PRO_LICENSE</DefineConstants>
+	<DefineConstants>DEBUG;TRACE;UNITY_5_1_2;UNITY_5_1;UNITY_5;ENABLE_NEW_BUGREPORTER;ENABLE_2D_PHYSICS;ENABLE_4_6_FEATURES;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_DUCK_TYPING;ENABLE_FRAME_DEBUGGER;ENABLE_GENERICS;ENABLE_HOME_SCREEN;ENABLE_IMAGEEFFECTS;ENABLE_LIGHT_PROBES_LEGACY;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_PHYSICS_PHYSX3;ENABLE_PLUGIN_INSPECTOR;ENABLE_SHADOWS;ENABLE_SINGLE_INSTANCE_BUILD_SETTING;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_UNET;ENABLE_UNITYEVENTS;ENABLE_VR;ENABLE_WEBCAM;ENABLE_WWW;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_UNET;ENABLE_CLOUD_LICENSE;ENABLE_AUDIOMIXER_SUSPEND;ENABLE_EDITOR_METRICS;INCLUDE_DYNAMIC_GI;INCLUDE_GI;INCLUDE_IL2CPP;INCLUDE_DIRECTX12;PLATFORM_SUPPORTS_MONO;RENDER_SOFTWARE_CURSOR;ENABLE_LOCALIZATION;UNITY_STANDALONE_LINUX;UNITY_STANDALONE;UNITY_STANDALONE_LINUX_API;ENABLE_SUBSTANCE;ENABLE_TEXTUREID_MAP;ENABLE_RUNTIME_GI;ENABLE_MOVIES;ENABLE_NETWORK;ENABLE_CRUNCH_TEXTURE_COMPRESSION;ENABLE_WEBSOCKET_HOST;ENABLE_MONO;ENABLE_PROFILER;DEBUG;TRACE;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_OSX;UNITY_TEAM_LICENSE;UNITY_PRO_LICENSE</DefineConstants>
 	<ErrorReport>prompt</ErrorReport>
 	<WarningLevel>4</WarningLevel>
 	<NoWarn>0169</NoWarn>
@@ -46,32 +46,119 @@
 	</Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\Config\Config.cs" />
+     <Compile Include="Assets\AudioToolkit\AudioToolkit\AudioController.cs" />
+     <Compile Include="Assets\AudioToolkit\AudioToolkit\AudioFader.cs" />
+     <Compile Include="Assets\AudioToolkit\AudioToolkit\AudioItem.cs" />
+     <Compile Include="Assets\AudioToolkit\AudioToolkit\AudioLog.cs" />
+     <Compile Include="Assets\AudioToolkit\AudioToolkit\AudioObject.cs" />
+     <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\ArrayHelper.cs" />
+     <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\FlashSupport.cs" />
+     <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\PoolableObject.cs" />
+     <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\RegisteredComponent.cs" />
+     <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\SystemTime.cs" />
+     <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\UnitySingleton.cs" />
      <Compile Include="Assets\Scripts\Data\GameData.cs" />
+     <Compile Include="Assets\Scripts\Data\TextDB.cs" />
      <Compile Include="Assets\Scripts\Data\Types.cs" />
+     <Compile Include="Assets\Scripts\Dlgs\CardDlg.cs" />
+     <Compile Include="Assets\Scripts\Encryption\EncryChip.cs" />
+     <Compile Include="Assets\Scripts\Frame Animation\DoubleAnim.cs" />
+     <Compile Include="Assets\Scripts\Frame Animation\FrameAnim.cs" />
+     <Compile Include="Assets\Scripts\Frame Animation\RandomAnim.cs" />
+     <Compile Include="Assets\Scripts\Frame Animation\ReverseAnim.cs" />
+     <Compile Include="Assets\Scripts\LinuxNative\LinuxHidPort.cs" />
+     <Compile Include="Assets\Scripts\LinuxNative\LinuxSerialPort.cs" />
+     <Compile Include="Assets\Scripts\LinuxNative\LinuxUtils.cs" />
      <Compile Include="Assets\Scripts\Managers\GameEventManager.cs" />
      <Compile Include="Assets\Scripts\Managers\Timer.cs" />
      <Compile Include="Assets\Scripts\Managers\TimerManager.cs" />
+     <Compile Include="Assets\Scripts\Network\AccountNetwork.cs" />
      <Compile Include="Assets\Scripts\Network\UClient.cs" />
      <Compile Include="Assets\Scripts\Network\UHost.cs" />
      <Compile Include="Assets\Scripts\NetworkDiscovery.cs" />
-     <Compile Include="Assets\Scripts\Scenes\Backend.cs" />
+     <Compile Include="Assets\Scripts\Scenes\Account.cs" />
+     <Compile Include="Assets\Scripts\Scenes\BackendLogic.cs" />
      <Compile Include="Assets\Scripts\Scenes\ClientLogic.cs" />
+     <Compile Include="Assets\Scripts\Scenes\ExtensionRecord.cs" />
+     <Compile Include="Assets\Scripts\Scenes\GameLogic.cs" />
      <Compile Include="Assets\Scripts\Scenes\RebootSystem.cs" />
      <Compile Include="Assets\Scripts\Scenes\ServerLogic.cs" />
      <Compile Include="Assets\Scripts\Scenes\StartInfo.cs" />
-     <Compile Include="Assets\Scripts\UIs\MainSceneUI.cs" />
+     <Compile Include="Assets\Scripts\Scenes\TouchCheck.cs" />
+     <Compile Include="Assets\Scripts\Test\TestCoinDevice.cs" />
+     <Compile Include="Assets\Scripts\Test\TestEncryChip.cs" />
+     <Compile Include="Assets\Scripts\Test\TestJson.cs" />
+     <Compile Include="Assets\Scripts\Test\TestUSB.cs" />
+     <Compile Include="Assets\Scripts\UI\BetChips.cs" />
+     <Compile Include="Assets\Scripts\UI\ButtonEvent.cs" />
+     <Compile Include="Assets\Scripts\UI\Calc.cs" />
+     <Compile Include="Assets\Scripts\UI\CardExplain.cs" />
+     <Compile Include="Assets\Scripts\UI\DlgPrintCode.cs" />
+     <Compile Include="Assets\Scripts\UI\DlgYesNO.cs" />
+     <Compile Include="Assets\Scripts\UI\GoldenRain.cs" />
+     <Compile Include="Assets\Scripts\UI\LastTenRecords.cs" />
+     <Compile Include="Assets\Scripts\UI\LoadingText.cs" />
+     <Compile Include="Assets\Scripts\UI\LotteryNum.cs" />
+     <Compile Include="Assets\Scripts\UI\MainUILogic.cs" />
+     <Compile Include="Assets\Scripts\UI\MouseRay.cs" />
+     <Compile Include="Assets\Scripts\UI\OddsTip.cs" />
+     <Compile Include="Assets\Scripts\UI\Prompts.cs" />
+     <Compile Include="Assets\Scripts\UI\RecordBar.cs" />
+     <Compile Include="Assets\Scripts\UI\RecordBarText.cs" />
+     <Compile Include="Assets\Scripts\UI\RecordCircle.cs" />
+     <Compile Include="Assets\Scripts\UI\RecordFew.cs" />
+     <Compile Include="Assets\Scripts\UI\RecordMost.cs" />
+     <Compile Include="Assets\Scripts\UI\Records.cs" />
+     <Compile Include="Assets\Scripts\UI\RollingNumber.cs" />
+     <Compile Include="Assets\Scripts\UI\ScrollingImage.cs" />
+     <Compile Include="Assets\Scripts\Utils\AndroidSerialPort.cs" />
      <Compile Include="Assets\Scripts\Utils\CryptoPrefs.cs" />
      <Compile Include="Assets\Scripts\Utils\DebugConsole.cs" />
-     <Compile Include="Assets\Scripts\Utils\FlashObject.cs" />
+     <Compile Include="Assets\Scripts\Utils\FlashImage.cs" />
      <Compile Include="Assets\Scripts\Utils\Gradient.cs" />
+     <Compile Include="Assets\Scripts\Utils\HIDUtils.cs" />
+     <Compile Include="Assets\Scripts\Utils\InputDevice.cs" />
+     <Compile Include="Assets\Scripts\Utils\InputEx.cs" />
      <Compile Include="Assets\Scripts\Utils\LoadLevelAsync.cs" />
-     <Compile Include="Assets\Scripts\Utils\SerialPortUtils.cs" />
-     <Compile Include="Assets\Scripts\Utils\SerialUtils.cs" />
+     <Compile Include="Assets\Scripts\Utils\SafedQueue.cs" />
+     <Compile Include="Assets\Scripts\Utils\SerialMousePort.cs" />
      <Compile Include="Assets\Scripts\Utils\ShowFPS.cs" />
+     <Compile Include="Assets\Scripts\Utils\TouchScreenPort.cs" />
+     <Compile Include="Assets\Scripts\Utils\UpdateUtils.cs" />
      <Compile Include="Assets\Scripts\Utils\Utils.cs" />
-     <Compile Include="Assets\Scripts\test.cs" />
+     <Compile Include="Assets\Scripts\Utils\iTween\iTween.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\Constants.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\DeviceChangeNotifier.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\DeviceCommunication.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\DeviceDiscovery.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\DllWrappers\Hid.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\DllWrappers\Kernel32.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\DllWrappers\SetupApi.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\DllWrappers\User32.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\Messaging\CommandMessage.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Classes\Messaging\IMesage.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\DevBroadcastDeviceinterface.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\DevBroadcastDeviceinterface1.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\DevBroadcastHdr.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\DeviceInformationStructure.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\HiddAttributes.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\HidpCaps.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\HidpReportType.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\HidpValueCaps.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\Message.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\NotRange.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\Overlapped.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\PspDeviceInterfaceDetailData.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\Range.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\SecurityAttributes.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\SpDeviceInterfaceData.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\Structures\SyncObjT.cs" />
+     <Compile Include="Assets\Scripts\WinNative\UsbHid\UsbHidDevice.cs" />
+     <Compile Include="Assets\Scripts\WinNative\WinHidListener.cs" />
+     <Compile Include="Assets\Scripts\WinNative\WinHidPort.cs" />
+     <None Include="Assets\AudioToolkit\Readme.txt" />
      <None Include="Assets\Android\AndroidManifest.xml" />
+     <None Include="Assets\StreamingAssets\Lanuages.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
@@ -80,6 +167,9 @@
  </Reference>
  <Reference Include="UnityEngine.Analytics">
  <HintPath>/Applications/Unity/Unity.app/Contents/UnityExtensions/Unity/UnityAnalytics/UnityEngine.Analytics.dll</HintPath>
+ </Reference>
+ <Reference Include="LitJson">
+ <HintPath>/Users/chenxi/Projects/UnityProjects/Roulette Game/Assets/Plugins/LitJson.dll</HintPath>
  </Reference>
  <Reference Include="UnityEditor.iOS.Extensions.Xcode">
  <HintPath>/Applications/Unity/Unity.app/Contents/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
