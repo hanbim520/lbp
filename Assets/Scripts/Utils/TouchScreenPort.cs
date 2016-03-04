@@ -17,17 +17,16 @@ public class TouchScreenPort : MonoBehaviour
 	private AndroidSerialPort androidSP;
 	private SerialPort sp; 
 	private Queue<byte> queueReadPool = new Queue<byte>();
+//	private SafedQueue<byte> queueReadPool = new SafedQueue<byte>();
 	private Thread readThread; 
 	private bool isReadThreadExit = false;
 	private string portName = "/dev/ttyS1";
-	private int iCorrectNum = 0;
-	private int[] filtedArray = new int[10];
+	private int iCorrectNum = -1;
+	private int[] filtedArray = new int[10]{0,0,0,0,0,0,0,0,0,0};
+	private bool isBingo = false;
 
 	void OnEnable() 
 	{ 
-		filtedArray[0] = 0x55;
-		filtedArray[1] = 0x54;
-
 #if UNITY_STANDALONE_WIN
 		// 端口名称 波特率 奇偶校验位 数据位值 停止位
 		try
@@ -66,7 +65,7 @@ public class TouchScreenPort : MonoBehaviour
 		{
 			if (!LinuxSerialPort.IsOpen())
 			{
-				int state = LinuxSerialPort.Open(9600, 8, 1, 0, 0);
+				int state = LinuxSerialPort.Open(9600, 8, 1, 0, 2);
 				if (state == 0)
 				{
 					isReadThreadExit = false;
@@ -85,11 +84,11 @@ public class TouchScreenPort : MonoBehaviour
 	void OnDisable()
 	{
 		Close();
-
 	}
 
 	void Update()
 	{
+//		ReadData();
 		DealReceivedData();
 #if UNITY_ANDROID
 		int[] data = androidSP.ReadData();
@@ -124,6 +123,26 @@ public class TouchScreenPort : MonoBehaviour
 				}
 			}
 #endif
+		} 
+		catch (Exception ex) 
+		{ 
+			Debug.Log(ex.ToString()); 
+		} 
+	} 
+
+	private void ReadData() 
+	{ 
+		try 
+		{ 
+			#if UNITY_STANDALONE_LINUX
+			if (LinuxSerialPort.IsOpen())
+			{
+				byte[] buf = LinuxSerialPort.Read();
+				if (buf.Length <= 0)
+					return;
+				FilterData(ref buf);
+			}
+			#endif
 		} 
 		catch (Exception ex) 
 		{ 
@@ -168,6 +187,7 @@ public class TouchScreenPort : MonoBehaviour
 						}
 					}
 //					Debug.Log("x:" + x + ", y:" +y);
+//					DebugConsole.Log("x:" + x + ", y:" +y);
 					if (flag == 0x81)
 						GameEventManager.OnFingerDown(x, y);
 					else if (flag == 0x82)
@@ -223,35 +243,61 @@ public class TouchScreenPort : MonoBehaviour
 		{
 			for (int i = 0; i < data.Length; ++i)
 			{
-				if (data[i] == 0x82)
+				if (!isBingo)
 				{
-					iCorrectNum = 0;
-					continue;
-				}
-				if (data[i] == 0x55 && iCorrectNum == 0)
-					iCorrectNum = 1;
-				else if (data[i] == 0x54 && iCorrectNum == 1)
-					iCorrectNum = 2;
-				else if (data[i] != 0x82 && iCorrectNum == 2)
-					iCorrectNum = 3;
-				if (iCorrectNum >= 3 && iCorrectNum <= 10)
-				{
-					filtedArray[iCorrectNum - 1] = data[i];
-					++iCorrectNum;
-				}
-
-				if (iCorrectNum > 10)
-				{
-					iCorrectNum = 0;
-					string log = "";
-					foreach (int d in filtedArray)
+					if (data[i] == 0x55 && iCorrectNum == -1)
 					{
-						queueReadPool.Enqueue((byte)d);
-						log += string.Format("{0:X}, ", (byte)d);
+						iCorrectNum = 0;
+						filtedArray[iCorrectNum] = data[i];
 					}
-					DebugConsole.Log("FilterData received:" + log);
+					else if (data[i] == 0x54 && iCorrectNum == 0)
+					{
+						iCorrectNum = 1;
+						filtedArray[iCorrectNum] = data[i];
+					}
+					else if ((data[i] == 0x81 || data[i] == 0x84) && iCorrectNum == 1)
+					{
+						isBingo = true;
+						iCorrectNum = 2;
+						filtedArray[iCorrectNum] = data[i];
+					}
+					else
+					{
+						iCorrectNum = -1;
+					}
+				}
+				else
+				{
+					++iCorrectNum;
+					if (iCorrectNum >= filtedArray.Length - 1)
+					{
+						isBingo = false;
+						filtedArray[filtedArray.Length - 1] = data[i];
+//						string log = "";
+						foreach (int d in filtedArray)
+						{
+//							log += string.Format("{0:X}, ", d);
+							queueReadPool.Enqueue((byte)d);
+						}
+//						DebugConsole.Log("FilterData:" + log);
+						iCorrectNum = -1;
+						for (int idx = 0; idx < filtedArray.Length; ++idx)
+							filtedArray[idx] = 0;
+					}
+					else
+					{
+						filtedArray[iCorrectNum] = data[i];
+					}
 				}
 			}
 		}
 	}
+
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(400, 10, 100, 100), "Clear"))
+//		{
+//			DebugConsole.Clear();
+//		}
+//	}
 }

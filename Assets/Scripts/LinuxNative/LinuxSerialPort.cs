@@ -110,7 +110,10 @@ public static class LinuxSerialPort
 		IntPtr data;
 		int len = Com_Read(fd, out data);
 		if (len <= 0)
+		{
+			FreeArrayPtr(data);
 			return new byte[0];
+		}
 		byte[] source = new byte[len];
 		Marshal.Copy(data, source, 0, len);
 		FreeArrayPtr(data);
