@@ -15,12 +15,18 @@ public class InputEx : MonoBehaviour
 	private const float kDeleteTouchTime = 0.05f;
 	private const float kDeleteMouseTime = 0.05f;
 
+	private Vector3 oldMousePos;
+	private float cursorShowElapse;
+	private const float cursorShowTime = 3.0f;
+
 	void Start()
 	{
 		touchUp = new Queue<InputInfo>();
 		touchDown = new Queue<InputInfo>();
 		mouseUp = new Queue<InputInfo>();
 		mouseDown = new Queue<InputInfo>();
+		oldMousePos = Input.mousePosition;
+		Cursor.visible = false;
 		RegisterEvents();
 	}
 
@@ -32,6 +38,21 @@ public class InputEx : MonoBehaviour
 	void Update()
 	{
 		CheckOutdated();
+		if (Cursor.visible && oldMousePos == Input.mousePosition)
+		{
+			cursorShowElapse += Time.deltaTime;
+			if (cursorShowElapse >= cursorShowTime)
+			{
+				Cursor.visible = false;
+				cursorShowElapse = 0;
+			}
+		}
+		if (oldMousePos != Input.mousePosition)
+		{
+			oldMousePos = Input.mousePosition;
+			cursorShowElapse = 0;
+			if (!Cursor.visible) Cursor.visible = true;
+		}
 	}
 
 	private void CheckOutdated()
