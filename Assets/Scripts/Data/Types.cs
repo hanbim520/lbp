@@ -9,17 +9,17 @@ public enum ConnectionState
 
 public struct GamePhase
 {
-	public const int GameStart = 1;
-	public const int Countdown = 2;
-    public const int Run = 3;
-    public const int ShowResult = 4;
-    public const int Compensate = 5;
-	public const int GameEnd = 6;
+	public const int GameStart          = 1;
+	public const int Countdown          = 2;
+    public const int Run                = 3;
+    public const int ShowResult         = 4;
+    public const int Compensate         = 5;
+	public const int GameEnd            = 6;
 }
 
 public struct NetInstr
 {
-	public const int SynData            = 1;
+	public const int SyncData           = 1; // sync system setting
 	public const int GamePhase          = 2;
     public const int Bet                = 3;
     public const int GetGamePhase       = 4;
@@ -28,6 +28,7 @@ public struct NetInstr
 	public const int ClearCurrentWin    = 7;
 	public const int GetBetRecords      = 8;
     public const int LotteryNum         = 9;
+    public const int SyncRecords        = 10; // sync last 100 records
 }
 
 // Use for network
@@ -79,13 +80,13 @@ public struct BetInfo
 
 public struct Scenes
 {
-    public static string Main = "Main";
-    public static string Loading = "Loading";
-    public static string StartInfo = "StartInfo";
-    public static string Backend = "Backend";
-	public static string Last10 = "LastTen";
-	public static string Account = "Account";
-	public static string TouchCheck = "TouchCheck";
+    public static string Main           = "Main";
+    public static string Loading        = "Loading";
+    public static string StartInfo      = "StartInfo";
+    public static string Backend        = "Backend";
+	public static string Last10         = "LastTen";
+	public static string Account        = "Account";
+	public static string TouchCheck     = "TouchCheck";
 }
 
 public struct CardMode

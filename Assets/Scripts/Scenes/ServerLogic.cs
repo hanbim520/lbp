@@ -293,11 +293,23 @@ public class ServerLogic : GameLogic
 	private IEnumerator ShowResult()
 	{
 		Debug.Log("ShowResult");
+        // sync last 100 records
+        string syncMsg = NetInstr.SyncRecords.ToString();
+        int recordsCount = GameData.GetInstance().records.Count;
+        int[] r = GameData.GetInstance().records.ToArray();
+        for (int i = 0; i < recordsCount; ++i)
+        {
+            syncMsg += string.Format(":{0}", r[i]);
+        }
+        host.SendToAll(syncMsg);
+        yield return new WaitForSeconds(waitSendTime);
+
 		gamePhase = GamePhase.ShowResult;
 		string msg = NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue;
 		host.SendToAll(msg);
 		GameData.GetInstance().AddBeginSessions();
         yield return new WaitForSeconds(waitSendTime);
+
 		// 切换回经典压分区
 		if (GameData.GetInstance().displayType == 1)
 		{

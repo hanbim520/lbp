@@ -57,9 +57,9 @@ public class ClientLogic : GameLogic
             return;
         }
         
-        if (instr == NetInstr.SynData)
+        if (instr == NetInstr.SyncData)
         {
-            SynData(ref words);
+            SyncData(ref words);
         }
         else if (instr == NetInstr.GamePhase)
         {
@@ -84,6 +84,10 @@ public class ClientLogic : GameLogic
         else if (instr == NetInstr.LotteryNum)
         {
             HandleLotteryNums(ref words);
+        }
+        else if (instr == NetInstr.SyncRecords)
+        {
+            SyncLast100(ref words);
         }
 	}
 
@@ -262,7 +266,7 @@ public class ClientLogic : GameLogic
         }
     }
 
-    private void SynData(ref string[] words)
+    private void SyncData(ref string[] words)
     {
         int betTimeLimit, coinToScore, baoji;
         int max36Value, max18Value, max12Value, max9Value, max6Value, max3Value, max2Value;
@@ -353,4 +357,24 @@ public class ClientLogic : GameLogic
 	{
 		ui.ClearAllEvent(null);
 	}
+
+    private void SyncLast100(ref string[] words)
+    {
+        int idx = -1;
+        for (int i = 1; i < words.Length; ++i)
+        {
+            int record;
+            if (int.TryParse(words[i], out record))
+            {
+                ++idx;
+                PlayerPrefs.SetInt("R" + idx, record);
+            }
+        }
+        PlayerPrefs.Save();
+        if (idx < 99 && idx != -1)
+        {
+            for (int i = idx + 1; i <= 99; ++i)
+                PlayerPrefs.DeleteKey("R" + i);
+        }
+    }
 }
