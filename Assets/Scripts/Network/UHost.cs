@@ -19,6 +19,7 @@ public class UHost : MonoBehaviour
 	private int numOfConnecting = 0;
 	private List<int> allConnections = new List<int>();
 	private ServerLogic serverLogic;
+	private BackendLogic backLogic;
 	private Timer timerConnectClients;
 	private bool isBroadcasting = false;
 
@@ -27,9 +28,22 @@ public class UHost : MonoBehaviour
 		get { return allConnections; }
 	}
 
+	void OnLevelWasLoaded(int level)
+	{
+		if (serverLogic == null && 
+		    string.Compare(Application.loadedLevelName, Scenes.Main) == 0)
+		{
+			serverLogic = GameObject.Find("ServerLogic").GetComponent<ServerLogic>();
+		}
+		else if (backLogic == null &&
+		         string.Compare(Application.loadedLevelName, Scenes.Backend) == 0)
+		{
+			backLogic = GameObject.Find("BackendLogic").GetComponent<BackendLogic>();
+		}
+	}
+
 	void Start()
 	{
-		serverLogic = GetComponent<ServerLogic>();
 		SetupServer();
 	}
 
@@ -210,7 +224,10 @@ public class UHost : MonoBehaviour
         string[] words = msg.Split(delimiterChars);
         if (words.Length > 0)
         {
-            serverLogic.HandleRecData(ref words, connectionId);
+			if (serverLogic != null)
+            	serverLogic.HandleRecData(ref words, connectionId);
+			if (backLogic != null)
+				backLogic.HandleRecData(ref words, connectionId);
         }
     }
 

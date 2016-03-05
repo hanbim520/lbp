@@ -18,9 +18,17 @@ public class UClient : MonoBehaviour
 	private ConnectionState connState = ConnectionState.Disconnected;
     private ClientLogic clientLogic;
 
+	void OnLevelWasLoaded(int level)
+	{
+		if (clientLogic == null &&
+		    string.Compare(Application.loadedLevelName, Scenes.Main) == 0)
+		{
+			clientLogic = GameObject.Find("ClientLogic").GetComponent<ClientLogic>();
+		}
+	}
+
 	void Start()
 	{
-        clientLogic = GetComponent<ClientLogic>();
 		SetupClient();
 	}
 

@@ -21,3 +21,5 @@ UsbWrapper/Release/
 UsbWrapper/UsbWrapper/Debug/
 UsbWrapper/UsbWrapper/Release/
 UsbWrapper/UsbWrapper/x64
+*.csproj
+*.sln

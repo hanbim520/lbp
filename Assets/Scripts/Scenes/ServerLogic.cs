@@ -14,20 +14,13 @@ public class ServerLogic : GameLogic
     
     private void Init()
     {
-        host = GetComponent<UHost>();
+		host = GameObject.Find("NetworkObject").GetComponent<UHost>();
 //        CalcRemainTime();
     }
 
     protected override void Start() 
     {
         base.Start();
-        if (GameData.GetInstance().deviceIndex != 1)
-        {
-            gameObject.SetActive(false);
-            return;
-        }
-        else
-            GetComponent<UHost>().enabled = true;
         Init();
         RegisterListener();
 

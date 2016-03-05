@@ -9,19 +9,12 @@ public class ClientLogic : GameLogic
     private void Init()
     {
         gamePhase = GamePhase.GameEnd;
+		uclient = GameObject.Find("NetworkObject").GetComponent<UClient>();
     }
 
 	protected override void Start()
 	{
         base.Start();
-        if (GameData.GetInstance().deviceIndex == 1)
-        {
-            gameObject.SetActive(false);
-            return;
-        }
-        else
-            GetComponent<UClient>().enabled = true;
-		uclient = GetComponent<UClient>();
         Init();
         RegisterListener();
 	}

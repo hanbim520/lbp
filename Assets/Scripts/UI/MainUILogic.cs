@@ -17,13 +17,6 @@ public class MainUILogic : MonoBehaviour
     public GameObject dlgCard;
 	public GameObject dlgYesNO;
 	public GameObject[] cardExplains;
-	// Particles for lottery mode
-	public GameObject win0;				// 大0中奖粒子
-	public GameObject winSmall;			// 小00 0~36 中奖粒子
-	public GameObject rectSpark0;		// 0框粒子
-	public GameObject rectSpark00;		// 00框粒子
-	public GameObject bigRectSpark;		// 大方框粒子
-	public GameObject smallRectSpark;	// 小方框粒子
 
 	public int CurChipIdx
 	{

@@ -33,7 +33,7 @@ public class BackendLogic : MonoBehaviour
     private Text calcPassword;
     private Timer timerHideWarning;
 	private Timer timerRefreshAccounts;
-	private AccountNetwork host;
+	private UHost host;
 	private Dictionary<int, AccountItem> otherDevice = new Dictionary<int, AccountItem>();
 	private Transform accountItemRoot;
 	private Transform loadingRoot;
@@ -72,8 +72,7 @@ public class BackendLogic : MonoBehaviour
 
 		if (GameData.GetInstance().deviceIndex == 1)
 		{
-			host = GetComponent<AccountNetwork>();
-			host.enabled = true;
+			host = GameObject.Find("NetworkObject").GetComponent<UHost>();
 		}
 
         GameEventManager.PrintCodeSuccess += PrintCodeSuccess;
@@ -468,6 +467,7 @@ public class BackendLogic : MonoBehaviour
 
     private void InitAccount()
     {
+		host.SendToAll(NetInstr.CheckAccount.ToString());
 		if (accountItemRoot == null)
 			accountItemRoot = menuAccount.transform.FindChild("ItemsRoot");
 		if (loadingRoot == null)
