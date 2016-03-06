@@ -13,8 +13,9 @@ public class UClient : MonoBehaviour
 	private int reliableChannelId;
 	private int unreliableChannelId;
 	private const int kMaxBroadcastMsgSize = 1024;
-	private const int kMaxReceiveMsgSize = 1024;
+	private const int kMaxReceiveMsgSize = 4096;
 	private const float reconnServerInterval = 1.0f;
+	private byte[] recBuffer = new byte[kMaxReceiveMsgSize];
 	private ConnectionState connState = ConnectionState.Disconnected;
     private ClientLogic clientLogic;
 
@@ -48,7 +49,7 @@ public class UClient : MonoBehaviour
 	{		
 		int connectionId; 
 		int channelId; 
-		byte[] recBuffer = new byte[kMaxReceiveMsgSize]; 
+		System.Array.Clear(recBuffer, 0, recBuffer.Length);
 		int dataSize;
 		byte error;
 		NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, recBuffer.Length, out dataSize, out error);
@@ -126,9 +127,9 @@ public class UClient : MonoBehaviour
 		yield return null;
 	}
 
-	private void HandleDataEvent(ref byte[] recBuffer)
+	private void HandleDataEvent(ref byte[] _recBuffer)
 	{
-        string msg = Utils.BytesToString(recBuffer);
+        string msg = Utils.BytesToString(_recBuffer);
         Debug.Log("Client HandleDataEvent: " + msg);
 		char[] delimiterChars = {':'};
 		string[] words = msg.Split(delimiterChars);

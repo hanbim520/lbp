@@ -807,8 +807,8 @@ public class MainUILogic : MonoBehaviour
 			eraser.SetActive(false);
 			mouseIcon.gameObject.SetActive(true);
 		}
-		if (gameLogic.LogicPhase != GamePhase.Countdown)
-			return;
+//		if (gameLogic.LogicPhase != GamePhase.Countdown)
+//			return;
 
 		int idx;
 		if (int.TryParse(hitObject.name.Substring(7, 1), out idx))

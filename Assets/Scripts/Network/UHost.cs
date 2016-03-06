@@ -12,9 +12,10 @@ public class UHost : MonoBehaviour
 	private int broadcastVersion = 1;
 	private int broadcastSubversion = 1;
 	private const int kMaxBroadcastMsgSize = 1024;
-	private const int kMaxReceiveMsgSize = 1024;
+	private const int kMaxReceiveMsgSize = 4096;
 	private int reliableChannelId;
 	private int unreliableChannelId;
+	private byte[] recBuffer = new byte[kMaxReceiveMsgSize];
 
 	private int numOfConnecting = 0;
 	private List<int> allConnections = new List<int>();
@@ -66,7 +67,7 @@ public class UHost : MonoBehaviour
 	{
 		int connectionId; 
 		int channelId; 
-		byte[] recBuffer = new byte[kMaxReceiveMsgSize]; 
+		System.Array.Clear(recBuffer, 0, recBuffer.Length);
 		int dataSize;
 		byte error;
 		NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, recBuffer.Length, out dataSize, out error);
@@ -218,9 +219,9 @@ public class UHost : MonoBehaviour
 		}
 	}
 
-    private void HandleDataEvent(ref byte[] recBuffer, int connectionId)
+    private void HandleDataEvent(ref byte[] _recBuffer, int connectionId)
     {
-        string msg = Utils.BytesToString(recBuffer);
+		string msg = Utils.BytesToString(_recBuffer);
         Debug.Log("Server HandleDataEvent:" + msg);
         char[] delimiterChars = {':'};
         string[] words = msg.Split(delimiterChars);

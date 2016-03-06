@@ -176,7 +176,7 @@ public class ClientLogic : GameLogic
     private void CountdownComplete()
     {
         gamePhase = GamePhase.Run;
-        ui.chooseBetEffect.SetActive(false);
+//        ui.chooseBetEffect.SetActive(false);
     }
 
     private void ShowResult()

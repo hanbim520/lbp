@@ -121,7 +121,7 @@ public class ServerLogic : GameLogic
 
     private void CountdownComplete()
     {
-		ui.chooseBetEffect.SetActive(false);
+//		ui.chooseBetEffect.SetActive(false);
 		// 收集其他机台的压分情况
 		host.SendToAll(NetInstr.GetBetRecords.ToString());
 //        StartCoroutine(StartLottery());
