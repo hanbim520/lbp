@@ -39,8 +39,9 @@ public class MainUILogic : MonoBehaviour
 	private int curChipIdx = -1;
 	private int timeLimit;
     private GameObject downHitObject;
-    private List<Transform> lightEffects = new List<Transform>();
+    private List<Transform> lightEffects = new List<Transform>();	// 选中的压分区域(亮色)
 	private Transform flashObject;
+	private List<Transform> flashObjects = new List<Transform>();	// 显示压中结果的区域(亮色)
     private Timer timerHideWarning;
     private string[] strCardError = new string[]{"If you want to use Presented\nCredits, you have to use up all\ncredits, and then keyin agian.",
         "要使用优惠卡，\n须从0分开始充值。"};
@@ -1037,6 +1038,47 @@ public class MainUILogic : MonoBehaviour
 				fo.flashCount = 0;
 				fo.interval = 0.5f;
 			}
+			// 除了号码外的其他区域也要闪烁
+			if (result != 37 && result != 0)
+			{
+				List<string> flashAreas = new List<string>();
+				if (result % 2 == 0)	
+					flashAreas.Add("Even");
+				else 				
+					flashAreas.Add("odd");
+				if (result >= 1 && result <= 12)
+					flashAreas.Add("1st12");
+				else if (result >= 13 && result <= 24)
+					flashAreas.Add("2nd12");
+				else if (result >= 25 && result <= 36)
+					flashAreas.Add("3rd12");
+				if (result >= 1 && result <= 18)
+					flashAreas.Add("1to18");
+				else if (result >= 19 && result <= 36)
+					flashAreas.Add("19to36");
+				if (GameData.GetInstance().colorTable[result] == ResultType.Red)
+					flashAreas.Add("red");
+				else if (GameData.GetInstance().colorTable[result] == ResultType.Black)
+					flashAreas.Add("black");
+				if (result % 3 == 0)
+					flashAreas.Add("2to1 up");
+				else if (result % 3 == 2)
+					flashAreas.Add("2to1 middle");
+				else if (result % 3 == 1)
+					flashAreas.Add("2to1 down");
+
+				foreach (string name in flashAreas)
+				{
+					Transform t = displayClassic.transform.FindChild("Choose Effect/" + name);
+					if (t != null)
+					{
+						FlashImage fo = t.gameObject.AddComponent<FlashImage>();
+						fo.flashCount = 0;
+						fo.interval = 0.5f;
+						flashObjects.Add(t);
+					}
+				}
+			}
 			crown.SetActive(true);
 			crown.transform.localPosition = target.localPosition;
 		}
@@ -1053,6 +1095,7 @@ public class MainUILogic : MonoBehaviour
 			crown.SetActive(true);
 			crown.transform.localPosition = target.localPosition;
 		}
+		// 出提示语
 		GameEventManager.OnResultPrompt(result);
 	}
 
@@ -1062,6 +1105,12 @@ public class MainUILogic : MonoBehaviour
 		{
 			flashObject.GetComponent<FlashImage>().StopFlash();
 			flashObject = null;
+		}
+		if (flashObjects.Count > 0)
+		{
+			foreach (Transform t in flashObjects)
+				t.GetComponent<FlashImage>().StopFlash();
+			flashObjects.Clear();
 		}
 		crown.SetActive(false);
 	}
