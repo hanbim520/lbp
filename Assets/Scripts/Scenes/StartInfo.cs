@@ -10,6 +10,7 @@ public class StartInfo : MonoBehaviour
 		LoadUpdateUtils();
 		LoadInputDevice();
 		LoadHIDUtils();
+		LoadNetwork();
 //		TextDB.LoadFile();
 		if (GameData.GetInstance().deviceIndex > 0)
 		{
@@ -52,6 +53,17 @@ public class StartInfo : MonoBehaviour
 			Object prefab = (Object)Resources.Load("Input/HIDUtils");
 			GameObject go = (GameObject)Instantiate(prefab);
 			go.name = "HIDUtils";
+			prefab = null;
+		}
+	}
+
+	private void LoadNetwork()
+	{
+		if (GameObject.Find("NetworkObject") == null)
+		{
+			Object prefab = (Object)Resources.Load("Network/NetworkObject");
+			GameObject go = (GameObject)Instantiate(prefab);
+			go.name = "NetworkObject";
 			prefab = null;
 		}
 	}

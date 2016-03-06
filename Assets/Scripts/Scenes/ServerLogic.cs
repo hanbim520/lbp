@@ -11,6 +11,7 @@ public class ServerLogic : GameLogic
 	private float remainTimeIntever = 0.0f;
 	// 保存其他客户端在当前局的压分记录
 	private Dictionary<string, int> clientBetFields = new Dictionary<string, int>();
+	private Timer timerConnectClients = null;
     
     private void Init()
     {
@@ -23,7 +24,7 @@ public class ServerLogic : GameLogic
         base.Start();
         Init();
         RegisterListener();
-
+		StartConnectClients();
 //		List<int> l = new List<int>();
 //		l.Add(1);
 //		l.Add(2);
@@ -75,6 +76,7 @@ public class ServerLogic : GameLogic
 				CalcRemainTime();
 			}
 		}
+		UpdateServerTimer();
 	}
 
     private void GameOver()
@@ -294,15 +296,18 @@ public class ServerLogic : GameLogic
 	{
 		Debug.Log("ShowResult");
         // sync last 100 records
-        string syncMsg = NetInstr.SyncRecords.ToString();
         int recordsCount = GameData.GetInstance().records.Count;
-        int[] r = GameData.GetInstance().records.ToArray();
-        for (int i = 0; i < recordsCount; ++i)
-        {
-            syncMsg += string.Format(":{0}", r[i]);
-        }
-        host.SendToAll(syncMsg);
-        yield return new WaitForSeconds(waitSendTime);
+		if (recordsCount > 1)
+		{
+			string syncMsg = NetInstr.SyncRecords.ToString();
+			int[] r = GameData.GetInstance().records.ToArray();
+			for (int i = 0; i < recordsCount - 1; ++i)	// 不同步最后一个号码
+			{
+				syncMsg += string.Format(":{0}", r[i]);
+			}
+			host.SendToAll(syncMsg);
+			yield return new WaitForSeconds(waitSendTime);
+		}
 
 		gamePhase = GamePhase.ShowResult;
 		string msg = NetInstr.GamePhase + ":" + gamePhase + ":" + ballValue;
@@ -432,7 +437,9 @@ public class ServerLogic : GameLogic
 	// 保存其他客户端在当前局的压分情况
 	private void CollectBetRecords(ref string[] words)
 	{
-		for (int idx = 0; idx < words.Length; idx += 2)
+		if (words.Length <= 1)
+			return;
+		for (int idx = 1; idx < words.Length; idx += 2)
 		{
 			if (clientBetFields.ContainsKey(words[idx]))
 			{
@@ -477,5 +484,24 @@ public class ServerLogic : GameLogic
                 GameData.GetInstance().remainMins = remainMins;
             }
         }
+	}
+
+	private void UpdateServerTimer()
+	{
+		if (timerConnectClients != null)
+			timerConnectClients.Update(Time.deltaTime);
+	}
+
+	private void StartConnectClients()
+	{
+		timerConnectClients = new Timer(GameData.GetInstance().ConnectClientsTime, 0);
+		timerConnectClients.Tick += StopConnectClients;
+		timerConnectClients.Start();
+	}
+
+	private void StopConnectClients()
+	{
+		timerConnectClients = null;
+		GameEventManager.TriggerGameStart();
 	}
 }

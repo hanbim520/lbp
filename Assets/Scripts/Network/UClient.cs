@@ -122,8 +122,9 @@ public class UClient : MonoBehaviour
 		if (connectionId <= 0)
 		{
 			yield return new WaitForSeconds(reconnServerInterval);
-			StartCoroutine(ConnectServer(serverAddress, port));
+			ConnectServer(serverAddress, port);
 		}
+		connState = ConnectionState.Connected;
 		yield return null;
 	}
 

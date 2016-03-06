@@ -380,5 +380,7 @@ public class ClientLogic : GameLogic
             for (int i = idx + 1; i <= 99; ++i)
                 PlayerPrefs.DeleteKey("R" + i);
         }
+		GameData.GetInstance().ReadRecords();
+        GameEventManager.OnRefreshRecord(ballValue);
     }
 }

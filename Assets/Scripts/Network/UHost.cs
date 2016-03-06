@@ -21,7 +21,6 @@ public class UHost : MonoBehaviour
 	private List<int> allConnections = new List<int>();
 	private ServerLogic serverLogic;
 	private BackendLogic backLogic;
-	private Timer timerConnectClients;
 	private bool isBroadcasting = false;
 
 	public List<int> AllConnections
@@ -88,10 +87,7 @@ public class UHost : MonoBehaviour
 			HandleDisconnectEvent(connectionId);
 			break;
 		}
-
-		UpdateTimer();
 	}
-
 
 	private void SetupServer()
 	{
@@ -108,7 +104,7 @@ public class UHost : MonoBehaviour
 		HostTopology topology = new HostTopology(config, GameData.GetInstance().MaxNumOfPlayers);
 		hostId = NetworkTransport.AddHost(topology, port);
 
-		StartConnectClients();
+		StartBroadcast();
 	}
 
 	private void HandleConnectEvent(int connectionId)
@@ -123,7 +119,7 @@ public class UHost : MonoBehaviour
 		++numOfConnecting;
 		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers)
 		{
-			StopBroadcast();
+//			StopBroadcast();
 			GameEventManager.TriggerGameStart();
 		}
 		// Synchronize backend data
@@ -158,24 +154,9 @@ public class UHost : MonoBehaviour
 		--numOfConnecting;
 		if (numOfConnecting < GameData.GetInstance().MaxNumOfPlayers)
 		{
-			StartBroadcast();
+//			StartBroadcast();
 		}
 	}
-
-
-	private void StartConnectClients()
-	{
-		StartBroadcast();
-		timerConnectClients = new Timer(GameData.GetInstance().ConnectClientsTime, 0);
-		timerConnectClients.Tick += StopConnectClients;
-		timerConnectClients.Start();
-	}
-
-	private void StopConnectClients()
-	{
-		timerConnectClients = null;
-		GameEventManager.TriggerGameStart();
-    }
 
 	public void SendToAll(string msg)
 	{
@@ -233,12 +214,6 @@ public class UHost : MonoBehaviour
 				backLogic.HandleRecData(ref words, connectionId);
         }
     }
-
-	private void UpdateTimer()
-	{
-		if (timerConnectClients != null)
-			timerConnectClients.Update(Time.deltaTime);
-	}
 
 	// 主动跟分机同步设置
 	private void SyncSetting()
