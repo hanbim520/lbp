@@ -210,7 +210,7 @@ public class ClientLogic : GameLogic
                 win += peilv * item.Value;
             }
         }
-        AppendLast10(totalCredits, totalCredits + win, currentBet, win);
+        AppendLast10(totalCredits, totalCredits + win, currentBet, win, ballValue);
         GameData.GetInstance().ZongPei += win;
         currentBet = 0;
         totalCredits += win;
@@ -275,6 +275,7 @@ public class ClientLogic : GameLogic
         int maxNumberOfFields;
         int lineId, machineId;
 		int lotteryCondition, lotteryBase, lotteryRate, lotteryAlloc;
+		int inputDevice;
 
         if(int.TryParse(words[1], out betTimeLimit))
             GameData.GetInstance().betTimeLimit = betTimeLimit;
@@ -333,8 +334,11 @@ public class ClientLogic : GameLogic
 			GameData.GetInstance().lotteryRate= lotteryRate;
 		if(int.TryParse(words[26], out lotteryAlloc))
 			GameData.GetInstance().lotteryAllocation= lotteryAlloc;
+		if(int.TryParse(words[27], out inputDevice))
+			GameData.GetInstance().inputDevice = inputDevice;
 
         GameData.GetInstance().SaveSetting();
+		GameData.GetInstance().SaveInputDevice();
         ui.SetDisplay();
         ui.SetBetChips();
     }

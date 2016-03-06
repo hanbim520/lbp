@@ -350,7 +350,7 @@ public class ServerLogic : GameLogic
 				win += peilv * item.Value;
 			}
 		}
-		AppendLast10(totalCredits, totalCredits + win, currentBet, win);
+		AppendLast10(totalCredits, totalCredits + win, currentBet, win, ballValue);
         GameData.GetInstance().ZongPei += win;
 		currentBet = 0;
 		totalCredits += win;

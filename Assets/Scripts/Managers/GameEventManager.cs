@@ -46,6 +46,7 @@ public static class GameEventManager
 	public static event BallValueEvent BallValue;
 	public static event PromptEvent Prompt, ResultPrompt;
 	public static event OddsPromptEvent OddsPrompt;
+	public static event GameEvent SyncSetting;
 
 	public static void TriggerOpenSerial()
 	{
@@ -251,5 +252,10 @@ public static class GameEventManager
 	public static void OnOddsPrompt(int odds)
 	{
 		if (OddsPrompt != null) OddsPrompt(odds);
+	}
+
+	public static void OnSyncSetting()
+	{
+		if (SyncSetting != null) SyncSetting();
 	}
 }

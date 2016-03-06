@@ -44,6 +44,7 @@ public class UHost : MonoBehaviour
 
 	void Start()
 	{
+		GameEventManager.SyncSetting += SyncSetting;
 		SetupServer();
 	}
 
@@ -51,6 +52,7 @@ public class UHost : MonoBehaviour
 	{
         try
         {
+			GameEventManager.SyncSetting -= SyncSetting;
             StopBroadcast();
             NetworkTransport.RemoveHost(hostId);
         }
@@ -124,14 +126,14 @@ public class UHost : MonoBehaviour
 			GameEventManager.TriggerGameStart();
 		}
 		// Synchronize backend data
-		SynData(connectionId);
+		SyncData(connectionId);
 	}
 
-	private void SynData(int connectionId)
+	public void SyncData(int connectionId)
 	{
 		GameData gd = GameData.GetInstance();
         string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9}:{10}:" +
-		                           "{11}:{12}:{13}:{14}:{15}:{16}:{17}:{18}:{19}:{20}:{21}:{22}:{23}:{24}:{25}:{26}", 
+		                           "{11}:{12}:{13}:{14}:{15}:{16}:{17}:{18}:{19}:{20}:{21}:{22}:{23}:{24}:{25}:{26}:{27}", 
 		                           NetInstr.SyncData, 
                                    gd.betTimeLimit, gd.coinToScore, gd.baoji,
                                    gd.betChipValues[0], gd.betChipValues[1], gd.betChipValues[2],
@@ -141,7 +143,7 @@ public class UHost : MonoBehaviour
                                    gd.couponsStart, gd.couponsKeyinRatio, gd.couponsKeoutRatio, 
                                    gd.maxNumberOfFields,
                                    gd.lineId, gd.machineId,
-		                           gd.lotteryCondition, gd.lotteryBase, gd.lotteryRate, gd.lotteryAllocation);
+		                           gd.lotteryCondition, gd.lotteryBase, gd.lotteryRate, gd.lotteryAllocation, gd.inputDevice);
 		SendToPeer(msg, connectionId);
 	}
 
@@ -235,5 +237,24 @@ public class UHost : MonoBehaviour
 	{
 		if (timerConnectClients != null)
 			timerConnectClients.Update(Time.deltaTime);
+	}
+
+	// 主动跟分机同步设置
+	private void SyncSetting()
+	{
+		GameData gd = GameData.GetInstance();
+		string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9}:{10}:" +
+		                           "{11}:{12}:{13}:{14}:{15}:{16}:{17}:{18}:{19}:{20}:{21}:{22}:{23}:{24}:{25}:{26}:{27}", 
+		                           NetInstr.SyncData, 
+		                           gd.betTimeLimit, gd.coinToScore, gd.baoji,
+		                           gd.betChipValues[0], gd.betChipValues[1], gd.betChipValues[2],
+		                           gd.betChipValues[3], gd.betChipValues[4], gd.betChipValues[5],
+		                           gd.max36Value, gd.max18Value, gd.max12Value, gd.max9Value, 
+		                           gd.max6Value, gd.max3Value, gd.max2Value, 
+		                           gd.couponsStart, gd.couponsKeyinRatio, gd.couponsKeoutRatio, 
+		                           gd.maxNumberOfFields,
+		                           gd.lineId, gd.machineId,
+		                           gd.lotteryCondition, gd.lotteryBase, gd.lotteryRate, gd.lotteryAllocation, gd.inputDevice);
+		SendToAll(msg);
 	}
 }

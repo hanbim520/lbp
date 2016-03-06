@@ -595,6 +595,7 @@ public class GameData
             PlayerPrefs.SetInt("br_endCredit" + idx, betRecords[idx].endCredit);
             PlayerPrefs.SetInt("br_bet" + idx, betRecords[idx].bet);
             PlayerPrefs.SetInt("br_win" + idx, betRecords[idx].win);
+			PlayerPrefs.SetInt("br_ballValue" + idx, betRecords[idx].ballValue);
         }
         PlayerPrefs.Save();
     }
@@ -615,6 +616,7 @@ public class GameData
             br.endCredit = PlayerPrefs.GetInt("br_endCredit" + idx);
             br.bet = PlayerPrefs.GetInt("br_bet" + idx);
             br.win = PlayerPrefs.GetInt("br_win" + idx);
+			br.ballValue = PlayerPrefs.GetInt("br_ballValue" + idx);
             br.bets = new List<BetInfo>();
 			int numOfbets = PlayerPrefs.GetInt("br_bets" + idx + "_num");
 			for (int i = 0; i < numOfbets; ++i)

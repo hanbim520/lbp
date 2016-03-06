@@ -507,13 +507,14 @@ public class GameLogic : MonoBehaviour
 		}
 	}
 
-    protected void AppendLast10(int startCredit, int endCredit, int bet, int win)
+    protected void AppendLast10(int startCredit, int endCredit, int bet, int win, int ball_value)
     {
         BetRecord br = new BetRecord();
         br.startCredit = startCredit;
         br.endCredit = endCredit;
         br.bet = bet;
         br.win = win;
+		br.ballValue = ball_value;
         br.bets = new List<BetInfo>();
         foreach (KeyValuePair<string, int> item in betFields)
         {

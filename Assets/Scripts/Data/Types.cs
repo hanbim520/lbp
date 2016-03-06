@@ -70,6 +70,7 @@ public struct BetRecord
     public int endCredit;
     public int bet;
     public int win;
+	public int ballValue;		// 球的号码
 }
 
 public struct BetInfo

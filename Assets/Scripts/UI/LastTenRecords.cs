@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 // 录单场景记录
 public class LastTenRecords : MonoBehaviour
@@ -17,14 +18,19 @@ public class LastTenRecords : MonoBehaviour
 
 	private void InitRecords()
 	{
-        if (GameData.GetInstance().records.Count == 0)
+		if (GameData.GetInstance().betRecords.Count == 0)
         {
             foreach (GameObject item in records)
                 item.SetActive(false);
             return;
         }
 
-		int[] r = GameData.GetInstance().records.ToArray();
+		List<int> ballValues = new List<int>();
+		for (int i = 0; i < GameData.GetInstance().betRecords.Count; ++i)
+		{
+			ballValues.Add(GameData.GetInstance().betRecords[i].ballValue);
+		}
+		int[] r = ballValues.ToArray();
 		int lastIdx = 0;
 		if (r.Length <= records.Length)
 			lastIdx = 0;
