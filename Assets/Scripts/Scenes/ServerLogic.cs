@@ -9,7 +9,7 @@ public class ServerLogic : GameLogic
 
 	private const float kCalcRemainTime = 60.0f;
 	private float remainTimeIntever = 0.0f;
-	// 保存其他客户端在当前局的压分记录
+	// 保存其他客户端和主机在当前局的压分记录
 	private Dictionary<string, int> clientBetFields = new Dictionary<string, int>();
 	private Timer timerConnectClients = null;
     
@@ -124,15 +124,23 @@ public class ServerLogic : GameLogic
     private void CountdownComplete()
     {
 //		ui.chooseBetEffect.SetActive(false);
-		// 收集其他机台的压分情况
-		host.SendToAll(NetInstr.GetBetRecords.ToString());
-//        StartCoroutine(StartLottery());
+        StartCoroutine(StartLottery());
 		BlowBall();
     }
 
     private IEnumerator StartLottery()
     {
-        yield return new WaitForSeconds(3.0f);
+		foreach (KeyValuePair<string, int> item in betFields)
+		{
+			// 保存主机台的压分情况
+			if (item.Value >= GameData.GetInstance().lotteryCondition)
+				clientBetFields.Add(item.Key, item.Value);
+		}
+		// 收集其他机台的压分情况
+		host.SendToAll(NetInstr.GetBetRecords.ToString());
+		// 等收到分机的压分情况
+		yield return new WaitForSeconds(3.0f);		
+
         if (GameData.GetInstance().lotteryEnable)
         {
             Debug.Log("lottery able");
@@ -148,7 +156,6 @@ public class ServerLogic : GameLogic
                 }
                 // 通知分机彩票号码
                 host.SendToAll(msg);
-                // ui
                 StartCoroutine(ui.FlashLotteries(lotteryValues));
             }
         }
@@ -190,17 +197,38 @@ public class ServerLogic : GameLogic
 		Debug.Log("RecBallValue: " + ballValue);
         GameData.GetInstance().SaveRecord(ballValue);
         GameEventManager.OnRefreshRecord(ballValue);
+		CalcLuckySum();
 		StartCoroutine(ShowResult());
+	}
+
+	// 计算压中彩金号的总金额
+	private void CalcLuckySum()
+	{
+		curLuckySum = 0;
+		bool isLucky = false;	// 出不出彩金
+		foreach (int lottery in lotteryValues)
+		{
+			if (lottery == ballValue)
+			{
+				isLucky = true;
+				break;
+			}
+		}
+		if (!isLucky)
+			return;
+
+		string strBall = ballValue.ToString();
+		int tmpLuckSum;
+		if (clientBetFields.TryGetValue(strBall, out tmpLuckSum))
+			curLuckySum = tmpLuckSum;
+
+		string msg = NetInstr.LuckSum.ToString() + ":" + curLuckySum.ToString();
+		host.SendToAll(msg);
 	}
 
 	// 计算彩金号码
 	private int[] CalcLottery()
 	{
-		foreach (KeyValuePair<string, int> item in betFields)
-		{
-			// 保存主机台的压分情况
-			clientBetFields.Add(item.Key, item.Value);
-		}
 		// 单点压分号码
 		List<int> betSingle = new List<int>();
 		foreach (KeyValuePair<string, int> item in clientBetFields)
@@ -323,18 +351,6 @@ public class ServerLogic : GameLogic
 			ui.SetDisplay();
 		}
 		ui.FlashResult(ballValue);
-        // 判断有没有中彩票 应放在Compensate中
-        if (GameData.GetInstance().lotteryEnable)
-        {
-            foreach (KeyValuePair<string, int> bet in betFields)
-            {
-                int peilv = Utils.IsBingo(bet.Key, ballValue);
-                if (peilv == 36)
-                {
-                    // 中彩票
-                }
-            }
-        }
 		StartCoroutine(Compensate());
 	}
 
@@ -343,10 +359,8 @@ public class ServerLogic : GameLogic
 		Debug.Log("Compensate");
         gamePhase = GamePhase.Compensate;
 
-        // TODO: Compensate
-        // TODO: Save account
-        // TODO: UI
-		int win = 0;
+		// 正常赢取的筹码数
+		int win = 0;	
 		foreach (KeyValuePair<string, int> item in betFields)
 		{
 			int peilv = Utils.IsBingo(item.Key, ballValue);
@@ -355,7 +369,43 @@ public class ServerLogic : GameLogic
 				win += peilv * item.Value;
 			}
 		}
-		AppendLast10(totalCredits, totalCredits + win, currentBet, win, ballValue);
+		// 赢取的彩金数
+		int luckyWin = 0;	
+		if (GameData.GetInstance().lotteryEnable)
+		{
+			// 计算自己赢了多少彩金
+			if (curLuckySum > 0)
+			{
+				bool isLucky = false;	// 是否出彩金
+				foreach (int lottery in lotteryValues)
+				{
+					if (lottery == ballValue)
+					{
+						isLucky = true;
+						break;
+					}
+				}
+				if (isLucky)
+				{
+					int selfBet;
+					if (betFields.TryGetValue(ballValue.ToString(), out selfBet))
+					{
+						if (selfBet >= GameData.GetInstance().lotteryCondition)
+						{
+							luckyWin = Mathf.CeilToInt((float)GameData.GetInstance().lotteryDigit * 
+							                           ((float)selfBet / (float)curLuckySum) * 
+							                           ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
+							if (luckyWin > 0)
+							{
+								ui.CreateGoldenRain();
+							}
+						}
+					}
+				}
+			}
+		}
+		AppendLast10(totalCredits, totalCredits + win + luckyWin, currentBet, win, luckyWin, ballValue);
+		win += luckyWin;	// 加上彩金送的分
         GameData.GetInstance().ZongPei += win;
 		currentBet = 0;
 		totalCredits += win;
@@ -407,6 +457,7 @@ public class ServerLogic : GameLogic
     private void ClearVariables()
     {
         ballValue = -1;
+		curLuckySum = 0;
 		lotteryValues.Clear();
         betFields.Clear();
 		clientBetFields.Clear();
@@ -431,6 +482,20 @@ public class ServerLogic : GameLogic
 			if (gamePhase >= GamePhase.ShowResult)
 				return;
 			CollectBetRecords(ref words);
+		}
+		else if (instr == NetInstr.LuckWin)
+		{
+			int luckyWin;
+			if (int.TryParse(words[1], out luckyWin))
+			{
+				int totalLottery = GameData.GetInstance().lotteryDigit;
+				totalLottery -= luckyWin;
+				if (totalLottery <= 0)
+					totalLottery = GameData.GetInstance().lotteryBase;
+				// 有问题 还要改
+				host.SendToAll(NetInstr.SyncLottery.ToString() + ":" + totalLottery.ToString());
+				GameEventManager.OnLotteryChange(totalLottery);
+			}
 		}
     }
 

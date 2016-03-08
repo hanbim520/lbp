@@ -72,6 +72,7 @@ public class GameLogic : MonoBehaviour
 	protected bool isLock = false;	// true:不能押分
 	protected int gamePhase = GamePhase.GameEnd;
 	protected int ballValue = -1;
+	protected int curLuckySum = 0;							// 当前局压中彩金的总筹码数
 	protected List<int> lotteryValues = new List<int>();	// 彩票值
 	protected string[] strBaoji = new string[]{"Please contact the assistant,\ndevice can't pay more.", "请联系服务员，\n该机台达到赢分上限。"};
 	protected string[] strKeoutError = new string[]{"Can't keout now.Total Credits \nshould be greater than {0}.", "现在不能退分。\n总分必须大于 {0}"};
@@ -507,13 +508,14 @@ public class GameLogic : MonoBehaviour
 		}
 	}
 
-    protected void AppendLast10(int startCredit, int endCredit, int bet, int win, int ball_value)
+    protected void AppendLast10(int startCredit, int endCredit, int bet, int win, int luckyWin, int ball_value)
     {
         BetRecord br = new BetRecord();
         br.startCredit = startCredit;
         br.endCredit = endCredit;
         br.bet = bet;
         br.win = win;
+		br.luckyWin = luckyWin;
 		br.ballValue = ball_value;
         br.bets = new List<BetInfo>();
         foreach (KeyValuePair<string, int> item in betFields)

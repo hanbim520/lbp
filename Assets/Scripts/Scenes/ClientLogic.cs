@@ -89,6 +89,12 @@ public class ClientLogic : GameLogic
         {
             SyncLast100(ref words);
         }
+		else if (instr == NetInstr.LuckSum)
+		{
+			int value;
+			if (int.TryParse(words[1], out value))
+				curLuckySum = value;
+		}
 	}
 
 	// 发送当前局的压分记录
@@ -97,6 +103,8 @@ public class ClientLogic : GameLogic
 		string items = "";
 		foreach (KeyValuePair<string, int> item in betFields)
 		{
+			if (item.Value < GameData.GetInstance().lotteryCondition)
+				continue;
 			string str = string.Format(":{0}:{1}", item.Key, item.Value);
 			items += str;
 		}
@@ -197,10 +205,8 @@ public class ClientLogic : GameLogic
     private IEnumerator Compensate()
     {
         Debug.Log("Client Compensate");
-        // TODO: Compensate
-        // TODO: Save account
-        // TODO: UI
         
+		// 正常赢取的筹码数
         int win = 0;
         foreach (KeyValuePair<string, int> item in betFields)
         {
@@ -210,7 +216,42 @@ public class ClientLogic : GameLogic
                 win += peilv * item.Value;
             }
         }
-        AppendLast10(totalCredits, totalCredits + win, currentBet, win, ballValue);
+		// 赢取的彩金数
+		int luckyWin = 0;	
+		// 计算自己赢了多少彩金
+		if (GameData.GetInstance().lotteryEnable && curLuckySum > 0)
+		{
+			bool isLucky = false;	// 是否出彩金
+			foreach (int lottery in lotteryValues)
+			{
+				if (lottery == ballValue)
+				{
+					isLucky = true;
+					break;
+				}
+			}
+			if (isLucky)
+			{
+				int selfBet;
+				if (betFields.TryGetValue(ballValue.ToString(), out selfBet))
+				{
+					if (selfBet >= GameData.GetInstance().lotteryCondition)
+					{
+						luckyWin = Mathf.CeilToInt((float)GameData.GetInstance().lotteryDigit * 
+						                           ((float)selfBet / (float)curLuckySum) * 
+						                           ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
+						if (luckyWin > 0)
+						{
+							string msg = NetInstr.LuckWin.ToString() + ":" + luckyWin.ToString();
+							uclient.SendToServer(msg);
+							ui.CreateGoldenRain();
+						}
+					}
+				}
+			}
+		}
+        AppendLast10(totalCredits, totalCredits + win + luckyWin, currentBet, win, luckyWin, ballValue);
+		win += luckyWin;	// 加上彩金送的分
         GameData.GetInstance().ZongPei += win;
         currentBet = 0;
         totalCredits += win;
@@ -236,6 +277,7 @@ public class ClientLogic : GameLogic
     private void ClearVariables()
     {
         ballValue = -1;
+		curLuckySum = 0;
         betFields.Clear();
 		lotteryValues.Clear();
         ui.StopFlash();

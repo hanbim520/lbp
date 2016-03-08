@@ -46,9 +46,10 @@ public class GameData
     public int zongPei;     // 总赔
 	public int currentZongShang;	// 当次总上分
 	public int currentZongXia;		// 当次总下分
-	public int currentWin;	// 当次赢分（有跳码时候用）
-	public int totalWin;	// 总赢分
-	public int cardCredits;	// 优惠卡送的分
+	public int currentWin;			// 当次赢分（有跳码时候用）
+	public int totalWin;			// 总赢分
+	public int cardCredits;			// 优惠卡送的分
+	public int lotteryCredits;		// 彩金送的分
 	public Queue<KeyinKeoutRecord> keyinKeoutRecords = new Queue<KeyinKeoutRecord>();		// 上下分 投退币流水账
     private int _printTimes;   // 打码次数
     public int printTimes
@@ -595,6 +596,7 @@ public class GameData
             PlayerPrefs.SetInt("br_endCredit" + idx, betRecords[idx].endCredit);
             PlayerPrefs.SetInt("br_bet" + idx, betRecords[idx].bet);
             PlayerPrefs.SetInt("br_win" + idx, betRecords[idx].win);
+            PlayerPrefs.SetInt("br_luckyWin" + idx, betRecords[idx].luckyWin);
 			PlayerPrefs.SetInt("br_ballValue" + idx, betRecords[idx].ballValue);
         }
         PlayerPrefs.Save();
@@ -616,6 +618,7 @@ public class GameData
             br.endCredit = PlayerPrefs.GetInt("br_endCredit" + idx);
             br.bet = PlayerPrefs.GetInt("br_bet" + idx);
             br.win = PlayerPrefs.GetInt("br_win" + idx);
+			br.luckyWin = PlayerPrefs.GetInt("br_luckyWin" + idx);
 			br.ballValue = PlayerPrefs.GetInt("br_ballValue" + idx);
             br.bets = new List<BetInfo>();
 			int numOfbets = PlayerPrefs.GetInt("br_bets" + idx + "_num");

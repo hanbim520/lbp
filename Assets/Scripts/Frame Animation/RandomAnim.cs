@@ -6,7 +6,7 @@ using System.Collections;
 public class RandomAnim : FrameAnim
 {
 
-	protected void Start()
+	protected override void Start()
 	{
 		image = GetComponent<Image>();
 		ani = Resources.LoadAll<Sprite>(resPath);

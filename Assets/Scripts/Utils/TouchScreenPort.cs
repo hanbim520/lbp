@@ -20,7 +20,9 @@ public class TouchScreenPort : MonoBehaviour
 //	private SafedQueue<byte> queueReadPool = new SafedQueue<byte>();
 	private Thread readThread; 
 	private bool isReadThreadExit = false;
+#if UNITY_ANDROID
 	private string portName = "/dev/ttyS1";
+#endif
 	private int iCorrectNum = -1;
 	private int[] filtedArray = new int[10]{0,0,0,0,0,0,0,0,0,0};
 	private bool isBingo = false;

@@ -932,10 +932,22 @@ public class MainUILogic : MonoBehaviour
 		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = 1;
 	}
 
+	// 生成中彩票的金币雨
+	public void CreateGoldenRain()
+	{
+		GameObject root = GameObject.Find("Canvas/LotteryEffectRoot");
+		Object prefab = (Object)Resources.Load("Effects/Golden Rain");
+		GameObject golds = (GameObject)Instantiate(prefab);
+		golds.transform.SetParent(root.transform);
+		golds.transform.localPosition = Vector3.zero;
+		golds.transform.localScale = Vector3.one;
+		prefab = null;
+	}
+
 	// 显示彩金号码
 	public IEnumerator FlashLotteries(List<int> lotteries)
 	{
-		print("FlashLotteries");
+		Debug.Log("FlashLotteries");
 		if (lotteries.Count == 0)
 			yield break;
 
@@ -950,7 +962,7 @@ public class MainUILogic : MonoBehaviour
 		yield return new WaitForSeconds(3.0f);
 		Destroy(bigRect);
 
-		List<GameObject> lights = new List<GameObject>();
+		List<GameObject> lights = new List<GameObject>();	// 闪电
 		prefab = (Object)Resources.Load(resPath + "blue light");
 		foreach (int num in lotteries)
 		{

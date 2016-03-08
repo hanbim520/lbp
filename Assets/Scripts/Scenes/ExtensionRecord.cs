@@ -106,6 +106,7 @@ public class ExtensionRecord : MonoBehaviour
         fonts[1].GetComponent<Text>().text = betRecord.endCredit.ToString();
         fonts[2].GetComponent<Text>().text = betRecord.bet.ToString();
         fonts[3].GetComponent<Text>().text = betRecord.win.ToString();
+		fonts[4].GetComponent<Text>().text = betRecord.luckyWin.ToString();
 
 		// Delete children of betChipsRoot
 		foreach (Transform child in betChipsRoot)

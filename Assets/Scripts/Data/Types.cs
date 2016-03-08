@@ -27,8 +27,11 @@ public struct NetInstr
 	public const int ClearAccount       = 6;
 	public const int ClearCurrentWin    = 7;
 	public const int GetBetRecords      = 8;
-    public const int LotteryNum         = 9;
+    public const int LotteryNum         = 9;  // 同步彩金号码
     public const int SyncRecords        = 10; // sync last 100 records
+	public const int LuckSum			= 11; // 同步当前局压中彩金的总筹码数
+	public const int LuckWin			= 12; // 分机通知主机中了多少彩金
+	public const int SyncLottery		= 13; // 同步彩金池
 }
 
 // Use for network
@@ -70,6 +73,7 @@ public struct BetRecord
     public int endCredit;
     public int bet;
     public int win;
+	public int luckyWin;		// 赢取的彩金数
 	public int ballValue;		// 球的号码
 }
 

@@ -13,7 +13,7 @@ public class FrameAnim : MonoBehaviour
 	protected float timeElasped = 0;
 	protected int curFrame = 0;
 	
-	protected void Start()
+	protected virtual void Start()
 	{
 		image = GetComponent<Image>();
 		ani = Resources.LoadAll<Sprite>(resPath);

@@ -30,8 +30,10 @@ public class SerialMousePort : MonoBehaviour
 	private bool bFindMouse = false;
 
 	private const int refrenceWidth = 704;
+#if UNITY_ANDROID
 	private string portName = "/dev/ttyS1";
-
+#endif
+	
 	void OnEnable()
 	{
 		Init();
