@@ -187,7 +187,7 @@ public class BackendLogic : MonoBehaviour
             	SaveSetting();
 			else if (menuLottery.activeSelf)
 				SaveLottery();
-			GameEventManager.OnSyncSetting();
+			GameEventManager.OnSyncData();
         }
         else if (string.Equals(hitObject.name, "password"))
         {

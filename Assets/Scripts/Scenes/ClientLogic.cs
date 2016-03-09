@@ -95,6 +95,12 @@ public class ClientLogic : GameLogic
 			if (int.TryParse(words[1], out value))
 				curLuckySum = value;
 		}
+        else if (instr == NetInstr.SyncLottery)
+        {
+            int totalLottery;
+            if (int.TryParse(words[1], out totalLottery))
+                GameEventManager.OnLotteryChange(totalLottery);
+        }
 	}
 
 	// 发送当前局的压分记录
@@ -316,7 +322,7 @@ public class ClientLogic : GameLogic
         int couponsStart, couponsKeyinRatio, couponsKeoutRatio;
         int maxNumberOfFields;
         int lineId, machineId;
-		int lotteryCondition, lotteryBase, lotteryRate, lotteryAlloc;
+		int lotteryCondition, lotteryBase, lotteryRate, lotteryAlloc, lotteryDigit;
 		int inputDevice;
 
         if(int.TryParse(words[1], out betTimeLimit))
@@ -378,6 +384,8 @@ public class ClientLogic : GameLogic
 			GameData.GetInstance().lotteryAllocation= lotteryAlloc;
 		if(int.TryParse(words[27], out inputDevice))
 			GameData.GetInstance().inputDevice = inputDevice;
+        if(int.TryParse(words[28], out lotteryDigit))
+            GameData.GetInstance().lotteryDigit = lotteryDigit;
 
         GameData.GetInstance().SaveSetting();
 		GameData.GetInstance().SaveInputDevice();

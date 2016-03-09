@@ -86,6 +86,7 @@ public class ServerLogic : GameLogic
 
     private IEnumerator NextRound()
     {
+        GameEventManager.OnSyncData();
         yield return new WaitForSeconds(2.0f);
         GameEventManager.TriggerGameStart();
     }
@@ -144,7 +145,19 @@ public class ServerLogic : GameLogic
         if (GameData.GetInstance().lotteryEnable)
         {
             Debug.Log("lottery able");
+            // 累积彩金池
+            int totalBets = 0;
+            foreach (KeyValuePair<string, int> item in clientBetFields)
+            {
+                totalBets += item.Value;
+            }
+            int totalLottery = GameData.GetInstance().lotteryDigit + Mathf.FloorToInt((float)totalBets * (float)GameData.GetInstance().lotteryRate * 0.001f);
+            if (totalLottery > 999999)
+                totalLottery = 999999;
+            GameEventManager.OnLotteryChange(totalLottery);
+
             int[] lotteries = CalcLottery();
+//            int[] lotteries = new int[]{1, 2, 3};
             if (lotteries.Length > 0)
             {
                 string msg = NetInstr.LotteryNum + ":";
@@ -414,8 +427,15 @@ public class ServerLogic : GameLogic
 		
 		yield return new WaitForSeconds(5);
 
-		ui.RefreshLblBet("0");
-		ui.RefreshLblCredits(totalCredits.ToString());
+        // sync lottery digit
+        int totalLottery = GameData.GetInstance().lotteryDigit;
+        if (totalLottery <= 0)
+            totalLottery = GameData.GetInstance().lotteryBase;
+        host.SendToAll(NetInstr.SyncLottery.ToString() + ":" + totalLottery.ToString());
+        GameEventManager.OnLotteryChange(totalLottery);
+
+        ui.RefreshLblBet("0");
+        ui.RefreshLblCredits(totalCredits.ToString());
 		if (win > 0)
 			ui.RefreshLblWin(win.ToString());
 		else
@@ -488,13 +508,7 @@ public class ServerLogic : GameLogic
 			int luckyWin;
 			if (int.TryParse(words[1], out luckyWin))
 			{
-				int totalLottery = GameData.GetInstance().lotteryDigit;
-				totalLottery -= luckyWin;
-				if (totalLottery <= 0)
-					totalLottery = GameData.GetInstance().lotteryBase;
-				// 有问题 还要改
-				host.SendToAll(NetInstr.SyncLottery.ToString() + ":" + totalLottery.ToString());
-				GameEventManager.OnLotteryChange(totalLottery);
+                GameData.GetInstance().lotteryDigit -= luckyWin;
 			}
 		}
     }

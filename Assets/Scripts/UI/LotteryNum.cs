@@ -27,7 +27,10 @@ public class LotteryNum : MonoBehaviour
 
 	private void ShowLottery()
 	{
-		lotteryDigit = GameData.GetInstance().lotteryDigit;
+        if (GameData.GetInstance().lotteryEnable)
+		    lotteryDigit = GameData.GetInstance().lotteryDigit;
+        else
+            lotteryDigit = 0;
 		int unit = Utils.FindNum(lotteryDigit, 1);
 		int decade = Utils.FindNum(lotteryDigit, 2);
 		int hundred = Utils.FindNum(lotteryDigit, 3);
