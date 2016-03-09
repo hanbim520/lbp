@@ -9,8 +9,10 @@ public class ServerLogic : GameLogic
 
 	private const float kCalcRemainTime = 60.0f;
 	private float remainTimeIntever = 0.0f;
-	// 保存其他客户端和主机在当前局的压分记录
+	// 保存分机和主机在当前局的压分记录(用来计算压中的彩金分数)
 	private Dictionary<string, int> clientBetFields = new Dictionary<string, int>();
+	// 保存分机和主机在当前局的总压分
+	private List<int> totalBets = new List<int>();
 	private Timer timerConnectClients = null;
     
     private void Init()
@@ -131,14 +133,20 @@ public class ServerLogic : GameLogic
 
     private IEnumerator StartLottery()
     {
+		//主机的总压分
+		int serverBets = 0;	
 		foreach (KeyValuePair<string, int> item in betFields)
 		{
 			// 保存主机台的压分情况
 			if (item.Value >= GameData.GetInstance().lotteryCondition)
 				clientBetFields.Add(item.Key, item.Value);
+			serverBets += item.Value;
 		}
-		// 收集其他机台的压分情况
+		totalBets.Add(serverBets);
+		// 收集其他机台的符合彩金门槛的压分
 		host.SendToAll(NetInstr.GetBetRecords.ToString());
+		// 收集其他机台的总压分
+		host.SendToAll(NetInstr.GetTotalBet.ToString());
 		// 等收到分机的压分情况
 		yield return new WaitForSeconds(3.0f);		
 
@@ -146,12 +154,12 @@ public class ServerLogic : GameLogic
         {
             Debug.Log("lottery able");
             // 累积彩金池
-            int totalBets = 0;
-            foreach (KeyValuePair<string, int> item in clientBetFields)
+            int allBets = 0;
+            foreach (int item in totalBets)
             {
-                totalBets += item.Value;
+				allBets += item;
             }
-            int totalLottery = GameData.GetInstance().lotteryDigit + Mathf.FloorToInt((float)totalBets * (float)GameData.GetInstance().lotteryRate * 0.001f);
+			int totalLottery = GameData.GetInstance().lotteryDigit + Mathf.CeilToInt((float)allBets * (float)GameData.GetInstance().lotteryRate * 0.001f);
             if (totalLottery > 999999)
                 totalLottery = 999999;
             GameEventManager.OnLotteryChange(totalLottery);
@@ -195,11 +203,12 @@ public class ServerLogic : GameLogic
 	// 模拟收到球的号码
 	private IEnumerator SimulateBallValue(int value)
 	{
-		yield return new WaitForSeconds(2);
+		yield return new WaitForSeconds(6);
 		ballValue = value;
 		Debug.Log("SimulateBallValue: " + ballValue);
         GameData.GetInstance().SaveRecord(ballValue);
 		GameEventManager.OnRefreshRecord(ballValue);
+		CalcLuckySum();
 		StartCoroutine(ShowResult());
 	}
 
@@ -257,15 +266,12 @@ public class ServerLogic : GameLogic
 			if (!betSingle.Contains(i))
 				noBetSingle.Add(i);
 		}
-		if (betSingle.Count > 0)
+		// 场次计数加一
+		++GameData.GetInstance().lotteryMatchCount;
+		if (GameData.GetInstance().lotteryMatchCount >= GameData.GetInstance().lotteryMaxMatch)
 		{
-			// 有单点压分的情况下场次计数加一
-			++GameData.GetInstance().lotteryMatchCount;
-			if (GameData.GetInstance().lotteryMatchCount >= GameData.GetInstance().lotteryMaxMatch)
-			{
-				GameData.GetInstance().CalcLotteryIdx();
-				GameData.GetInstance().lotteryMatchCount = 1;
-			}
+			GameData.GetInstance().CalcLotteryIdx();
+			GameData.GetInstance().lotteryMatchCount = 1;
 		}
 		// 有单点压分 且能中彩金
 		if (GameData.GetInstance().lotteryWinIdx.Contains(GameData.GetInstance().lotteryMatchCount) &&
@@ -405,11 +411,12 @@ public class ServerLogic : GameLogic
 					{
 						if (selfBet >= GameData.GetInstance().lotteryCondition)
 						{
-							luckyWin = Mathf.CeilToInt((float)GameData.GetInstance().lotteryDigit * 
+							luckyWin = Mathf.FloorToInt((float)GameData.GetInstance().lotteryDigit * 
 							                           ((float)selfBet / (float)curLuckySum) * 
 							                           ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
 							if (luckyWin > 0)
 							{
+								GameData.GetInstance().lotteryDigit -= luckyWin;
 								ui.CreateGoldenRain();
 							}
 						}
@@ -481,6 +488,7 @@ public class ServerLogic : GameLogic
 		lotteryValues.Clear();
         betFields.Clear();
 		clientBetFields.Clear();
+		totalBets.Clear();
 		ui.StopFlash();
         ui.StopFlashLotteries();
     }
@@ -511,6 +519,12 @@ public class ServerLogic : GameLogic
                 GameData.GetInstance().lotteryDigit -= luckyWin;
 			}
 		}
+		else if (instr == NetInstr.GetTotalBet)
+		{
+			if (gamePhase >= GamePhase.ShowResult)
+				return;
+			CollectTotalBets(ref words);
+		}
     }
 
 	// 保存其他客户端在当前局的压分情况
@@ -537,6 +551,19 @@ public class ServerLogic : GameLogic
 					clientBetFields.Add(key, value);
 				}
 			}
+		}
+	}
+
+	// 保存所有机台的总压分
+	private void CollectTotalBets(ref string[] words)
+	{
+		if (words.Length <= 1)
+			return;
+
+		int totalBet;
+		if (int.TryParse(words[1], out totalBet))
+		{
+			totalBets.Add(totalBet);
 		}
 	}
 

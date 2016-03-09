@@ -20,6 +20,7 @@ public static class GameEventManager
 	public delegate void LotteryChangeEvent(int digit);
 	public delegate void PromptEvent(int promptId);
 	public delegate void OddsPromptEvent(int odds);
+	public delegate void ChooseFieldsEvent(Transform hitObject);	// 选中多个区域 选中区域显亮色
     public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
@@ -41,6 +42,7 @@ public static class GameEventManager
 	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
 	public static event GameEvent ClientDisconnect;	// 分机通讯断开
 	public static event LotteryChangeEvent LotteryChange;
+	public static event ChooseFieldsEvent ChooseFields;	
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
 	public static event BallValueEvent BallValue;
@@ -257,5 +259,10 @@ public static class GameEventManager
 	public static void OnSyncData()
 	{
 		if (SyncData != null) SyncData();
+	}
+
+	public static void OnChooseFields(Transform hitObject)
+	{
+		if (ChooseFields != null) ChooseFields(hitObject);
 	}
 }

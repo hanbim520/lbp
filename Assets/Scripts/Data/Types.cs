@@ -32,6 +32,7 @@ public struct NetInstr
 	public const int LuckSum			= 11; // 同步当前局压中彩金的总筹码数
 	public const int LuckWin			= 12; // 分机通知主机中了多少彩金
 	public const int SyncLottery		= 13; // 同步彩金池
+	public const int GetTotalBet		= 14; // 获取分机的总压分
 }
 
 // Use for network

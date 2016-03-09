@@ -101,6 +101,10 @@ public class ClientLogic : GameLogic
             if (int.TryParse(words[1], out totalLottery))
                 GameEventManager.OnLotteryChange(totalLottery);
         }
+		else if (instr == NetInstr.GetTotalBet)
+		{
+		    SendTotalBet();
+		}
 	}
 
 	// 发送当前局的压分记录
@@ -115,6 +119,19 @@ public class ClientLogic : GameLogic
 			items += str;
 		}
 		string msg = NetInstr.GetBetRecords.ToString() + items;
+		uclient.SendToServer(msg);
+	}
+
+	// 发送当前局的总压分
+	private void SendTotalBet()
+	{
+		string msg = NetInstr.GetTotalBet.ToString() + ":";
+		int totalBet = 0;
+		foreach (KeyValuePair<string, int> item in betFields)
+		{
+			totalBet += item.Value;
+		}
+		msg += totalBet.ToString();
 		uclient.SendToServer(msg);
 	}
 

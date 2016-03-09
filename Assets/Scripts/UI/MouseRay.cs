@@ -12,6 +12,7 @@ public class MouseRay : MonoBehaviour
 		RaycastHit2D[] hit = Physics2D.RaycastAll(new Vector2(sx, sy), Vector2.zero);
 		if (hit.Length == 0)
 		{
+			GameEventManager.OnChooseFields(null);
 			GameEventManager.OnOddsPrompt(0);
 			return;
 		}
@@ -31,17 +32,16 @@ public class MouseRay : MonoBehaviour
 				{
 					bFound = true;
 					string name = hit[i].collider.name;
-					if (name.Contains("-"))
-						break;
-					else
-					{
-						GameEventManager.OnOddsPrompt(Utils.GetOdds(name));
-						return;
-					}
+					GameEventManager.OnChooseFields(hit[i].collider.transform);
+					GameEventManager.OnOddsPrompt(Utils.GetOdds(name));
+					return;
 				}
 			}
 		}
 		if (!bFound)
+		{
+			GameEventManager.OnChooseFields(null);
 			GameEventManager.OnOddsPrompt(0);
+		}
 	}
 }

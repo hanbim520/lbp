@@ -39,7 +39,9 @@ public class MainUILogic : MonoBehaviour
 	private int curChipIdx = -1;
 	private int timeLimit;
     private GameObject downHitObject;
-    private List<Transform> lightEffects = new List<Transform>();	// 选中的压分区域(亮色)
+//    private List<Transform> lightEffects = new List<Transform>();	// 选中的压分区域(亮色)
+	// 改版后：鼠标只要移到边或角 所有关联压分区显示亮色
+	Dictionary<string, List<Transform>> lightEffects = new Dictionary<string, List<Transform>>();
 	private Transform flashObject;
 	private List<Transform> flashObjects = new List<Transform>();	// 显示压中结果的区域(亮色)
     private Timer timerHideWarning;
@@ -81,12 +83,14 @@ public class MainUILogic : MonoBehaviour
     {
 		GameEventManager.CloseGate += StopFlash;
 		GameEventManager.OpenKey += OpenKey;
+		GameEventManager.ChooseFields += ChooseFields;
     }
 
     private void UnregisterEvents()
     {
 		GameEventManager.CloseGate -= StopFlash;
 		GameEventManager.OpenKey -= OpenKey;
+		GameEventManager.ChooseFields -= ChooseFields;
     }
 
 	private void Init()
@@ -648,39 +652,108 @@ public class MainUILogic : MonoBehaviour
 		hitObject.gameObject.SetActive(false);
 	}
 
+	private void ChooseFields(Transform hitObject)
+	{
+		if (gameLogic.LogicPhase >= GamePhase.ShowResult)
+			return;
+		if (hitObject == null)
+		{
+			foreach (KeyValuePair<string, List<Transform>> item in lightEffects)
+			{
+				foreach (Transform t in item.Value)
+				{
+					Color c = t.GetComponent<Image>().color;
+					c.a = 0;
+					t.GetComponent<Image>().color = c;
+				}
+			}
+			lightEffects.Clear();
+			return;
+		}
+		if (lightEffects.ContainsKey(hitObject.name))
+		{
+			return;
+		}
+		else
+		{
+			foreach (KeyValuePair<string, List<Transform>> item in lightEffects)
+			{
+				foreach (Transform t in item.Value)
+				{
+					Color c = t.GetComponent<Image>().color;
+					c.a = 0;
+					t.GetComponent<Image>().color = c;
+				}
+			}
+			lightEffects.Clear();
+
+			string filedName = hitObject.name;
+			if (string.Equals(filedName.Substring(0, 1), "e"))
+			{
+				lightEffects.Add(filedName, new List<Transform>(){hitObject});
+			}
+			else
+			{
+            	Transform effectRoot = hitObject.parent.parent.FindChild("Choose Effect");
+				if (effectRoot != null)
+				{
+					char[] separater = {'-'};
+					string[] names = hitObject.name.Split(separater);
+
+					List<Transform> effects = new List<Transform>();
+					foreach (string str in names)
+					{
+						Transform effect = effectRoot.FindChild(str);
+						if (effect != null)
+						{
+							Color c = effect.GetComponent<Image>().color;
+							c.a = 255;
+							effect.GetComponent<Image>().color = c;
+							effects.Add(effect);
+						}
+					}
+					if (effects.Count > 0)
+					{
+						lightEffects.Add(filedName, effects);
+					}
+				}
+			}
+		}
+	}
+
 	public void FieldDownEvent(Transform hitObject)
 	{
 		if (eraser.activeSelf || curChipIdx == -1 || 
 		    gameLogic.LogicPhase != GamePhase.Countdown)
 			return;
 
-        if (string.Equals(hitObject.name.Substring(0, 1), "e"))
-        {
-            lightEffects.Add(hitObject);
-        }
-        else
-        {
-            Transform effectRoot = hitObject.parent.parent.FindChild("Choose Effect");
-            if (effectRoot != null)
-            {
-                char[] separater = {'-'};
-                string[] names = hitObject.name.Split(separater);
-                foreach (string str in names)
-                {
-                    Transform effect = effectRoot.FindChild(str);
-                    if (effect != null)
-                    {
-                        lightEffects.Add(effect);
-                    }
-                }
-            }
-        }
-        foreach (Transform t in lightEffects)
-        {
-            Color c = t.GetComponent<Image>().color;
-            c.a = 255;
-            t.GetComponent<Image>().color = c;
-        }
+//        if (string.Equals(hitObject.name.Substring(0, 1), "e"))
+//        {
+//            lightEffects.Add(hitObject);
+//        }
+//        else
+//        {
+//            Transform effectRoot = hitObject.parent.parent.FindChild("Choose Effect");
+//            if (effectRoot != null)
+//            {
+//                char[] separater = {'-'};
+//                string[] names = hitObject.name.Split(separater);
+//                foreach (string str in names)
+//                {
+//                    Transform effect = effectRoot.FindChild(str);
+//                    if (effect != null)
+//                    {
+//                        lightEffects.Add(effect);
+//                    }
+//                }
+//            }
+//        }
+//        foreach (Transform t in lightEffects)
+//        {
+//            Color c = t.GetComponent<Image>().color;
+//            c.a = 255;
+//            t.GetComponent<Image>().color = c;
+//        }
     }
 
 	public void FieldClickEvent(Transform hitObject)
@@ -697,13 +770,13 @@ public class MainUILogic : MonoBehaviour
 			}
 			
 			// Clear light effects
-			foreach (Transform t in lightEffects)
-			{
-				Color c = t.GetComponent<Image>().color;
-				c.a = 0;
-				t.GetComponent<Image>().color = c;
-			}
-			lightEffects.Clear();
+//			foreach (Transform t in lightEffects)
+//			{
+//				Color c = t.GetComponent<Image>().color;
+//				c.a = 0;
+//				t.GetComponent<Image>().color = c;
+//			}
+//			lightEffects.Clear();
 			
 			if (curChipIdx == -1 || 
 			    gameLogic.LogicPhase != GamePhase.Countdown ||
@@ -1030,6 +1103,19 @@ public class MainUILogic : MonoBehaviour
 
 	public void FlashResult(int result)
 	{
+		if (lightEffects.Count > 0)
+		{
+			foreach (KeyValuePair<string, List<Transform>> item in lightEffects)
+			{
+				foreach (Transform t in item.Value)
+				{
+					Color c = t.GetComponent<Image>().color;
+					c.a = 0;
+					t.GetComponent<Image>().color = c;
+				}
+			}
+			lightEffects.Clear();
+		}
 		if (eraser.activeSelf)
 		{
 			eraser.SetActive(false);
