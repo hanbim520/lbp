@@ -690,11 +690,14 @@ public class MainUILogic : MonoBehaviour
 			string filedName = hitObject.name;
 			if (string.Equals(filedName.Substring(0, 1), "e"))
 			{
-				lightEffects.Add(filedName, new List<Transform>(){hitObject});
-			}
-			else
-			{
-            	Transform effectRoot = hitObject.parent.parent.FindChild("Choose Effect");
+                lightEffects.Add(filedName, new List<Transform>(){hitObject});
+                Color c = hitObject.GetComponent<Image>().color;
+                c.a = 255;
+                hitObject.GetComponent<Image>().color = c;
+            }
+            else
+            {
+                Transform effectRoot = hitObject.parent.parent.FindChild("Choose Effect");
 				if (effectRoot != null)
 				{
 					char[] separater = {'-'};
