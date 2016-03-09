@@ -278,7 +278,6 @@ public class ServerLogic : GameLogic
 		    betSingle.Count > 0)
 		{
 			int betCount = betSingle.Count;
-			int noBetCount = noBetSingle.Count;
 			// 中彩金
 			if (betCount > 0)
 			{
@@ -287,7 +286,6 @@ public class ServerLogic : GameLogic
 				Utils.SetSeed();
 				lotteryCount = Utils.GetRandom(1, Mathf.Min(betCount, 6));		// 彩金个数 1~5
 				int winCount = Utils.GetRandom(1, lotteryCount);				// 中奖个数 1~4
-				int loseCount = lotteryCount - winCount;					// 没中奖个数 1~3
 				for (int i = 0; i < winCount;)
 				{
 					int idx = Utils.GetRandom(0, betCount);
@@ -297,17 +295,7 @@ public class ServerLogic : GameLogic
 						retArray.Add(value);
 						++i;
 					}
-				}
-				for (int i = 0; i < loseCount;)
-				{
-					int idx = Utils.GetRandom(0, noBetCount);
-					int value = noBetSingle[idx];
-					if (!retArray.Contains(value))
-					{
-						retArray.Add(value);
-						++i;
-					}
-				}
+                }
 				return retArray.ToArray();
 			}
 		}

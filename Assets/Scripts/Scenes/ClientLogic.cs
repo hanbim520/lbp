@@ -8,7 +8,7 @@ public class ClientLogic : GameLogic
 
     private void Init()
     {
-        gamePhase = GamePhase.GameEnd;
+        gamePhase = GamePhase.GameStart;
 		uclient = GameObject.Find("NetworkObject").GetComponent<UClient>();
     }
 

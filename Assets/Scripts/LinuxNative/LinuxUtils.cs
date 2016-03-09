@@ -8,5 +8,8 @@ public static class LinuxUtils
 	public extern static int GetRandom(int min, int max);
 
 	[DllImport ("LinuxUtils")] 
-	public extern static void SetSeed();
+    public extern static void SetSeed();
+
+    [DllImport ("LinuxUtils")] 
+	public extern static void Seed(int seed);
 }

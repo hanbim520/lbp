@@ -343,6 +343,18 @@ public static class Utils
 		}
 	}
 
+    public static void Seed(int seed)
+    {
+        if (Application.platform == RuntimePlatform.LinuxPlayer)
+        {
+            LinuxUtils.Seed(seed);
+        }
+        else
+        {
+            UnityEngine.Random.seed = seed;
+        }
+    }
+
 	// Returns a random integer number between min[inclusive] and max[exclusive]
 	public static int GetRandom(int min, int max)
 	{

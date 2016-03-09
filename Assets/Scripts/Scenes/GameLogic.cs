@@ -70,7 +70,7 @@ public class GameLogic : MonoBehaviour
 	protected int _rememberCredits = 0;
 	protected bool isPause = false;	// true:程序不往下走
 	protected bool isLock = false;	// true:不能押分
-	protected int gamePhase = GamePhase.GameEnd;
+	protected int gamePhase = GamePhase.GameStart;
 	protected int ballValue = -1;
 	protected int curLuckySum = 0;							// 当前局压中彩金的总筹码数
 	protected List<int> lotteryValues = new List<int>();	// 彩票值
