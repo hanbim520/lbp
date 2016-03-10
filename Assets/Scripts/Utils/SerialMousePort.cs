@@ -248,7 +248,7 @@ X，Y方向的两个8位数据为有符号的整数，范围是-128—+127，
     private void SerialMouseMove(sbyte deltaX, sbyte deltaY)
     {
         GameData.GetInstance().serialMouseX += deltaX * ratio;
-        GameData.GetInstance().serialMouseY += deltaY * (ratio + 0.1f);
+        GameData.GetInstance().serialMouseY -= deltaY * (ratio + 0.1f);
 		
 		if (GameData.GetInstance().serialMouseX >= xMax)
             GameData.GetInstance().serialMouseX = xMax;

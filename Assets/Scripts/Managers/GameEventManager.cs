@@ -5,6 +5,7 @@ using System.Collections;
 public static class GameEventManager 
 {
     public delegate void GameEvent();
+    public delegate void GameEventWithId(int eventId);
     public delegate void RefreshRecordEvent(int result);
 	public delegate void FingerEvent(UInt16 x, UInt16 y);
 	public delegate void SerialMouseMoveEvent(sbyte deltaX, sbyte deltaY);
@@ -49,6 +50,7 @@ public static class GameEventManager
 	public static event PromptEvent Prompt, ResultPrompt;
 	public static event OddsPromptEvent OddsPrompt;
 	public static event GameEvent SyncData;
+	public static event GameEventWithId BreakdownTip;
 
 	public static void TriggerOpenSerial()
 	{
@@ -264,5 +266,10 @@ public static class GameEventManager
 	public static void OnChooseFields(Transform hitObject)
 	{
 		if (ChooseFields != null) ChooseFields(hitObject);
+	}
+
+	public static void OnBreakdownTip(int breakdownType)
+	{
+		if (BreakdownTip != null) BreakdownTip(breakdownType);
 	}
 }

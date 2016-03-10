@@ -133,3 +133,8 @@ public struct PromptId
 	public static int NoMoreBet = 1;
 	public static int Result 	= 2;
 }
+
+public struct BreakdownType
+{
+	public static int RecognizeBall = 1;	// 两次认球结果不同
+}

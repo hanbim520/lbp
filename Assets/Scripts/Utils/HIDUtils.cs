@@ -252,20 +252,24 @@ public class HIDUtils : MonoBehaviour
                     }
                 }
                 // 不是上轮结果
-                if (data[5] != kPreviousValue && phase == kPhaseEndBlowBall)
+				if (data[5] != kPreviousValue && phase == kPhaseEndBlowBall)
                 {
-                    // 结果
-                    int idx = data[4];
-                    if (idx == 0)
-                        return;
-                    else
-                        idx -= 1;
-                    phase = kPhaseDetectBallValue;
-                    if (GameData.GetInstance().maxNumberOfFields == 38)
-                        GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
-                    else if (GameData.GetInstance().maxNumberOfFields == 37)
-                        GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
+					// 结果
+					int idx = data[4];
+					if (idx == 0)
+						return;
+					else
+						idx -= 1;
+					phase = kPhaseDetectBallValue;
+					if (GameData.GetInstance().maxNumberOfFields == 38)
+						GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
+					else if (GameData.GetInstance().maxNumberOfFields == 37)
+						GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
                 }
+				else if (data[5] == kPreviousValue && phase == kPhaseEndBlowBall)
+				{
+					GameEventManager.OnBreakdownTip(BreakdownType.RecognizeBall);
+				}
 				if (data[9] != 0)	// 投币
 				{
 					GameEventManager.OnReceiveCoin(data[9]);

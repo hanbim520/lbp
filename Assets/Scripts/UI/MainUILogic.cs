@@ -84,6 +84,7 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.CloseGate += StopFlash;
 		GameEventManager.OpenKey += OpenKey;
 		GameEventManager.ChooseFields += ChooseFields;
+		GameEventManager.BreakdownTip += BreakdownTip;
     }
 
     private void UnregisterEvents()
@@ -91,6 +92,7 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.CloseGate -= StopFlash;
 		GameEventManager.OpenKey -= OpenKey;
 		GameEventManager.ChooseFields -= ChooseFields;
+		GameEventManager.BreakdownTip -= BreakdownTip;
     }
 
 	private void Init()
@@ -1245,6 +1247,17 @@ public class MainUILogic : MonoBehaviour
 						FlashResult(value);
 				}
 			}
+		}
+	}
+
+	public void BreakdownTip(int breakdownType)
+	{
+		int language = GameData.GetInstance().language;
+		if (breakdownType == BreakdownType.RecognizeBall)
+		{
+			string[] msg = {"Communication failures.\nPlease reboot device!\nError code:" + BreakdownType.RecognizeBall, 
+							"通讯故障，请重启机器！\n故障号：" + BreakdownType.RecognizeBall};
+			ShowWarning(msg[language]);
 		}
 	}
 
