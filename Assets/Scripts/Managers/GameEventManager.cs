@@ -22,7 +22,6 @@ public static class GameEventManager
 	public delegate void PromptEvent(int promptId);
 	public delegate void OddsPromptEvent(int odds);
 	public delegate void ChooseFieldsEvent(Transform hitObject);	// 选中多个区域 选中区域显亮色
-    public static event GameEvent ObtainInput;
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll, CleanAll;
@@ -61,11 +60,6 @@ public static class GameEventManager
 	{
 		if (CloseSerial != null) CloseSerial();
 	}
-
-    public static void TriggerObtainInput()
-    {
-        if (ObtainInput != null) ObtainInput();
-    }
 
     public static void TriggerGameStart()
     {
