@@ -6,21 +6,13 @@ public static class GameEventManager
 {
     public delegate void GameEvent();
     public delegate void GameEventWithId(int eventId);
-    public delegate void RefreshRecordEvent(int result);
 	public delegate void FingerEvent(UInt16 x, UInt16 y);
 	public delegate void SerialMouseMoveEvent(sbyte deltaX, sbyte deltaY);
 	public delegate void SerialMouseButtonEvent();
     public delegate int FieldClickEvent(string fieldName, int bet);
     public delegate void ClearEvent(string fieldName);
-	public delegate void BallValueEvent(int ballValue);
     public delegate void KeyinEvent(int delta, int coinNum);
-	public delegate void ReceiveCoinEvent(int count);
-	public delegate void PayCoinEvent(int count);
-    public delegate void NetworkReadyEvent(bool value);
     public delegate void ChangeSceneEvent(string sceneName);
-	public delegate void LotteryChangeEvent(int digit);
-	public delegate void PromptEvent(int promptId);
-	public delegate void OddsPromptEvent(int odds);
 	public delegate void ChooseFieldsEvent(Transform hitObject);	// 选中多个区域 选中区域显亮色
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
@@ -30,24 +22,24 @@ public static class GameEventManager
 	public static event FingerEvent FingerUp, FingerDown, FingerHover;
 	public static event SerialMouseMoveEvent SerialMouseMove;
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
-    public static event RefreshRecordEvent RefreshRecord;
+    public static event GameEventWithId RefreshRecord;
     public static event FieldClickEvent FieldClick;
 	public static event KeyinEvent Keyin;	// 上分
 	public static event GameEvent Keout;	// 下分
-	public static event ReceiveCoinEvent ReceiveCoin;	// 投币
+    public static event GameEventWithId ReceiveCoin;	// 投币
 	public static event GameEvent PayCoin;				// 退币
-	public static event PayCoinEvent PayCoinCallback;	// 退币机发来的退币数
+    public static event GameEventWithId PayCoinCallback;	// 退币机发来的退币数
 	public static event GameEvent OpenKey;				// 旋转物理钥匙
     public static event ChangeSceneEvent ChangeScene;
 	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
 	public static event GameEvent ClientDisconnect;	// 分机通讯断开
-	public static event LotteryChangeEvent LotteryChange;
+    public static event GameEventWithId LotteryChange;
 	public static event ChooseFieldsEvent ChooseFields;	
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
-	public static event BallValueEvent BallValue;
-	public static event PromptEvent Prompt, ResultPrompt;
-	public static event OddsPromptEvent OddsPrompt;
+    public static event GameEventWithId BallValue;
+    public static event GameEventWithId Prompt, ResultPrompt;
+    public static event GameEventWithId OddsPrompt;
 	public static event GameEvent SyncData;
 	public static event GameEventWithId BreakdownTip;
 
