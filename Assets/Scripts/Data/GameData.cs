@@ -771,9 +771,9 @@ public class GameData
 	// 计算会中彩金的场次序号
 	public void CalcLotteryIdx()
 	{
-		Utils.SetSeed();
-		int count = Utils.GetRandom(1, 10);					// 共有多少场出彩金
-		int sumMatch = 24 * 60 * 60 * 2 / betTimeLimit;		// 2天内的场次数
+		Utils.Seed(System.DateTime.Now.Millisecond);
+		int count = Utils.GetRandom(9, 12);					// 共有多少场出彩金
+		int sumMatch = 2400;								// 2天内的场次数 (一场90秒 每天15个小时)
 		lotteryWinIdx.Clear();
 		for (int i = 0; i < 10; ++i)
 		{

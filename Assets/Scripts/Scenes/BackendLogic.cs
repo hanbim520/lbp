@@ -89,9 +89,15 @@ public class BackendLogic : MonoBehaviour
 
     void Update()
     {
-        DetectInputEvents();
+        if (!IsDlgActived())
+       		DetectInputEvents();
         UpdateTimer();
     }
+
+	public bool IsDlgActived()
+	{
+		return warning.activeSelf;
+	}
     
     private void DetectInputEvents()
     {
@@ -309,6 +315,9 @@ public class BackendLogic : MonoBehaviour
 		GameObject go = GameObject.Find("InputDevice");
 		if (go != null)
 		{
+			string[] msg = {"Setting device, please wait.", "正在设置，请稍后！"};
+			ShowWarning(msg[GameData.GetInstance().language], true, 4.0f);
+
 			SerialMousePort mouse = go.GetComponent<SerialMousePort>();
 			TouchScreenPort touchScreen = go.GetComponent<TouchScreenPort>();
 			if (GameData.GetInstance().inputDevice == 0)
@@ -337,6 +346,7 @@ public class BackendLogic : MonoBehaviour
 					go.AddComponent<SerialMousePort>();
 				}
 			}
+			GameEventManager.OnSyncInputDevice();
 		}
 	}
 
@@ -934,7 +944,7 @@ public class BackendLogic : MonoBehaviour
         }
     }
 
-    private void ShowWarning(string str, bool autoDisappear)
+	private void ShowWarning(string str, bool autoDisappear, float duration = 1.5f)
     {
         if (warning != null && !warning.activeSelf)
         {
@@ -942,7 +952,7 @@ public class BackendLogic : MonoBehaviour
             warning.transform.FindChild("Text").GetComponent<Text>().text = str;
 			if (autoDisappear)
 			{
-				timerHideWarning = new Timer(1.5f, 0);
+				timerHideWarning = new Timer(duration, 0);
 				timerHideWarning.Tick += HideWarning;
 				timerHideWarning.Start();
 			}

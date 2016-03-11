@@ -85,6 +85,7 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.OpenKey += OpenKey;
 		GameEventManager.ChooseFields += ChooseFields;
 		GameEventManager.BreakdownTip += BreakdownTip;
+		GameEventManager.SyncUI += SyncUI;
     }
 
     private void UnregisterEvents()
@@ -93,6 +94,7 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.OpenKey -= OpenKey;
 		GameEventManager.ChooseFields -= ChooseFields;
 		GameEventManager.BreakdownTip -= BreakdownTip;
+		GameEventManager.SyncUI -= SyncUI;
     }
 
 	private void Init()
@@ -1337,4 +1339,10 @@ public class MainUILogic : MonoBehaviour
         backendTip.SetActive(true);
         backendTip.transform.FindChild("Text").GetComponent<Text>().text = tip;
     }
+
+	private void SyncUI()
+	{
+		SetDisplay();
+		SetBetChips();
+	}
 }

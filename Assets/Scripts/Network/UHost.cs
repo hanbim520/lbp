@@ -45,6 +45,7 @@ public class UHost : MonoBehaviour
 	void Start()
 	{
 		GameEventManager.SyncData += SyncDataToClients;
+		GameEventManager.SyncInputDevice += SyncInputDevice;
 		SetupServer();
 	}
 
@@ -53,6 +54,7 @@ public class UHost : MonoBehaviour
         try
         {
 			GameEventManager.SyncData -= SyncDataToClients;
+			GameEventManager.SyncInputDevice -= SyncInputDevice;
             StopBroadcast();
             NetworkTransport.RemoveHost(hostId);
         }
@@ -223,5 +225,14 @@ public class UHost : MonoBehaviour
         {
             SyncData(connectionId);
         }
+	}
+
+	private void SyncInputDevice()
+	{
+		string msg = string.Format("{0}:{1}", NetInstr.SyncInputDevice, GameData.GetInstance().inputDevice);
+		foreach (int connectionId in allConnections)
+		{
+			SendToPeer(msg, connectionId);
+		}
 	}
 }

@@ -42,6 +42,8 @@ public static class GameEventManager
     public static event GameEventWithId OddsPrompt;
 	public static event GameEvent SyncData;
 	public static event GameEventWithId BreakdownTip;
+	public static event GameEvent SyncUI;			// 同步后台设置后，设置分机ui
+	public static event GameEvent SyncInputDevice;  // 同步输入设备
 
 	public static void TriggerOpenSerial()
 	{
@@ -257,5 +259,15 @@ public static class GameEventManager
 	public static void OnBreakdownTip(int breakdownType)
 	{
 		if (BreakdownTip != null) BreakdownTip(breakdownType);
+	}
+
+	public static void OnSyncUI()
+	{
+		if (SyncUI != null) SyncUI();
+	}
+
+	public static void OnSyncInputDevice()
+	{
+		if (SyncInputDevice != null) SyncInputDevice();
 	}
 }
