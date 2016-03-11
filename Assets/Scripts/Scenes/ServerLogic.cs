@@ -127,9 +127,20 @@ public class ServerLogic : GameLogic
     private void CountdownComplete()
     {
 //		ui.chooseBetEffect.SetActive(false);
+		timerConnectClients = new Timer(120, 0);	// 2分钟后不认球 则当故障处理
+		timerConnectClients.Tick += RecogBallTimeout;
+		timerConnectClients.Start();
         StartCoroutine(StartLottery());
 		BlowBall();
     }
+
+	// 认球超时
+	private void RecogBallTimeout()
+	{
+		isPause = true;
+		timerConnectClients = null;
+		GameEventManager.OnBreakdownTip(BreakdownType.USBDisconnect);
+	}
 
     private IEnumerator StartLottery()
     {
@@ -159,12 +170,32 @@ public class ServerLogic : GameLogic
             {
 				allBets += item;
             }
-			int totalLottery = GameData.GetInstance().lotteryDigit + Mathf.CeilToInt((float)allBets * (float)GameData.GetInstance().lotteryRate * 0.001f);
-            if (totalLottery > 999999)
-                totalLottery = 999999;
-            GameEventManager.OnLotteryChange(totalLottery);
+			int threshold = GameData.GetInstance().lotteryRate * 10;
+			bool bAccumulate = false;
+			if (allBets >= threshold)
+			{
+				GameData.GetInstance().lotteryBetPool = 0;
+				bAccumulate = true;
+			}
+			else
+			{
+				GameData.GetInstance().lotteryBetPool += allBets;
+				if (GameData.GetInstance().lotteryBetPool >= threshold)
+				{
+					GameData.GetInstance().lotteryBetPool = 0;
+					bAccumulate = true;
+				}
+			}
+			GameData.GetInstance().SaveLotteryBetPool();
+			if (bAccumulate)
+			{
+				int totalLottery = GameData.GetInstance().lotteryDigit + Mathf.FloorToInt((float)allBets * (float)GameData.GetInstance().lotteryRate * 0.001f);
+				if (totalLottery > 999999)
+					totalLottery = 999999;
+				GameEventManager.OnLotteryChange(totalLottery);
+			}
 
-            int[] lotteries = CalcLottery();
+			int[] lotteries = CalcLottery();
 //            int[] lotteries = new int[]{1, 2, 3};
             if (lotteries.Length > 0)
             {
@@ -204,6 +235,11 @@ public class ServerLogic : GameLogic
 	private IEnumerator SimulateBallValue(int value)
 	{
 		yield return new WaitForSeconds(6);
+		if (timerConnectClients != null)
+		{
+			timerConnectClients.Stop();
+			timerConnectClients = null;
+		}
 		ballValue = value;
 		Debug.Log("SimulateBallValue: " + ballValue);
         GameData.GetInstance().SaveRecord(ballValue);
@@ -215,6 +251,11 @@ public class ServerLogic : GameLogic
 	// 收到球的号码
 	private void RecBallValue(int value)
 	{
+		if (timerConnectClients != null)
+		{
+			timerConnectClients.Stop();
+			timerConnectClients = null;
+		}
 		ballValue = value;
 		Debug.Log("RecBallValue: " + ballValue);
         GameData.GetInstance().SaveRecord(ballValue);

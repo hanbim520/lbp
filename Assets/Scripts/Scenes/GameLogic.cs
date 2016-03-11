@@ -569,4 +569,9 @@ public class GameLogic : MonoBehaviour
 		bFirstOpenGate = true;
 		OpenGate();
 	}
+
+	public void SetPause(bool pause)
+	{
+		isPause = pause;
+	}
 }

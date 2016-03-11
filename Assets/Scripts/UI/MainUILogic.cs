@@ -47,8 +47,13 @@ public class MainUILogic : MonoBehaviour
     private Timer timerHideWarning;
     private string[] strCardError = new string[]{"If you want to use Presented\nCredits, you have to use up all\ncredits, and then keyin agian.",
         "要使用优惠卡，\n须从0分开始充值。"};
+	// 认球错误
+	private string[] strRecognBallError = {"Communication failures.\nPlease reboot device!\nError code:" + BreakdownType.RecognizeBall, 
+		"通讯故障，请重启机器！\n故障号：" + BreakdownType.RecognizeBall};
+	private string[] strUSBDisconnError = {"Communication failures.\nPlease reboot device!\nError code:" + BreakdownType.USBDisconnect, 
+		"通讯故障，请重启机器！\n故障号：" + BreakdownType.USBDisconnect};
 	
-    void Awake()
+	void Awake()
     {
         string logicName = "";
         if (GameData.GetInstance().deviceIndex == 1)
@@ -72,6 +77,7 @@ public class MainUILogic : MonoBehaviour
 		SetDisplay();
 		SetBetChips();
         RegisterEvents();
+		print(CryptoPrefs.GetInt("lotteryBetPool"));
 	}
 
     void OnDestroy()
@@ -1257,9 +1263,13 @@ public class MainUILogic : MonoBehaviour
 		int language = GameData.GetInstance().language;
 		if (breakdownType == BreakdownType.RecognizeBall)
 		{
-			string[] msg = {"Communication failures.\nPlease reboot device!\nError code:" + BreakdownType.RecognizeBall, 
-							"通讯故障，请重启机器！\n故障号：" + BreakdownType.RecognizeBall};
-			ShowWarning(msg[language]);
+			gameLogic.SetPause(true);
+			ShowWarning(strRecognBallError[language]);
+		}
+		else if (breakdownType == BreakdownType.USBDisconnect)
+		{
+			gameLogic.SetPause(true);
+			ShowWarning(strUSBDisconnError[language]);
 		}
 	}
 

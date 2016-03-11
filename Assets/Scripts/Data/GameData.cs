@@ -170,6 +170,7 @@ public class GameData
     public int passwordLength = 6;
 	public int inputDevice;			// 0:touch screen 1:serial mouse
 	public int lotteryDigit;		// 累计彩金
+	public int lotteryBetPool;		// 累积到彩金池的压分
 
     // 记录最近10场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
@@ -354,6 +355,7 @@ public class GameData
 		isCardMode = CardMode.NO;
 		inputDevice = 0;
 		lotteryDigit = 1000;
+		lotteryBetPool = 0;
 	}
 
 	public void SaveCustom()
@@ -365,6 +367,7 @@ public class GameData
 		PlayerPrefs.SetInt("isCardMode", isCardMode);
 		PlayerPrefs.SetInt("inputDevice", inputDevice);
 		CryptoPrefs.SetInt("lotteryDigit", lotteryDigit);
+		CryptoPrefs.SetInt("lotteryBetPool", lotteryBetPool);
 		PlayerPrefs.Save();
 	}
 
@@ -480,6 +483,7 @@ public class GameData
 			isCardMode = PlayerPrefs.GetInt("isCardMode");
 			inputDevice = PlayerPrefs.GetInt("inputDevice");
 			lotteryDigit = CryptoPrefs.GetInt("lotteryDigit");
+			lotteryBetPool = CryptoPrefs.GetInt("lotteryBetPool");
         }
         ReadTouchMatrix();
         ReadRecords();
@@ -657,6 +661,12 @@ public class GameData
 	public void SaveLotteryDigit()
 	{
 		CryptoPrefs.SetInt("lotteryDigit", lotteryDigit);
+		CryptoPrefs.Save();
+	}
+
+	public void SaveLotteryBetPool()
+	{
+		CryptoPrefs.SetInt("lotteryBetPool", lotteryBetPool);
 		CryptoPrefs.Save();
 	}
 
