@@ -27,13 +27,6 @@ public class ServerLogic : GameLogic
         Init();
         RegisterListener();
 		StartConnectClients();
-//		List<int> l = new List<int>();
-//		l.Add(1);
-//		l.Add(2);
-//		l.Add(36);
-//		l.Add(0);
-//		l.Add(37);
-//		StartCoroutine(ui.FlashLotteries(l));
 	}
 
     protected override void OnDestroy()
@@ -170,30 +163,16 @@ public class ServerLogic : GameLogic
             {
 				allBets += item;
             }
-			int threshold = GameData.GetInstance().lotteryRate * 10;
-			bool bAccumulate = false;
-			if (allBets >= threshold)
-			{
-				GameData.GetInstance().lotteryBetPool = 0;
-				bAccumulate = true;
-			}
-			else
-			{
-				GameData.GetInstance().lotteryBetPool += allBets;
-				if (GameData.GetInstance().lotteryBetPool >= threshold)
-				{
-					GameData.GetInstance().lotteryBetPool = 0;
-					bAccumulate = true;
-				}
-			}
+
+			float ratio = (float)GameData.GetInstance().lotteryRate * 0.001f;
+			int sum = GameData.GetInstance().lotteryBetPool + allBets;
+			int accumulation = Mathf.FloorToInt(sum * ratio);
+			GameData.GetInstance().lotteryBetPool = sum - Mathf.FloorToInt((float)accumulation / ratio);
 			GameData.GetInstance().SaveLotteryBetPool();
-			if (bAccumulate)
-			{
-				int totalLottery = GameData.GetInstance().lotteryDigit + Mathf.FloorToInt((float)allBets * (float)GameData.GetInstance().lotteryRate * 0.001f);
-				if (totalLottery > 999999)
-					totalLottery = 999999;
-				GameEventManager.OnLotteryChange(totalLottery);
-			}
+			int totalLottery = accumulation + GameData.GetInstance().lotteryDigit;
+			if (totalLottery > 999999)
+				totalLottery = 999999;
+			GameEventManager.OnLotteryChange(totalLottery);
 
 			int[] lotteries = CalcLottery();
 //            int[] lotteries = new int[]{1, 2, 3};
@@ -221,7 +200,7 @@ public class ServerLogic : GameLogic
     {
 		Debug.Log("BlowBall");
 		gamePhase = GamePhase.Run;
-		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 1500);
+		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 2100);
         if (!GameData.debug)
 		    hidUtils.BlowBall(time);
 		else

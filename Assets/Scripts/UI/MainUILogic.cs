@@ -77,7 +77,6 @@ public class MainUILogic : MonoBehaviour
 		SetDisplay();
 		SetBetChips();
         RegisterEvents();
-		print(CryptoPrefs.GetInt("lotteryBetPool"));
 	}
 
     void OnDestroy()
