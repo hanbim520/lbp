@@ -807,4 +807,13 @@ public class GameData
 		CryptoPrefs.SetInt("lotteryMaxMatch", lotteryMaxMatch);
 		CryptoPrefs.Save();
 	}
+
+	// 统计各个号码出现的次数
+	public void StatisticBall(int ballValue)
+	{
+		int count = PlayerPrefs.GetInt("ballValue" + ballValue.ToString(), 0);
+		++count;
+		PlayerPrefs.SetInt("ballValue" + ballValue.ToString(), count);
+		PlayerPrefs.Save();
+	}
 }

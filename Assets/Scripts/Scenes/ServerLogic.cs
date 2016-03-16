@@ -200,7 +200,11 @@ public class ServerLogic : GameLogic
     {
 		Debug.Log("BlowBall");
 		gamePhase = GamePhase.Run;
-		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 2100);
+		Utils.Seed(System.DateTime.Now.Millisecond);
+		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
+//		int[] t = new int[]{1200, 1500, 2000, 2500, 3000};
+//		int time = t[Utils.GetRandom(0, 5)];
+//		GameEventManager.OnDebugLog(1, string.Format("吹风：{0}毫秒", time));
         if (!GameData.debug)
 		    hidUtils.BlowBall(time);
 		else
@@ -225,6 +229,7 @@ public class ServerLogic : GameLogic
 		GameEventManager.OnRefreshRecord(ballValue);
 		CalcLuckySum();
 		StartCoroutine(ShowResult());
+		StatisticBall(ballValue);
 	}
 
 	// 收到球的号码
@@ -241,6 +246,7 @@ public class ServerLogic : GameLogic
         GameEventManager.OnRefreshRecord(ballValue);
 		CalcLuckySum();
 		StartCoroutine(ShowResult());
+		StatisticBall(ballValue);
 	}
 
 	// 计算压中彩金号的总金额
@@ -617,5 +623,19 @@ public class ServerLogic : GameLogic
 	{
 		timerConnectClients = null;
 		GameEventManager.TriggerGameStart();
+	}
+
+	private void StatisticBall(int ballValue)
+	{
+		GameData.GetInstance().StatisticBall(ballValue);
+		string log = "";
+		for (int i = 0; i < GameData.GetInstance().maxNumberOfFields; ++i)
+		{
+			if (i % 10 == 0 && i > 0)
+				log += string.Format("{0}:{1},\n", i, PlayerPrefs.GetInt("ballValue" + i, 0));
+			else
+				log += string.Format("{0}:{1}, ", i, PlayerPrefs.GetInt("ballValue" + i, 0));
+		}
+		GameEventManager.OnDebugLog(2, log);
 	}
 }

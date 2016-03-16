@@ -401,8 +401,12 @@ public class HIDUtils : MonoBehaviour
 		int hight = blowTime >> 8 & 0xff;
 		int low = blowTime & 0xff;
 
+		Utils.Seed(System.DateTime.Now.Millisecond);
+		// 控制吹风在轮盘转到第几个格子后启动
+		int cellNum = Utils.GetRandom(1, GameData.GetInstance().maxNumberOfFields);
+
 		int[] data = new int[]{0x58, 0x57, 0x03, hight, low, flagPayCoin, 0, 0, 
-			0, 0, 0, 0, 0, 0, 0, 0,
+			cellNum, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
@@ -421,6 +425,7 @@ public class HIDUtils : MonoBehaviour
 //		}
 //		Debug.Log(log);
 //		DebugConsole.Log(log);
+//		GameEventManager.OnDebugLog(0, log);
 	}
 
 	public void SendCheckInfo()
