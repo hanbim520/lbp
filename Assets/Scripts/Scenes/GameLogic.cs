@@ -492,6 +492,27 @@ public class GameLogic : MonoBehaviour
 		ui.HideWarning();
 		StartCoroutine(AfterConnHID());
 	}
+
+	protected IEnumerator AfterConnHID()
+	{
+		// 发送guid给加密片验证
+		hidUtils.SendCheckInfo();
+		yield return new WaitForSeconds(3);
+		if (GameData.GetInstance().deviceIndex == 1)
+		{
+			bFirstOpenGate = true;
+			OpenGate();
+		}
+	}
+	
+	// 第一次连上机芯应打开一次门
+	protected void OpenGate()
+	{
+		if (GameData.GetInstance().deviceIndex == 1)
+		{
+			hidUtils.OpenGate();
+		}
+	}
 	
 	protected void HIDDisconnected()
 	{
@@ -546,29 +567,6 @@ public class GameLogic : MonoBehaviour
         GameData.GetInstance().NextLevelName = strNextSceneName;
         Application.LoadLevel(Scenes.Loading);
     }
-
-	// 第一次连上机芯应打开一次门
-	protected void OpenGate()
-	{
-		if (GameData.GetInstance().deviceIndex == 1)
-		{
-			hidUtils.OpenGate();
-		}
-	}
-
-	// 发送guid给加密片验证
-	protected void SendCheckInfo()
-	{
-		hidUtils.SendCheckInfo();
-	}
-
-	protected IEnumerator AfterConnHID()
-	{
-		SendCheckInfo();
-		yield return new WaitForSeconds(2);
-		bFirstOpenGate = true;
-		OpenGate();
-	}
 
 	public void SetPause(bool pause)
 	{

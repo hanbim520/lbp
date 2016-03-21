@@ -132,7 +132,7 @@ public class ServerLogic : GameLogic
 	{
 		isPause = true;
 		timerConnectClients = null;
-		GameEventManager.OnBreakdownTip(BreakdownType.USBDisconnect);
+		GameEventManager.OnBreakdownTip(BreakdownType.RecognizeBallTimeout);
 	}
 
     private IEnumerator StartLottery()
@@ -200,11 +200,11 @@ public class ServerLogic : GameLogic
     {
 		Debug.Log("BlowBall");
 		gamePhase = GamePhase.Run;
-		Utils.Seed(System.DateTime.Now.Millisecond);
+		Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Minute);
 		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
 //		int[] t = new int[]{1200, 1500, 2000, 2500, 3000};
 //		int time = t[Utils.GetRandom(0, 5)];
-//		GameEventManager.OnDebugLog(1, string.Format("吹风：{0}毫秒", time));
+		GameEventManager.OnDebugLog(1, string.Format("吹风：{0}毫秒", time));
         if (!GameData.debug)
 		    hidUtils.BlowBall(time);
 		else
@@ -383,8 +383,8 @@ public class ServerLogic : GameLogic
 			GameData.GetInstance().SaveDisplayType();
 			ui.SetDisplay();
 		}
-		ui.FlashResult(ballValue);
 		StartCoroutine(Compensate());
+		ui.FlashResult(ballValue);
 	}
 
 	private IEnumerator Compensate()

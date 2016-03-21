@@ -722,7 +722,8 @@ public class BackendLogic : MonoBehaviour
 			int idx = GameData.GetInstance().language;
 			if (passwordPhase == 0)
 			{
-				if (string.Equals(txtPassword, GameData.GetInstance().systemPassword))
+				if ((string.Equals(txtPassword, GameData.GetInstance().systemPassword) && passwordType == 1) ||
+				    (string.Equals(txtPassword, GameData.GetInstance().accountPassword) && passwordType == 2))
 				{
 					passwordPhase = 1;
 					SetCalcTitle(strNewPassword[idx], Color.black);

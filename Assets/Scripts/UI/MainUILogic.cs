@@ -52,6 +52,8 @@ public class MainUILogic : MonoBehaviour
 		"通讯故障，请重启机器！\n故障号：" + BreakdownType.RecognizeBall};
 	private string[] strUSBDisconnError = {"Communication failures.\nPlease reboot device!\nError code:" + BreakdownType.USBDisconnect, 
 		"通讯故障，请重启机器！\n故障号：" + BreakdownType.USBDisconnect};
+	private string[] strTimeoutError = {"Communication failures.\nPlease reboot device!\nError code:" + BreakdownType.RecognizeBallTimeout, 
+		"通讯故障，请重启机器！\n故障号：" + BreakdownType.RecognizeBallTimeout};
 	
 	void Awake()
     {
@@ -1269,6 +1271,11 @@ public class MainUILogic : MonoBehaviour
 		{
 			gameLogic.SetPause(true);
 			ShowWarning(strUSBDisconnError[language]);
+		}
+		else if (breakdownType == BreakdownType.RecognizeBallTimeout)
+		{
+			gameLogic.SetPause(true);
+			ShowWarning(strTimeoutError[language]);
 		}
 	}
 

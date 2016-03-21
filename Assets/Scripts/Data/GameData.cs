@@ -353,7 +353,7 @@ public class GameData
 		systemPassword = "888888";
 		accountPassword = "888888";
 		isCardMode = CardMode.NO;
-		inputDevice = 0;
+		inputDevice = 1;
 		lotteryDigit = 1000;
 		lotteryBetPool = 0;
 	}

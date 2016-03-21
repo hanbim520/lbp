@@ -35,6 +35,9 @@ public class HIDUtils : MonoBehaviour
 	private const int kPreviousValue = 0x55;
 	private int flagPayCoin = 0;
 
+	private Timer timerHeartBeat;		// 用来检测断连的计时器
+	private Timer timerCheckInfo;		// 用来验证的计时器
+	private bool bCheckInfo = true;		// 验证是否开始
 	private bool bBlowedBall = false;
 	private bool bOpenGate = false;
 	private int phase = 0; 
@@ -56,8 +59,22 @@ public class HIDUtils : MonoBehaviour
 		CloseUSB();
 	}
 
+	private void UpdateTimers()
+	{
+		// 检测断连
+		if (timerHeartBeat != null)
+			timerHeartBeat.Update(Time.deltaTime);
+		// 等待加密片验证结束
+		if (timerCheckInfo != null)
+			timerCheckInfo.Update(Time.deltaTime);
+	}
+
 	void Update()
 	{
+		UpdateTimers();
+		if (bCheckInfo)
+			return;
+
 		getDataTimeDelta += Time.deltaTime;
 		if (getDataTimeDelta >= getDataTime)
 		{
@@ -106,16 +123,18 @@ public class HIDUtils : MonoBehaviour
 
 	protected IEnumerator AfterConnHID()
 	{
-		if (GameData.GetInstance().deviceIndex <= 0)
-			yield break;
+//		if (GameData.GetInstance().deviceIndex <= 0)
+//			yield break;
 
 		string name = GameData.GetInstance().deviceIndex == 1 ? "ServerLogic" : "ClientLogic";
 		GameObject logic = GameObject.Find(name);
 		while(logic == null)
 		{
+			// 等待进入Main场景
 			logic = GameObject.Find(name);
 			yield return new WaitForSeconds(1);
 		}
+		// 执行验证和开门操作
 		GameEventManager.OnHIDConnected();
 	}
 
@@ -152,7 +171,6 @@ public class HIDUtils : MonoBehaviour
 			isReadThreadExit = false;
 			tRead = new Thread(QueueStore);
 			tRead.Start();
-			SendCheckInfo();
 		}
 		else
 		{
@@ -206,7 +224,19 @@ public class HIDUtils : MonoBehaviour
 #endif
 		if (data == null || data[0] == -1)
 		{ 
+			if (timerHeartBeat == null)
+			{
+				timerHeartBeat = new Timer(10.0f, 0);
+				timerHeartBeat.Tick += HeartBeatOver;
+				timerHeartBeat.Start();
+			}
 			return;
+		}
+
+		if (timerHeartBeat != null)
+		{
+			timerHeartBeat.Stop();
+			timerHeartBeat = null;
 		}
 
 		if (data.Length >= kReadDataLength)
@@ -401,7 +431,7 @@ public class HIDUtils : MonoBehaviour
 		int hight = blowTime >> 8 & 0xff;
 		int low = blowTime & 0xff;
 
-		Utils.Seed(System.DateTime.Now.Millisecond);
+		Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Minute);
 		// 控制吹风在轮盘转到第几个格子后启动
 		int cellNum = Utils.GetRandom(1, GameData.GetInstance().maxNumberOfFields);
 
@@ -418,14 +448,14 @@ public class HIDUtils : MonoBehaviour
 
 	private void PrintData(ref int[] data)
 	{
-//		string log = "data.Length:" + data.Length + "--";
-//		for (int i = 0; i < data.Length; ++i)
-//		{
-//			log += string.Format("{0:X}", data[i]) + ", ";
-//		}
+		string log = "data.Length:" + data.Length + "--";
+		for (int i = 0; i < data.Length; ++i)
+		{
+			log += string.Format("{0:X}", data[i]) + ", ";
+		}
 //		Debug.Log(log);
 //		DebugConsole.Log(log);
-//		GameEventManager.OnDebugLog(0, log);
+		GameEventManager.OnDebugLog(0, log);
 	}
 
 	public void SendCheckInfo()
@@ -447,8 +477,27 @@ public class HIDUtils : MonoBehaviour
 		}
 		int[] data = dataList.ToArray();
 		WriteData(data, "writeUsbPort");
+
+		bCheckInfo = true;
+		timerCheckInfo = new Timer(2.0f, 0);
+		timerCheckInfo.Tick += CheckInfoOver;
+		timerCheckInfo.Start();
 	}
 
+	// timerCheckInfo 结束
+	private void CheckInfoOver()
+	{
+		timerCheckInfo = null;
+		bCheckInfo = false;
+	}
+
+	// timerHeartBeat 结束
+	private void HeartBeatOver()
+	{
+		timerHeartBeat = null;
+		GameEventManager.OnBreakdownTip(BreakdownType.USBDisconnect);
+	}
+	
 	private void ReceiveDataFromHID()
 	{
 		int[] data = new int[]{0x58, 0x57, 0, 0, 0, flagPayCoin, 0, 0,

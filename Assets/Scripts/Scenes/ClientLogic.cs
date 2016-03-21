@@ -35,11 +35,18 @@ public class ClientLogic : GameLogic
             ui.ActiveDlgCard(true);
         }
         #endif
-    }
 
-    private void RegisterListener()
-    {
-        GameEventManager.EndCountdown += CountdownComplete;
+		if (bChangeScene && gamePhase == GamePhase.GameStart)
+		{
+			ui.backendTip.SetActive(false);
+			ChangeScene();
+			return;
+		}
+	}
+	
+	private void RegisterListener()
+	{
+		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.ClientDisconnect += ClientDisconnect;
     }
     
@@ -121,12 +128,6 @@ public class ClientLogic : GameLogic
             gamePhase = phase;
             if (gamePhase == GamePhase.Countdown)
             {
-                ui.backendTip.SetActive(false);
-                if (bChangeScene)
-                {
-                    ChangeScene();
-                    return;
-                }
                 Countdown();
             }
             else if (gamePhase == GamePhase.ShowResult)
@@ -173,8 +174,8 @@ public class ClientLogic : GameLogic
 			GameData.GetInstance().SaveDisplayType();
 			ui.SetDisplay();
 		}
-		ui.FlashResult(ballValue);
         StartCoroutine(Compensate());
+		ui.FlashResult(ballValue);
     }
 
     private IEnumerator Compensate()
