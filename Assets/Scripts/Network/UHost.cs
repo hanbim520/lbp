@@ -163,19 +163,33 @@ public class UHost : MonoBehaviour
 
 	public void SendToAll(string msg)
 	{
-		byte[] buffer = Utils.StringToBytes(msg);
-		foreach (int connectionId in allConnections)
+		try
 		{
-			byte error;
-			NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
+			byte[] buffer = Utils.StringToBytes(msg);
+			foreach (int connectionId in allConnections)
+			{
+				byte error;
+				NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
+			}
+		}
+		catch(System.Exception ex)
+		{
+			Debug.Log("UHost SendToAll exception:" + ex.ToString());
 		}
 	}
 
 	public void SendToPeer(string msg, int connectionId)
 	{
-		byte[] buffer = Utils.StringToBytes(msg);
-		byte error;
-		NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
+		try
+		{
+			byte[] buffer = Utils.StringToBytes(msg);
+			byte error;
+			NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
+		}
+		catch(System.Exception ex)
+		{
+			Debug.Log("UHost SendToPeer exception:" + ex.ToString());
+		}
 	}
 
 	public void StartBroadcast()

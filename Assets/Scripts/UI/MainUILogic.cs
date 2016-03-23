@@ -333,6 +333,8 @@ public class MainUILogic : MonoBehaviour
 	public void SetBetChips()
 	{
 		betChipsRoot = GameObject.Find("BetChips");
+		foreach (Transform child in betChipsRoot.transform)
+			Destroy(child.gameObject);
 		string path = "Bet Chips/";
 		float y = -502.0f;
 		float start = 0.0f, dist = 0.0f;
@@ -380,7 +382,8 @@ public class MainUILogic : MonoBehaviour
 				if (j == 0)
 				{
 					// 默认第一个筹码是选中的
-					curChipIdx = i;
+					if (curChipIdx < 0 || curChipIdx >= betChipsNum)	
+						curChipIdx = i;
 					if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
 					chooseBetEffect.transform.localPosition = betChip.transform.localPosition + new Vector3(0, 10f, 0);
 				}
@@ -625,7 +628,7 @@ public class MainUILogic : MonoBehaviour
 		{
 			// Blue button
 			GameObject.Find("Canvas/Buttons/EN/Card EN").transform.GetChild(0).gameObject.SetActive(true);
-			cardExplains[0].SetActive(true);
+			cardExplains[0].SetActive(false);
 			cardExplains[1].SetActive(false);
 		}
 		else
@@ -633,7 +636,7 @@ public class MainUILogic : MonoBehaviour
 			// Blue button
 			GameObject.Find("Canvas/Buttons/CN/Card CN").transform.GetChild(0).gameObject.SetActive(true);
 			cardExplains[0].SetActive(false);
-			cardExplains[1].SetActive(true);
+			cardExplains[1].SetActive(false);
 		}
 		// Effect
 		if (cardEffect != null) cardEffect.SetActive(true);
@@ -808,13 +811,6 @@ public class MainUILogic : MonoBehaviour
 				strField = strField.Substring(1);
 			}
 			bet = GameEventManager.OnFieldClick(strField, bet);
-			// Play sfx
-			char[] splits = {'-'};
-			string[] words = strField.Split(splits);
-			int num;
-			if (words.Length == 1 && int.TryParse(words[0], out num))
-				AudioController.Play(words[0]);
-			
 			if (bet <= 0)
 				return;
 			
@@ -993,16 +989,22 @@ public class MainUILogic : MonoBehaviour
 		Timer t = TimerManager.GetInstance().CreateTimer(1, TimerType.Loop, timeLimit);
 		t.Tick += CountdownTick;
 		t.OnComplete += CountdownComplete;
+		iTween.ValueTo(gameObject, iTween.Hash("from", 1, "to", 0, "time", timeLimit,
+		                                       "onupdate", "UpdateProgress", "onupdatetarget", gameObject));
 		t.Start();
 		AudioController.Play("makeyourbets");
 		GameEventManager.OnPrompt(PromptId.PleaseBet);
+	}
+
+	private void UpdateProgress(float value)
+	{
+		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = value;
 	}
 
 	private void CountdownTick()
 	{
 		--timeLimit;
 		countdown.transform.FindChild("Text").GetComponent<Text>().text = timeLimit.ToString();
-		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = (float)timeLimit / GameData.GetInstance().betTimeLimit;
 	}
 
 	private void CountdownComplete()
@@ -1209,6 +1211,9 @@ public class MainUILogic : MonoBehaviour
 		}
 		// 出提示语
 		GameEventManager.OnResultPrompt(result);
+		// Play sfx
+		string promptSfx = result == 37 ? "00" : result.ToString();
+		AudioController.Play(promptSfx);
 	}
 
 	public void StopFlash()

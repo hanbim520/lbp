@@ -754,6 +754,10 @@ public class GameData
 
     public void ClearAccount()
     {
+		// 桌面上有分 不能清账
+		if (CryptoPrefs.GetInt("totalCredits") > 0)
+			return;
+
         zongShang = 0;
         zongXia = 0;
         zongYa = 0;

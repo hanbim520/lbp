@@ -17,6 +17,11 @@ public class ClientLogic : GameLogic
         base.Start();
         Init();
         RegisterListener();
+
+		int totalLottery = GameData.GetInstance().lotteryDigit;
+		if (totalLottery <= GameData.GetInstance().lotteryBase)
+			totalLottery = GameData.GetInstance().lotteryBase;
+		GameEventManager.OnLotteryChange(totalLottery);
 	}
 
     protected override void OnDestroy()
@@ -36,7 +41,8 @@ public class ClientLogic : GameLogic
         }
         #endif
 
-		if (bChangeScene && gamePhase == GamePhase.GameStart)
+		if (bChangeScene && 
+		    (gamePhase == GamePhase.GameStart || gamePhase == GamePhase.GameEnd || gamePhase == GamePhase.Countdown))
 		{
 			ui.backendTip.SetActive(false);
 			ChangeScene();
@@ -153,6 +159,7 @@ public class ClientLogic : GameLogic
         if (ui.CurChipIdx != -1)
             ui.chooseBetEffect.SetActive(true);
         ui.RefreshLblWin("0");
+        ui.RefreshLblCredits(totalCredits.ToString());
         ui.ResetCountdown();
         ui.Countdown();
     }
@@ -237,7 +244,6 @@ public class ClientLogic : GameLogic
         yield return new WaitForSeconds(5);
         
         ui.RefreshLblBet("0");
-        ui.RefreshLblCredits(totalCredits.ToString());
         if (win > 0)
             ui.RefreshLblWin(win.ToString());
         else
@@ -286,20 +292,21 @@ public class ClientLogic : GameLogic
 
     private void HandleLotteryNums(ref string[] words)
     {
-        List<int> nums = new List<int>();
         for (int i = 1; i < words.Length; ++i)
         {
             int num;
             if (int.TryParse(words[i], out num))
             {
-                nums.Add(num);
-            }
+				lotteryValues.Add(num);
+			}
         }
-        ui.FlashLotteries(nums);
-    }
+		StartCoroutine(ui.FlashLotteries(lotteryValues));
+	}
 
 	private void ClientDisconnect()
 	{
+		ui.StopFlash();
+		ui.StopFlashLotteries();
 		ui.ClearAllEvent(null);
 	}
 

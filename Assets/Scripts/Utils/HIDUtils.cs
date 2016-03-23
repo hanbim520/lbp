@@ -286,15 +286,15 @@ public class HIDUtils : MonoBehaviour
                 {
 					// 结果
 					int idx = data[4];
-					if (idx == 0)
-						return;
-					else
+					if (idx > 0)
+					{
 						idx -= 1;
-					phase = kPhaseDetectBallValue;
-					if (GameData.GetInstance().maxNumberOfFields == 38)
-						GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
-					else if (GameData.GetInstance().maxNumberOfFields == 37)
-						GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
+						phase = kPhaseDetectBallValue;
+						if (GameData.GetInstance().maxNumberOfFields == 38)
+							GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
+						else if (GameData.GetInstance().maxNumberOfFields == 37)
+							GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
+					}
                 }
 				else if (data[5] == kPreviousValue && phase == kPhaseEndBlowBall)
 				{
@@ -330,11 +330,11 @@ public class HIDUtils : MonoBehaviour
 				{
 					Debug.Log("Bill Acceptor Happen Exception:" + data[12]);
 				}
-				if (data[54] != 0)	// 物理钥匙(原上分)
+				if (data[54] == 0x20)	// 物理钥匙(原上分)
 				{
 					GameEventManager.OnOpenKey();
 				}
-				if (data[55] != 0)	// 触摸屏校验(原下分)
+				if (data[55] == 0x20)	// 触摸屏校验(原下分)
 				{
 					GameEventManager.OnChangeScene(Scenes.TouchCheck);
 				}
@@ -451,6 +451,8 @@ public class HIDUtils : MonoBehaviour
 		string log = "data.Length:" + data.Length + "--";
 		for (int i = 0; i < data.Length; ++i)
 		{
+			if (i > 0 && i % 20 == 0)
+				log += "\n";
 			log += string.Format("{0:X}", data[i]) + ", ";
 		}
 //		Debug.Log(log);

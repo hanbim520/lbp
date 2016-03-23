@@ -14,6 +14,7 @@ public class ServerLogic : GameLogic
 	// 保存分机和主机在当前局的总压分
 	private List<int> totalBets = new List<int>();
 	private Timer timerConnectClients = null;
+	private int othersLucyWin = 0;	// 其他分机中的彩金数额
     
     private void Init()
     {
@@ -27,8 +28,13 @@ public class ServerLogic : GameLogic
         Init();
         RegisterListener();
 		StartConnectClients();
-	}
 
+		int totalLottery = GameData.GetInstance().lotteryDigit;
+		if (totalLottery <= GameData.GetInstance().lotteryBase)
+			totalLottery = GameData.GetInstance().lotteryBase;
+		GameEventManager.OnLotteryChange(totalLottery);
+	}
+	
     protected override void OnDestroy()
     {
         base.OnDestroy();
@@ -111,9 +117,17 @@ public class ServerLogic : GameLogic
 		host.SendToAll(NetInstr.GamePhase + ":" + gamePhase);
         yield return new WaitForSeconds(waitSendTime);
 
+		int totalLottery = GameData.GetInstance().lotteryDigit;
+		if (totalLottery <= GameData.GetInstance().lotteryBase)
+			totalLottery = GameData.GetInstance().lotteryBase;
+		host.SendToAll(NetInstr.SyncLottery.ToString() + ":" + totalLottery.ToString());
+		GameEventManager.OnLotteryChange(totalLottery);
+        yield return new WaitForSeconds(waitSendTime);
+		
 		if (ui.CurChipIdx != -1)
 			ui.chooseBetEffect.SetActive(true);
 		ui.RefreshLblWin("0");
+        ui.RefreshLblCredits(totalCredits.ToString());
 		ui.Countdown();
     }
 
@@ -172,16 +186,15 @@ public class ServerLogic : GameLogic
 			int totalLottery = accumulation + GameData.GetInstance().lotteryDigit;
 			if (totalLottery > 999999)
 				totalLottery = 999999;
+			host.SendToAll(NetInstr.SyncLottery.ToString() + ":" + totalLottery.ToString());
 			GameEventManager.OnLotteryChange(totalLottery);
 
 			int[] lotteries = CalcLottery();
-//            int[] lotteries = new int[]{1, 2, 3};
             if (lotteries.Length > 0)
             {
-                string msg = NetInstr.LotteryNum + ":";
+                string msg = NetInstr.LotteryNum.ToString();
                 foreach (int num in lotteries)
                 {
-                    Debug.Log("lottery:" + num);
                     msg += string.Format(":{0}", num);
                     lotteryValues.Add(num);
                 }
@@ -282,7 +295,9 @@ public class ServerLogic : GameLogic
 		foreach (KeyValuePair<string, int> item in clientBetFields)
 		{
 			int key;
-			if (int.TryParse(item.Key, out key))
+			if (string.Compare(item.Key, "00") == 0)
+				betSingle.Add(37);
+			else if (int.TryParse(item.Key, out key))
 				betSingle.Add(key);
 		}
 		// 没压的单点号码
@@ -330,8 +345,9 @@ public class ServerLogic : GameLogic
 		{
 			int noBetCount = noBetSingle.Count;
 			// 判断要不要出彩金，出的话不中。
-			Utils.SetSeed();
-			int ret = Utils.GetRandom(0, 20);
+			Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Minute);
+//			int ret = Utils.GetRandom(0, 20);
+			int ret = 12;
 			// 出彩金
 			if (ret == 12 && noBetCount > 0)
 			{
@@ -347,10 +363,12 @@ public class ServerLogic : GameLogic
 						++i;
 					}
 				}
-				return retArray.ToArray();
+//				return retArray.ToArray();
+				return new int[]{12, 20, 30};
 			}
 		}
-		return new int[0];
+//		return new int[0];
+		return new int[]{12, 20, 30};
 	}
 
 	private IEnumerator ShowResult()
@@ -430,7 +448,7 @@ public class ServerLogic : GameLogic
 							                           ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
 							if (luckyWin > 0)
 							{
-								GameData.GetInstance().lotteryDigit -= luckyWin;
+								GameData.GetInstance().lotteryDigit -= (luckyWin + othersLucyWin);
 								ui.CreateGoldenRain();
 							}
 						}
@@ -450,13 +468,12 @@ public class ServerLogic : GameLogic
 
         // sync lottery digit
         int totalLottery = GameData.GetInstance().lotteryDigit;
-        if (totalLottery <= 0)
-            totalLottery = GameData.GetInstance().lotteryBase;
+		if (totalLottery <= 0)
+			totalLottery = 0;
         host.SendToAll(NetInstr.SyncLottery.ToString() + ":" + totalLottery.ToString());
         GameEventManager.OnLotteryChange(totalLottery);
 
         ui.RefreshLblBet("0");
-        ui.RefreshLblCredits(totalCredits.ToString());
 		if (win > 0)
 			ui.RefreshLblWin(win.ToString());
 		else
@@ -499,6 +516,7 @@ public class ServerLogic : GameLogic
     {
         ballValue = -1;
 		curLuckySum = 0;
+		othersLucyWin = 0;
 		lotteryValues.Clear();
         betFields.Clear();
 		clientBetFields.Clear();
@@ -530,7 +548,7 @@ public class ServerLogic : GameLogic
 			int luckyWin;
 			if (int.TryParse(words[1], out luckyWin))
 			{
-                GameData.GetInstance().lotteryDigit -= luckyWin;
+				othersLucyWin += luckyWin;
 			}
 		}
 		else if (instr == NetInstr.GetTotalBet)

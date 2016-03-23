@@ -38,6 +38,7 @@ public class BackendLogic : MonoBehaviour
 	private Transform accountItemRoot;
 	private Transform loadingRoot;
     private int printCodeTimes;
+	private int iYesNoType = 0;	// Yes No对话框的类型: 0--none 1--清账
     
     private string[] strPassword = new string[]{"Please Input Password", "请输入原密码"};
     private string[] strNewPassword = new string[]{"Please Input New Password", "请输入新密码"};
@@ -373,6 +374,24 @@ public class BackendLogic : MonoBehaviour
         SetCalcContent(string.Empty, Color.white);
     }
 
+	public void DlgYesNoDownEvent(Transform hitObject)
+	{
+		SetAlpha(hitObject, 255);
+		iYesNoType = 1;
+	}
+
+	public void DlgYesNoUpEvent(Transform hitObject)
+	{
+		SetAlpha(hitObject, 0);
+		iYesNoType = 0;
+		string name = hitObject.name;
+		if (string.Equals(name, "Yes"))
+		{
+			ClearAccount();
+		}
+		dlgYesNO.SetActive(false);
+	}
+
     private void InitMain()
     {
         menuMain.SetActive(true);
@@ -514,7 +533,7 @@ public class BackendLogic : MonoBehaviour
 			}
 		}
 
-		timerRefreshAccounts = new Timer(3, 1, TimerType.Loop);
+		timerRefreshAccounts = new Timer(5, 1, TimerType.Loop);
 		timerRefreshAccounts.Tick += RefreshAccounts;
 		timerRefreshAccounts.Start();
     }
@@ -565,6 +584,7 @@ public class BackendLogic : MonoBehaviour
 			}
 		}
 		CalcTotalAccount();
+		host.SendToAll(NetInstr.CheckAccount.ToString());
 	}
 
 	public void AccountExitEvent(Transform hitObject)
@@ -1114,7 +1134,7 @@ public class BackendLogic : MonoBehaviour
 		}
 		else
 		{
-			ClearAccount();
+			dlgYesNO.SetActive(true);
 		}
 	}
 

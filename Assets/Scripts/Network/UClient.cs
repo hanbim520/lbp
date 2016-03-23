@@ -177,9 +177,16 @@ public class UClient : MonoBehaviour
 
 	public void SendToServer(string msg)
 	{
-		byte[] buffer = Utils.StringToBytes(msg);
-		byte error;
-		NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
+		try
+		{
+			byte[] buffer = Utils.StringToBytes(msg);
+			byte error;
+			NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
+		}
+		catch(System.Exception ex)
+		{
+			Debug.Log("SendToServer exception:" + ex.ToString());
+		}
 	}
 
 	private void SyncData(ref string[] words)
@@ -260,7 +267,10 @@ public class UClient : MonoBehaviour
 			}
 		}
 		if(int.TryParse(words[28], out lotteryDigit))
+		{
 			GameData.GetInstance().lotteryDigit = lotteryDigit;
+			GameEventManager.OnLotteryChange(lotteryDigit);
+		}
 		
 		GameData.GetInstance().SaveSetting();
 		GameEventManager.OnSyncUI();

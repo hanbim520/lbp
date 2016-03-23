@@ -10,7 +10,6 @@ public class LotteryNum : MonoBehaviour
 	void Start()
 	{
 		GameEventManager.LotteryChange += HandleLotteryChange;
-		ShowLottery();
 	}
 
 	void OnDestroy()
