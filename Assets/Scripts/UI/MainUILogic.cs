@@ -443,14 +443,20 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.OnCleanAll();
 	}
 
+	// 清除没有中的筹码
+	public void ClearLoseChips(int ballValue)
+	{
+
+	}
+
 	public void RepeatEvent()
 	{
-        int count = GameData.GetInstance().betRecords.Count;
+        int count = GameData.GetInstance().lastBets.Count;
 		if (count == 0 || gameLogic.LogicPhase != GamePhase.Countdown)
             return;
 
-        BetRecord lastRecord = GameData.GetInstance().betRecords[count - 1];
-        if (lastRecord.bet > gameLogic.totalCredits)
+		int lastBetCredit = GameData.GetInstance().lastBetCredit;
+		if (lastBetCredit > gameLogic.totalCredits)
             return;
 
         if (displayClassic.activeSelf)
@@ -466,12 +472,12 @@ public class MainUILogic : MonoBehaviour
             {
 				int betValue = 0;
 				ClearAllEvent(null);
-                foreach (BetInfo info in lastRecord.bets)
+                foreach (KeyValuePair<string, int> info in GameData.GetInstance().lastBets)
                 {
-                    if (info.betField == "00" && fields37.activeSelf)
+                    if (info.Key == "00" && fields37.activeSelf)
                         continue;
 
-                    Transform target = root.transform.FindChild(info.betField);
+                    Transform target = root.transform.FindChild(info.Key);
                     if (target != null)
                     {
                         Object prefab = (Object)Resources.Load(prefabPath);
@@ -483,10 +489,10 @@ public class MainUILogic : MonoBehaviour
                                                         target.localPosition.y * target.parent.localScale.y,
                                                         0);
                         chip.transform.localPosition = targetPos;
-                        chip.transform.GetChild(0).GetComponent<Text>().text = info.betValue.ToString();
-                        chip.name = info.betField;
-						betValue += info.betValue;
-						gameLogic.betFields.Add(info.betField, info.betValue);
+                        chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
+                        chip.name = info.Key;
+						betValue += info.Value;
+						gameLogic.betFields.Add(info.Key, info.Value);
                     }
                 }
 				gameLogic.totalCredits -= betValue;
@@ -512,16 +518,16 @@ public class MainUILogic : MonoBehaviour
             {
 				int betValue = 0;
 				ClearAllEvent(null);
-                foreach (BetInfo info in lastRecord.bets)
-                {
-                    if (info.betField == "00" && fields37.activeSelf)
+				foreach (KeyValuePair<string, int> info in GameData.GetInstance().lastBets)
+				{
+                    if (info.Key == "00" && fields37.activeSelf)
                         continue;
 
                     string prefabPath = "SmallChip/SC0";
                     Transform target;
                     int fieldName;
-                    string name = info.betField;
-                    if (int.TryParse(info.betField, out fieldName) || string.Equals(info.betField, "00"))
+                    string name = info.Key;
+                    if (int.TryParse(info.Key, out fieldName) || string.Equals(info.Key, "00"))
                     {
                         prefabPath = "BigChip/BC0";
                         name = "e" + name;
@@ -529,7 +535,7 @@ public class MainUILogic : MonoBehaviour
                     }
                     else
                     {
-                        target = vfRoot.transform.FindChild(info.betField);
+                        target = vfRoot.transform.FindChild(info.Key);
                     }
                     
                     if (target != null)
@@ -543,10 +549,10 @@ public class MainUILogic : MonoBehaviour
                                                         target.localPosition.y * target.parent.localScale.y,
                                                         0);
                         chip.transform.localPosition = targetPos;
-                        chip.transform.GetChild(0).GetComponent<Text>().text = info.betValue.ToString();
+                        chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
                         chip.name = name;
-						betValue += info.betValue;
-						gameLogic.betFields.Add(info.betField, info.betValue);
+						betValue += info.Value;
+						gameLogic.betFields.Add(info.Key, info.Value);
                     }
                 }
 				gameLogic.totalCredits -= betValue;

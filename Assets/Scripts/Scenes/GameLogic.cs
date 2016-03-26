@@ -554,6 +554,15 @@ public class GameLogic : MonoBehaviour
         GameData.GetInstance().SaveBetRecords();
     }
 
+	protected void AppendLastBets(int totalBetCredit)
+	{
+		if (betFields.Count > 0)
+		{
+			GameData.GetInstance().RemoveLastBet();
+			GameData.GetInstance().SaveLastBet(ref betFields, totalBetCredit);
+		}
+	}
+
     protected void ReadyToChangeScene(string sceneName)
     {
         bChangeScene = true;

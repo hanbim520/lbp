@@ -9,8 +9,8 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = false;       // 是否模拟出球
-	public static bool controlCode = false;  // 是否打码
+	public static bool debug = true;       // 是否模拟出球
+	public static bool controlCode = true;  // 是否打码
 
     // Setting menu
     public int betTimeLimit;
@@ -174,8 +174,10 @@ public class GameData
 
     // 记录最近10场押分情况
     public List<BetRecord> betRecords = new List<BetRecord>();
-	public Queue<int> records = new Queue<int>();	// 00:用37表示
+	public Queue<int> records = new Queue<int>();	// 100场记录		00:用37表示
     public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
+	public Dictionary<string, int> lastBets = new Dictionary<string, int>();	// 最近一场压分记录
+	public int lastBetCredit = 0;					// 最近一场压分总数
 
 	public int[] ballValue38 = new int[]{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24};
 	public int[] ballValue37 = new int[]{26,0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3};
@@ -488,6 +490,7 @@ public class GameData
         ReadTouchMatrix();
         ReadRecords();
         ReadBetRecords();
+		ReadLastBets();
 		ReadKeyinKeoutRecords();
 		ReadLotteryParams();
     }
@@ -819,5 +822,50 @@ public class GameData
 		++count;
 		PlayerPrefs.SetInt("ballValue" + ballValue.ToString(), count);
 		PlayerPrefs.Save();
+	}
+
+	public void RemoveLastBet()
+	{
+		int count = PlayerPrefs.GetInt("lastBet_count");
+		PlayerPrefs.DeleteKey("lastBet_count");
+		for (int i = 0; i < count; ++i)
+		{
+			PlayerPrefs.DeleteKey("lastBet_field" + i);
+			PlayerPrefs.DeleteKey("lastBet_value" + i);
+		}
+		lastBets.Clear();
+	}
+
+	public void SaveLastBet(ref Dictionary<string, int> betFields, int totalBetCredit)
+	{
+		int count = betFields.Count;
+		if (count > 0)
+		{
+			PlayerPrefs.SetInt("lastBet_count", count);
+			PlayerPrefs.SetInt("lastBet_credit", totalBetCredit);
+			int idx = 0;
+			foreach (KeyValuePair<string, int> item in betFields)
+			{
+				PlayerPrefs.SetString("lastBet_field" + idx, item.Key);
+				PlayerPrefs.SetInt("lastBet_value" + idx, item.Value);
+				lastBets.Add(item.Key, item.Value);
+				++idx;
+			}
+		}
+	}
+
+	// 读取最近一次压分
+	public void ReadLastBets()
+	{
+		int count = PlayerPrefs.GetInt("lastBet_count", 0);
+		if (count <= 0)
+			return;
+		lastBetCredit = PlayerPrefs.GetInt("lastBet_credit");
+		for (int i = 0; i < count; ++i)
+		{
+			string field = PlayerPrefs.GetString("lastBet_field" + i);
+			int value = PlayerPrefs.GetInt("lastBet_value" + i);
+			lastBets.Add(field, value);
+		}
 	}
 }

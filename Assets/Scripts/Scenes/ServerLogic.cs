@@ -456,6 +456,7 @@ public class ServerLogic : GameLogic
 				}
 			}
 		}
+		AppendLastBets(currentBet);
 		AppendLast10(totalCredits, totalCredits + win + luckyWin, currentBet, win, luckyWin, ballValue);
 		win += luckyWin;	// 加上彩金送的分
         GameData.GetInstance().ZongPei += win;
