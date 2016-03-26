@@ -48,8 +48,13 @@ public class RecordMost : MonoBehaviour
         lst.Sort(delegate(KeyValuePair<int, int> s1, KeyValuePair<int, int> s2) {return s2.Value.CompareTo(s1.Value);});
 
 		mostValues.Clear();
+        GameData.GetInstance().hotValues.Clear();
 		foreach(KeyValuePair<int, int> kvp in lst)
+        {
 			mostValues.Add(kvp.Key, kvp.Value);
+            if (kvp.Value > 0 && GameData.GetInstance().hotValues.Count < 5)
+                GameData.GetInstance().hotValues.Add(kvp.Key);
+        }
 
         RefreshView();
     }

@@ -36,44 +36,50 @@ public class RecordCircle : MonoBehaviour
 
 	private void HandleRefreshRecord(int result = -1)
 	{
-		int count = GameData.GetInstance().records.Count;
-		int[] records = GameData.GetInstance().records.ToArray();
-		if (count == 0)
-		{
-			foreach (Image item in triangles)
-				item.fillAmount = 0;
-			return;
-		}
-		int sum = 100;
-		Dictionary<int, int> dict = new Dictionary<int, int>();
-		for (int i = 0; i < fieldsCount; ++i)
-		{
-			dict.Add(i, 0);
-		}
-		foreach (int item in records)
-		{
-			dict[item] += 1;
-		}
-		foreach (var item in dict)
-		{
-			triangles[item.Key].fillAmount = (float)item.Value * 5 / sum;
-			if (triangles[item.Key].fillAmount >= 0.8f)
-				triangles[item.Key].color = Color.white;
-			else if (triangles[item.Key].fillAmount < 0.8f && triangles[item.Key].fillAmount >= 0.3f)
-				triangles[item.Key].color = new Color(1f, 0.3960f, 0.004f);
-			else if (triangles[item.Key].fillAmount < 0.3f)
-				triangles[item.Key].color = new Color(0.4196f, 0.9960f, 0.9255f);
-		}
-		int currentValue = records[count - 1];
-		if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)
-			bgBall.overrideSprite = bgs[0];
-		else if (GameData.GetInstance().colorTable[currentValue] == ResultType.Black)
-			bgBall.overrideSprite = bgs[1];
-		else
-			bgBall.overrideSprite = bgs[2];
-		if (currentValue != 37)
-			txtNum.text = currentValue.ToString();
-		else
-			txtNum.text = "00";
+        StartCoroutine(RefreshView());
 	}
+
+    private IEnumerator RefreshView()
+    {
+        yield return new WaitForSeconds(1.0f);
+        int count = GameData.GetInstance().records.Count;
+        int[] records = GameData.GetInstance().records.ToArray();
+        if (count == 0)
+        {
+            foreach (Image item in triangles)
+                item.fillAmount = 0;
+            yield break;
+        }
+        int sum = 100;
+        Dictionary<int, int> dict = new Dictionary<int, int>();
+        for (int i = 0; i < fieldsCount; ++i)
+        {
+            dict.Add(i, 0);
+        }
+        foreach (int item in records)
+        {
+            dict[item] += 1;
+        }
+        foreach (var item in dict)
+        {
+            triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
+            if (GameData.GetInstance().hotValues.Contains(item.Key))
+                triangles[item.Key].color = new Color(1f, 0.3960f, 0.004f);
+            else if (GameData.GetInstance().coldValues.Contains(item.Key))
+                triangles[item.Key].color = new Color(0.4196f, 0.9960f, 0.9255f);
+            else
+                triangles[item.Key].color = new Color(0.6078f, 0.6392f, 0.6510f);
+        }
+        int currentValue = records[count - 1];
+        if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)
+            bgBall.overrideSprite = bgs[0];
+        else if (GameData.GetInstance().colorTable[currentValue] == ResultType.Black)
+            bgBall.overrideSprite = bgs[1];
+        else
+            bgBall.overrideSprite = bgs[2];
+        if (currentValue != 37)
+            txtNum.text = currentValue.ToString();
+        else
+            txtNum.text = "00";
+    }
 }

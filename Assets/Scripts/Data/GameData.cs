@@ -10,7 +10,7 @@ using System.Collections.Generic;
 public class GameData
 {
 	public static bool debug = true;       // 是否模拟出球
-	public static bool controlCode = true;  // 是否打码
+	public static bool controlCode = false;  // 是否打码
 
     // Setting menu
     public int betTimeLimit;
@@ -178,6 +178,8 @@ public class GameData
     public Dictionary<int, ResultType> colorTable = new Dictionary<int, ResultType>();
 	public Dictionary<string, int> lastBets = new Dictionary<string, int>();	// 最近一场压分记录
 	public int lastBetCredit = 0;					// 最近一场压分总数
+    public List<int> hotValues = new List<int>();   // 出现最多5个号
+    public List<int> coldValues = new List<int>();  // 出现最少5个号 不包括出现0次的号
 
 	public int[] ballValue38 = new int[]{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24};
 	public int[] ballValue37 = new int[]{26,0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3};

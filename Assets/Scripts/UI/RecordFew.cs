@@ -48,8 +48,13 @@ public class RecordFew : MonoBehaviour
         lst.Sort(delegate(KeyValuePair<int, int> s1, KeyValuePair<int, int> s2) {return s1.Value.CompareTo(s2.Value);});
 
         fewValues.Clear();
+        GameData.GetInstance().coldValues.Clear();
 		foreach(KeyValuePair<int, int> kvp in lst)
+        {
 			fewValues.Add(kvp.Key, kvp.Value);
+            if (kvp.Value > 0 && GameData.GetInstance().coldValues.Count < 5)
+                GameData.GetInstance().coldValues.Add(kvp.Key);
+        }
 
         RefreshView();
 	}
