@@ -382,17 +382,17 @@ public class MainUILogic : MonoBehaviour
 				if (j == 0)
 				{
 					// 默认第一个筹码是选中的
-					if (curChipIdx < 0 || curChipIdx >= betChipsNum)	
+					if (curChipIdx < 0 || curChipIdx >= betChipsNum)
 						curChipIdx = i;
 					if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
 					chooseBetEffect.transform.localPosition = betChip.transform.localPosition + new Vector3(0, 10f, 0);
 				}
-				++j;
-				betChip.transform.localScale = Vector3.one;
+                betChip.transform.localScale = j == 0 ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.one;
 				betChip.GetComponent<ButtonEvent>().receiver = gameObject;
 				betChip.GetComponent<ButtonEvent>().inputUpEvent = "ChipButtonEvent";
 				betChip.transform.GetChild(0).GetComponent<Text>().text = value.ToString();
 				prefab = null;
+                ++j;
 			}
 		}
 	}
@@ -896,14 +896,19 @@ public class MainUILogic : MonoBehaviour
 			eraser.SetActive(false);
 			mouseIcon.gameObject.SetActive(true);
 		}
-//		if (gameLogic.LogicPhase != GamePhase.Countdown)
-//			return;
 
 		int idx;
 		if (int.TryParse(hitObject.name.Substring(7, 1), out idx))
+        {
+            foreach (Transform child in betChipsRoot.transform)
+                child.localScale = Vector3.one;
 			curChipIdx = idx;
+            hitObject.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+        }
 		else
+        {
 			curChipIdx = -1;
+        }
 		
 		if (curChipIdx == -1)
 		{
