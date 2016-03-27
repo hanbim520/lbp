@@ -102,6 +102,7 @@ public class ServerLogic : GameLogic
         }
         gamePhase = GamePhase.GameStart;
 		ui.ResetCountdown();
+        ui.ClearWinChips();
         StartCoroutine(Countdown());
 	}
 	
@@ -418,6 +419,7 @@ public class ServerLogic : GameLogic
 			if (peilv > 0)
 			{
 				win += peilv * item.Value;
+                ui.AddWinChip(item.Key);
 			}
 		}
 		// 赢取的彩金数
@@ -479,7 +481,7 @@ public class ServerLogic : GameLogic
 			ui.RefreshLblWin(win.ToString());
 		else
 			ui.RefreshLblWin("0");
-		ui.CleanAll();
+        ui.ClearLoseChips();
 
         if (!GameData.debug)
 		    hidUtils.OpenGate();

@@ -134,6 +134,7 @@ public class ClientLogic : GameLogic
             gamePhase = phase;
             if (gamePhase == GamePhase.Countdown)
             {
+                ui.ClearWinChips();
                 Countdown();
             }
             else if (gamePhase == GamePhase.ShowResult)
@@ -197,6 +198,7 @@ public class ClientLogic : GameLogic
             if (peilv > 0)
             {
                 win += peilv * item.Value;
+                ui.AddWinChip(item.Key);
             }
         }
 		// 赢取的彩金数
@@ -249,7 +251,7 @@ public class ClientLogic : GameLogic
             ui.RefreshLblWin(win.ToString());
         else
             ui.RefreshLblWin("0");
-        ui.CleanAll();
+        ui.ClearLoseChips();
     }
 
     private void CloseGate()
@@ -270,25 +272,6 @@ public class ClientLogic : GameLogic
     private void NotifyMsg(ref string msg)
     {
         Debug.Log(Time.realtimeSinceStartup + ": " + msg);
-    }
-
-    private void ResponseBet(ref string[] words)
-    {
-		string field = words[1];
-        int betVal;
-        if (int.TryParse(words[2], out betVal))
-        {
-            if (betFields.ContainsKey(field))
-            {
-                betFields[field] += betVal;
-            }
-            else
-            {
-                betFields.Add(field, betVal);
-            }
-            totalCredits -= betVal;
-            Debug.Log(Time.realtimeSinceStartup + ": field-" + field + ", betVal-" + betFields[field]);
-        }
     }
 
     private void HandleLotteryNums(ref string[] words)

@@ -44,6 +44,7 @@ public class MainUILogic : MonoBehaviour
 	Dictionary<string, List<Transform>> lightEffects = new Dictionary<string, List<Transform>>();
 	private Transform flashObject;
 	private List<Transform> flashObjects = new List<Transform>();	// 显示压中结果的区域(亮色)
+    private List<Transform> winChips = new List<Transform>();        // 赢的筹码
     private Timer timerHideWarning;
     private string[] strCardError = new string[]{"If you want to use Presented\nCredits, you have to use up all\ncredits, and then keyin agian.",
         "要使用优惠卡，\n须从0分开始充值。"};
@@ -444,10 +445,33 @@ public class MainUILogic : MonoBehaviour
 	}
 
 	// 清除没有中的筹码
-	public void ClearLoseChips(int ballValue)
+	public void ClearLoseChips()
 	{
-
+        foreach (Transform t in fieldChipsRoot.transform)
+        {
+            if (winChips.Contains(t))
+                continue;
+            Destroy(t.gameObject);
+        }
 	}
+
+    // 清除中的筹码
+    public void ClearWinChips()
+    {
+        foreach (Transform t in winChips)
+            Destroy(t.gameObject);
+        winChips.Clear();
+    }
+
+    // 加中的筹码
+    public void AddWinChip(string fieldName)
+    {
+        if (string.Equals(fieldName.Substring(0, 1), "e"))
+            return;
+        Transform t = fieldChipsRoot.transform.FindChild(fieldName);
+        if (t != null)
+            winChips.Add(t);
+    }
 
 	public void RepeatEvent()
 	{
@@ -824,7 +848,18 @@ public class MainUILogic : MonoBehaviour
 			if (string.Equals(hitObject.parent.name, "Valid Fields") && 
 			    string.Equals(hitObject.parent.parent.name, "Ellipse"))
 				prefabPath = "SmallChip/SC";
-			Object prefab = (Object)Resources.Load(prefabPath + curChipIdx);
+            int chipIdx = 0;
+            if (gameLogic.betFields.ContainsKey(strField))
+            {
+                int credit = gameLogic.betFields[strField] + bet;
+                int count = GameData.GetInstance().betChipValues.Count;
+                for (int i = 0; i < count; ++i)
+                {
+                    if (credit > GameData.GetInstance().betChipValues[i])
+                        chipIdx = i;
+                }
+            }
+            Object prefab = (Object)Resources.Load(prefabPath + chipIdx);
 			GameObject chip = (GameObject)Instantiate(prefab);
 			chip.transform.SetParent(fieldChipsRoot.transform);
 			chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
