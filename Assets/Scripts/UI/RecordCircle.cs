@@ -7,20 +7,47 @@ public class RecordCircle : MonoBehaviour
 {
 	public int fieldsCount = 37;
 	public Sprite[] bgs;
+	public GameObject flashImg;
 	private Image[] triangles;
 	private Image bgBall;
 	private Text txtNum;
+
+	private const float fixedFlashTime = 0.8f;
+	private float flashDeltaTime = 0.0f;
+	private bool bFlashEnable = false;
 
 	void Start()
 	{
 		Init();
 		HandleRefreshRecord();
 		GameEventManager.RefreshRecord += HandleRefreshRecord;
+		GameEventManager.EndCountdown += EndCountdown;
 	}
 
 	void OnDestroy()
 	{
 		GameEventManager.RefreshRecord -= HandleRefreshRecord;
+		GameEventManager.EndCountdown -= EndCountdown;
+	}
+
+	void Update()
+	{
+		if (bFlashEnable)
+		{
+			flashDeltaTime += Time.deltaTime;
+			if (fixedFlashTime <= flashDeltaTime)
+			{
+				flashDeltaTime = 0.0f;
+				flashImg.SetActive(!flashImg.activeSelf);
+			}
+		}
+		else if (!bFlashEnable && flashImg.activeSelf)
+			flashImg.SetActive(false);
+	}
+
+	private void EndCountdown()
+	{
+		bFlashEnable = false;
 	}
 
 	private void Init()
@@ -66,9 +93,9 @@ public class RecordCircle : MonoBehaviour
             if (GameData.GetInstance().hotValues.Contains(item.Key))
                 triangles[item.Key].color = new Color(1f, 0.3960f, 0.004f);
             else if (GameData.GetInstance().coldValues.Contains(item.Key))
-                triangles[item.Key].color = new Color(0.4196f, 0.9960f, 0.9255f);
-            else
-                triangles[item.Key].color = new Color(0.6078f, 0.6392f, 0.6510f);
+				triangles[item.Key].color = new Color(0.2510f, 0.3765f, 0.8078f);
+			else
+				triangles[item.Key].color = new Color(0.6078f, 0.6392f, 0.6510f);
         }
         int currentValue = records[count - 1];
         if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)
@@ -81,5 +108,11 @@ public class RecordCircle : MonoBehaviour
             txtNum.text = currentValue.ToString();
         else
             txtNum.text = "00";
+
+		bFlashEnable = true;
+		Transform targetImg = triangles[currentValue].transform;
+		flashImg.transform.localPosition = targetImg.localPosition;
+		flashImg.transform.localRotation = targetImg.localRotation;
+		flashImg.transform.localScale = Vector3.one;
     }
 }
