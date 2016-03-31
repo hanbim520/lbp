@@ -18,6 +18,7 @@ public class CardDlg : MonoBehaviour
 	private string txtPassword; // Temp variable
 	private Transform preSelected;
     private GameObject downHitObject;
+	private bool hitDownOpt = false;
     
 	private string[] strKeyin = new string[]{"Keyin", "上分"};
 	private string[] strSysPassword = new string[]{"Input Sys-Password", "请输入系统密码"};
@@ -318,7 +319,7 @@ public class CardDlg : MonoBehaviour
     
     private void DetectInputEvents()
     {
-        if (InputEx.GetInputDown())
+		if (InputEx.GetInputDown() && !hitDownOpt)
         {
             Vector2 pos;
             InputEx.InputDownPosition(out pos);
@@ -336,11 +337,13 @@ public class CardDlg : MonoBehaviour
             {
                 for (int i = 0; i < hit.Length; ++i)
                 {
-                    if (hit[i].collider.tag == "Dialog")
+					if (hit[i].collider.tag == "Dialog")
                     {
                         idx = i;
                         break;
                     }
+					else if (hit[i].collider.gameObject.GetComponent<ButtonEvent>() != null)
+						idx = i;
                 }
             }
             if (idx > -1 && hit[idx].collider != null)
@@ -350,8 +353,9 @@ public class CardDlg : MonoBehaviour
             }
             
             mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
-        }
-        else if (InputEx.GetInputUp())
+			hitDownOpt = true;
+		}
+		else if (InputEx.GetInputUp() && hitDownOpt)
         {
             Vector2 pos;
             InputEx.InputUpPosition(out pos);
@@ -364,7 +368,7 @@ public class CardDlg : MonoBehaviour
             {
                 downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
             }
-            downHitObject = null;
+			hitDownOpt = false;
         }
     }
 }

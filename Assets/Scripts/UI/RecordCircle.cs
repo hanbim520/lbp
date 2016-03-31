@@ -93,7 +93,7 @@ public class RecordCircle : MonoBehaviour
             if (GameData.GetInstance().hotValues.Contains(item.Key))
                 triangles[item.Key].color = new Color(1f, 0.3960f, 0.004f);
             else if (GameData.GetInstance().coldValues.Contains(item.Key))
-				triangles[item.Key].color = new Color(0.2510f, 0.3765f, 0.8078f);
+				triangles[item.Key].color = new Color(0.4196f, 0.9960f, 0.9255f);
 			else
 				triangles[item.Key].color = new Color(0.6078f, 0.6392f, 0.6510f);
         }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 public static class GameEventManager 
 {
@@ -14,6 +15,7 @@ public static class GameEventManager
     public delegate void KeyinEvent(int delta, int coinNum);
 	public delegate void ChooseFieldsEvent(Transform hitObject);	// 选中多个区域 选中区域显亮色
 	public delegate void DebugLogEvent(int eventId, string log);
+	public delegate void RakeInitEvent(int type, int lineId, float startX1, float startX2, ref List<Transform> winChips);
     public static event GameEvent GameStart, GameOver, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll, CleanAll;
@@ -45,6 +47,7 @@ public static class GameEventManager
 	public static event GameEventWithId BreakdownTip;
 	public static event GameEvent SyncUI;			// 同步后台设置后，设置分机ui
 	public static event GameEvent SyncInputDevice;  // 同步输入设备
+	public static event RakeInitEvent RakeInit;
 
 	public static void TriggerOpenSerial()
 	{
@@ -275,5 +278,10 @@ public static class GameEventManager
 	public static void OnDebugLog(int eventId, string log)
 	{
 		if (DebugLog != null) DebugLog(eventId, log);
+	}
+
+	public static void OnRakeInit(int type, int lineId, float startX1, float startX2, ref List<Transform> winChips)
+	{
+		if (RakeInit != null) RakeInit(type, lineId, startX1, startX2, ref winChips);
 	}
 }

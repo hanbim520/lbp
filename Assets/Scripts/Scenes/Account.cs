@@ -13,6 +13,7 @@ public class Account : MonoBehaviour
 
 	private RectTransform mouseIcon;
 	private GameObject downHitObject;
+	private bool hitDownOpt = false;
 
 	void Start()
 	{
@@ -96,7 +97,7 @@ public class Account : MonoBehaviour
 
 	private void DetectInputEvents()
 	{
-		if (InputEx.GetInputDown())
+		if (InputEx.GetInputDown() && !hitDownOpt)
 		{
 			Vector2 pos;
 			InputEx.InputDownPosition(out pos);
@@ -119,6 +120,8 @@ public class Account : MonoBehaviour
 						idx = i;
 						break;
 					}
+					else if (hit[i].collider.gameObject.GetComponent<ButtonEvent>() != null)
+						idx = i;
 				}
 			}
 			if (hit[idx].collider != null)
@@ -128,8 +131,9 @@ public class Account : MonoBehaviour
 			}
 			
 			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+			hitDownOpt = true;
 		}
-		else if (InputEx.GetInputUp())
+		else if (InputEx.GetInputUp() && hitDownOpt)
 		{
 			Vector2 pos;
 			InputEx.InputUpPosition(out pos);
@@ -142,7 +146,7 @@ public class Account : MonoBehaviour
 			{
 				downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
 			}
-			downHitObject = null;
+			hitDownOpt = false;
 		}
 	}
 }

@@ -169,12 +169,6 @@ public class ClientLogic : GameLogic
     {
         gamePhase = GamePhase.Run;
 //        ui.chooseBetEffect.SetActive(false);
-    }
-
-    private void ShowResult()
-    {
-        Debug.Log("Client ShowResult");
-		GameData.GetInstance().AddBeginSessions();
 		// 切换回经典压分区
 		if (GameData.GetInstance().displayType == 1)
 		{
@@ -182,6 +176,12 @@ public class ClientLogic : GameLogic
 			GameData.GetInstance().SaveDisplayType();
 			ui.SetDisplay();
 		}
+    }
+
+    private void ShowResult()
+    {
+        Debug.Log("Client ShowResult");
+		GameData.GetInstance().AddBeginSessions();
         StartCoroutine(Compensate());
 		ui.FlashResult(ballValue);
     }

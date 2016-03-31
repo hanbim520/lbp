@@ -9,7 +9,8 @@ public class DlgYesNO : MonoBehaviour
     public Transform mouseIcon;
     
 	private GameObject downHitObject;
-	
+	private bool hitDownOpt = false;
+
 	void OnEnable()
 	{
 		SetLanguage();
@@ -62,7 +63,7 @@ public class DlgYesNO : MonoBehaviour
 	
 	private void DetectInputEvents()
 	{
-		if (InputEx.GetInputDown())
+		if (InputEx.GetInputDown() && !hitDownOpt)
 		{
 			Vector2 pos;
 			InputEx.InputDownPosition(out pos);
@@ -85,6 +86,8 @@ public class DlgYesNO : MonoBehaviour
 						idx = i;
 						break;
 					}
+					else if (hit[i].collider.gameObject.GetComponent<ButtonEvent>() != null)
+						idx = i;
 				}
 			}
 			if (idx > -1 && hit[idx].collider != null)
@@ -94,8 +97,9 @@ public class DlgYesNO : MonoBehaviour
 			}
 			
 			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
+			hitDownOpt = true;
 		}
-		else if (InputEx.GetInputUp())
+		else if (InputEx.GetInputUp() && hitDownOpt)
 		{
 			Vector2 pos;
 			InputEx.InputUpPosition(out pos);
@@ -108,7 +112,7 @@ public class DlgYesNO : MonoBehaviour
 			{
 				downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
 			}
-			downHitObject = null;
+			hitDownOpt = false;
 		}
 	}
 

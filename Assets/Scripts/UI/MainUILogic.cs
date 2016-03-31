@@ -39,6 +39,7 @@ public class MainUILogic : MonoBehaviour
 	private int curChipIdx = -1;
 	private int timeLimit;
     private GameObject downHitObject;
+	private bool hitDownOpt = false;
 //    private List<Transform> lightEffects = new List<Transform>();	// 选中的压分区域(亮色)
 	// 改版后：鼠标只要移到边或角 所有关联压分区显示亮色
 	Dictionary<string, List<Transform>> lightEffects = new Dictionary<string, List<Transform>>();
@@ -170,7 +171,7 @@ public class MainUILogic : MonoBehaviour
 
 	public void ChangeDisplay()
 	{
-		if (gameLogic.LogicPhase >= GamePhase.ShowResult)
+		if (gameLogic.LogicPhase >= GamePhase.Run)
 			return;
 
 		if (GameData.GetInstance().displayType == 0)	// classic
@@ -217,22 +218,8 @@ public class MainUILogic : MonoBehaviour
 		// 还原压分区筹码
 		if (fieldChipsRoot.transform.childCount > 0)
 		{
-			int childCount = fieldChipsRoot.transform.childCount;
-			Dictionary<string, int> betFields = new Dictionary<string, int>();
-			for (int i = 0; i < childCount; ++i)
-			{
-				Transform child = fieldChipsRoot.transform.GetChild(i);
-				string betValue = child.GetChild(0).GetComponent<Text>().text;
-				string name = child.name;
-				if (string.Equals(name.Substring(0, 1), "e"))
-					continue;
-
-				if (betFields.ContainsKey(name))
-					betFields[name] += int.Parse(betValue);
-				else
-					betFields.Add(name, int.Parse(betValue));
-			}
-
+			Dictionary<string, int> betFields = gameLogic.betFields;
+			
 			foreach (Transform t in fieldChipsRoot.transform)
 				Destroy(t.gameObject);
 
@@ -247,12 +234,19 @@ public class MainUILogic : MonoBehaviour
 				GameObject root = GameObject.Find(rootPath);
 				if (root != null)
 				{
-					string prefabPath = "BigChip/BC" + curChipIdx;
 					foreach (KeyValuePair<string, int> item in betFields)
 					{
+						int count = GameData.GetInstance().betChipValues.Count;
 						Transform target = root.transform.FindChild(item.Key);
 						if (target != null)
 						{
+							int chipIdx = 0;
+							for (int i = 0; i < count; ++i)
+							{
+								if (item.Value >= GameData.GetInstance().betChipValues[i])
+									chipIdx = i;
+							}
+							string prefabPath = "BigChip/BC" + chipIdx;
 							Object prefab = (Object)Resources.Load(prefabPath);
 							GameObject chip = (GameObject)Instantiate(prefab);
 							chip.transform.SetParent(fieldChipsRoot.transform);
@@ -283,10 +277,18 @@ public class MainUILogic : MonoBehaviour
 				//Choose Effect
 				if (vfRoot != null && ceRoot != null)
 				{
+					int count = GameData.GetInstance().betChipValues.Count;
 					foreach (KeyValuePair<string, int> item in betFields)
 					{
+						int chipIdx = 0;
+						for (int i = 0; i < count; ++i)
+						{
+							if (item.Value >= GameData.GetInstance().betChipValues[i])
+								chipIdx = i;
+						}
+
 						List<string> prefabPath = new List<string>();
-						prefabPath.Add("SmallChip/SC" + curChipIdx.ToString());
+						prefabPath.Add("SmallChip/SC" + chipIdx.ToString());
 						List<Transform> target = new List<Transform>();
 						int fieldName;
 						List<string> name = new List<string>();
@@ -300,7 +302,7 @@ public class MainUILogic : MonoBehaviour
 						// 设置大筹码
 						if (int.TryParse(item.Key, out fieldName) || string.Equals(item.Key, "00"))
 						{
-							prefabPath.Add("BigChip/BC" + curChipIdx.ToString());
+							prefabPath.Add("BigChip/BC" + chipIdx.ToString());
 							string eName = "e" + item.Key;
 							name.Add(eName);
 							tmpTarget = ceRoot.transform.FindChild(eName);
@@ -383,12 +385,13 @@ public class MainUILogic : MonoBehaviour
 				if (j == 0)
 				{
 					// 默认第一个筹码是选中的
+					betChip.GetComponent<BreathyChip>().enabled  = true;
 					if (curChipIdx < 0 || curChipIdx >= betChipsNum)
 						curChipIdx = i;
 					if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
 					chooseBetEffect.transform.localPosition = betChip.transform.localPosition + new Vector3(0, 10f, 0);
 				}
-                betChip.transform.localScale = j == 0 ? new Vector3(1.2f, 1.2f, 1.2f) : Vector3.one;
+				betChip.transform.localScale = Vector3.one;
 				betChip.GetComponent<ButtonEvent>().receiver = gameObject;
 				betChip.GetComponent<ButtonEvent>().inputUpEvent = "ChipButtonEvent";
 				betChip.transform.GetChild(0).GetComponent<Text>().text = value.ToString();
@@ -447,20 +450,51 @@ public class MainUILogic : MonoBehaviour
 	// 清除没有中的筹码
 	public void ClearLoseChips()
 	{
+		if (gameLogic.betFields.Count == 0)
+			return;
+
+		int type = 0;
+		int lineId = 0;
+		bool line1 = false;
+		bool line2 = false;
+		float startX1 = 0;
+		float startX2 = 0;
         foreach (Transform t in fieldChipsRoot.transform)
-        {
-            if (winChips.Contains(t))
-                continue;
-            Destroy(t.gameObject);
-        }
+		{
+			if (winChips.Contains(t))
+				continue;
+			if (t.localPosition.y > -96)
+			{
+				line1 = true;
+				if (startX1 > t.localPosition.x)
+					startX1 = t.localPosition.x;
+			}
+			else
+			{
+				line2 = true;
+				if (startX2 > t.localPosition.x)
+					startX2 = t.localPosition.x;
+			}
+		}
+		if (line1 || line2)
+			type = line1 && line2 ? 2 : 1;
+		else
+			return;
+		if (type == 2)
+			lineId = 1;
+		else
+			lineId = line1 ? 1 : 2;
+		GameEventManager.OnRakeInit(type, lineId, startX1 - 95.0f, startX2 - 95.0f, ref winChips);
 	}
 
     // 清除中的筹码
     public void ClearWinChips()
     {
-        foreach (Transform t in winChips)
-            Destroy(t.gameObject);
+//        foreach (Transform t in winChips)
+//            Destroy(t.gameObject);
         winChips.Clear();
+		foreach (Transform child in fieldChipsRoot.transform)
+			Destroy(child.gameObject);
     }
 
     // 加中的筹码
@@ -851,12 +885,14 @@ public class MainUILogic : MonoBehaviour
             int chipIdx = 0;
             if (gameLogic.betFields.ContainsKey(strField))
             {
-                int credit = gameLogic.betFields[strField] + bet;
+                int credit = gameLogic.betFields[strField];
                 int count = GameData.GetInstance().betChipValues.Count;
                 for (int i = 0; i < count; ++i)
                 {
-                    if (credit > GameData.GetInstance().betChipValues[i])
+                    if (credit >= GameData.GetInstance().betChipValues[i])
+					{
                         chipIdx = i;
+					}
                 }
             }
             Object prefab = (Object)Resources.Load(prefabPath + chipIdx);
@@ -936,9 +972,12 @@ public class MainUILogic : MonoBehaviour
 		if (int.TryParse(hitObject.name.Substring(7, 1), out idx))
         {
             foreach (Transform child in betChipsRoot.transform)
+			{
                 child.localScale = Vector3.one;
+				child.GetComponent<BreathyChip>().enabled = false;
+			}
 			curChipIdx = idx;
-            hitObject.localScale = new Vector3(1.2f, 1.2f, 1.2f);
+			hitObject.GetComponent<BreathyChip>().enabled = true;
         }
 		else
         {
@@ -957,14 +996,14 @@ public class MainUILogic : MonoBehaviour
 
 	void Update()
 	{
-        if (!IsDlgActived())
-		    DetectInputEvents();
+		if (!IsDlgActived())
+			DetectInputEvents();
 		UpdateTimer();
 	}
 
 	private void DetectInputEvents()
 	{
-		if (InputEx.GetInputDown())
+		if (InputEx.GetInputDown() && !hitDownOpt)
 		{
 			Vector2 pos;
 			InputEx.InputDownPosition(out pos);
@@ -987,6 +1026,8 @@ public class MainUILogic : MonoBehaviour
 						idx = i;
 						break;
 					}
+					else if (hit[i].collider.gameObject.GetComponent<ButtonEvent>() != null)
+						idx = i;
 				}
 			}
 			if (hit[idx].collider != null)
@@ -997,8 +1038,9 @@ public class MainUILogic : MonoBehaviour
 
 			mouseIcon.localPosition = new Vector3(pos.x, pos.y, 0);
 			eraser.transform.localPosition = mouseIcon.localPosition;
+			hitDownOpt = true;
 		}
-		if (InputEx.GetInputUp())
+		else if (InputEx.GetInputUp() && hitDownOpt)
 		{
 			Vector2 pos;
 			InputEx.InputUpPosition(out pos);
@@ -1010,10 +1052,10 @@ public class MainUILogic : MonoBehaviour
 
             if (downHitObject != null)
             {
-                downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
-            }
-            downHitObject = null;
-        }
+				downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
+			}
+			hitDownOpt = false;
+		}
 	}
 
 	private void UpdateTimer()

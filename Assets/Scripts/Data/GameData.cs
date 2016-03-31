@@ -836,6 +836,7 @@ public class GameData
 			PlayerPrefs.DeleteKey("lastBet_value" + i);
 		}
 		lastBets.Clear();
+		PlayerPrefs.Save();
 	}
 
 	public void SaveLastBet(ref Dictionary<string, int> betFields, int totalBetCredit)
@@ -845,6 +846,7 @@ public class GameData
 		{
 			PlayerPrefs.SetInt("lastBet_count", count);
 			PlayerPrefs.SetInt("lastBet_credit", totalBetCredit);
+			lastBetCredit = totalBetCredit;
 			int idx = 0;
 			foreach (KeyValuePair<string, int> item in betFields)
 			{
@@ -853,6 +855,7 @@ public class GameData
 				lastBets.Add(item.Key, item.Value);
 				++idx;
 			}
+			PlayerPrefs.Save();
 		}
 	}
 
@@ -862,7 +865,10 @@ public class GameData
 		int count = PlayerPrefs.GetInt("lastBet_count", 0);
 		if (count <= 0)
 			return;
+
 		lastBetCredit = PlayerPrefs.GetInt("lastBet_credit");
+		if (lastBets.Count > 0)
+			lastBets.Clear();
 		for (int i = 0; i < count; ++i)
 		{
 			string field = PlayerPrefs.GetString("lastBet_field" + i);

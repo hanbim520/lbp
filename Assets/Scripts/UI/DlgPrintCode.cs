@@ -18,6 +18,7 @@ public class DlgPrintCode : MonoBehaviour
     public GameObject cn;
 
     private GameObject downHitObject;
+	private bool hitDownOpt = false;
 #if UNITY_ANDROID
     private AndroidJavaClass jc;
     private AndroidJavaObject jo;
@@ -146,7 +147,7 @@ public class DlgPrintCode : MonoBehaviour
     
     private void DetectInputEvents()
     {
-        if (InputEx.GetInputDown())
+		if (InputEx.GetInputDown() && !hitDownOpt)
         {
             Vector2 pos;
             InputEx.InputDownPosition(out pos);
@@ -164,11 +165,13 @@ public class DlgPrintCode : MonoBehaviour
             {
                 for (int i = 0; i < hit.Length; ++i)
                 {
-                    if (hit[i].collider.tag == "Dialog")
+					if (hit[i].collider.tag == "Dialog")
                     {
                         idx = i;
                         break;
                     }
+					else if (hit[i].collider.gameObject.GetComponent<ButtonEvent>() != null)
+						idx = i;
                 }
             }
             if (idx > -1 && hit[idx].collider != null)
@@ -176,8 +179,9 @@ public class DlgPrintCode : MonoBehaviour
                 hit[idx].collider.gameObject.GetComponent<ButtonEvent>().OnInputDown(hit[idx].collider.transform);
                 downHitObject = hit[idx].collider.gameObject;
             }
+			hitDownOpt = true;
         }
-        else if (InputEx.GetInputUp())
+		else if (InputEx.GetInputUp() && hitDownOpt)
         {
             Vector2 pos;
             InputEx.InputUpPosition(out pos);
@@ -188,7 +192,7 @@ public class DlgPrintCode : MonoBehaviour
             {
                 downHitObject.GetComponent<ButtonEvent>().OnInputUp(downHitObject.transform);
             }
-            downHitObject = null;
+			hitDownOpt = false;
         }
     }
 

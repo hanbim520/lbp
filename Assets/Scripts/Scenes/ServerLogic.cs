@@ -135,6 +135,13 @@ public class ServerLogic : GameLogic
     private void CountdownComplete()
     {
 //		ui.chooseBetEffect.SetActive(false);
+		// 切换回经典压分区
+		if (GameData.GetInstance().displayType == 1)
+		{
+			GameData.GetInstance().displayType = 0;
+			GameData.GetInstance().SaveDisplayType();
+			ui.SetDisplay();
+		}
 		timerConnectClients = new Timer(120, 0);	// 2分钟后不认球 则当故障处理
 		timerConnectClients.Tick += RecogBallTimeout;
 		timerConnectClients.Start();
@@ -395,13 +402,7 @@ public class ServerLogic : GameLogic
 		GameData.GetInstance().AddBeginSessions();
         yield return new WaitForSeconds(waitSendTime);
 
-		// 切换回经典压分区
-		if (GameData.GetInstance().displayType == 1)
-		{
-			GameData.GetInstance().displayType = 0;
-			GameData.GetInstance().SaveDisplayType();
-			ui.SetDisplay();
-		}
+
 		StartCoroutine(Compensate());
 		ui.FlashResult(ballValue);
 	}
@@ -481,9 +482,9 @@ public class ServerLogic : GameLogic
 			ui.RefreshLblWin(win.ToString());
 		else
 			ui.RefreshLblWin("0");
-        ui.ClearLoseChips();
-
-        if (!GameData.debug)
+		ui.ClearLoseChips();
+			
+		if (!GameData.debug)
 		    hidUtils.OpenGate();
 		else
 			StartCoroutine(SimulateCloseGate());
