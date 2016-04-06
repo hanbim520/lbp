@@ -199,6 +199,7 @@ public class UClient : MonoBehaviour
 		int lineId, machineId;
 		int lotteryCondition, lotteryBase, lotteryRate, lotteryAlloc, lotteryDigit;
 		int inputDevice;
+		int powerOffCompensate;
 		
 		if(int.TryParse(words[1], out betTimeLimit))
 			GameData.GetInstance().betTimeLimit = betTimeLimit;
@@ -271,6 +272,8 @@ public class UClient : MonoBehaviour
 			GameData.GetInstance().lotteryDigit = lotteryDigit;
 			GameEventManager.OnLotteryChange(lotteryDigit);
 		}
+		if (int.TryParse(words[29], out powerOffCompensate))
+			GameData.GetInstance().powerOffCompensate = powerOffCompensate;
 		
 		GameData.GetInstance().SaveSetting();
 		GameEventManager.OnSyncUI();

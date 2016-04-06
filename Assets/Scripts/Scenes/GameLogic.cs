@@ -105,10 +105,15 @@ public class GameLogic : MonoBehaviour
     {
         int lastBet = CryptoPrefs.GetInt("currentBet", 0);
         _totalCredits = CryptoPrefs.GetInt("totalCredits");
+		int powerOffCompensate = GameData.GetInstance().powerOffCompensate;
         if (lastBet > 0)
         {
-            _totalCredits += lastBet;
-            GameData.GetInstance().ZongYa -= lastBet;
+			// 断电赔付
+			if (powerOffCompensate > 0)
+			{
+				_totalCredits += lastBet;
+				GameData.GetInstance().ZongYa -= lastBet;
+			}
             currentBet = 0;
         }
         SaveTotalCredits();

@@ -25,6 +25,7 @@ public class GameData
 	public int max6Value;
 	public int max3Value;
 	public int max2Value;
+	public int powerOffCompensate;	// 0--断电吃分 1--断电赔付
 	// 优惠卡分限
 	public int couponsStart;
 	public int couponsKeyinRatio;	// 1%~100%
@@ -316,6 +317,7 @@ public class GameData
 		PlayerPrefs.SetInt("lotteryBase", lotteryBase);
 		PlayerPrefs.SetInt("lotteryRate", lotteryRate);
 		PlayerPrefs.SetInt("lotteryAllocation", lotteryAllocation);
+		PlayerPrefs.SetInt("powerOffCompensate", powerOffCompensate);
         PlayerPrefs.Save();
     }
 
@@ -348,6 +350,7 @@ public class GameData
 		lotteryBase = 1000;
 		lotteryRate = 10;
 		lotteryAllocation = 40;
+		powerOffCompensate = 1;
     }
 
 	public void DefaultCustom()
@@ -464,6 +467,7 @@ public class GameData
 			lotteryBase = PlayerPrefs.GetInt("lotteryBase");
 			lotteryRate = PlayerPrefs.GetInt("lotteryRate");
 			lotteryAllocation = PlayerPrefs.GetInt("lotteryAllocation");
+			powerOffCompensate = PlayerPrefs.GetInt("powerOffCompensate");
 
             // Check account menu 
             zongShang = CryptoPrefs.GetInt("zongShang");
