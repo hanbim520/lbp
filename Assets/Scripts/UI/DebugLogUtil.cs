@@ -8,7 +8,6 @@ public class DebugLogUtil : MonoBehaviour
 	void Start()
 	{
 		GameEventManager.DebugLog += DebugLog;
-		debuglog[2].gameObject.SetActive(false);
 	}
 
 	void OnDestroy()

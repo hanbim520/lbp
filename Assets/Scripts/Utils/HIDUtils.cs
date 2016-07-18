@@ -9,20 +9,20 @@ public class HIDUtils : MonoBehaviour
 {
 	private int vid = 0x0483;
 	private int pid = 0x5750;
-
+	
 	public const int kPhaseStartBlowBall = 1;
 	public const int kPhaseEndBlowBall = 2;
 	public const int kPhaseOpenGate = 3;
 	public const int kPhaseCloseGate = 4;
 	public const int kPhaseDetectBallValue = 5;
-
-#if UNITY_ANDROID
+	
+	#if UNITY_ANDROID
 	private AndroidJavaClass jc;
 	private AndroidJavaObject jo;
-#endif
+	#endif
 	private bool isReadThreadExit = false;
 	private Thread tRead;
-//	private Queue<int> readQueue = new Queue<int>();
+	//	private Queue<int> readQueue = new Queue<int>();
 	private SafedQueue<int> readQueue = new SafedQueue<int>();
 	// In seconds
 	private const float getDataTime = 0.1f;
@@ -34,7 +34,7 @@ public class HIDUtils : MonoBehaviour
 	private const int kOpenGate = 0x55;
 	private const int kPreviousValue = 0x55;
 	private int flagPayCoin = 0;
-
+	
 	private Timer timerHeartBeat;		// 用来检测断连的计时器
 	private Timer timerCheckInfo;		// 用来验证的计时器
 	private bool bCheckInfo = true;		// 验证是否开始
@@ -47,18 +47,18 @@ public class HIDUtils : MonoBehaviour
 		get { return isOpen; }
 		set { isOpen = value; }
 	}
-
+	
 	void Start()
 	{
 		DontDestroyOnLoad(this);
 		InitData();
 	}
-
+	
 	void OnDestroy()
 	{
 		CloseUSB();
 	}
-
+	
 	private void UpdateTimers()
 	{
 		// 检测断连
@@ -68,20 +68,20 @@ public class HIDUtils : MonoBehaviour
 		if (timerCheckInfo != null)
 			timerCheckInfo.Update(Time.deltaTime);
 	}
-
+	
 	void Update()
 	{
 		UpdateTimers();
 		if (bCheckInfo)
 			return;
-
+		
 		getDataTimeDelta += Time.deltaTime;
 		if (getDataTimeDelta >= getDataTime)
 		{
 			getDataTimeDelta = 0;
 			ReadUsbPort();
 		}
-
+		
 		receiveFromHIDInterver += Time.deltaTime;
 		if (receiveFromHIDInterver >= kReceiveFromHIDTime)
 		{
@@ -89,20 +89,20 @@ public class HIDUtils : MonoBehaviour
 			ReceiveDataFromHID();
 		}
 	}
-
+	
 	private void InitData()
 	{
-	
-#if UNITY_ANDROID
-			jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
-			jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
-#endif
 		
-#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
-			OpenUSB();
-#endif
+		#if UNITY_ANDROID
+		jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
+		jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
+		#endif
+		
+		#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
+		OpenUSB();
+		#endif
 	}
-
+	
 	public void SetState(string value)
 	{
 		Debug.Log("SetState:" + value);
@@ -120,12 +120,12 @@ public class HIDUtils : MonoBehaviour
 			}
 		}
 	}
-
+	
 	protected IEnumerator AfterConnHID()
 	{
-//		if (GameData.GetInstance().deviceIndex <= 0)
-//			yield break;
-
+		//		if (GameData.GetInstance().deviceIndex <= 0)
+		//			yield break;
+		
 		string name = GameData.GetInstance().deviceIndex == 1 ? "ServerLogic" : "ClientLogic";
 		GameObject logic = GameObject.Find(name);
 		while(logic == null)
@@ -137,18 +137,18 @@ public class HIDUtils : MonoBehaviour
 		// 执行验证和开门操作
 		GameEventManager.OnHIDConnected();
 	}
-
+	
 	public void OpenUSB()
 	{
-#if UNITY_ANDROID
+		#if UNITY_ANDROID
 		int ret = jo.Call("openUsb");
 		if (ret > 0)
 		{
 			SetState("True");
 		}
-#endif
-
-#if UNITY_STANDALONE_WIN
+		#endif
+		
+		#if UNITY_STANDALONE_WIN
 		int ret = WinUsbPortOpen();
 		Debug.Log("WinUsbPortOpen:" + ret);
 		Debug.Log("GUID:" + GameData.GetInstance().deviceGuid);
@@ -160,9 +160,9 @@ public class HIDUtils : MonoBehaviour
 			tRead.Start();
 			SendCheckInfo();
 		}
-#endif
-
-#if UNITY_STANDALONE_LINUX
+		#endif
+		
+		#if UNITY_STANDALONE_LINUX
 		int ret = LinuxUsbPortOpen();
 		Debug.Log("LinuxUsbPortOpen: " + ret);
 		if (ret == 1)
@@ -176,52 +176,52 @@ public class HIDUtils : MonoBehaviour
 		{
 			SetState("False");
 		}
-#endif
+		#endif
 	}
-
+	
 	public void CloseUSB()
 	{
 		isReadThreadExit = true;
 		tRead.Abort();
-#if UNITY_ANDROID
+		#if UNITY_ANDROID
 		jo.Call("closeUsb");
-#endif
-
-#if UNITY_STANDALONE_WIN
+		#endif
+		
+		#if UNITY_STANDALONE_WIN
 		WinUsbPortClose();
-#endif
-
-#if UNITY_STANDALONE_LINUX
+		#endif
+		
+		#if UNITY_STANDALONE_LINUX
 		LinuxUsbPortClose();
-#endif
+		#endif
 	}
-
+	
 	public void DebugLog(string msg)
 	{
 		DebugConsole.Log(msg);
 	}
-
+	
 	public int[] ReadData(string methodName)
 	{
-#if UNITY_ANDROID
-			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
-			return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
-#endif
+		#if UNITY_ANDROID
+		AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
+		return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
+		#endif
 		return null;
 	}
-
+	
 	public void ReadUsbPort()
 	{
-#if UNITY_ANDROID
+		#if UNITY_ANDROID
 		int[] data = ReadData("readHID");
-#endif
-
-#if UNITY_STANDALONE_LINUX || UNITY_STANDALONE_WIN
+		#endif
+		
+		#if UNITY_STANDALONE_LINUX || UNITY_STANDALONE_WIN
 		if (!isOpen)
 			return;
-
+		
 		int[] data = QueueRead();
-#endif
+		#endif
 		if (data == null || data[0] == -1)
 		{ 
 			if (timerHeartBeat == null)
@@ -232,58 +232,60 @@ public class HIDUtils : MonoBehaviour
 			}
 			return;
 		}
-
+		
 		if (timerHeartBeat != null)
 		{
 			timerHeartBeat.Stop();
 			timerHeartBeat = null;
 		}
-
+		
 		if (data.Length >= kReadDataLength)
 		{
 			PrintData(ref data);
-            // 机芯指令
-            if (data[0] == 0x58 && data[1] == 0x57)
-            {
-                // 吹风
-                if (data[2] == kBlowBall)
-                {
-                    if (!bBlowedBall)
-                    {
-                        phase = kPhaseStartBlowBall;
-                        bBlowedBall = true;
-                    }
-                }
-                else
-                {
-                    if (bBlowedBall && phase == kPhaseStartBlowBall)
-                    {
-                        phase = kPhaseEndBlowBall;
-                        bBlowedBall = false;
-                        GameEventManager.OnEBlowBall();
-                    }
-                }
-                // 开门
-                if (data[3] == kOpenGate)
-                {
-                    if (!bOpenGate)
-                    {
-                        phase = kPhaseOpenGate;
-                        bOpenGate = true;
-                    }
-                }
-                else
-                {
-                    if (bOpenGate && phase == kPhaseOpenGate)
-                    {
-                        phase = kPhaseCloseGate;
-                        bOpenGate = false;
-                        GameEventManager.OnCloseGate();
-                    }
-                }
-                // 不是上轮结果
+			// 机芯指令
+			if (data[58] != CrcAddXor(data, 58))
+				return;
+			if (data[0] == 0x58 && data[1] == 0x57)
+			{
+				// 吹风
+				if (data[2] == kBlowBall)
+				{
+					if (!bBlowedBall)
+					{
+						phase = kPhaseStartBlowBall;
+						bBlowedBall = true;
+					}
+				}
+				else
+				{
+					if (bBlowedBall && phase == kPhaseStartBlowBall)
+					{
+						phase = kPhaseEndBlowBall;
+						bBlowedBall = false;
+						GameEventManager.OnEBlowBall();
+					}
+				}
+				// 开门
+				if (data[3] == kOpenGate)
+				{
+					if (!bOpenGate)
+					{
+						phase = kPhaseOpenGate;
+						bOpenGate = true;
+					}
+				}
+				else
+				{
+					if (bOpenGate && phase == kPhaseOpenGate)
+					{
+						phase = kPhaseCloseGate;
+						bOpenGate = false;
+						GameEventManager.OnCloseGate();
+					}
+				}
+				// 不是上轮结果
 				if (data[5] != kPreviousValue && phase == kPhaseEndBlowBall)
-                {
+				{
 					// 结果
 					int idx = data[4];
 					if (idx > 0)
@@ -295,7 +297,7 @@ public class HIDUtils : MonoBehaviour
 						else if (GameData.GetInstance().maxNumberOfFields == 37)
 							GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
 					}
-                }
+				}
 				else if (data[5] == kPreviousValue && phase == kPhaseEndBlowBall)
 				{
 					GameEventManager.OnBreakdownTip(BreakdownType.RecognizeBall);
@@ -338,30 +340,30 @@ public class HIDUtils : MonoBehaviour
 				{
 					GameEventManager.OnChangeScene(Scenes.TouchCheck);
 				}
-            }
-            // 报账指令
-            else if (data[0] == 0x42 && data[1] == 0x5a)
-            {
-//                PrintData(ref data);
+			}
+			// 报账指令
+			else if (data[0] == 0x42 && data[1] == 0x5a)
+			{
+				//                PrintData(ref data);
 				List<byte> col = new List<byte>();
 				for (int i = 3; i < 17; ++i)
 					col.Add((byte)data[i]);
 				byte[] sendData = col.ToArray();
-#if UNITY_ANDROID
+				#if UNITY_ANDROID
 				IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(sendData);
-                jvalue[] blah = new jvalue[1];
-                blah[0].l = pArr;
-
-                IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckPWStringValue");
+				jvalue[] blah = new jvalue[1];
+				blah[0].l = pArr;
+				
+				IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckPWStringValue");
 				// 获取打码结果
 				string result = AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah);
-#endif
-
-#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
+				#endif
+				
+				#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 				IntPtr ret = EncryChip.ParserCheckData(sendData);
 				string result = System.Runtime.InteropServices.Marshal.PtrToStringAnsi(ret);
 				EncryChip.FreeByteArray(ret);
-#endif
+				#endif
 				char[] split = {':'};
 				string[] word = result.Split(split);
 				if (word.Length >= 2)
@@ -380,39 +382,39 @@ public class HIDUtils : MonoBehaviour
 							GameEventManager.OnPrintCodeFail();
 					}
 				}
-            }
+			}
 		}
 		else
 		{
 			PrintData(ref data);
 		}
 	}
-
+	
 	public int WriteData(int[] data, string methodName)
 	{
-#if UNITY_ANDROID
+		#if UNITY_ANDROID
 		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
 		jvalue[] blah = new jvalue[1];
 		blah[0].l = pArr;
 		
 		IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), methodName);
 		return AndroidJNI.CallIntMethod(jo.GetRawObject(), methodId, blah);
-#endif
-
-#if UNITY_STANDALONE_WIN
-//		print("write:" + WinUsbPortWrite(data));
+		#endif
+		
+		#if UNITY_STANDALONE_WIN
+		//		print("write:" + WinUsbPortWrite(data));
 		if (!isOpen)
 			return 0;
 		return WinUsbPortWrite(data);
-#endif
-
-#if UNITY_STANDALONE_LINUX
+		#endif
+		
+		#if UNITY_STANDALONE_LINUX
 		if (!isOpen)
 			return -1;
 		return LinuxUsbPortWrite(data);
-#endif
+		#endif
 	}
-
+	
 	public void OpenGate()
 	{
 		int[] data = new int[]{0x58, 0x57, 0x02, 0x0E, 0xA6, flagPayCoin, 0, 0, 
@@ -425,16 +427,17 @@ public class HIDUtils : MonoBehaviour
 			0, 0, 0, 0, 0, 0, 0, 0};
 		WriteData(data, "writeUsbPort");
 	}
-
+	
 	public void BlowBall(int blowTime)
 	{
 		int hight = blowTime >> 8 & 0xff;
 		int low = blowTime & 0xff;
-
-		Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Minute);
+		
+		Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second);
 		// 控制吹风在轮盘转到第几个格子后启动
 		int cellNum = Utils.GetRandom(1, GameData.GetInstance().maxNumberOfFields);
-
+		GameEventManager.OnDebugLog(2, string.Format("{0}", cellNum));
+		
 		int[] data = new int[]{0x58, 0x57, 0x03, hight, low, flagPayCoin, 0, 0, 
 			cellNum, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
@@ -445,7 +448,7 @@ public class HIDUtils : MonoBehaviour
 			0, 0, 0, 0, 0, 0, 0, 0};
 		WriteData(data, "writeUsbPort");
 	}
-
+	
 	private void PrintData(ref int[] data)
 	{
 		string log = "data.Length:" + data.Length + "--";
@@ -455,11 +458,11 @@ public class HIDUtils : MonoBehaviour
 				log += "\n";
 			log += string.Format("{0:X}", data[i]) + ", ";
 		}
-//		Debug.Log(log);
-//		DebugConsole.Log(log);
+		//		Debug.Log(log);
+		//		DebugConsole.Log(log);
 		GameEventManager.OnDebugLog(0, log);
 	}
-
+	
 	public void SendCheckInfo()
 	{
 		int minCapacity = 64;
@@ -479,20 +482,20 @@ public class HIDUtils : MonoBehaviour
 		}
 		int[] data = dataList.ToArray();
 		WriteData(data, "writeUsbPort");
-
+		
 		bCheckInfo = true;
 		timerCheckInfo = new Timer(2.0f, 0);
 		timerCheckInfo.Tick += CheckInfoOver;
 		timerCheckInfo.Start();
 	}
-
+	
 	// timerCheckInfo 结束
 	private void CheckInfoOver()
 	{
 		timerCheckInfo = null;
 		bCheckInfo = false;
 	}
-
+	
 	// timerHeartBeat 结束
 	private void HeartBeatOver()
 	{
@@ -512,7 +515,7 @@ public class HIDUtils : MonoBehaviour
 			0, 0, 0, 0, 0, 0, 0, 0};
 		WriteData(data, "writeUsbPort");
 	}
-
+	
 	// 设置退币指令位
 	public void PayCoin(int count)
 	{
@@ -529,18 +532,18 @@ public class HIDUtils : MonoBehaviour
 			0, 0, 0, 0, 0, 0, 0, 0};
 		WriteData(data, "writeUsbPort");
 	}
-
+	
 	public void StopPayCoin()
 	{
 		flagPayCoin = 0;
 	}
-
+	
 	// return: 0 success
 	private int WinUsbPortOpen()
 	{
 		return WinHidPort.OpenHid(vid, pid);
 	}
-
+	
 	private void QueueStore()
 	{
 		try
@@ -566,7 +569,7 @@ public class HIDUtils : MonoBehaviour
 			Debug.Log(ex.ToString());
 		}
 	}
-
+	
 	private int[] QueueRead()
 	{
 		if (readQueue.Count > 0)
@@ -578,12 +581,12 @@ public class HIDUtils : MonoBehaviour
 		else
 			return null;
 	}
-
+	
 	private void WinUsbPortClose()
 	{
 		WinHidPort.CloseHid();
 	}
-
+	
 	private int[] WinUsbPortRead()
 	{
 		byte[] data = WinHidPort.Read();
@@ -593,7 +596,7 @@ public class HIDUtils : MonoBehaviour
 			array[i] = data[i];
 		return array;
 	}
-
+	
 	private int WinUsbPortWrite(int[] data)
 	{
 		int len = data.Length - 3;
@@ -602,17 +605,17 @@ public class HIDUtils : MonoBehaviour
 			buffer[i] = (byte)data[i];
 		return WinHidPort.Write(ref buffer, len);
 	}
-
+	
 	private int LinuxUsbPortOpen()
 	{
 		return LinuxHidPort.Open(vid, pid);
 	}
-
+	
 	private void LinuxUsbPortClose()
 	{
 		LinuxHidPort.Close();
 	}
-
+	
 	private int[] LinuxUsbPortRead()
 	{
 		byte[] data = LinuxHidPort.Read();
@@ -622,7 +625,7 @@ public class HIDUtils : MonoBehaviour
 			array[i] = data[i];
 		return array;
 	}
-
+	
 	private int LinuxUsbPortWrite(int[] data)
 	{
 		int len = data.Length - 3;
@@ -631,12 +634,26 @@ public class HIDUtils : MonoBehaviour
 			buffer[i] = (byte)data[i];
 		return LinuxHidPort.Write(ref buffer, len);
 	}
-
-//	void OnGUI()
-//	{
-//		if (GUI.Button(new Rect(10, 10, 100, 50), "Touch Check"))
-//		{
-//			Application.LoadLevel("TouchCheck");
-//		}
-//	}
+	
+	private int CrcAddXor(int[] array, int len) 
+	{
+		int crc2 = 0;
+		for (int i = 0; i < len; ++i)
+		{
+			crc2 += array[i];
+			if (crc2 > 255) crc2 = crc2 - 256;
+		}
+		
+		crc2 ^= 0xff;
+		crc2++;
+		return crc2;
+	}
+	
+	//	void OnGUI()
+	//	{
+	//		if (GUI.Button(new Rect(10, 10, 100, 50), "Touch Check"))
+	//		{
+	//			Application.LoadLevel("TouchCheck");
+	//		}
+	//	}
 }

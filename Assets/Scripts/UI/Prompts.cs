@@ -53,13 +53,14 @@ public class Prompts : MonoBehaviour
 		else
 			currentPrompt.transform.GetChild(0).GetComponent<Text>().text = string.Empty;
 		iTween.MoveTo(currentPrompt.gameObject,
+//		              iTween.Hash("x", -120.0f, "time", 2.5f, "islocal", true, "easetype", iTween.EaseType.linear));
 		              iTween.Hash("x", 0.0f, "time", 2.5f, "islocal", true, "easetype", iTween.EaseType.linear));
 	}
 
 	private void Disappear()
 	{
 		float width = currentPrompt.rectTransform.rect.width;
-		float pivodX = -294.0f;
+		float pivodX = -580.0f;
 		Vector3 pos = currentPrompt.rectTransform.localPosition;
 		pos.x = pivodX - width * 0.5f;
 		iTween.MoveTo(currentPrompt.gameObject,

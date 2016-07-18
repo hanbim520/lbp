@@ -917,7 +917,7 @@ public class MainUILogic : MonoBehaviour
 				if (targetObject == null)
 					return;
 				prefabPath = "SmallChip/SC";
-				prefab = (Object)Resources.Load(prefabPath + curChipIdx);
+				prefab = (Object)Resources.Load(prefabPath + chipIdx);
 				chip = (GameObject)Instantiate(prefab);
 				chip.transform.SetParent(fieldChipsRoot.transform);
 				chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;

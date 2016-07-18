@@ -221,7 +221,7 @@ public class ServerLogic : GameLogic
     {
 		Debug.Log("BlowBall");
 		gamePhase = GamePhase.Run;
-		Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Minute);
+		Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
 		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
 //		int[] t = new int[]{1200, 1500, 2000, 2500, 3000};
 //		int time = t[Utils.GetRandom(0, 5)];
@@ -372,11 +372,11 @@ public class ServerLogic : GameLogic
 					}
 				}
 //				return retArray.ToArray();
-				return new int[]{12, 20, 30};
+				return new int[]{7, 17, 27};
 			}
 		}
 //		return new int[0];
-		return new int[]{12, 20, 30};
+		return new int[]{7, 17, 27};
 	}
 
 	private IEnumerator ShowResult()
