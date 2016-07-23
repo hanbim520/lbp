@@ -340,6 +340,7 @@ public class HIDUtils : MonoBehaviour
 				{
 					GameEventManager.OnChangeScene(Scenes.TouchCheck);
 				}
+				// TODO: 进入后台
 			}
 			// 报账指令
 			else if (data[0] == 0x42 && data[1] == 0x5a)

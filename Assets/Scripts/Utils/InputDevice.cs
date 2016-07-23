@@ -43,13 +43,20 @@ public class InputDevice : MonoBehaviour
 
 	void Update()
 	{
-		if (Input.GetKeyUp(KeyCode.S))	// Check touch
+		if (GameData.debug)
 		{
-			GameEventManager.OnChangeScene(Scenes.TouchCheck);
-		}
-		else if (Input.GetKeyUp(KeyCode.Space))	// Main menu
-		{
-			GameEventManager.OnOpenKey();
+			if (Input.GetKeyUp(KeyCode.S))			// Check touch
+			{
+				GameEventManager.OnChangeScene(Scenes.TouchCheck);
+			}
+			else if (Input.GetKeyUp(KeyCode.Space))	// Main menu
+			{
+				GameEventManager.OnOpenKey();
+			}
+			else if (Input.GetKeyUp(KeyCode.B))
+			{
+				GameEventManager.OnEnterBackend();
+			}
 		}
 	}
 }

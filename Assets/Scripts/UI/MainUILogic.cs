@@ -92,6 +92,7 @@ public class MainUILogic : MonoBehaviour
     {
 		GameEventManager.CloseGate += StopFlash;
 		GameEventManager.OpenKey += OpenKey;
+		GameEventManager.EnterBackend += EnterBackend;
 		GameEventManager.ChooseFields += ChooseFields;
 		GameEventManager.BreakdownTip += BreakdownTip;
 		GameEventManager.SyncUI += SyncUI;
@@ -101,6 +102,7 @@ public class MainUILogic : MonoBehaviour
     {
 		GameEventManager.CloseGate -= StopFlash;
 		GameEventManager.OpenKey -= OpenKey;
+		GameEventManager.EnterBackend -= EnterBackend;
 		GameEventManager.ChooseFields -= ChooseFields;
 		GameEventManager.BreakdownTip -= BreakdownTip;
 		GameEventManager.SyncUI -= SyncUI;
@@ -1441,6 +1443,13 @@ public class MainUILogic : MonoBehaviour
 	public void OpenKey()
 	{
 		ActiveDlgCard(true);
+	}
+
+	// 输入后台密码 准备进入后台
+	public void EnterBackend()
+	{
+		ActiveDlgCard(true);
+		dlgCard.GetComponent<CardDlg>().SetInputPW();
 	}
 
     public void ActiveBackendTip(string tip)

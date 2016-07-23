@@ -8,6 +8,8 @@ public class CardDlg : MonoBehaviour
 	public GameObject en;
 	public GameObject calc;
     public Transform mouseIcon;
+	public GameObject validFieldsRoot;
+	public GameObject btnExitInputPW;
 	public Text calcTitle;
 	public Text calcContent;
 	public Text calcPassword;
@@ -41,8 +43,14 @@ public class CardDlg : MonoBehaviour
 		DisalbeCalc();
 	}
 
-	void OnDisenable()
+	void OnDisable()
 	{
+		calc.SetActive(true);
+		calc.transform.localPosition = new Vector3(66f, 306f, 0);
+		SetAlpha(transform, 255);
+		SetAlpha(btnExitInputPW.transform, 255);
+		validFieldsRoot.SetActive(true);
+
 		InputEx.inputEnable = previousInputState;
 	}
 
@@ -61,6 +69,7 @@ public class CardDlg : MonoBehaviour
 			for (int i = 0; i < count; ++i)
 				en.transform.GetChild(i).gameObject.SetActive(false);
 		}
+		btnExitInputPW.SetActive(false);
 	}
 
 	private void EnableCalc()
@@ -371,4 +380,17 @@ public class CardDlg : MonoBehaviour
 			hitDownOpt = false;
         }
     }
+
+	// 设置输入密码进入后台
+	public void SetInputPW()
+	{
+		System();
+		calc.transform.localPosition = new Vector3(-269f, 306f, 0);
+
+		SetAlpha(transform, 0);
+		validFieldsRoot.SetActive(false);
+		cn.SetActive(false);
+		en.SetActive(false);
+		btnExitInputPW.SetActive(true);
+	}
 }

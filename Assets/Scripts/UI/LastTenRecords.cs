@@ -52,9 +52,9 @@ public class LastTenRecords : MonoBehaviour
 				records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
                 if (j == 0)
-                    records[j].transform.localPosition = new Vector3(pos.x, -480, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 365.4f, 0);
                 else
-				    records[j].transform.localPosition = new Vector3(pos.x, -467, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 377f, 0);
 			}
 			else if (GameData.GetInstance().colorTable[r[i]] == ResultType.Black)
 			{
@@ -62,9 +62,9 @@ public class LastTenRecords : MonoBehaviour
 				records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
                 if (j == 0)
-                    records[j].transform.localPosition = new Vector3(pos.x, -480, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 365.4f, 0);
                 else
-				    records[j].transform.localPosition = new Vector3(pos.x, -494, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 354.7f, 0);
 			}
 			else
 			{
@@ -75,9 +75,9 @@ public class LastTenRecords : MonoBehaviour
 					records[j].transform.FindChild("Text").GetComponent<Text>().text = "00";
 				Vector3 pos = records[j].transform.localPosition;
                 if (j == 0)
-                    records[j].transform.localPosition = new Vector3(pos.x, -480, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 365.4f, 0);
                 else
-                    records[j].transform.localPosition = new Vector3(pos.x, -481, 0);
+					records[j].transform.localPosition = new Vector3(pos.x, 366f, 0);
 			}
 		}
 	}

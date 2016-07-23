@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 36341a14b79bdac48a4247dcfdb4d42c
-timeCreated: 1441959148
+guid: b63129b5589c03743a308a553879bc3f
+timeCreated: 1468997320
 licenseType: Pro
 TextureImporter:
   fileIDToRecycleName: {}
@@ -49,7 +49,7 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites: []
-  spritePackingTag: ten records
+  spritePackingTag: dialog
   userData: 
   assetBundleName: 
   assetBundleVariant: 
