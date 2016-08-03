@@ -33,7 +33,8 @@ public class GameData
 	public int maxNumberOfFields; 	// 37 or 38
 	public int beginSessions;		// 起始场次
 	public int maxNumberOfChips;	// 1 ~ 6
-	public int lotteryCondition;	// 彩金条件(1-10000)
+	public int lotteryLv;			// 彩金档位(0-9)
+	public int lotteryCondition;	// 彩金押分起始分值(1-100000)
 	public int lotteryBase;			// 起始彩金(0-100000)
 	public int lotteryRate;			// 彩金累计千分比(1-100)
 	public int lotteryAllocation; 	// 彩金分配(可设置范围0-100)
@@ -166,8 +167,9 @@ public class GameData
 	// Custom setting
 	public int language;			// 0:EN 1:CN
 	public int displayType; 		// 0:classic 1:ellipse
-    public string systemPassword;
-    public string accountPassword;
+	public string systemPassword;	// 设置密码
+	public string accountPassword;	// 查询密码
+	public string adminPassword;	// 管理员密码
     public int passwordLength = 6;
 	public int inputDevice;			// 0:touch screen 1:serial mouse
 	public int lotteryDigit;		// 累计彩金
@@ -313,6 +315,7 @@ public class GameData
 		PlayerPrefs.SetInt("couponsKeyinRatio", couponsKeyinRatio);
 		PlayerPrefs.SetInt("couponsKeoutRatio", couponsKeoutRatio);
 		PlayerPrefs.SetInt("beginSessions", beginSessions);
+		PlayerPrefs.SetInt("lotteryLv", lotteryLv);
 		PlayerPrefs.SetInt("lotteryCondition", lotteryCondition);
 		PlayerPrefs.SetInt("lotteryBase", lotteryBase);
 		PlayerPrefs.SetInt("lotteryRate", lotteryRate);
@@ -346,6 +349,7 @@ public class GameData
 		couponsKeyinRatio = 10;	// 1%~100%
 		couponsKeoutRatio = 4;	
 		beginSessions = 100;
+		lotteryLv = 4;
 		lotteryCondition = 100;
 		lotteryBase = 1000;
 		lotteryRate = 10;
@@ -359,6 +363,7 @@ public class GameData
 		displayType = 0;	// classic
 		systemPassword = "888888";
 		accountPassword = "888888";
+		adminPassword = "888888";
 		isCardMode = CardMode.NO;
 		inputDevice = 1;
 		lotteryDigit = 1000;
@@ -369,6 +374,7 @@ public class GameData
 	{
 		CryptoPrefs.SetString("systemPassword", systemPassword);
 		CryptoPrefs.SetString("accountPassword", accountPassword);
+		CryptoPrefs.SetString("adminPassword", adminPassword);
 		PlayerPrefs.SetInt("language", language);
 		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.SetInt("isCardMode", isCardMode);
@@ -463,11 +469,12 @@ public class GameData
 			couponsKeoutRatio = PlayerPrefs.GetInt("couponsKeoutRatio");
 			beginSessions = PlayerPrefs.GetInt("beginSessions");
 			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
+			lotteryLv = PlayerPrefs.GetInt("lotteryLv");
 			lotteryCondition = PlayerPrefs.GetInt("lotteryCondition");
 			lotteryBase = PlayerPrefs.GetInt("lotteryBase");
 			lotteryRate = PlayerPrefs.GetInt("lotteryRate");
 			lotteryAllocation = PlayerPrefs.GetInt("lotteryAllocation");
-			powerOffCompensate = PlayerPrefs.GetInt("powerOffCompensate");
+			powerOffCompensate = PlayerPrefs.GetInt("powerOffCompensate", 1);
 
             // Check account menu 
             zongShang = CryptoPrefs.GetInt("zongShang");
@@ -488,6 +495,7 @@ public class GameData
 			displayType = PlayerPrefs.GetInt("displayType");
 			systemPassword = CryptoPrefs.GetString("systemPassword");
 			accountPassword = CryptoPrefs.GetString("accountPassword");
+			adminPassword = CryptoPrefs.GetString("adminPassword");
 			isCardMode = PlayerPrefs.GetInt("isCardMode");
 			inputDevice = PlayerPrefs.GetInt("inputDevice");
 			lotteryDigit = CryptoPrefs.GetInt("lotteryDigit");
@@ -660,6 +668,12 @@ public class GameData
         CryptoPrefs.SetString("accountPassword", accountPassword);
         CryptoPrefs.Save();
     }
+
+	public void SaveAdminPassword()
+	{
+		CryptoPrefs.SetString("adminPassword", adminPassword);
+		CryptoPrefs.Save();
+	}
 
 	public void SaveDeviceIndex()
 	{

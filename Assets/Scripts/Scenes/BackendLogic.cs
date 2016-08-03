@@ -24,7 +24,7 @@ public class BackendLogic : MonoBehaviour
     private Transform preSelected; // Only for setting menu
     private bool preInputState;
 	private int passwordMode;	// 0:non-password 1:modify 2:enter account
-    private int passwordType; // 0:none 1:system 2:account
+    private int passwordType; // 0:none 1:system 2:account 3:admin
 	private int passwordPhase; // 0:original 1:new 2:check
     private string txtPassword; // Temp variable
 	private string txtCheckPassword;
@@ -190,6 +190,8 @@ public class BackendLogic : MonoBehaviour
         txtPassword = null;
         if (string.Equals(hitObject.name, "exit"))
         {
+			SetAlpha(preSelected, 0);
+			preSelected = null;
             InitMain();
         }
         else if (string.Equals(hitObject.name, "save"))
@@ -364,14 +366,18 @@ public class BackendLogic : MonoBehaviour
     {
         SetAlpha(hitObject, 0);
         string name = hitObject.name;
-        if (string.Equals(name, "system"))
+		if (string.Compare(name, "system") == 0)
         {
             passwordType = 1;
         }
-        else if (string.Equals(name, "account"))
+		else if (string.Compare(name, "account") == 0)
         {
             passwordType = 2;
         }
+		else if (string.Compare(name, "admin") == 0)
+		{
+			passwordType = 3;
+		}
         int idx = GameData.GetInstance().language;
         dlgPassword.SetActive(false);
         SetCalcTitle(strPassword[idx], Color.black);
@@ -463,23 +469,24 @@ public class BackendLogic : MonoBehaviour
         menuAccount.SetActive(false);
 		menuLottery.SetActive(false);
 		dlgCalc.SetActive(true);
-		dlgCalc.transform.localPosition = Vector3.zero;
+		dlgCalc.transform.localPosition = new Vector3(0, -26, 0);
 		calcContent.text = string.Empty;
 		calcPassword.text = string.Empty;
 
         SetLanguage(menuSetting);
 
         GameData ga = GameData.GetInstance();
-        string[] datas = new string[]{ga.betTimeLimit.ToString(), ga.coinToScore.ToString(), ga.baoji.ToString(), ga.gameDifficulty.ToString(), 
-            ga.betChipValues[0].ToString(), ga.betChipValues[1].ToString(), ga.betChipValues[2].ToString().ToString(), ga.betChipValues[3].ToString(), ga.betChipValues[4].ToString(), ga.betChipValues[5].ToString(),
-            ga.max36Value.ToString(), ga.max18Value.ToString(), ga.max12Value.ToString(), ga.max9Value.ToString(), ga.max6Value.ToString(), ga.max3Value.ToString(), ga.max2Value.ToString(),
-            ga.couponsStart.ToString(), ga.couponsKeyinRatio.ToString() + "%", ga.couponsKeoutRatio.ToString(), ga.beginSessions.ToString(), ga.maxNumberOfFields.ToString()};
+		string[] datas = new string[]{ga.betTimeLimit.ToString(), ga.coinToScore.ToString(), ga.baoji.ToString(), ga.gameDifficulty.ToString(), 
+			ga.betChipValues[0].ToString(), ga.betChipValues[1].ToString(), ga.betChipValues[2].ToString().ToString(), ga.betChipValues[3].ToString(), ga.betChipValues[4].ToString(), ga.betChipValues[5].ToString(),
+			ga.max36Value.ToString(), ga.max18Value.ToString(), ga.max12Value.ToString(), ga.max9Value.ToString(), ga.max6Value.ToString(), ga.max3Value.ToString(), ga.max2Value.ToString(),
+			ga.lotteryLv.ToString(), ga.lotteryCondition.ToString(), ga.lotteryBase.ToString(), ga.lotteryRate.ToString(), ga.lotteryAllocation.ToString(),
+			ga.beginSessions.ToString(), ga.maxNumberOfFields.ToString()};
 
         Transform root = menuSetting.transform.FindChild("Valid Fields");
         if (root != null)
         {
-            int count = root.childCount;
-            for (int i = 0; i < count; ++i)
+			int count = datas.Length - 1;
+            for (int i = 0; i <= count; ++i)
             {
                 Transform str = root.GetChild(i).FindChild("Text");
                 if (str != null)
@@ -839,7 +846,7 @@ public class BackendLogic : MonoBehaviour
                     }
                 }
             }
-			else
+			else if (menuMain.activeSelf)
 			{
 				// Set device index
 				int value;
@@ -958,12 +965,14 @@ public class BackendLogic : MonoBehaviour
             GameData.GetInstance().max6Value = values[14];
             GameData.GetInstance().max3Value = values[15];
             GameData.GetInstance().max2Value = values[16];
-            GameData.GetInstance().couponsStart = values[17];
-            GameData.GetInstance().couponsKeyinRatio = values[18];
-            GameData.GetInstance().couponsKeoutRatio = values[19];
-            GameData.GetInstance().beginSessions = values[20];
-            GameData.GetInstance().maxNumberOfFields = values[21];
-            GameData.GetInstance().SaveSetting();
+			GameData.GetInstance().lotteryLv = values[17];
+			GameData.GetInstance().lotteryCondition = values[18];
+			GameData.GetInstance().lotteryBase = values[19];
+			GameData.GetInstance().lotteryRate = values[20];
+			GameData.GetInstance().lotteryAllocation = values[21];
+			GameData.GetInstance().beginSessions = values[22];
+			GameData.GetInstance().maxNumberOfFields = values[23];
+			GameData.GetInstance().SaveSetting();
             int idx = GameData.GetInstance().language;
             ShowWarning(Notifies.saveSuccess[idx], true);
         }
@@ -1001,6 +1010,7 @@ public class BackendLogic : MonoBehaviour
 			timerRefreshAccounts.Update(Time.deltaTime);
     }
 
+	// 限制参数的范围
     private void LimitValue(string name, ref int value)
     {
         if (string.Equals(name, "time"))
@@ -1044,28 +1054,14 @@ public class BackendLogic : MonoBehaviour
             else if (value < 1)
                 value = 1;
         }
-        else if (string.Equals(name, "card1"))
-        {
-            if (value > 100000)
-                value = 100000;
-            else if (value < 1)
-                value = 1;
-        }
-        else if (string.Equals(name, "card2"))
+		else if (string.Equals(name, "device id"))
         {
             if (value > 100)
                 value = 100;
             else if (value < 1)
                 value = 1;
         }
-        else if (string.Equals(name, "card3"))
-        {
-            if (value > 100)
-                value = 100;
-            else if (value < 1)
-                value = 1;
-        }
-        else if (string.Equals(name, "card4"))
+		else if (string.Equals(name, "beginSession"))
         {
             if (value > 100000)
                 value = 100000;

@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 
+// 闪烁一定次数后Destroy这个object
 public class FlashImage : MonoBehaviour
 {
 	public float interval = 3;
@@ -42,12 +43,6 @@ public class FlashImage : MonoBehaviour
 				}
 			}
 		}
-	}
-
-	private IEnumerator DelayDestroy()
-	{
-		yield return new WaitForSeconds(3.0f);
-		DestroyItself();
 	}
 
 	private void DestroyItself()
