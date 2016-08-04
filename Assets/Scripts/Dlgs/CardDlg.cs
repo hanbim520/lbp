@@ -16,7 +16,7 @@ public class CardDlg : MonoBehaviour
 
 	private bool previousInputState;
 	private bool passwordMode;
-	private int passwordType; // 0:none 1:system
+	private int passwordType; // 0:none 1:system 2:account
 	private string txtPassword; // Temp variable
 	private Transform preSelected;
     private GameObject downHitObject;
@@ -24,6 +24,7 @@ public class CardDlg : MonoBehaviour
     
 	private string[] strKeyin = new string[]{"Keyin", "上分"};
 	private string[] strSysPassword = new string[]{"Input Sys-Password", "请输入系统密码"};
+	private string[] strAccountPassword = new string[]{"Inpu Account Password", "请输入查账密码"};
     private string[] strError = new string[]{"Error!", "密码错误!"};
 
 	void OnEnable()
@@ -142,8 +143,9 @@ public class CardDlg : MonoBehaviour
 		passwordType = 1;
 		int idx = GameData.GetInstance().language;
 		SetCalcTitle(strSysPassword[idx], Color.black);
-//		SetCalcTitle(TextDB.CardDlg_SysPassword[idx], Color.black);
 	}
+
+
 
 	private void Last10()
 	{
@@ -151,11 +153,22 @@ public class CardDlg : MonoBehaviour
         gameObject.SetActive(false);
 	}
 
+	// 不输入密码 直接进入Account
+//	private void Account()
+//	{
+//		DisalbeCalc();
+//        GameEventManager.OnChangeScene(Scenes.Account);
+//        gameObject.SetActive(false);
+//	}
+
+	// 输入密码进入Account
 	private void Account()
 	{
-		DisalbeCalc();
-        GameEventManager.OnChangeScene(Scenes.Account);
-        gameObject.SetActive(false);
+		EnableCalc();
+		passwordMode = true;
+		passwordType = 2;
+		int idx = GameData.GetInstance().language;
+		SetCalcTitle(strAccountPassword[idx], Color.black);
 	}
 
 	public void CalcDownEvent(Transform hitObject)
@@ -220,25 +233,28 @@ public class CardDlg : MonoBehaviour
 	{
 		if (passwordMode)
 		{
-			if (passwordType == 1)
+			if ((Utils.StringIsEquals(txtPassword, GameData.GetInstance().systemPassword) && passwordType == 1) ||
+			    (Utils.StringIsEquals(txtPassword, GameData.GetInstance().accountPassword) && passwordType == 2))
 			{
-                if (string.Equals(txtPassword, GameData.GetInstance().systemPassword))
-                {
-//                    print("sys p : " + GameData.GetInstance().systemPassword);
-//                    print("txtpassword : " + txtPassword);
-                    GameEventManager.OnChangeScene(Scenes.Backend);
-                    gameObject.SetActive(false);
-                }
-                else
-                {
-                    int idx = GameData.GetInstance().language;
-                    calcContent.text = strError[idx];
-                    calcContent.color = Color.red;
-                    calcPassword.text = string.Empty;
-                }
-
-                txtPassword = null;
+				if (passwordType == 1)			// 输入设置密码
+				{
+					GameEventManager.OnChangeScene(Scenes.Backend);
+				}
+				else if (passwordType == 2)		// 输入查账密码
+				{
+					GameEventManager.OnChangeScene(Scenes.Account);
+				}
+				gameObject.SetActive(false);
 			}
+			else
+			{
+				int idx = GameData.GetInstance().language;
+				calcContent.text = strError[idx];
+				calcContent.color = Color.red;
+				calcPassword.text = string.Empty;
+			}
+			
+			txtPassword = null;
 		}
 		else
 		{

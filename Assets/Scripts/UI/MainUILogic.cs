@@ -92,7 +92,6 @@ public class MainUILogic : MonoBehaviour
     {
 		GameEventManager.CloseGate += StopFlash;
 		GameEventManager.OpenKey += OpenKey;
-		GameEventManager.EnterBackend += EnterBackend;
 		GameEventManager.ChooseFields += ChooseFields;
 		GameEventManager.BreakdownTip += BreakdownTip;
 		GameEventManager.SyncUI += SyncUI;
@@ -102,7 +101,6 @@ public class MainUILogic : MonoBehaviour
     {
 		GameEventManager.CloseGate -= StopFlash;
 		GameEventManager.OpenKey -= OpenKey;
-		GameEventManager.EnterBackend -= EnterBackend;
 		GameEventManager.ChooseFields -= ChooseFields;
 		GameEventManager.BreakdownTip -= BreakdownTip;
 		GameEventManager.SyncUI -= SyncUI;

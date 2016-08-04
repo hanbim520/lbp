@@ -364,4 +364,9 @@ public static class Utils
 		}
 		return UnityEngine.Random.Range(min, max);
 	}
+
+	public static bool StringIsEquals(string strA, string strB)
+	{
+		return string.Compare(strA, strB) == 0;
+	}
 }

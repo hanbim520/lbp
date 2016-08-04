@@ -32,7 +32,6 @@ public static class GameEventManager
 	public static event GameEvent PayCoin;				// 退币
     public static event GameEventWithId PayCoinCallback;	// 退币机发来的退币数
 	public static event GameEvent OpenKey;				// 旋转物理钥匙 (上下分)
-	public static event GameEvent EnterBackend;			// 机箱里面有个按钮 (点击输入密码 进入后台)
 	public static event GameEventWithString ChangeScene;
 	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
 	public static event GameEvent ClientDisconnect;	// 分机通讯断开
@@ -49,11 +48,6 @@ public static class GameEventManager
 	public static event GameEvent SyncUI;			// 同步后台设置后，设置分机ui
 	public static event GameEvent SyncInputDevice;  // 同步输入设备
 	public static event RakeInitEvent RakeInit;
-
-	public static void OnEnterBackend()
-	{
-		if (EnterBackend != null) EnterBackend();
-	}
 
 	public static void TriggerOpenSerial()
 	{

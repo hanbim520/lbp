@@ -775,11 +775,11 @@ public class GameData
 		PlayerPrefs.Save();
 	}
 
-    public void ClearAccount()
+    public bool ClearAccount()
     {
 		// 桌面上有分 不能清账
 		if (CryptoPrefs.GetInt("totalCredits") > 0)
-			return;
+			return false;
 
         zongShang = 0;
         zongXia = 0;
@@ -793,6 +793,7 @@ public class GameData
 		currentZongShang = 0;
 		currentZongXia = 0;
         SaveAccount();
+		return true;
     }
 
 	// 开始场次加一

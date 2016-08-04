@@ -55,7 +55,7 @@ public class InputDevice : MonoBehaviour
 			}
 			else if (Input.GetKeyUp(KeyCode.B))
 			{
-				GameEventManager.OnEnterBackend();
+				GameEventManager.OnChangeScene(Scenes.Backend);
 			}
 		}
 	}

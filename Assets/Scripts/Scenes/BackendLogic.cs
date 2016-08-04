@@ -13,7 +13,7 @@ public class BackendLogic : MonoBehaviour
     public GameObject dlgYesNO;
     public GameObject dlgPrintCode;
     public GameObject warning;
-	public Text[] deviceId;	// 机台序号 0:en 1:cn
+	public Text[] deviceId;				// 机台序号 0:en 1:cn
 	public GameObject[] btnMouse;
 	public GameObject[] btnTouchScreen;
 	public GameObject tipPrintCode;
@@ -21,12 +21,12 @@ public class BackendLogic : MonoBehaviour
     private RectTransform mouseIcon;
     private GameObject downHitObject;
 	private bool hitDownOpt = false;
-    private Transform preSelected; // Only for setting menu
+    private Transform preSelected; 		// Only for setting menu
     private bool preInputState;
-	private int passwordMode;	// 0:non-password 1:modify 2:enter account
-    private int passwordType; // 0:none 1:system 2:account 3:admin
-	private int passwordPhase; // 0:original 1:new 2:check
-    private string txtPassword; // Temp variable
+	private int passwordMode;			// 0:non-password 1:modify password 2:enter account 3:enter system
+	private int passwordType; 			// 密码类型,修改密码时用到.	0:none 1:system 2:account 3:admin
+	private int passwordPhase; 			// 修改密码的步骤序号			0:original 1:new 2:check
+    private string txtPassword; 		// Temp variable
 	private string txtCheckPassword;
     private GameObject dlgCalc;
     private Text calcTitle;
@@ -41,16 +41,20 @@ public class BackendLogic : MonoBehaviour
     private int printCodeTimes;
 	private int iYesNoType = 0;	// Yes No对话框的类型: 0--none 1--清账
     
-    private string[] strPassword = new string[]{"Please Input Password", "请输入原密码"};
-    private string[] strNewPassword = new string[]{"Please Input New Password", "请输入新密码"};
+	private string[] strPassword = new string[]{"Input Original/Admin Password", "输入原密码,或管理员密码!"};
+	private string[] strNewPassword = new string[]{"Input New Password", "输入新密码"};
     private string[] strAgain = new string[]{"Again!", "请再次输入!"};
 	private string[] strOK = new string[]{"OK!", "修改成功!"};
     private string[] strCorrect = new string[]{"Correct!", "输入正确!"};
     private string[] strError = new string[]{"Error!", "输入错误!"};
-	private string[] strAccountPassword = new string[]{"Input Account Password", "请输入账户密码"};
+	private string[] strAccountPassword = new string[]{"Input Account Password", "请输入查账密码"};
+	private string[] strSysPassword = new string[]{"Input Sys-Password", "请输入设置密码"};
+	private string[] strAdminPassword = new string[]{"Input Admin Password", "请输入管理员密码"};
 	private string[] strDeviceId = new string[]{"Device Id", "请输入设备Id"};
 	private string[] strSetError = new string[]{"Only host device can enter.", "只有主机可以进入"};
 	private string[] strClearAccoutTip = new string[]{"Time's up, please\nreport accounts.", "游戏时间结束，\n请报账打码。"};
+	private string[] strErrorPW = new string[]{"Incorrect Password!", "密码输入错误!"};
+	private string[] strClearAccountFailed = new string[]{"Game credit is not zero,\nclear credit firstly!", "先下完台面上的分,\n再清除账目!"};
 
     void Start()
     {
@@ -202,11 +206,6 @@ public class BackendLogic : MonoBehaviour
 				SaveLottery();
 			GameEventManager.OnSyncData();
         }
-        else if (string.Equals(hitObject.name, "password"))
-        {
-            passwordMode = 1;
-            InitPasswordDlg();
-        }
         else if (string.Equals(hitObject.name, "reset"))
         {
             GameData.GetInstance().DefaultSetting();
@@ -247,21 +246,34 @@ public class BackendLogic : MonoBehaviour
 
     public void MainDownEvent(Transform hitObject)
     {
+		if (IsMainDlgActived())
+			return;
+
         SetAlpha(hitObject, 255);
     }
 
     public void MainUpEvent(Transform hitObject)
     {
+		if (IsMainDlgActived())
+			return;
+
         SetAlpha(hitObject, 0);
         string name = hitObject.name;
-        if (string.Equals(name, "setting2"))
+		if (string.Compare(name, "setting2") == 0)
 		{
 			if (GameData.GetInstance().deviceIndex == 1)
-            	InitSetting();
+			{
+				dlgCalc.SetActive(true);
+				dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
+				calcTitle.text = strSysPassword[GameData.GetInstance().language];
+				calcContent.text = string.Empty;
+				calcPassword.text = string.Empty;
+				passwordMode = 3;
+			}
 			else
 				ShowWarning(strSetError[GameData.GetInstance().language], true);
 		}
-        else if (string.Equals(name, "account2"))
+		else if (string.Compare(name, "account2") == 0)
 		{
 			if (GameData.GetInstance().deviceIndex == 1)
 			{
@@ -275,27 +287,27 @@ public class BackendLogic : MonoBehaviour
 			else
 				ShowWarning(strSetError[GameData.GetInstance().language], true);
 		}
-		else if (string.Equals(name, "lottery2"))
+		else if (string.Compare(name, "lottery2") == 0)
 		{
 			if (GameData.GetInstance().deviceIndex == 1)
 				InitLotterySetting();
 			else
 				ShowWarning(strSetError[GameData.GetInstance().language], true);
 		}
-        else if (string.Equals(name, "exit2"))
+		else if (string.Compare(name, "exit2") == 0)
 		{
             Application.LoadLevel(Scenes.StartInfo);
 		}
-		else if (string.Equals(name, "device2 id"))
+		else if (string.Compare(name, "device2 id") == 0)
 		{
 			dlgCalc.SetActive(true);
-			dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
+			dlgCalc.transform.localPosition = new Vector3(100, 40, 0);
 			calcTitle.text = strDeviceId[GameData.GetInstance().language];
 			calcContent.text = string.Empty;
 			calcPassword.text = string.Empty;
 			passwordMode = 0;
 		}
-		else if (string.Equals(name, "ts2"))
+		else if (string.Compare(name, "ts2") == 0)
 		{
 			foreach (GameObject i in btnMouse)
 				i.SetActive(true);
@@ -305,7 +317,7 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().SaveInputDevice();
 			StartCoroutine(ChangeInputHanlde());
 		}
-		else if (string.Equals(name, "mouse2"))
+		else if (string.Compare(name, "mouse2") == 0)
 		{
 			foreach (GameObject i in btnMouse)
 				i.SetActive(false);
@@ -314,6 +326,13 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().inputDevice = 1;
 			GameData.GetInstance().SaveInputDevice();
 			StartCoroutine(ChangeInputHanlde());
+		}
+		else if (string.Compare(hitObject.name, "password") == 0)
+		{
+			passwordMode = 1;
+			passwordType = 0;
+			passwordPhase = 0;
+			InitPasswordDlg();
 		}
     }
 
@@ -378,6 +397,8 @@ public class BackendLogic : MonoBehaviour
 		{
 			passwordType = 3;
 		}
+		dlgCalc.SetActive(true);
+		dlgCalc.transform.localPosition = new Vector3(100, 40, 0);
         int idx = GameData.GetInstance().language;
         dlgPassword.SetActive(false);
         SetCalcTitle(strPassword[idx], Color.black);
@@ -395,9 +416,17 @@ public class BackendLogic : MonoBehaviour
 		SetAlpha(hitObject, 0);
 		iYesNoType = 0;
 		string name = hitObject.name;
-		if (string.Equals(name, "Yes"))
+		if (Utils.StringIsEquals(name, "Yes"))
 		{
-			ClearAccount();
+			passwordMode = 4;
+			passwordPhase = 0;
+			passwordType = 0;
+			calcTitle.text = strAdminPassword[GameData.GetInstance().language];
+			calcTitle.color = Color.black;
+			calcPassword.text = calcContent.text = string.Empty;
+			dlgCalc.SetActive(true);
+			dlgCalc.transform.localPosition = Vector3.zero;
+//			ClearAccount();
 		}
 		dlgYesNO.SetActive(false);
 	}
@@ -409,6 +438,12 @@ public class BackendLogic : MonoBehaviour
         menuAccount.SetActive(false);
 		menuLottery.SetActive(false);
 		dlgCalc.SetActive(false);
+
+		calcContent.text = calcPassword.text = calcTitle.text = string.Empty;
+		passwordType = 0;
+		passwordMode = 0;
+		passwordPhase = 0;
+
         SetLanguage(menuMain);
 		SetInputDevice();
 
@@ -469,9 +504,10 @@ public class BackendLogic : MonoBehaviour
         menuAccount.SetActive(false);
 		menuLottery.SetActive(false);
 		dlgCalc.SetActive(true);
-		dlgCalc.transform.localPosition = new Vector3(0, -26, 0);
+		dlgCalc.transform.localPosition = Vector3.zero;
 		calcContent.text = string.Empty;
 		calcPassword.text = string.Empty;
+		calcTitle.text = string.Empty;
 
         SetLanguage(menuSetting);
 
@@ -632,8 +668,6 @@ public class BackendLogic : MonoBehaviour
 
     private void InitPasswordDlg()
     {
-        passwordType = 0;
-		passwordPhase = 0;
         dlgPassword.SetActive(true);
         SetLanguage(dlgPassword);
     }
@@ -737,24 +771,30 @@ public class BackendLogic : MonoBehaviour
 
         if (passwordMode != 0)
         {
-            if (txtPassword.Length > 1)
-                txtPassword = txtPassword.Substring(0, txtPassword.Length - 1);
-            else
-                txtPassword = string.Empty;
-//            print(txtPassword);
+			if (txtPassword != null)
+			{
+				if (txtPassword.Length > 1)
+					txtPassword = txtPassword.Substring(0, txtPassword.Length - 1);
+				else
+					txtPassword = string.Empty;
+//              print(txtPassword);
+			}
         }
         SetCalcContent(text, Color.white);
     }
 
     private void CalcEnterEvent()
     {
-        if (passwordMode == 1)
+        if (passwordMode == 1)				// 修改密码
         {
 			int idx = GameData.GetInstance().language;
-			if (passwordPhase == 0)
+			if (passwordPhase == 0)			// 输入原密码
 			{
-				if ((string.Equals(txtPassword, GameData.GetInstance().systemPassword) && passwordType == 1) ||
-				    (string.Equals(txtPassword, GameData.GetInstance().accountPassword) && passwordType == 2))
+				if (((Utils.StringIsEquals(txtPassword, GameData.GetInstance().systemPassword) || 
+				    Utils.StringIsEquals(txtPassword, GameData.GetInstance().adminPassword)) && passwordType == 1) ||
+				    ((Utils.StringIsEquals(txtPassword, GameData.GetInstance().accountPassword) || 
+				  	Utils.StringIsEquals(txtPassword, GameData.GetInstance().adminPassword)) && passwordType == 2) ||
+				    (Utils.StringIsEquals(txtPassword, GameData.GetInstance().adminPassword) && passwordType == 3))
 				{
 					passwordPhase = 1;
 					SetCalcTitle(strNewPassword[idx], Color.black);
@@ -769,7 +809,7 @@ public class BackendLogic : MonoBehaviour
 				}
 				txtPassword = null;
 			}
-			else if (passwordPhase == 1)
+			else if (passwordPhase == 1)	// 输入新密码
 			{
 				passwordPhase = 2;
 				txtCheckPassword = txtPassword;
@@ -778,9 +818,9 @@ public class BackendLogic : MonoBehaviour
 				calcContent.color = Color.red;
 				txtPassword = null;
 			}
-			else if (passwordPhase == 2)
+			else if (passwordPhase == 2)	// 再次输入新密码
 			{
-				if (string.Equals(txtPassword, txtCheckPassword))
+				if (string.Compare(txtPassword, txtCheckPassword) == 0)
 				{
 					if (passwordType == 1)
 					{
@@ -791,6 +831,11 @@ public class BackendLogic : MonoBehaviour
 					{
 						GameData.GetInstance().accountPassword = txtPassword;
 						GameData.GetInstance().SaveAccountPassword();
+					}
+					else if (passwordType == 3)
+					{
+						GameData.GetInstance().adminPassword = txtPassword;
+						GameData.GetInstance().SaveAdminPassword();
 					}
 					calcTitle.text = string.Empty;
 					calcPassword.text = string.Empty;
@@ -812,9 +857,9 @@ public class BackendLogic : MonoBehaviour
 				}
 			}
         }
-		else if (passwordMode == 2)
+		else if (passwordMode == 2)		// 输入查账密码
 		{
-			if (string.Equals(txtPassword, GameData.GetInstance().accountPassword))
+			if (Utils.StringIsEquals(txtPassword, GameData.GetInstance().accountPassword))
 			{
 				txtPassword = "";
 				InitAccount();
@@ -827,7 +872,37 @@ public class BackendLogic : MonoBehaviour
 				txtPassword = null;
 			}
 		}
-        else
+		else if (passwordMode == 3)		// 输入设置密码
+		{
+			if (Utils.StringIsEquals(txtPassword, GameData.GetInstance().systemPassword))
+			{
+				txtPassword = "";
+				InitSetting();
+			}
+			else
+			{
+				calcContent.text = strError[GameData.GetInstance().language];
+				calcContent.color = Color.red;
+				calcPassword.text = string.Empty;
+				txtPassword = null;
+			}
+		}
+		else if (passwordMode == 4)		// 清帐
+		{
+			if (Utils.StringIsEquals(txtPassword, GameData.GetInstance().adminPassword))
+			{
+				ClearAccount();
+			}
+			else
+			{
+				ShowWarning(strErrorPW[GameData.GetInstance().language], true);
+			}
+			passwordMode = 0;
+			calcPassword.text = string.Empty;
+			dlgCalc.SetActive(false);
+			txtPassword = null;
+		}
+        else 							// 输入参数值
         {
 			// Set setting-menu item
 			if (preSelected != null)
@@ -891,8 +966,13 @@ public class BackendLogic : MonoBehaviour
 
     private bool IsSettingDlgActived()
     {
-        return dlgPassword.activeSelf || dlgYesNO.activeSelf;
+        return dlgYesNO.activeSelf;
     }
+
+	private bool IsMainDlgActived()
+	{
+		return dlgPassword.activeSelf;
+	}
 
 	private void SaveLottery()
 	{
@@ -978,7 +1058,7 @@ public class BackendLogic : MonoBehaviour
         }
     }
 
-	private void ShowWarning(string str, bool autoDisappear, float duration = 1.5f)
+	private void ShowWarning(string str, bool autoDisappear, float duration = 2.0f)
     {
         if (warning != null && !warning.activeSelf)
         {
@@ -1167,10 +1247,16 @@ public class BackendLogic : MonoBehaviour
     private void ClearAccount()
     {
         // 账目归零
-        GameData.GetInstance().ClearAccount();
-		UpdateHostAccount();
-		string msg = NetInstr.ClearAccount.ToString();
-		host.SendToAll(msg);
+        if (GameData.GetInstance().ClearAccount())
+		{
+			UpdateHostAccount();
+			string msg = NetInstr.ClearAccount.ToString();
+			host.SendToAll(msg);
+		}
+		else
+		{
+			ShowWarning(strClearAccountFailed[GameData.GetInstance().language], true, 3.0f);
+		}
     }
 
 	private void UpdateHostAccount()
