@@ -98,7 +98,7 @@ public class HIDUtils : MonoBehaviour
 		jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
 		#endif
 		
-		#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
+		#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_ANDROID
 		OpenUSB();
 		#endif
 	}
@@ -141,11 +141,9 @@ public class HIDUtils : MonoBehaviour
 	public void OpenUSB()
 	{
 		#if UNITY_ANDROID
-		int ret = jo.Call("openUsb");
-		if (ret > 0)
-		{
-			SetState("True");
-		}
+		// Java代码中主动尝试打开usb，成功后回调SetState(bool)
+		AndroidHidPort.Init();
+		SendCheckInfo();
 		#endif
 		
 		#if UNITY_STANDALONE_WIN
@@ -181,17 +179,19 @@ public class HIDUtils : MonoBehaviour
 	
 	public void CloseUSB()
 	{
-		isReadThreadExit = true;
-		tRead.Abort();
 		#if UNITY_ANDROID
-		jo.Call("closeUsb");
+		AndroidHidPort.Close();
 		#endif
 		
 		#if UNITY_STANDALONE_WIN
+		isReadThreadExit = true;
+		tRead.Abort();
 		WinUsbPortClose();
 		#endif
 		
 		#if UNITY_STANDALONE_LINUX
+		isReadThreadExit = true;
+		tRead.Abort();
 		LinuxUsbPortClose();
 		#endif
 	}
@@ -201,19 +201,10 @@ public class HIDUtils : MonoBehaviour
 		DebugConsole.Log(msg);
 	}
 	
-	public int[] ReadData(string methodName)
-	{
-		#if UNITY_ANDROID
-		AndroidJavaObject rev = jo.Call<AndroidJavaObject>(methodName);
-		return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
-		#endif
-		return null;
-	}
-	
 	public void ReadUsbPort()
 	{
 		#if UNITY_ANDROID
-		int[] data = ReadData("readHID");
+		int[] data = AndroidHidPort.Read();
 		#endif
 		
 		#if UNITY_STANDALONE_LINUX || UNITY_STANDALONE_WIN
@@ -391,15 +382,10 @@ public class HIDUtils : MonoBehaviour
 		}
 	}
 	
-	public int WriteData(int[] data, string methodName)
+	public int WriteData(int[] data)
 	{
 		#if UNITY_ANDROID
-		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
-		jvalue[] blah = new jvalue[1];
-		blah[0].l = pArr;
-		
-		IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), methodName);
-		return AndroidJNI.CallIntMethod(jo.GetRawObject(), methodId, blah);
+		return AndroidHidPort.Write(ref data);
 		#endif
 		
 		#if UNITY_STANDALONE_WIN
@@ -426,7 +412,7 @@ public class HIDUtils : MonoBehaviour
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0};
-		WriteData(data, "writeUsbPort");
+		WriteData(data);
 	}
 	
 	public void BlowBall(int blowTime)
@@ -447,7 +433,7 @@ public class HIDUtils : MonoBehaviour
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0};
-		WriteData(data, "writeUsbPort");
+		WriteData(data);
 	}
 	
 	private void PrintData(ref int[] data)
@@ -460,7 +446,7 @@ public class HIDUtils : MonoBehaviour
 			log += string.Format("{0:X}", data[i]) + ", ";
 		}
 		//		Debug.Log(log);
-		//		DebugConsole.Log(log);
+				DebugConsole.Log(log);
 		GameEventManager.OnDebugLog(0, log);
 	}
 	
@@ -482,7 +468,7 @@ public class HIDUtils : MonoBehaviour
 			dataList.Add(0);
 		}
 		int[] data = dataList.ToArray();
-		WriteData(data, "writeUsbPort");
+		WriteData(data);
 		
 		bCheckInfo = true;
 		timerCheckInfo = new Timer(2.0f, 0);
@@ -514,7 +500,7 @@ public class HIDUtils : MonoBehaviour
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0};
-		WriteData(data, "writeUsbPort");
+		WriteData(data);
 	}
 	
 	// 设置退币指令位
@@ -531,7 +517,7 @@ public class HIDUtils : MonoBehaviour
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0,
 			0, 0, 0, 0, 0, 0, 0, 0};
-		WriteData(data, "writeUsbPort");
+		WriteData(data);
 	}
 	
 	public void StopPayCoin()
@@ -557,12 +543,15 @@ public class HIDUtils : MonoBehaviour
 				#if UNITY_STANDALONE_WIN
 				int[] data = WinUsbPortRead();
 				#endif
+
+				#if UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX
 				if (data == null || data[0] == -1)
 					continue;
 				foreach (int d in data)
 				{
 					readQueue.Enqueue(d);
 				}
+				#endif
 			}
 		}
 		catch(Exception ex)

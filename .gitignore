@@ -4,6 +4,7 @@ Temp
 AndroidExport/Roulette Game/assets
 AndroidExport/Roulette Game/bin
 AndroidExport/Roulette Game/gen
+AndroidExport/COM_Version
 *.apk
 *.csproj
 *.sln

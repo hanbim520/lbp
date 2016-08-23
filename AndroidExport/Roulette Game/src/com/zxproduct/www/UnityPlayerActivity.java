@@ -71,12 +71,12 @@ public class UnityPlayerActivity extends Activity
 
 		setContentView(mUnityPlayer);
 		mUnityPlayer.requestFocus();
-		detectHIDViaTimer();
-		IntentFilter intentFilter = new IntentFilter();
-		intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
-		intentFilter.addAction(Intent.ACTION_MEDIA_EJECT);
-		intentFilter.addDataScheme("file");
-        registerReceiver(mReceiver, intentFilter);
+//		detectHIDViaTimer();
+//		IntentFilter intentFilter = new IntentFilter();
+//		intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+//		intentFilter.addAction(Intent.ACTION_MEDIA_EJECT);
+//		intentFilter.addDataScheme("file");
+//        registerReceiver(mReceiver, intentFilter);
 	}
 
 	// Quit Unity

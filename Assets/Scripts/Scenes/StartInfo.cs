@@ -6,7 +6,7 @@ public class StartInfo : MonoBehaviour
 	void Start()
 	{
 		GameData.GetInstance().ReadDataFromDisk();
-//		Screen.SetResolution(1024, 768, true);
+		Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
 		LoadUpdateUtils();
 		LoadInputDevice();
 		LoadHIDUtils();

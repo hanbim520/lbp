@@ -347,27 +347,27 @@ public class MainUILogic : MonoBehaviour
 			start = -627.5f;
 			dist = 86;
 		}
-		else if (GameData.GetInstance().maxNumberOfChips == 5)
+		else if (num == 5)
 		{
 			start = -620.0f;
 			dist = 100;
 		}
-		else if (GameData.GetInstance().maxNumberOfChips == 4)
+		else if (num == 4)
 		{
 			start = -600.0f;
 			dist = 130;
 		}
-		else if (GameData.GetInstance().maxNumberOfChips == 3)
+		else if (num == 3)
 		{
 			start = -580.0f;
 			dist = 160;
 		}
-		else if (GameData.GetInstance().maxNumberOfChips == 2)
+		else if (num == 2)
 		{
 			start = -500.0f;
 			dist = 160;
 		}
-		else if (GameData.GetInstance().maxNumberOfChips == 1)
+		else if (num == 1)
 		{
 			start = -367.0f;
 		}

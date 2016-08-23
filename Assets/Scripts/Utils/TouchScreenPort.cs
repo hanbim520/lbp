@@ -94,7 +94,10 @@ public class TouchScreenPort : MonoBehaviour
 		DealReceivedData();
 #if UNITY_ANDROID
 		int[] data = androidSP.ReadData();
-		FilterData(ref data);
+		byte[] tmp = new byte[data.Length];
+		Array.Copy(data, tmp, data.Length);
+		FilterData(ref tmp);
+//		FilterData(ref data);
 #endif
 	}
 	

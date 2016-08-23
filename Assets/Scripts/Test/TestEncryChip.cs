@@ -66,7 +66,7 @@ public class TestEncryChip : MonoBehaviour
 				data.Add((int)b);
 			while (data.Count < 64)
 				data.Add(0);
-            hidUtils.WriteData(data.ToArray(), "writeUsbPort");
+            hidUtils.WriteData(data.ToArray());
 		}
 
 		if (GUI.Button(new Rect(200, 300, 200, 100), "GetCheckPWStringValue"))

@@ -332,37 +332,37 @@ public static class Utils
 
 	public static void SetSeed()
 	{
-		if (Application.platform == RuntimePlatform.LinuxPlayer)
-		{
+		#if UNITY_STANDALONE_LINUX
 			LinuxUtils.SetSeed();
-		}
-		else
-		{
-			int seed = (int)System.DateTime.Now.ToUniversalTime().ToBinary();
-			UnityEngine.Random.seed = seed;
-		}
+		#endif
+
+#if UNITY_ANDROID
+		int seed = (int)System.DateTime.Now.ToUniversalTime().ToBinary();
+		UnityEngine.Random.seed = seed;
+#endif
 	}
 
     public static void Seed(int seed)
     {
-        if (Application.platform == RuntimePlatform.LinuxPlayer)
-        {
-            LinuxUtils.Seed(seed);
-        }
-        else
-        {
-            UnityEngine.Random.seed = seed;
-        }
+		#if UNITY_STANDALONE_LINUX
+        LinuxUtils.Seed(seed);
+		#endif
+
+#if UNITY_ANDROID
+        UnityEngine.Random.seed = seed;
+#endif
     }
 
 	// Returns a random integer number between min[inclusive] and max[exclusive]
 	public static int GetRandom(int min, int max)
 	{
-		if (Application.platform == RuntimePlatform.LinuxPlayer)
-		{
-			return LinuxUtils.GetRandom(min, max);
-		}
+		#if UNITY_STANDALONE_LINUX
+		return LinuxUtils.GetRandom(min, max);
+		#endif
+
+#if UNITY_ANDROID
 		return UnityEngine.Random.Range(min, max);
+#endif
 	}
 
 	public static bool StringIsEquals(string strA, string strB)

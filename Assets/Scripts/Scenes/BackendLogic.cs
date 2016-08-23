@@ -1167,6 +1167,10 @@ public class BackendLogic : MonoBehaviour
 		{
 			value = Mathf.Clamp(value, 0, 100);
 		}
+		else if (Utils.StringIsEquals(name, "jackpot lv"))
+		{
+			value = Mathf.Clamp(value, 0, 9);
+		}
     }
 
 	public void HandleRecData(ref string[] words, int connectionId)
