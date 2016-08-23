@@ -1,10 +1,10 @@
 obj
 Library
 Temp
-AndroidExport/Roulette Game/assets
-AndroidExport/Roulette Game/bin
-AndroidExport/Roulette Game/gen
-AndroidExport/COM_Version
+AndroidExport/Roulette Game
+AndroidExport/COM_Version/assets
+AndroidExport/COM_Version/bin
+AndroidExport/COM_Version/gen
 *.apk
 *.csproj
 *.sln
