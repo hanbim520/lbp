@@ -7,6 +7,8 @@ using System.Threading;
 public class AndroidSerialPort
 {
 #if UNITY_ANDROID
+	protected int portId;
+
 	protected string portName;
 	protected int baudRate;
 	protected int dataBits;
@@ -19,16 +21,27 @@ public class AndroidSerialPort
 	protected string strOpenMethod = "openSerialPort";
 	protected string strCloseMethod = "closeSerialPort";
 	protected string strReadMethod = "readSerialPort";
+	protected string strWriteMethod = "writeSerialPort";
+	protected IntPtr writeMethodId = IntPtr.Zero;
 
 	// Note: Java side should be return int[]
 	public int[] ReadData()
 	{
-		if (Application.platform == RuntimePlatform.Android)
-		{
-			AndroidJavaObject rev = jo.Call<AndroidJavaObject>(strReadMethod);
-			return AndroidJNIHelper.ConvertFromJNIArray<int[]>(rev.GetRawObject());
-		}
-		return null;
+		AndroidJavaObject readMethod = jo.Call<AndroidJavaObject>(strReadMethod, portId);
+		return AndroidJNIHelper.ConvertFromJNIArray<int[]>(readMethod.GetRawObject());
+	}
+
+	public void WriteData(ref int[] data)
+	{
+		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
+		jvalue[] blah = new jvalue[2];
+		blah[0].l = pArr;
+		blah[1].i = portId;
+		
+		if (writeMethodId == IntPtr.Zero)
+			writeMethodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), strWriteMethod);
+		AndroidJNI.CallVoidMethod(jo.GetRawObject(), writeMethodId, blah);
+		AndroidJNI.DeleteLocalRef(pArr);
 	}
 
 	//"/dev/ttyS1"
@@ -52,7 +65,7 @@ public class AndroidSerialPort
 			_parity = 1;
 		else if (this.parity == Parity.Even)
 			_parity = 2;
-		jo.Call(strOpenMethod, portName, baudRate, _parity, dataBits, stopbits);
+		portId = jo.Call<int>(strOpenMethod, portName, baudRate, _parity, dataBits, stopbits);
     }
 
     public void Close()
@@ -60,12 +73,10 @@ public class AndroidSerialPort
         if (jo != null)
         {
        		jo.Call(strCloseMethod);
-            jo.Dispose();
             jo = null;
         }
         if (jc != null)
         {
-            jc.Dispose();
             jc = null;
         }
     }

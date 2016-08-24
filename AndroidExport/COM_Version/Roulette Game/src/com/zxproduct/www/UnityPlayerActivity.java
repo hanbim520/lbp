@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -29,7 +31,6 @@ import android.view.MotionEvent;
 import android.view.Window;
 import android.view.WindowManager;
 import android_serialport_api.SerialPort;
-import android_usb_api.UsbPort;
 
 import com.unity3d.player.UnityPlayer;
 
@@ -57,11 +58,14 @@ public class UnityPlayerActivity extends Activity
 
 		setContentView(mUnityPlayer);
 		mUnityPlayer.requestFocus();
+		
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
 		intentFilter.addAction(Intent.ACTION_MEDIA_EJECT);
 		intentFilter.addDataScheme("file");
         registerReceiver(mReceiver, intentFilter);
+        
+        Init();
 	}
 
 	// Quit Unity
@@ -115,20 +119,23 @@ public class UnityPlayerActivity extends Activity
 	@Override public boolean onTouchEvent(MotionEvent event)          { return mUnityPlayer.injectEvent(event); }
 	/*API12*/ public boolean onGenericMotionEvent(MotionEvent event)  { return mUnityPlayer.injectEvent(event); }
 	
-	private SerialPort mSerialPort0 = null;
-	private InputStream mInputStream0 = null;
-	private ReadThread0 mReadThread0 = null;
+	private ReadThread mReadThread = null;
+	private WriteThread mWriteThread = null;
 	
-	private ConcurrentLinkedQueue<BufferStruct> readSerialQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
+	private List<SerialPort> serialPorts = new ArrayList<SerialPort>();
+	private List<InputStream> inputStreams = new ArrayList<InputStream>();
+	private List<OutputStream> outputStreams = new ArrayList<OutputStream>();
+	private List<ConcurrentLinkedQueue<BufferStruct>> writeQueues = new ArrayList<ConcurrentLinkedQueue<BufferStruct>>(); 
+	private List<ConcurrentLinkedQueue<BufferStruct>> readQueues = new ArrayList<ConcurrentLinkedQueue<BufferStruct>>(); 
 	private ConcurrentLinkedQueue<BufferStruct> readUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
-	private ConcurrentLinkedQueue<BufferStruct> writeUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
+//	private ConcurrentLinkedQueue<BufferStruct> writeUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 	
 	private class BufferStruct
 	{
 		public int[] buffer;
 	}
 	
-	private class ReadThread0 extends Thread 
+	private class ReadThread extends Thread 
 	{	
 		@Override
 		public void run()
@@ -138,20 +145,23 @@ public class UnityPlayerActivity extends Activity
 			{
 				try
 				{
-					if (mInputStream0 != null) 
+					if (!inputStreams.isEmpty()) 
 					{
-						byte[] buffer = new byte[128];
-						int size = mInputStream0.read(buffer);
-						if (size > 0)
+						int inputStreamLength = inputStreams.size();
+						for (int id = 0; id < inputStreamLength; ++id)
 						{
-//							Log.d(TAG, "mInputStream0 size:" + size);
-							BufferStruct buf = new BufferStruct();
-							buf.buffer = new int[size];
-							for (int i = 0; i < size; ++i)
+							byte[] buffer = new byte[128];
+							int size = inputStreams.get(id).read(buffer);
+							if (size > 0)
 							{
-								buf.buffer[i] = buffer[i] & 0xff;
+								BufferStruct buf = new BufferStruct();
+								buf.buffer = new int[size];
+								for (int i = 0; i < size; ++i)
+								{
+									buf.buffer[i] = buffer[i] & 0xff;
+								}
+								readQueues.get(id).offer(buf);
 							}
-							readSerialQueue0.offer(buf);
 						}
 					}
 				}
@@ -164,46 +174,118 @@ public class UnityPlayerActivity extends Activity
 		}
 	}
 	
-	public void openSerialPort(String filePath, int baudrate, int parity, int dataBits, int stopBits)
+	private class WriteThread extends Thread
+	{
+		@Override
+		public void run()
+		{
+			super.run();
+			while(!isInterrupted()) 
+			{
+				try
+				{
+					if (!outputStreams.isEmpty()) 
+					{
+						int outputStreamLength = outputStreams.size();
+						for (int id = 0; id < outputStreamLength; ++id)
+						{
+							if (!writeQueues.get(id).isEmpty())
+							{
+								BufferStruct buf = writeQueues.get(id).poll();
+								int size = buf.buffer.length;
+								byte[] buffer = new byte[size];
+								String log = "";
+								for (int i = 0; i < size; ++i)
+								{
+									buffer[i] = (byte)buf.buffer[i];
+									log += String.format("%#x, ", buffer[i]);
+								}
+								CallCSLog("send:" + log);
+								outputStreams.get(id).write(buffer);
+							}
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+					return;
+				}
+			}
+		}
+	}
+	
+	public void Init()
+	{
+		mReadThread = new ReadThread();
+		mReadThread.start();
+		
+		mWriteThread = new WriteThread();
+		mWriteThread.start();
+	}
+	
+	public int openSerialPort(String filePath, int baudrate, int parity, int dataBits, int stopBits)
 	{
 		try
 		{
-			mSerialPort0 = new SerialPort(new File(filePath), baudrate,  parity, dataBits, stopBits);
-			mInputStream0 = mSerialPort0.getInputStream();
+			Log.d(TAG, "filePath:" + filePath + ", baudrate:" + baudrate + ", parity:" + parity + ", dataBits:" + dataBits + ", stopBits:"+ stopBits);
 			
-			mReadThread0 = new ReadThread0();
-			mReadThread0.start();
+			SerialPort sp = new SerialPort(new File(filePath), baudrate,  parity, dataBits, stopBits);
+			serialPorts.add(sp);
+			writeQueues.add(new ConcurrentLinkedQueue<BufferStruct>());
+			readQueues.add(new ConcurrentLinkedQueue<BufferStruct>());
+			inputStreams.add(sp.getInputStream());
+			outputStreams.add(sp.getOutputStream());
+			
+			return serialPorts.size() - 1;
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 		}
+		return -1;
 	}
 
 	public void closeSerialPort()
 	{
 		try
 		{
-			if (mSerialPort0 != null)
+			if (serialPorts.size() > 0)
 			{
-				mSerialPort0.close();
-				mSerialPort0 = null;
+				for (SerialPort sp : serialPorts)
+					sp.close();
+				serialPorts.clear();
 			}
 			
-			if (mReadThread0 != null)
-				mReadThread0.stop();
+			if (mReadThread != null)
+				mReadThread.stop();
+			
+			if (mWriteThread != null)
+				mWriteThread.stop();
 		}
 		catch(Exception ex)
 		{
 			Log.d(TAG, ex.toString());
 		}
 	}
+	
+	public void writeSerialPort(int[] data, int portId)
+	{
+		int size = data.length;
+		BufferStruct buf = new BufferStruct();
+		buf.buffer = new int[size];
+		for (int i = 0; i < size; ++i)
+		{
+			buf.buffer[i] = data[i] & 0xff;
+		}
+		writeQueues.get(portId).offer(buf);
+	}
 
-	 public int[] readSerialPort()
+	 public int[] readSerialPort(int portId)
 	 {
-		 if (!readSerialQueue0.isEmpty())
+		 if (!readQueues.get(portId).isEmpty())
 		 {
-			 BufferStruct buffer = readSerialQueue0.poll();
+			 BufferStruct buffer = readQueues.get(portId).poll();
 			 return buffer.buffer;
 		 }
 		 

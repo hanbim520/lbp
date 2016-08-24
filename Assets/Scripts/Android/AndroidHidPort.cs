@@ -6,8 +6,7 @@ public static class AndroidHidPort
 {
 	private static AndroidJavaClass jc;
 	private static AndroidJavaObject jo;
-	private static IntPtr writeMethodId;
-	private static AndroidJavaObject readMethod;
+	private static IntPtr writeMethodId = IntPtr.Zero;
 
 
 	public static void Init()
@@ -27,7 +26,7 @@ public static class AndroidHidPort
 		jvalue[] blah = new jvalue[1];
 		blah[0].l = pArr;
 
-		if (writeMethodId == null)
+		if (writeMethodId == IntPtr.Zero)
 			writeMethodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "writeUsbPort");
 		int ret = AndroidJNI.CallIntMethod(jo.GetRawObject(), writeMethodId, blah);
 		AndroidJNI.DeleteLocalRef(pArr);
@@ -36,8 +35,7 @@ public static class AndroidHidPort
 
 	public static int[] Read()
 	{
-		if (readMethod == null)
-			readMethod = jo.Call<AndroidJavaObject>("readHID");
+		AndroidJavaObject readMethod = jo.Call<AndroidJavaObject>("readHID");
 		return AndroidJNIHelper.ConvertFromJNIArray<int[]>(readMethod.GetRawObject());
 	}
 

@@ -57,7 +57,9 @@
      <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\RegisteredComponent.cs" />
      <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\SystemTime.cs" />
      <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\UnitySingleton.cs" />
+     <Compile Include="Assets\Scripts\Android\AndroidHIDUtils.cs" />
      <Compile Include="Assets\Scripts\Android\AndroidHidPort.cs" />
+     <Compile Include="Assets\Scripts\Android\AndroidSerialPort.cs" />
      <Compile Include="Assets\Scripts\Data\GameData.cs" />
      <Compile Include="Assets\Scripts\Data\TextDB.cs" />
      <Compile Include="Assets\Scripts\Data\Types.cs" />
@@ -86,6 +88,7 @@
      <Compile Include="Assets\Scripts\Scenes\ServerLogic.cs" />
      <Compile Include="Assets\Scripts\Scenes\StartInfo.cs" />
      <Compile Include="Assets\Scripts\Scenes\TouchCheck.cs" />
+     <Compile Include="Assets\Scripts\Test\TestCOM.cs" />
      <Compile Include="Assets\Scripts\Test\TestCoinDevice.cs" />
      <Compile Include="Assets\Scripts\Test\TestEncryChip.cs" />
      <Compile Include="Assets\Scripts\Test\TestJson.cs" />
@@ -118,7 +121,6 @@
      <Compile Include="Assets\Scripts\UI\Records.cs" />
      <Compile Include="Assets\Scripts\UI\RollingNumber.cs" />
      <Compile Include="Assets\Scripts\UI\ScrollingImage.cs" />
-     <Compile Include="Assets\Scripts\Utils\AndroidSerialPort.cs" />
      <Compile Include="Assets\Scripts\Utils\CryptoPrefs.cs" />
      <Compile Include="Assets\Scripts\Utils\DebugConsole.cs" />
      <Compile Include="Assets\Scripts\Utils\FlashImage.cs" />
