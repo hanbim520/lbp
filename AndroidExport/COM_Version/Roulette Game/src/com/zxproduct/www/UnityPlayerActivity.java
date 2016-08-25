@@ -150,7 +150,7 @@ public class UnityPlayerActivity extends Activity
 						int inputStreamLength = inputStreams.size();
 						for (int id = 0; id < inputStreamLength; ++id)
 						{
-							byte[] buffer = new byte[128];
+							byte[] buffer = new byte[64];
 							int size = inputStreams.get(id).read(buffer);
 							if (size > 0)
 							{
@@ -194,13 +194,10 @@ public class UnityPlayerActivity extends Activity
 								BufferStruct buf = writeQueues.get(id).poll();
 								int size = buf.buffer.length;
 								byte[] buffer = new byte[size];
-								String log = "";
 								for (int i = 0; i < size; ++i)
 								{
 									buffer[i] = (byte)buf.buffer[i];
-									log += String.format("%#x, ", buffer[i]);
 								}
-								CallCSLog("send:" + log);
 								outputStreams.get(id).write(buffer);
 							}
 						}

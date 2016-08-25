@@ -369,4 +369,19 @@ public static class Utils
 	{
 		return string.Compare(strA, strB) == 0;
 	}
+
+	// 返回：发给金手指的校验位
+	public static int CrcAddXor(int[] array, int len) 
+	{
+		int crc2 = 0;
+		for (int i = 0; i < len; ++i)
+		{
+			crc2 += array[i];
+			if (crc2 > 255) crc2 = crc2 - 256;
+		}
+		
+		crc2 ^= 0xff;
+		crc2++;
+		return crc2;
+	}
 }

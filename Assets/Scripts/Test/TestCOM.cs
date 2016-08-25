@@ -41,20 +41,6 @@ public class TestCOM : MonoBehaviour
 		DebugConsole.Log(log);
 	}
 
-	int CrcAddXor(int[] array, int len) 
-	{
-		int crc2 = 0;
-		for (int i = 0; i < len; ++i)
-		{
-			crc2 += array[i];
-			if (crc2 > 255) crc2 = crc2 - 256;
-		}
-		
-		crc2 ^= 0xff;
-		crc2++;
-		return crc2;
-	}
-
 	public void DebugLog(string msg)
 	{
 		DebugConsole.Log(msg);
@@ -70,7 +56,7 @@ public class TestCOM : MonoBehaviour
 		};
 		int[] temp = new int[17];
 		System.Array.Copy(outData, 1, temp, 0, 17);
-		int crc = CrcAddXor(temp, 17);
+		int crc = Utils.CrcAddXor(temp, 17);
 		outData[18] = crc;
 		serialPort.WriteData(ref outData);
 	}
