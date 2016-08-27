@@ -9,8 +9,17 @@ public class TestCOM : MonoBehaviour
 	float readInterval = 0.1f;
 	bool bReadTime = false;
 
+	int doorState = 0;
+	int ballValue = 0;
+
 	void Start()
 	{
+		StartCoroutine(DelayOpenCOM());
+	}
+
+	IEnumerator DelayOpenCOM()
+	{
+		yield return new WaitForSeconds(2.0f);
 		serialPort = new AndroidSerialPort("/dev/ttyS2", 115200, Parity.None, 8, StopBits.One);
 		serialPort.Open();
 	}
@@ -63,10 +72,24 @@ public class TestCOM : MonoBehaviour
 
 	void OnGUI()
 	{
-		if (GUI.Button(new Rect(250, 50, 150, 100), "RealTime"))
+		if (GUI.Button(new Rect(250, 50, 150, 100), "门状态"))
 		{
-			bReadTime = !bReadTime;
-			DebugConsole.Clear();
+			
+		}
+
+		if (GUI.Button(new Rect(250, 200, 150, 100), "开门"))
+		{
+
+		}
+
+		if (GUI.Button(new Rect(250, 350, 150, 100), "吹风"))
+		{
+			
+		}
+
+		if (GUI.Button(new Rect(250, 500, 150, 100), "点数"))
+		{
+			
 		}
 
 		if (GUI.Button(new Rect(50, 50, 150, 100), "Quit"))
@@ -82,6 +105,12 @@ public class TestCOM : MonoBehaviour
 		if (GUI.Button(new Rect(50, 350, 150, 100), "Rev"))
 		{
 			Rev();
+		}
+
+		if (GUI.Button(new Rect(50, 500, 150, 100), "RealTime"))
+		{
+			bReadTime = !bReadTime;
+			DebugConsole.Clear();
 		}
 	}
 }

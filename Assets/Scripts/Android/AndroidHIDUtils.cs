@@ -70,16 +70,27 @@ public class AndroidHIDUtils : MonoBehaviour
 		int[] data = sp1.ReadData();
 		if (data == null || data[0] == -1)
 		{ 
-			if (timerHeartBeat == null)
-			{
-				timerHeartBeat = new Timer(10.0f, 0);
-				timerHeartBeat.Tick += HeartBeatOver;
-				timerHeartBeat.Start();
-			}
+//			if (timerHeartBeat == null)
+//			{
+//				timerHeartBeat = new Timer(10.0f, 0);
+//				timerHeartBeat.Tick += HeartBeatOver;
+//				timerHeartBeat.Start();
+//			}
 			return;
 		}
 
+		int len = data.Length;
+		for (int i = 0; i < len; ++i)
+		{
+			if (data[i] == 0xA5)
+			{
 
+			}
+			else if (data[i] == 0x58)
+			{
+
+			}
+		}
 	}
 
 	private void RevGoldfingerData()
