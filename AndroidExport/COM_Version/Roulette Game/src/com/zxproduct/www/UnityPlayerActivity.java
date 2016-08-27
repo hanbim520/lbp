@@ -3,10 +3,15 @@ package com.zxproduct.www;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -122,9 +127,16 @@ public class UnityPlayerActivity extends Activity
 	private ReadThread mReadThread = null;
 	private WriteThread mWriteThread = null;
 	
+	private final String kNameCOM1	= "ttyS1";
+	private final String kNameCOM2	= "ttyS2";
+	private final String kNameCOM3	= "ttyS3";
+	private final String kNameCOM4	= "ttyS4";
+	private final int kMaxRevDataLen = 20;	// 从金手指回传的数据长度
+	Map<Integer, String> ttySDic = new HashMap<Integer, String>();
 	private List<SerialPort> serialPorts = new ArrayList<SerialPort>();
 	private List<InputStream> inputStreams = new ArrayList<InputStream>();
 	private List<OutputStream> outputStreams = new ArrayList<OutputStream>();
+	private List<Integer> inputParsePhases = new ArrayList<Integer>();
 	private List<ConcurrentLinkedQueue<BufferStruct>> writeQueues = new ArrayList<ConcurrentLinkedQueue<BufferStruct>>(); 
 	private List<ConcurrentLinkedQueue<BufferStruct>> readQueues = new ArrayList<ConcurrentLinkedQueue<BufferStruct>>(); 
 	private ConcurrentLinkedQueue<BufferStruct> readUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
@@ -133,6 +145,47 @@ public class UnityPlayerActivity extends Activity
 	private class BufferStruct
 	{
 		public int[] buffer;
+	}
+	
+	// 解析金手指传来的数据
+	private void parsettyS2(int id) throws IOException
+	{
+		int parsePhase = inputParsePhases.get(id);
+		byte[] buffer = new byte[64];
+		int size = inputStreams.get(id).read(buffer);
+		if (size > 0)
+		{
+			BufferStruct buf = null;
+			for (int i = 0; i < size; ++i)
+			{
+				int tmp = buffer[i] & 0xff;
+				if (buf == null)
+				{
+					buf = readQueues.get(id).peek();
+					if (buf != null && buf.buffer[kMaxRevDataLen - 1] == -1)
+						buf = readQueues.get(id).poll();
+					else
+					{
+						buf = new BufferStruct();
+						buf.buffer = new int[kMaxRevDataLen];
+						buf.buffer[kMaxRevDataLen - 1] = -1;
+					}
+				}
+				
+				buf.buffer[parsePhase++] = tmp;
+				if (parsePhase == kMaxRevDataLen)
+				{
+					parsePhase = 0;
+					readQueues.get(id).offer(buf);
+					buf = null;
+				}
+			}
+			if (buf != null)
+			{
+				readQueues.get(id).offer(buf);
+			}
+		}
+		inputParsePhases.set(id, parsePhase);
 	}
 	
 	private class ReadThread extends Thread 
@@ -150,17 +203,11 @@ public class UnityPlayerActivity extends Activity
 						int inputStreamLength = inputStreams.size();
 						for (int id = 0; id < inputStreamLength; ++id)
 						{
-							byte[] buffer = new byte[64];
-							int size = inputStreams.get(id).read(buffer);
-							if (size > 0)
+							if (ttySDic.containsKey(id))
 							{
-								BufferStruct buf = new BufferStruct();
-								buf.buffer = new int[size];
-								for (int i = 0; i < size; ++i)
-								{
-									buf.buffer[i] = buffer[i] & 0xff;
-								}
-								readQueues.get(id).offer(buf);
+								String portName = ttySDic.get(id);
+								if (portName.equals(kNameCOM2))
+									parsettyS2(id);
 							}
 						}
 					}
@@ -233,8 +280,18 @@ public class UnityPlayerActivity extends Activity
 			readQueues.add(new ConcurrentLinkedQueue<BufferStruct>());
 			inputStreams.add(sp.getInputStream());
 			outputStreams.add(sp.getOutputStream());
+			int portId = serialPorts.size() - 1;
+			if (filePath.contains("ttyS1"))
+				ttySDic.put(portId, "ttyS1");
+			else if (filePath.contains(kNameCOM2))
+				ttySDic.put(portId, kNameCOM2);
+			else if (filePath.contains("ttyS3"))
+				ttySDic.put(portId, "ttyS3");
+			else if (filePath.contains("ttyS4"))
+				ttySDic.put(portId, "ttyS4");
+			inputParsePhases.add(0);
 			
-			return serialPorts.size() - 1;
+			return portId;
 		}
 		catch (Exception e)
 		{
@@ -282,8 +339,24 @@ public class UnityPlayerActivity extends Activity
 	 {
 		 if (!readQueues.get(portId).isEmpty())
 		 {
-			 BufferStruct buffer = readQueues.get(portId).poll();
-			 return buffer.buffer;
+			 String portName = ttySDic.get(portId);
+			 if (portName.contains(kNameCOM2))
+			 {
+				 BufferStruct buf = readQueues.get(portId).peek();
+				 if (buf.buffer.length == kMaxRevDataLen)
+				 {
+					 if (buf.buffer[0] == 0xA5 && buf.buffer[kMaxRevDataLen - 1] == 0)
+					 {
+						 buf = readQueues.get(portId).poll();
+						 return buf.buffer;
+					 }
+					 else
+					 {
+//						 readQueues.get(portId).poll();
+						 readQueues.get(portId).clear();
+					 }
+				 }
+			 }
 		 }
 		 
 		 // Can't return null, otherwise csharp side case exception.
@@ -312,7 +385,7 @@ public class UnityPlayerActivity extends Activity
 	   		{
 	   			String path = intent.getData().getPath();
 	   			CallCSLog("Path:" + path);
-	   			if (path.contains("/mnt/usbhost"))
+	   			if (path.contains("/mnt/usb"))
 	   			{
 	   				getFiles(path);
 	   			}
@@ -326,26 +399,37 @@ public class UnityPlayerActivity extends Activity
     
     private void getFiles(String filePath)
 	{
-    	CallCSLog("getFiles:" + filePath);
-    	File root = new File(filePath);
-	    File[] files = root.listFiles();
-	    String fileName = "update";
-	    String apkName = "update.apk";
-	    for(File file:files)
-	    {     
-	    	if(!file.isDirectory())
-	    	{
-	    		if (file.getName().equals(fileName))
-	    		{
-	    			CallCSLog("File name:" + file.getName());
-	    			decryFile(file);
-	    		}
-	    		else if (file.getName().equals(apkName))
-	    		{
-	    			installAPK(filePath + "/" + apkName);
-	    		}
-	    	}  
-	    }
+    	try
+    	{
+    		CallCSLog("getFiles:" + filePath);
+        	File root = new File(filePath);
+        	if (root.exists())
+        	{
+        		File[] files = root.listFiles();
+        	    String fileName = "update";
+        	    String apkName = "update.apk";
+        	    for(File file:files)
+        	    {     
+        	    	if(!file.isDirectory())
+        	    	{
+        	    		if (file.getName().equals(fileName))
+        	    		{
+        	    			CallCSLog("File name:" + file.getName());
+        	    			decryFile(file);
+        	    		}
+        	    		else if (file.getName().equals(apkName))
+        	    		{
+        	    			installAPK(filePath + "/" + apkName);
+        	    		}
+        	    	}  
+        	    }
+        	}
+    	}
+    	catch(Exception e)
+    	{
+    		CallCSLog(e.toString());
+    		e.printStackTrace();
+    	}
 	}
     
     private void decryFile(File file) {
