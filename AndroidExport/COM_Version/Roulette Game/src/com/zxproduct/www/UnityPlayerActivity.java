@@ -131,7 +131,7 @@ public class UnityPlayerActivity extends Activity
 	private final String kNameCOM2	= "ttyS2";
 	private final String kNameCOM3	= "ttyS3";
 	private final String kNameCOM4	= "ttyS4";
-	private final int kMaxRevDataLen = 20;	// 从金手指回传的数据长度
+	private final int kMaxRevDataLen = 18;	// 从金手指回传的数据长度
 	Map<Integer, String> ttySDic = new HashMap<Integer, String>();
 	private List<SerialPort> serialPorts = new ArrayList<SerialPort>();
 	private List<InputStream> inputStreams = new ArrayList<InputStream>();
@@ -139,6 +139,7 @@ public class UnityPlayerActivity extends Activity
 	private List<Integer> inputParsePhases = new ArrayList<Integer>();
 	private List<ConcurrentLinkedQueue<BufferStruct>> writeQueues = new ArrayList<ConcurrentLinkedQueue<BufferStruct>>(); 
 	private List<ConcurrentLinkedQueue<BufferStruct>> readQueues = new ArrayList<ConcurrentLinkedQueue<BufferStruct>>(); 
+	private BufferStruct dealingCOM2Data = null;
 	private ConcurrentLinkedQueue<BufferStruct> readUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 //	private ConcurrentLinkedQueue<BufferStruct> writeUsbQueue0 = new ConcurrentLinkedQueue<BufferStruct>();
 	
@@ -148,44 +149,88 @@ public class UnityPlayerActivity extends Activity
 	}
 	
 	// 解析金手指传来的数据
-	private void parsettyS2(int id) throws IOException
+	private void parsettyS2(int id)
 	{
-		int parsePhase = inputParsePhases.get(id);
-		byte[] buffer = new byte[64];
-		int size = inputStreams.get(id).read(buffer);
-		if (size > 0)
+		try
 		{
-			BufferStruct buf = null;
-			for (int i = 0; i < size; ++i)
+			int parsePhase = inputParsePhases.get(id);
+			byte[] buffer = new byte[64];
+			int size = inputStreams.get(id).read(buffer);
+			if (size > 0)
 			{
-				int tmp = buffer[i] & 0xff;
-				if (buf == null)
+				String log = ""; 
+				for (int i = 0; i < size; ++i)
 				{
-					buf = readQueues.get(id).peek();
-					if (buf != null && buf.buffer[kMaxRevDataLen - 1] == -1)
-						buf = readQueues.get(id).poll();
-					else
+					int tmp = buffer[i] & 0xff;
+					if (dealingCOM2Data == null)
 					{
-						buf = new BufferStruct();
-						buf.buffer = new int[kMaxRevDataLen];
-						buf.buffer[kMaxRevDataLen - 1] = -1;
+						if (parsePhase == 0 && tmp != 0xA5)
+							break;
+						if ((parsePhase == 1 && tmp != 0x58) ||
+							(parsePhase == 2 && tmp != 0x57))
+						{
+							dealingCOM2Data = null;
+							parsePhase = 0;
+							break;
+						}
+							
+						dealingCOM2Data = new BufferStruct();
+						dealingCOM2Data.buffer = new int[kMaxRevDataLen];
+						dealingCOM2Data.buffer[kMaxRevDataLen - 1] = -1;
+					}
+
+					log += String.format("%#x, ", tmp);
+					dealingCOM2Data.buffer[parsePhase++] = tmp;
+					// 接收完毕
+					if (parsePhase == kMaxRevDataLen)
+					{
+						parsePhase = 0;
+						
+						int len = dealingCOM2Data.buffer.length;
+						String endLog = "";
+						for (int j = 0; j < len; ++j)
+						{
+							endLog += String.format("%#x, ", dealingCOM2Data.buffer[j]);
+						}
+						CallCSLog("parsettyS2:" + endLog);
+						readQueues.get(id).offer(dealingCOM2Data);
+						dealingCOM2Data = null;
 					}
 				}
-				
-				buf.buffer[parsePhase++] = tmp;
-				if (parsePhase == kMaxRevDataLen)
-				{
-					parsePhase = 0;
-					readQueues.get(id).offer(buf);
-					buf = null;
-				}
+				CallCSLog("ReadThread:" + log);
 			}
-			if (buf != null)
+			inputParsePhases.set(id, parsePhase);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return;
+		}
+	}
+	
+	private void parsettyS(int id)
+	{
+		try
+		{
+			byte[] buffer = new byte[64];
+			int size = inputStreams.get(id).read(buffer);
+			if (size > 0)
 			{
+				BufferStruct buf = new BufferStruct();
+				buf.buffer = new int[size];
+				for (int i = 0; i < size; ++i)
+				{
+					int tmp = buffer[i] & 0xff;
+					buf.buffer[i] = tmp;
+				}
 				readQueues.get(id).offer(buf);
 			}
 		}
-		inputParsePhases.set(id, parsePhase);
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return;
+		}
 	}
 	
 	private class ReadThread extends Thread 
@@ -208,12 +253,15 @@ public class UnityPlayerActivity extends Activity
 								String portName = ttySDic.get(id);
 								if (portName.equals(kNameCOM2))
 									parsettyS2(id);
+								else
+									parsettyS(id);
 							}
 						}
 					}
 				}
 				catch (Exception e)
 				{
+					CallCSLog("ReadThread Exception:" + e.toString());
 					e.printStackTrace();
 					return;
 				}
@@ -241,10 +289,13 @@ public class UnityPlayerActivity extends Activity
 								BufferStruct buf = writeQueues.get(id).poll();
 								int size = buf.buffer.length;
 								byte[] buffer = new byte[size];
+								String log = "";
 								for (int i = 0; i < size; ++i)
 								{
 									buffer[i] = (byte)buf.buffer[i];
+									log += String.format("%#x, ", buffer[i]);
 								}
+								CallCSLog("WriteThread:" + log);
 								outputStreams.get(id).write(buffer);
 							}
 						}
@@ -252,6 +303,7 @@ public class UnityPlayerActivity extends Activity
 				}
 				catch (Exception e)
 				{
+					CallCSLog("WriteThread Exception:" + e.toString());
 					e.printStackTrace();
 					return;
 				}
@@ -272,7 +324,7 @@ public class UnityPlayerActivity extends Activity
 	{
 		try
 		{
-			Log.d(TAG, "filePath:" + filePath + ", baudrate:" + baudrate + ", parity:" + parity + ", dataBits:" + dataBits + ", stopBits:"+ stopBits);
+			CallCSLog("filePath:" + filePath + ", baudrate:" + baudrate + ", parity:" + parity + ", dataBits:" + dataBits + ", stopBits:"+ stopBits);
 			
 			SerialPort sp = new SerialPort(new File(filePath), baudrate,  parity, dataBits, stopBits);
 			serialPorts.add(sp);
@@ -281,16 +333,16 @@ public class UnityPlayerActivity extends Activity
 			inputStreams.add(sp.getInputStream());
 			outputStreams.add(sp.getOutputStream());
 			int portId = serialPorts.size() - 1;
-			if (filePath.contains("ttyS1"))
-				ttySDic.put(portId, "ttyS1");
+			if (filePath.contains(kNameCOM1))
+				ttySDic.put(portId, kNameCOM1);
 			else if (filePath.contains(kNameCOM2))
 				ttySDic.put(portId, kNameCOM2);
-			else if (filePath.contains("ttyS3"))
-				ttySDic.put(portId, "ttyS3");
-			else if (filePath.contains("ttyS4"))
-				ttySDic.put(portId, "ttyS4");
+			else if (filePath.contains(kNameCOM3))
+				ttySDic.put(portId, kNameCOM3);
+			else if (filePath.contains(kNameCOM4))
+				ttySDic.put(portId, kNameCOM4);
 			inputParsePhases.add(0);
-			
+
 			return portId;
 		}
 		catch (Exception e)
@@ -340,21 +392,24 @@ public class UnityPlayerActivity extends Activity
 		 if (!readQueues.get(portId).isEmpty())
 		 {
 			 String portName = ttySDic.get(portId);
-			 if (portName.contains(kNameCOM2))
+			 if (portName.equals(kNameCOM2))
 			 {
 				 BufferStruct buf = readQueues.get(portId).peek();
-				 if (buf.buffer.length == kMaxRevDataLen)
+				 if (buf != null && buf.buffer.length == kMaxRevDataLen)
 				 {
 					 if (buf.buffer[0] == 0xA5 && buf.buffer[kMaxRevDataLen - 1] == 0)
 					 {
 						 buf = readQueues.get(portId).poll();
 						 return buf.buffer;
 					 }
-					 else
-					 {
-//						 readQueues.get(portId).poll();
-						 readQueues.get(portId).clear();
-					 }
+				 }
+			 }
+			 else
+			 {
+				 if (!readQueues.get(portId).isEmpty())
+				 {
+					 BufferStruct buf = readQueues.get(portId).poll();
+					 return buf.buffer;
 				 }
 			 }
 		 }

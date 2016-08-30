@@ -15,6 +15,17 @@ public class AndroidHIDUtils : MonoBehaviour
 	private const float kParseDataInterval			= 0.1f;
 	private float parseDataElapsed					= 0f;
 
+	private int phase = 0; 
+	public const int kPhaseStartBlowBall 			= 1;
+	public const int kPhaseEndBlowBall 				= 2;
+	public const int kPhaseOpenGate 				= 3;
+	public const int kPhaseCloseGate 				= 4;
+	public const int kPhaseDetectBallValue 			= 5;
+
+	private const int kMaxCOM2DataLength			= 20;
+	private bool bBlowedBall = false;
+	private bool bOpenGate = false;
+	
 	void Start()
 	{
 		DontDestroyOnLoad(this);
@@ -30,7 +41,6 @@ public class AndroidHIDUtils : MonoBehaviour
 	{
 		sp1 = new AndroidSerialPort("/dev/ttyS1", 115200, Parity.None, 8, StopBits.One);
 		sp1.Open();
-//		sp3 = new AndroidSerialPort("/dev/ttyS3", 9600, Parity.None, 8, StopBits.One);
 	}
 
 	public void CloseCOM()
@@ -80,6 +90,57 @@ public class AndroidHIDUtils : MonoBehaviour
 		}
 
 		int len = data.Length;
+		if (data.Length >= kMaxCOM2DataLength)
+		{
+			if (data[0] == 0xA5 && data[1] == 0x58 && data[2] == 0x57)
+			{
+				// 校验数据
+				int[] temp = new int[14];
+				System.Array.Copy(data, 1, temp, 0, 14);
+				if (data[15] != Utils.CrcAddXor(temp, 14))
+				{
+					// 校验不通过
+					return;
+				}
+
+				// 吹风
+				if (data[4] == 0x55)
+				{
+					if (!bBlowedBall)
+					{
+						phase = kPhaseStartBlowBall;
+						bBlowedBall = true;
+					}
+				}
+				else
+				{
+					if (bBlowedBall && phase == kPhaseStartBlowBall)
+					{
+						phase = kPhaseEndBlowBall;
+						bBlowedBall = false;
+						GameEventManager.OnEBlowBall();
+					}
+				}
+				// 开门
+				if (data[5] == 0x55)
+				{
+					if (!bOpenGate)
+					{
+						phase = kPhaseOpenGate;
+						bOpenGate = true;
+					}
+				}
+				else
+				{
+					if (bOpenGate && phase == kPhaseOpenGate)
+					{
+						phase = kPhaseCloseGate;
+						bOpenGate = false;
+						GameEventManager.OnCloseGate();
+					}
+				}
+			}
+		}
 		for (int i = 0; i < len; ++i)
 		{
 			if (data[i] == 0xA5)
