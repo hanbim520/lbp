@@ -158,7 +158,7 @@ public class UnityPlayerActivity extends Activity
 			int size = inputStreams.get(id).read(buffer);
 			if (size > 0)
 			{
-				String log = ""; 
+//				String log = ""; 
 				for (int i = 0; i < size; ++i)
 				{
 					int tmp = buffer[i] & 0xff;
@@ -179,25 +179,25 @@ public class UnityPlayerActivity extends Activity
 						dealingCOM2Data.buffer[kMaxRevDataLen - 1] = -1;
 					}
 
-					log += String.format("%#x, ", tmp);
+//					log += String.format("%#x, ", tmp);
 					dealingCOM2Data.buffer[parsePhase++] = tmp;
 					// 接收完毕
 					if (parsePhase == kMaxRevDataLen)
 					{
 						parsePhase = 0;
 						
-						int len = dealingCOM2Data.buffer.length;
-						String endLog = "";
-						for (int j = 0; j < len; ++j)
-						{
-							endLog += String.format("%#x, ", dealingCOM2Data.buffer[j]);
-						}
-						CallCSLog("parsettyS2:" + endLog);
+//						int len = dealingCOM2Data.buffer.length;
+//						String endLog = "";
+//						for (int j = 0; j < len; ++j)
+//						{
+//							endLog += String.format("%#x, ", dealingCOM2Data.buffer[j]);
+//						}
+//						CallCSLog("parsettyS2:" + endLog);
 						readQueues.get(id).offer(dealingCOM2Data);
 						dealingCOM2Data = null;
 					}
 				}
-				CallCSLog("ReadThread:" + log);
+//				CallCSLog("ReadThread:" + log);
 			}
 			inputParsePhases.set(id, parsePhase);
 		}
@@ -289,13 +289,13 @@ public class UnityPlayerActivity extends Activity
 								BufferStruct buf = writeQueues.get(id).poll();
 								int size = buf.buffer.length;
 								byte[] buffer = new byte[size];
-								String log = "";
+//								String log = "";
 								for (int i = 0; i < size; ++i)
 								{
 									buffer[i] = (byte)buf.buffer[i];
-									log += String.format("%#x, ", buffer[i]);
+//									log += String.format("%#x, ", buffer[i]);
 								}
-								CallCSLog("WriteThread:" + log);
+//								CallCSLog("WriteThread:" + log);
 								outputStreams.get(id).write(buffer);
 							}
 						}
@@ -400,6 +400,7 @@ public class UnityPlayerActivity extends Activity
 					 if (buf.buffer[0] == 0xA5 && buf.buffer[kMaxRevDataLen - 1] == 0)
 					 {
 						 buf = readQueues.get(portId).poll();
+//						 CallCSLog("readQueues " + portId + " size: " + readQueues.get(portId).size());
 						 return buf.buffer;
 					 }
 				 }
@@ -420,7 +421,7 @@ public class UnityPlayerActivity extends Activity
 	 
     public void CallCSLog(String msg)
 	{
-		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
+//		UnityPlayer.UnitySendMessage("Main Camera", "DebugLog", msg);
 	}
     
     //  线号          机号          总利润              当前利润            算码次数 

@@ -16,7 +16,6 @@ public class TestCOM : MonoBehaviour
 	{
 		serialPort = new AndroidSerialPort("/dev/ttyS2", 115200, Parity.None, 8, StopBits.One);
 		serialPort.Open();
-
 	}
 
 	IEnumerator DelayOpenCOM()
@@ -39,7 +38,6 @@ public class TestCOM : MonoBehaviour
 				readElapsed = 0;
 			}
 		}
-
 	}
 
 	void Rev()

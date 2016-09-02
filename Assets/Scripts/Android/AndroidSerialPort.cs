@@ -86,5 +86,10 @@ public class AndroidSerialPort
         jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"); 
         jo = jc.GetStatic<AndroidJavaObject>("currentActivity");
     }
+
+	public int GetPortId()
+	{
+		return portId;
+	}
 #endif
 }

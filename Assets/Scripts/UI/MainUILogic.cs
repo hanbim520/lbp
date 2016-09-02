@@ -95,6 +95,7 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.ChooseFields += ChooseFields;
 		GameEventManager.BreakdownTip += BreakdownTip;
 		GameEventManager.SyncUI += SyncUI;
+		GameEventManager.EnterBackend += EnterBackend;
     }
 
     private void UnregisterEvents()
@@ -104,6 +105,7 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.ChooseFields -= ChooseFields;
 		GameEventManager.BreakdownTip -= BreakdownTip;
 		GameEventManager.SyncUI -= SyncUI;
+		GameEventManager.EnterBackend -= EnterBackend;
     }
 
 	private void Init()

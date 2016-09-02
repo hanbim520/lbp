@@ -2,6 +2,7 @@
 using System.Collections;
 using System.IO.Ports;
 
+// android上与纸钞机通过com口通讯 
 public class BillAcceptorUtils : MonoBehaviour
 {
 	private AndroidSerialPort sp;	// 纸钞机通讯
@@ -120,7 +121,7 @@ public class BillAcceptorUtils : MonoBehaviour
 				PrintLog(string.Format("Bill Acceptor Exception Code:{0:X}", data[i]));
 			}
 		}
-		PrintData(ref data);
+//		PrintData(ref data);
 	}
 
 	// 检测纸钞机的状态

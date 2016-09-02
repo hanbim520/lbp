@@ -94,7 +94,7 @@ public class ServerLogic : GameLogic
 
     private void GameStart()
     {
-        ui.backendTip.SetActive(false);
+		ui.backendTip.SetActive(false);
         if (bChangeScene)
         {
             ChangeScene();
@@ -103,7 +103,7 @@ public class ServerLogic : GameLogic
         gamePhase = GamePhase.GameStart;
 		ui.ResetCountdown();
         ui.ClearWinChips();
-        StartCoroutine(Countdown());
+		StartCoroutine(Countdown());
 	}
 	
     private IEnumerator Countdown()
@@ -227,7 +227,7 @@ public class ServerLogic : GameLogic
 //		int time = t[Utils.GetRandom(0, 5)];
 		GameEventManager.OnDebugLog(1, string.Format("吹风：{0}毫秒", time));
         if (!GameData.debug)
-		    hidUtils.BlowBall(time);
+		    base.BlowBall(time);
 		else
 		{
 			Utils.SetSeed();
@@ -371,12 +371,12 @@ public class ServerLogic : GameLogic
 						++i;
 					}
 				}
-//				return retArray.ToArray();
-				return new int[]{7, 17, 27};
+				return retArray.ToArray();
+//				return new int[]{7, 17, 27};
 			}
 		}
-//		return new int[0];
-		return new int[]{7, 17, 27};
+		return new int[0];
+//		return new int[]{7, 17, 27};
 	}
 
 	private IEnumerator ShowResult()
@@ -485,7 +485,12 @@ public class ServerLogic : GameLogic
 		ui.ClearLoseChips();
 			
 		if (!GameData.debug)
-		    hidUtils.OpenGate();
+		{
+			if (Application.platform == RuntimePlatform.LinuxPlayer)
+				hidUtils.OpenGate();
+			else if (Application.platform == RuntimePlatform.Android)
+				goldfingerUtils.OpenGate();
+		}
 		else
 			StartCoroutine(SimulateCloseGate());
     }

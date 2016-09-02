@@ -108,6 +108,9 @@ public static class Utils
 		float resolutionHeight = GameData.GetInstance().resolutionHeight;
 		ux = resolutionWidth / Screen.width * sx - resolutionWidth * 0.5f;
 		uy = resolutionHeight / Screen.height * sy - resolutionHeight * 0.5f;
+//		DebugConsole.Log("Screen.width:" + Screen.width + ", " + "Screen.height:" + Screen.height + ", " +
+//		                 "sx:" + sx + ", " + "sy:" + sy + ", " +
+//		                 "ux:" + ux + ", " + "uy:" + uy);
 	}
 
     public static void UISpaceToScreenSpace(float ux, float uy, out float sx, out float sy)
@@ -116,6 +119,9 @@ public static class Utils
         float resolutionHeight = GameData.GetInstance().resolutionHeight;
         sx = (ux + resolutionWidth * 0.5f) * Screen.width / resolutionWidth;
         sy = (uy + resolutionHeight * 0.5f) * Screen.height / resolutionHeight;
+//		DebugConsole.Log("Screen.width:" + Screen.width + ", " + "Screen.height:" + Screen.height + ", " +
+//		                 "ux:" + ux + ", " + "uy:" + uy + ", " +
+//		                 "sx:" + sx + ", " + "sy:" + sy);
     }
 
     public static int IsBingo(string fieldName, int value)

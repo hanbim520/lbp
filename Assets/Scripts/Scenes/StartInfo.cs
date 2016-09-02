@@ -8,7 +8,7 @@ public class StartInfo : MonoBehaviour
 		GameData.GetInstance().ReadDataFromDisk();
 		Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
 		LoadUpdateUtils();
-		LoadInputDevice();
+//		LoadInputDevice();
 		LoadHIDUtils();
 		LoadNetwork();
 //		TextDB.LoadFile();
@@ -48,6 +48,7 @@ public class StartInfo : MonoBehaviour
 
 	private void LoadHIDUtils()
 	{
+#if UNITY_STANDALONE_LINUX
 		if (GameObject.Find("HIDUtils") == null)
 		{
 			Object prefab = (Object)Resources.Load("Input/HIDUtils");
@@ -55,6 +56,16 @@ public class StartInfo : MonoBehaviour
 			go.name = "HIDUtils";
 			prefab = null;
 		}
+#endif
+#if UNITY_ANDROID
+		if (GameObject.Find("AndroidHIDUtils") == null)
+		{
+			Object prefab = (Object)Resources.Load("Input/AndroidHIDUtils");
+			GameObject go = (GameObject)Instantiate(prefab);
+			go.name = "AndroidHIDUtils";
+			prefab = null;
+		}
+#endif
 	}
 
 	private void LoadNetwork()

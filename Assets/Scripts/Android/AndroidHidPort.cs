@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
  
+// android上与usb通讯
 public static class AndroidHidPort
 {
 	private static AndroidJavaClass jc;

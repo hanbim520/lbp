@@ -88,6 +88,7 @@ public class GameLogic : MonoBehaviour
 	public Dictionary<string, int> betFields = new Dictionary<string, int>();
     public MainUILogic ui;
 	public HIDUtils hidUtils;
+	public GoldfingerUtils goldfingerUtils;
     
 	protected virtual void Update()
 	{
@@ -165,7 +166,10 @@ public class GameLogic : MonoBehaviour
     protected virtual void Start()
     {
         ui = GameObject.Find("UILogic").GetComponent<MainUILogic>();
-		hidUtils = GameObject.Find("HIDUtils").GetComponent<HIDUtils>();
+		if (Application.platform == RuntimePlatform.LinuxPlayer)
+			hidUtils = GameObject.Find("HIDUtils").GetComponent<HIDUtils>();
+		else if (Application.platform == RuntimePlatform.Android)
+			goldfingerUtils = GameObject.Find("AndroidHIDUtils").GetComponent<GoldfingerUtils>();
 		FixExitAbnormally();
         RegisterEvents();
     }
@@ -241,13 +245,13 @@ public class GameLogic : MonoBehaviour
 		timerPayCoin = new Timer(3, 1);
 		timerPayCoin.Tick += DetectPayCoinComplete;
 		timerPayCoin.Start();
-		hidUtils.PayCoin(coinNum);
+		PayCoin(coinNum);
 	}
 
 	protected void DetectPayCoinComplete()
 	{
 		timerPayCoin = null;
-		hidUtils.StopPayCoin();
+		StopPayCoin();
 		// 处理异常情况
 		if (payCoinCount < expectedPayCoinCount)
 		{
@@ -278,7 +282,7 @@ public class GameLogic : MonoBehaviour
 		int scoreNum = payCoinCount * GameData.GetInstance().coinToScore;
 		if (payCoinCount >= expectedPayCoinCount)
 		{
-			hidUtils.StopPayCoin();
+			StopPayCoin();
             timerPayCoin.Stop();
             timerPayCoin = null;
 			// 剩余分数
@@ -501,21 +505,21 @@ public class GameLogic : MonoBehaviour
 	protected IEnumerator AfterConnHID()
 	{
 		// 发送guid给加密片验证
-		hidUtils.SendCheckInfo();
+		SendCheckInfo();
 		yield return new WaitForSeconds(3);
 		if (GameData.GetInstance().deviceIndex == 1)
 		{
 			bFirstOpenGate = true;
-			OpenGate();
+			FirstOpenGate();
 		}
 	}
 	
 	// 第一次连上机芯应打开一次门
-	protected void OpenGate()
+	protected void FirstOpenGate()
 	{
 		if (GameData.GetInstance().deviceIndex == 1)
 		{
-			hidUtils.OpenGate();
+			OpenGate();
 		}
 	}
 	
@@ -585,5 +589,49 @@ public class GameLogic : MonoBehaviour
 	public void SetPause(bool pause)
 	{
 		isPause = pause;
+	}
+
+	private void OpenGate()
+	{
+		if (Application.platform == RuntimePlatform.LinuxPlayer)
+		{
+			hidUtils.OpenGate();
+		}
+		else if (Application.platform == RuntimePlatform.Android)
+		{
+			goldfingerUtils.OpenGate();
+		}
+	}
+	
+	private void StopPayCoin()
+	{
+		if (Application.platform == RuntimePlatform.LinuxPlayer)
+			hidUtils.StopPayCoin();
+		else if (Application.platform == RuntimePlatform.Android)
+			goldfingerUtils.StopPayCoin();
+	}
+	
+	private void PayCoin(int coinNum)
+	{
+		if (Application.platform == RuntimePlatform.LinuxPlayer)
+			hidUtils.PayCoin(coinNum);
+		else if (Application.platform == RuntimePlatform.Android)
+			goldfingerUtils.PayCoin(coinNum);
+	}
+	
+	private void SendCheckInfo()
+	{
+		if (Application.platform == RuntimePlatform.LinuxPlayer)
+			hidUtils.SendCheckInfo();
+		else if (Application.platform == RuntimePlatform.Android)
+			goldfingerUtils.SendCheckInfo();
+	}
+	
+	public void BlowBall(int time)
+	{
+		if (Application.platform == RuntimePlatform.LinuxPlayer)
+			hidUtils.BlowBall(time);
+		else if (Application.platform == RuntimePlatform.Android)
+			goldfingerUtils.BlowBall(time);
 	}
 }

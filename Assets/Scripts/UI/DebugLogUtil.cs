@@ -26,6 +26,7 @@ public class DebugLogUtil : MonoBehaviour
 
 	void DebugLog(int eventId, string log)
 	{
+		if (eventId == 0)
 		debuglog[eventId].text = log;
 	}
 }

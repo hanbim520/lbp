@@ -48,6 +48,12 @@ public static class GameEventManager
 	public static event GameEvent SyncUI;			// 同步后台设置后，设置分机ui
 	public static event GameEvent SyncInputDevice;  // 同步输入设备
 	public static event RakeInitEvent RakeInit;
+	public static event GameEvent EnterBackend;
+
+	public static void OnEnterBackend()
+	{
+		if (EnterBackend != null) EnterBackend();
+	}
 
 	public static void TriggerOpenSerial()
 	{
