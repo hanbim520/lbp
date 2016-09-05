@@ -136,12 +136,13 @@ public class ServerLogic : GameLogic
     {
 //		ui.chooseBetEffect.SetActive(false);
 		// 切换回经典压分区
-		if (GameData.GetInstance().displayType == 1)
-		{
-			GameData.GetInstance().displayType = 0;
-			GameData.GetInstance().SaveDisplayType();
-			ui.SetDisplay();
-		}
+//		if (GameData.GetInstance().displayType == 1)
+//		{
+//			GameData.GetInstance().displayType = 0;
+//			GameData.GetInstance().SaveDisplayType();
+//			ui.SetDisplay();
+//		}
+
 		timerConnectClients = new Timer(120, 0);	// 2分钟后不认球 则当故障处理
 		timerConnectClients.Tick += RecogBallTimeout;
 		timerConnectClients.Start();

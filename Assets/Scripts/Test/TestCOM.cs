@@ -43,12 +43,20 @@ public class TestCOM : MonoBehaviour
 	void Rev()
 	{
 		int[] data = serialPort.ReadData();
-		if (data.Length == 1 && data[0] == -1)
+		if (data == null || data[0] == -1)
 			return;
 		string log = "data.Length:" + data.Length + "--";
 		for (int i = 0; i < data.Length; ++i)
 			log += string.Format("{0:X}", data[i]) + ", ";
 		DebugConsole.Log(log);
+
+		int[] temp = new int[14];
+		System.Array.Copy(data, 1, temp, 0, 14);
+		if (data[15] != Utils.CrcAddXor(temp, 14))
+		{
+			// 校验不通过
+			DebugConsole.Log("校验不通过");
+		}
 	}
 
 	// 解析数据

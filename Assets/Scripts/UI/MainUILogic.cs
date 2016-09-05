@@ -1145,9 +1145,25 @@ public class MainUILogic : MonoBehaviour
 			prefab = (Object)Resources.Load(resPath + prefabname);
 			GameObject jackpot = (GameObject)Instantiate(prefab);
 			jackpot.transform.SetParent(root.transform);
-			string chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Classic/Choose Effect/" : "Canvas/38 Fields/Classic/Choose Effect/";
+			string chooseEffectPath = string.Empty;
+			if (GameData.GetInstance().displayType == 0)	// 传统压分区
+			{
+				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Classic/Choose Effect/" : "Canvas/38 Fields/Classic/Choose Effect/";
+				jackpot.transform.localScale = Vector3.one;
+			}
+			else
+			{
+				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Ellipse/Choose Effect/" : "Canvas/38 Fields/Ellipse/Choose Effect/";
+				jackpot.transform.localScale = Vector3.one * 0.5f;
+			}
 			jackpot.transform.localPosition = GameObject.Find(chooseEffectPath + refrenceName).transform.localPosition;
-			jackpot.transform.localScale = Vector3.one;
+			if (GameData.GetInstance().displayType == 1)	// 椭圆压分区
+			{
+				GameObject go = Instantiate(jackpot);
+				go.transform.SetParent(root.transform);
+				go.transform.localPosition = GameObject.Find(chooseEffectPath + "e" + refrenceName).transform.localPosition;
+				go.transform.localScale = Vector3.one;
+			}
 		}
 
 		prefab = null;
@@ -1188,73 +1204,64 @@ public class MainUILogic : MonoBehaviour
             strResult = result.ToString();
         else
             strResult = "00";
-		if (displayClassic.activeSelf)
-		{
-			Transform target = displayClassic.transform.FindChild("Choose Effect/" + strResult);
-			if (target != null)
-			{
-				flashObject = target;
-				FlashImage fo = target.gameObject.AddComponent<FlashImage>();
-				fo.flashCount = 0;
-				fo.interval = 0.5f;
-			}
-			// 除了号码外的其他区域也要闪烁
-			if (result != 37 && result != 0)
-			{
-				List<string> flashAreas = new List<string>();
-				if (result % 2 == 0)	
-					flashAreas.Add("Even");
-				else 				
-					flashAreas.Add("odd");
-				if (result >= 1 && result <= 12)
-					flashAreas.Add("1st12");
-				else if (result >= 13 && result <= 24)
-					flashAreas.Add("2nd12");
-				else if (result >= 25 && result <= 36)
-					flashAreas.Add("3rd12");
-				if (result >= 1 && result <= 18)
-					flashAreas.Add("1to18");
-				else if (result >= 19 && result <= 36)
-					flashAreas.Add("19to36");
-				if (GameData.GetInstance().colorTable[result] == ResultType.Red)
-					flashAreas.Add("red");
-				else if (GameData.GetInstance().colorTable[result] == ResultType.Black)
-					flashAreas.Add("black");
-				if (result % 3 == 0)
-					flashAreas.Add("2to1 up");
-				else if (result % 3 == 2)
-					flashAreas.Add("2to1 middle");
-				else if (result % 3 == 1)
-					flashAreas.Add("2to1 down");
 
-				foreach (string name in flashAreas)
+		Transform target = displayClassic.activeSelf ? displayClassic.transform.FindChild("Choose Effect/" + strResult) : 
+						   displayEllipse.transform.FindChild("Choose Effect/" + "e" + strResult);
+		if (target != null)
+		{
+			flashObject = target;
+			FlashImage fo = target.gameObject.AddComponent<FlashImage>();
+			fo.flashCount = 0;
+			fo.interval = 0.5f;
+		}
+		// 除了号码外的其他区域也要闪烁
+		if (result != 37 && result != 0)
+		{
+			List<string> flashAreas = new List<string>();
+			if (result % 2 == 0)	
+				flashAreas.Add("Even");
+			else 				
+				flashAreas.Add("odd");
+			if (result >= 1 && result <= 12)
+				flashAreas.Add("1st12");
+			else if (result >= 13 && result <= 24)
+				flashAreas.Add("2nd12");
+			else if (result >= 25 && result <= 36)
+				flashAreas.Add("3rd12");
+			if (result >= 1 && result <= 18)
+				flashAreas.Add("1to18");
+			else if (result >= 19 && result <= 36)
+				flashAreas.Add("19to36");
+			if (GameData.GetInstance().colorTable[result] == ResultType.Red)
+				flashAreas.Add("red");
+			else if (GameData.GetInstance().colorTable[result] == ResultType.Black)
+				flashAreas.Add("black");
+			if (result % 3 == 0)
+				flashAreas.Add("2to1 up");
+			else if (result % 3 == 2)
+				flashAreas.Add("2to1 middle");
+			else if (result % 3 == 1)
+				flashAreas.Add("2to1 down");
+
+			if (displayEllipse.activeSelf)
+				flashAreas.Add(strResult);
+			
+			foreach (string name in flashAreas)
+			{
+				Transform t = displayClassic.activeSelf ? displayClassic.transform.FindChild("Choose Effect/" + name) : 
+							  displayEllipse.transform.FindChild("Choose Effect/" + name);
+				if (t != null)
 				{
-					Transform t = displayClassic.transform.FindChild("Choose Effect/" + name);
-					if (t != null)
-					{
-						FlashImage fo = t.gameObject.AddComponent<FlashImage>();
-						fo.flashCount = 0;
-						fo.interval = 0.5f;
-						flashObjects.Add(t);
-					}
+					FlashImage fo = t.gameObject.AddComponent<FlashImage>();
+					fo.flashCount = 0;
+					fo.interval = 0.5f;
+					flashObjects.Add(t);
 				}
 			}
-			crown.SetActive(true);
-			crown.transform.localPosition = target.localPosition;
 		}
-		else
-		{
-            Transform target = displayEllipse.transform.FindChild("Choose Effect/" + "e" + strResult);
-			if (target != null)
-			{
-				flashObject = target;
-				FlashImage fo = target.gameObject.AddComponent<FlashImage>();
-				fo.flashCount = 0;
-				fo.interval = 0.5f;
-			}
-			crown.SetActive(true);
-			crown.transform.localPosition = target.localPosition;
-		}
+		crown.SetActive(true);
+		crown.transform.localPosition = target.localPosition;
+
 		// 出提示语
 		GameEventManager.OnResultPrompt(result);
 		// Play sfx
