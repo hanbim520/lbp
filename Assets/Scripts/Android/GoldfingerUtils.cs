@@ -31,7 +31,8 @@ public class GoldfingerUtils : MonoBehaviour
 	private int iBlowOrDoor 	= 0;
 	private int iCellNum 		= 0;
 
-	private Timer timerHeartBeat;		// 用来检测断连的计时器
+	private Timer timerHeartBeat;			// 用来检测断连的计时器
+
 	
 	void Start()
 	{
@@ -116,7 +117,8 @@ public class GoldfingerUtils : MonoBehaviour
 		int[] data = sp.ReadData();
 		if (data == null || data[0] == -1)
 		{
-			if (timerHeartBeat == null)
+			if (timerHeartBeat == null &&
+			    GameData.GetInstance().deviceIndex == 1)
 			{
 				timerHeartBeat = new Timer(10.0f, 0);
 				timerHeartBeat.Tick += HeartBeatOver;
@@ -298,18 +300,18 @@ public class GoldfingerUtils : MonoBehaviour
 		GameEventManager.OnDebugLog(0, log);
 	}
 
-	void OnGUI()
-	{
-		if (GUI.Button(new Rect(250, 200, 150, 100), "开门"))
-		{
-			OpenGate();
-		}
-		
-		if (GUI.Button(new Rect(250, 350, 150, 100), "吹风"))
-		{
-			Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
-			int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
-			BlowBall(time);
-		}
-	}
+//	void OnGUI()
+//	{
+//		if (GUI.Button(new Rect(250, 200, 150, 100), "开门"))
+//		{
+//			OpenGate();
+//		}
+//		
+//		if (GUI.Button(new Rect(250, 350, 150, 100), "吹风"))
+//		{
+//			Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
+//			int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
+//			BlowBall(time);
+//		}
+//	}
 }

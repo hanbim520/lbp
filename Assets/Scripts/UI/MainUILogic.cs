@@ -1259,6 +1259,18 @@ public class MainUILogic : MonoBehaviour
 				}
 			}
 		}
+		else if (displayEllipse.activeSelf)
+		{
+			// 闪烁小区域里面的0/00
+			Transform t = displayEllipse.transform.FindChild("Choose Effect/" + strResult); 
+			if (t != null)
+			{
+				FlashImage fo = t.gameObject.AddComponent<FlashImage>();
+				fo.flashCount = 0;
+				fo.interval = 0.5f;
+				flashObjects.Add(t);
+			}
+		}
 		crown.SetActive(true);
 		crown.transform.localPosition = target.localPosition;
 

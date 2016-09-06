@@ -394,12 +394,12 @@ public class UnityPlayerActivity extends Activity
 			 String portName = ttySDic.get(portId);
 			 if (portName.equals(kNameCOM2))
 			 {
-				 BufferStruct buf = readQueues.get(portId).peek();
+				 BufferStruct buf = readQueues.get(portId).poll();
 				 if (buf != null && buf.buffer.length == kMaxRevDataLen)
 				 {
 					 if (buf.buffer[0] == 0xA5 && buf.buffer[kMaxRevDataLen - 1] == 0)
 					 {
-						 buf = readQueues.get(portId).poll();
+//						 buf = readQueues.get(portId).poll();
 //						 CallCSLog("readQueues " + portId + " size: " + readQueues.get(portId).size());
 						 return buf.buffer;
 					 }

@@ -170,12 +170,12 @@ public class ClientLogic : GameLogic
         gamePhase = GamePhase.Run;
 //        ui.chooseBetEffect.SetActive(false);
 		// 切换回经典压分区
-		if (GameData.GetInstance().displayType == 1)
-		{
-			GameData.GetInstance().displayType = 0;
-			GameData.GetInstance().SaveDisplayType();
-			ui.SetDisplay();
-		}
+//		if (GameData.GetInstance().displayType == 1)
+//		{
+//			GameData.GetInstance().displayType = 0;
+//			GameData.GetInstance().SaveDisplayType();
+//			ui.SetDisplay();
+//		}
     }
 
     private void ShowResult()

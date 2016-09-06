@@ -82,6 +82,7 @@ public class Rake : MonoBehaviour
 
 	public void RakeInit(int type, int lineId, float startX1, float startX2, ref List<Transform> winChips)
 	{
+		chips.Clear();
 		this.winChips = winChips;
 		this.type = type;
 		if (lineId == 1)
