@@ -9,6 +9,9 @@ public class Records : MonoBehaviour
     public GameObject[] records;
     public Sprite[] imagesSmall;
     public Sprite[] imagesBig;
+    public float redPosY = 24.0f;
+    public float greenPosY = 12.0f;
+    public float blackPosY = 1.0f; 
 
 	void Start() 
     {
@@ -46,9 +49,6 @@ public class Records : MonoBehaviour
 
             if (!records[j].activeSelf)
                 records[j].SetActive(true);
-			float redPosY = 24.0f;
-			float greenPosY = 12.0f;
-			float blackPosY = 1.0f;
             if (GameData.GetInstance().colorTable[r[i]] == ResultType.Red)
             {
 				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[0];

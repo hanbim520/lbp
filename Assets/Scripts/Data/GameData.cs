@@ -899,4 +899,10 @@ public class GameData
 			lastBets.Add(field, value);
 		}
 	}
+
+    public void SaveMonitorLanguage()
+    {
+        PlayerPrefs.SetInt("topScreenLanguage", topScreenLanguage);
+        PlayerPrefs.Save();
+    }
 }

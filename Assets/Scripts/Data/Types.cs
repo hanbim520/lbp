@@ -34,6 +34,7 @@ public struct NetInstr
 	public const int SyncLottery		= 13; // 同步彩金池
 	public const int GetTotalBet		= 14; // 获取分机的总压分
 	public const int SyncInputDevice	= 15; // 同步输入设备
+    public const int SyncTSLanguage     = 16; // 同步路单的语言
 }
 
 // Use for network

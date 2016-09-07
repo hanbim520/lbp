@@ -9,7 +9,24 @@ public class TopStatistics : MonoBehaviour
 	void Start()
 	{
 		ustats = GetComponent<UStats>();
+        SetLanguage();
 	}
+
+    private void SetLanguage()
+    {
+        GameObject cn = GameObject.Find("/Canvas/CN");
+        GameObject en = GameObject.Find("/Canvas/EN");
+        if (GameData.GetInstance().topScreenLanguage == 0)
+        {
+            cn.SetActive(false);
+            en.SetActive(true);
+        }
+        else
+        {
+            cn.SetActive(true);
+            en.SetActive(false);
+        }
+    }
 
 	public void HandleRecData(int instr, ref string[] words)
 	{
@@ -19,6 +36,16 @@ public class TopStatistics : MonoBehaviour
 			if (int.TryParse(words[1], out totalLottery))
 				GameEventManager.OnLotteryChange(totalLottery);
 		}
+        else if (instr == NetInstr.SyncTSLanguage)
+        {
+            int language;
+            if (int.TryParse(words[1], out language))
+            {
+                GameData.GetInstance().topScreenLanguage = language;
+                GameData.GetInstance().SaveMonitorLanguage();
+                SetLanguage();
+            }
+        }
 		else if (instr == NetInstr.GamePhase)
 		{
 			HandleGamePhase(ref words);
