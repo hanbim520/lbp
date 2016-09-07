@@ -504,7 +504,7 @@ public class BackendLogic : MonoBehaviour
         menuAccount.SetActive(false);
 		menuLottery.SetActive(false);
 		dlgCalc.SetActive(true);
-		dlgCalc.transform.localPosition = Vector3.zero;
+		dlgCalc.transform.localPosition = new Vector3(0, -30, 0);
 		calcContent.text = string.Empty;
 		calcPassword.text = string.Empty;
 		calcTitle.text = string.Empty;
@@ -516,7 +516,7 @@ public class BackendLogic : MonoBehaviour
 			ga.betChipValues[0].ToString(), ga.betChipValues[1].ToString(), ga.betChipValues[2].ToString().ToString(), ga.betChipValues[3].ToString(), ga.betChipValues[4].ToString(), ga.betChipValues[5].ToString(),
 			ga.max36Value.ToString(), ga.max18Value.ToString(), ga.max12Value.ToString(), ga.max9Value.ToString(), ga.max6Value.ToString(), ga.max3Value.ToString(), ga.max2Value.ToString(),
 			ga.lotteryLv.ToString(), ga.lotteryCondition.ToString(), ga.lotteryBase.ToString(), ga.lotteryRate.ToString(), ga.lotteryAllocation.ToString(),
-			ga.beginSessions.ToString(), ga.maxNumberOfFields.ToString()};
+			ga.beginSessions.ToString(), ga.maxNumberOfFields.ToString(), ga.topScreenLanguage.ToString()};
 
         Transform root = menuSetting.transform.FindChild("Valid Fields");
         if (root != null)
@@ -1170,6 +1170,10 @@ public class BackendLogic : MonoBehaviour
 		else if (Utils.StringIsEquals(name, "jackpot lv"))
 		{
 			value = Mathf.Clamp(value, 0, 9);
+		}
+		else if (Utils.StringIsEquals(name, "monitor language"))
+		{
+			value = Mathf.Clamp(value, 0, 1);
 		}
     }
 

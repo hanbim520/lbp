@@ -63,9 +63,24 @@ public class ServerLogic : GameLogic
     {
 		base.Update();
 #if UNITY_EDITOR
-		if (Input.GetKeyUp(KeyCode.Escape))
+		if (GameData.debug)
 		{
-			ui.ActiveDlgCard(true);
+			if (Input.GetKeyUp(KeyCode.Escape))
+			{
+				ui.ActiveDlgCard(true);
+			}
+			else if (Input.GetKeyUp(KeyCode.S))			// Check touch
+			{
+				GameEventManager.OnChangeScene(Scenes.TouchCheck);
+			}
+			else if (Input.GetKeyUp(KeyCode.Space))	// Main menu
+			{
+				GameEventManager.OnOpenKey();
+			}
+			else if (Input.GetKeyUp(KeyCode.B))
+			{
+				GameEventManager.OnChangeScene(Scenes.Backend);
+			}
 		}
 #endif
 		if (GameData.controlCode)

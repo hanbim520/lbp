@@ -9,7 +9,7 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = false;       // 是否模拟出球
+	public static bool debug = true;       // 是否模拟出球
 	public static bool controlCode = false;  // 是否打码
 
     // Setting menu
@@ -38,6 +38,7 @@ public class GameData
 	public int lotteryBase;			// 起始彩金(0-100000)
 	public int lotteryRate;			// 彩金累计千分比(1-100)
 	public int lotteryAllocation; 	// 彩金分配(可设置范围0-100)
+	public int topScreenLanguage;	// 顶部路单屏的语言  0:EN 1:CN
 
     // Account
     public int zongShang;	// 总上分
@@ -321,6 +322,7 @@ public class GameData
 		PlayerPrefs.SetInt("lotteryRate", lotteryRate);
 		PlayerPrefs.SetInt("lotteryAllocation", lotteryAllocation);
 		PlayerPrefs.SetInt("powerOffCompensate", powerOffCompensate);
+		PlayerPrefs.SetInt("topScreenLanguage", topScreenLanguage);
         PlayerPrefs.Save();
     }
 
@@ -355,6 +357,7 @@ public class GameData
 		lotteryRate = 10;
 		lotteryAllocation = 40;
 		powerOffCompensate = 1;
+		topScreenLanguage = 0;
     }
 
 	public void DefaultCustom()
@@ -475,6 +478,7 @@ public class GameData
 			lotteryRate = PlayerPrefs.GetInt("lotteryRate");
 			lotteryAllocation = PlayerPrefs.GetInt("lotteryAllocation");
 			powerOffCompensate = PlayerPrefs.GetInt("powerOffCompensate", 1);
+			topScreenLanguage = PlayerPrefs.GetInt("topScreenLanguage", 0);
 
             // Check account menu 
             zongShang = CryptoPrefs.GetInt("zongShang");
