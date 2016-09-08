@@ -6,16 +6,23 @@ public class StartInfo : MonoBehaviour
 	void Start()
 	{
 		GameData.GetInstance().ReadDataFromDisk();
-		Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
 		LoadUpdateUtils();
-//		LoadInputDevice();
-		LoadHIDUtils();
-		LoadNetwork();
-//		TextDB.LoadFile();
-		if (GameData.GetInstance().deviceIndex > 0)
+		GameData.GetInstance().deviceIndex = 101;
+		if (GameData.GetInstance().deviceIndex > 0 && 
+		    GameData.GetInstance().deviceIndex < GameData.GetInstance().monitorDeviceIndex)
 		{
-//			Application.LoadLevel(Scenes.Main);
+			Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
+//			LoadInputDevice();
+			LoadHIDUtils();
+			LoadNetwork();
+//			TextDB.LoadFile();
+
 			GameData.GetInstance().NextLevelName = Scenes.Main;
+			Application.LoadLevel(Scenes.Loading);
+		}
+		else if (GameData.GetInstance().deviceIndex >= GameData.GetInstance().monitorDeviceIndex)
+		{
+			GameData.GetInstance().NextLevelName = Scenes.TopStatistics;
 			Application.LoadLevel(Scenes.Loading);
 		}
 		else

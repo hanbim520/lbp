@@ -200,6 +200,7 @@ public class UClient : MonoBehaviour
 		int lotteryCondition, lotteryBase, lotteryRate, lotteryAlloc, lotteryDigit;
 		int inputDevice;
 		int powerOffCompensate;
+		int topScreenLanguage;
 		
 		if(int.TryParse(words[1], out betTimeLimit))
 			GameData.GetInstance().betTimeLimit = betTimeLimit;
@@ -274,7 +275,9 @@ public class UClient : MonoBehaviour
 		}
 		if (int.TryParse(words[29], out powerOffCompensate))
 			GameData.GetInstance().powerOffCompensate = powerOffCompensate;
-		
+		if (int.TryParse(words[30], out topScreenLanguage))
+			GameData.GetInstance().topScreenLanguage = topScreenLanguage;
+
 		GameData.GetInstance().SaveSetting();
 		GameEventManager.OnSyncUI();
 	}

@@ -68,6 +68,7 @@ public class RecordCircle : MonoBehaviour
 
     private IEnumerator RefreshView()
     {
+		// 为了等冷热号处理结束
         yield return new WaitForSeconds(1.0f);
         int count = GameData.GetInstance().records.Count;
         int[] records = GameData.GetInstance().records.ToArray();

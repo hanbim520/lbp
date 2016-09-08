@@ -16,7 +16,7 @@ public static class GameEventManager
 	public delegate void ChooseFieldsEvent(Transform hitObject);	// 选中多个区域 选中区域显亮色
 	public delegate void DebugLogEvent(int eventId, string log);
 	public delegate void RakeInitEvent(int type, int lineId, float startX1, float startX2, ref List<Transform> winChips);
-    public static event GameEvent GameStart, GameOver, EndCountdown;
+	public static event GameEvent GameStart, GameOver, StartCountdown, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll, CleanAll;
 	public static event GameEvent HIDConnected, HIDDisconnected;
@@ -142,6 +142,11 @@ public static class GameEventManager
 	public static void OnClear(string fieldName)
 	{
 		if (Clear != null) Clear(fieldName);
+	}
+
+	public static void OnStartCountdown()
+	{
+		if (StartCountdown != null) StartCountdown();
 	}
 
 	public static void OnEndCountdown()

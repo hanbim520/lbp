@@ -10,18 +10,7 @@ public class LotteryNum : MonoBehaviour
 	void Start()
 	{
 		GameEventManager.LotteryChange += HandleLotteryChange;
-        lotteryDigit = 200384;
-        ShowLottery();
-        StartCoroutine(test());
-    }
-
-    IEnumerator test()
-    {
-        yield return new WaitForSeconds(5);
-        lotteryDigit = 100000;
-        ShowLottery();
-        
-    }
+	}
 
 	void OnDestroy()
 	{

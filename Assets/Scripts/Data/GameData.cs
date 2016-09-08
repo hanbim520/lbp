@@ -9,7 +9,7 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = true;       // 是否模拟出球
+	public static bool debug = false;       // 是否模拟出球
 	public static bool controlCode = false;  // 是否打码
 
     // Setting menu
@@ -225,6 +225,8 @@ public class GameData
 	{
 		get { return lotteryAllocation > 0; }
 	}
+
+	public int monitorDeviceIndex = 101;	// 路单屏的机器id (大于等于这个号都是路单屏)
 
 	private GameData()
 	{

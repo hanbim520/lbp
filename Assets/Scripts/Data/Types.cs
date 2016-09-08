@@ -95,6 +95,7 @@ public struct Scenes
 	public static string Last10         = "LastTen";
 	public static string Account        = "Account";
 	public static string TouchCheck     = "TouchCheck";
+	public static string TopStatistics  = "TopStatistics";
 }
 
 public struct CardMode
