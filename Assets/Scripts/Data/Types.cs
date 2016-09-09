@@ -135,6 +135,7 @@ public struct PromptId
 	public static int PleaseBet = 0;
 	public static int NoMoreBet = 1;
 	public static int Result 	= 2;
+	public static int Reboot	= 3;
 }
 
 public struct BreakdownType

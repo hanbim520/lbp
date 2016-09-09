@@ -26,27 +26,27 @@ public static class GameEventManager
 	public static event SerialMouseButtonEvent SMLBUp, SMLBDown, SMRBUp, SMRBDown;
     public static event GameEventWithId RefreshRecord;
     public static event FieldClickEvent FieldClick;
-	public static event KeyinEvent Keyin;	// 上分
-	public static event GameEvent Keout;	// 下分
-    public static event GameEventWithId ReceiveCoin;	// 投币
-	public static event GameEvent PayCoin;				// 退币
-    public static event GameEventWithId PayCoinCallback;	// 退币机发来的退币数
-	public static event GameEvent OpenKey;				// 旋转物理钥匙 (上下分)
+	public static event KeyinEvent Keyin;							// 上分
+	public static event GameEvent Keout;							// 下分
+    public static event GameEventWithId ReceiveCoin;				// 投币
+	public static event GameEvent PayCoin;							// 退币
+    public static event GameEventWithId PayCoinCallback;			// 退币机发来的退币数
+	public static event GameEvent OpenKey;							// 旋转物理钥匙 (上下分)
 	public static event GameEventWithString ChangeScene;
 	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
-	public static event GameEvent ClientDisconnect;	// 分机通讯断开
+	public static event GameEvent ClientDisconnect;					// 分机通讯断开
     public static event GameEventWithId LotteryChange;
 	public static event ChooseFieldsEvent ChooseFields;	
-	public static event DebugLogEvent DebugLog;		// 在屏幕上显示log
+	public static event DebugLogEvent DebugLog;						// 在屏幕上显示log
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
     public static event GameEventWithId BallValue;
-    public static event GameEventWithId Prompt, ResultPrompt;
-    public static event GameEventWithId OddsPrompt;
+    public static event GameEventWithId Prompt, ResultPrompt;		// 提示跑马灯
+    public static event GameEventWithId OddsPrompt;					// 提示压分区倍率
 	public static event GameEvent SyncData;
 	public static event GameEventWithId BreakdownTip;
-	public static event GameEvent SyncUI;			// 同步后台设置后，设置分机ui
-	public static event GameEvent SyncInputDevice;  // 同步输入设备
+	public static event GameEvent SyncUI;							// 同步后台设置后，设置分机ui
+	public static event GameEvent SyncInputDevice;  				// 同步输入设备
 	public static event RakeInitEvent RakeInit;
 	public static event GameEvent EnterBackend;
 

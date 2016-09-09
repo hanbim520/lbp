@@ -9,8 +9,8 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug = false;       // 是否模拟出球
-	public static bool controlCode = false;  // 是否打码
+	public static bool debug 		= true;		// 是否模拟出球
+	public static bool controlCode	= false;		// 是否打码
 
     // Setting menu
     public int betTimeLimit;

@@ -1332,19 +1332,18 @@ public class MainUILogic : MonoBehaviour
 	public void BreakdownTip(int breakdownType)
 	{
 		int language = GameData.GetInstance().language;
+		gameLogic.SetPause(true);
+		GameEventManager.OnPrompt(PromptId.Reboot);
 		if (breakdownType == BreakdownType.RecognizeBall)
 		{
-			gameLogic.SetPause(true);
 			ShowWarning(strRecognBallError[language]);
 		}
 		else if (breakdownType == BreakdownType.USBDisconnect)
 		{
-			gameLogic.SetPause(true);
 			ShowWarning(strUSBDisconnError[language]);
 		}
 		else if (breakdownType == BreakdownType.RecognizeBallTimeout)
 		{
-			gameLogic.SetPause(true);
 			ShowWarning(strTimeoutError[language]);
 		}
 	}

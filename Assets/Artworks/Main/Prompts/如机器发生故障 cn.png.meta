@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: f93c43763353b97489a42201be5c5035
-timeCreated: 1468588274
+guid: 2127a0e82c6595b4db8479dd4ebae257
+timeCreated: 1473406315
 licenseType: Pro
 TextureImporter:
   fileIDToRecycleName: {}
@@ -49,7 +49,7 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites: []
-  spritePackingTag: main
+  spritePackingTag: prompt
   userData: 
   assetBundleName: 
   assetBundleVariant: 

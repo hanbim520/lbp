@@ -21,10 +21,7 @@ public class Prompts : MonoBehaviour
 
 	private void Prompt(int promptId)
 	{
-		if (promptId == PromptId.PleaseBet)
-			StartCoroutine(SetPrompt(0));
-		else if (promptId == PromptId.NoMoreBet)
-			StartCoroutine(SetPrompt(1));
+		StartCoroutine(SetPrompt(promptId));
 	}
 
 	private void ResultPrompt(int result)
@@ -54,7 +51,7 @@ public class Prompts : MonoBehaviour
 			currentPrompt.transform.GetChild(0).GetComponent<Text>().text = string.Empty;
 		iTween.MoveTo(currentPrompt.gameObject,
 //		              iTween.Hash("x", -120.0f, "time", 2.5f, "islocal", true, "easetype", iTween.EaseType.linear));
-		              iTween.Hash("x", 0.0f, "time", 2.5f, "islocal", true, "easetype", iTween.EaseType.linear));
+		              iTween.Hash("x", 15.0f, "time", 2.5f, "islocal", true, "easetype", iTween.EaseType.linear));
 	}
 
 	private void Disappear()
