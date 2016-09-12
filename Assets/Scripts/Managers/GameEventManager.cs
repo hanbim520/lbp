@@ -16,6 +16,7 @@ public static class GameEventManager
 	public delegate void ChooseFieldsEvent(Transform hitObject);	// 选中多个区域 选中区域显亮色
 	public delegate void DebugLogEvent(int eventId, string log);
 	public delegate void RakeInitEvent(int type, int lineId, float startX1, float startX2, ref List<Transform> winChips);
+	public delegate void PromptEvent(PromptId promptId, int result);
 	public static event GameEvent GameStart, GameOver, StartCountdown, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll, CleanAll;
@@ -41,7 +42,7 @@ public static class GameEventManager
     
 	public static event GameEvent SBlowBall, EBlowBall, OpenGate, CloseGate;
     public static event GameEventWithId BallValue;
-    public static event GameEventWithId Prompt, ResultPrompt;		// 提示跑马灯
+	public static event PromptEvent Prompt;		// 提示跑马灯
     public static event GameEventWithId OddsPrompt;					// 提示压分区倍率
 	public static event GameEvent SyncData;
 	public static event GameEventWithId BreakdownTip;
@@ -246,14 +247,9 @@ public static class GameEventManager
 		if (LotteryChange != null) LotteryChange(value); 
 	}
 
-	public static void OnPrompt(int promptId)
+	public static void OnPrompt(PromptId promptId, int result)
 	{
-		if (Prompt != null) Prompt(promptId);
-	}
-
-	public static void OnResultPrompt(int result)
-	{
-		if (ResultPrompt != null) ResultPrompt(result);
+		if (Prompt != null) Prompt(promptId, result);
 	}
 
 	public static void OnOddsPrompt(int odds)

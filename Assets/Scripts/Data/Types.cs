@@ -129,13 +129,14 @@ public class AccountItem
 	public int card;
 }
 
-public struct PromptId
+public enum PromptId
 {
-	public static int None 		= -1;
-	public static int PleaseBet = 0;
-	public static int NoMoreBet = 1;
-	public static int Result 	= 2;
-	public static int Reboot	= 3;
+	None 		= -1,
+	PleaseBet 	= 0,
+	NoMoreBet 	= 1,
+	Result 		= 2,
+	Reboot		= 3,
+	Jackpot		= 4
 }
 
 public struct BreakdownType

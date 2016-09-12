@@ -1083,7 +1083,7 @@ public class MainUILogic : MonoBehaviour
 		                                       "onupdate", "UpdateProgress", "onupdatetarget", gameObject));
 		t.Start();
 		AudioController.Play("makeyourbets");
-		GameEventManager.OnPrompt(PromptId.PleaseBet);
+		GameEventManager.OnPrompt(PromptId.PleaseBet, -1);
 	}
 
 	private void UpdateProgress(float value)
@@ -1102,7 +1102,7 @@ public class MainUILogic : MonoBehaviour
 		Debug.Log("ui CountdownComplete");
 		GameEventManager.OnEndCountdown();
 		AudioController.Play("nomorebets");
-		GameEventManager.OnPrompt(PromptId.NoMoreBet);
+		GameEventManager.OnPrompt(PromptId.NoMoreBet, -1);
 	}
 
 	public void ResetCountdown()
@@ -1165,8 +1165,9 @@ public class MainUILogic : MonoBehaviour
 				go.transform.localScale = Vector3.one;
 			}
 		}
-
 		prefab = null;
+
+		GameEventManager.OnPrompt(PromptId.Jackpot, GameData.GetInstance().lotteryCondition);
 	}
 
 	public void StopFlashLotteries()
@@ -1275,7 +1276,7 @@ public class MainUILogic : MonoBehaviour
 		crown.transform.localPosition = target.localPosition;
 
 		// 出提示语
-		GameEventManager.OnResultPrompt(result);
+		GameEventManager.OnPrompt(PromptId.Result, result);
 		// Play sfx
 		string promptSfx = result == 37 ? "00" : result.ToString();
 		AudioController.Play(promptSfx);
@@ -1333,7 +1334,7 @@ public class MainUILogic : MonoBehaviour
 	{
 		int language = GameData.GetInstance().language;
 		gameLogic.SetPause(true);
-		GameEventManager.OnPrompt(PromptId.Reboot);
+		GameEventManager.OnPrompt(PromptId.Reboot, -1);
 		if (breakdownType == BreakdownType.RecognizeBall)
 		{
 			ShowWarning(strRecognBallError[language]);

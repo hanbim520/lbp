@@ -390,4 +390,19 @@ public static class Utils
 		crc2++;
 		return crc2;
 	}
+
+	public static int GetNumLength(int num)
+	{
+		if (num == 0)
+			return 1;
+
+		int ret = 0;
+		num = Mathf.Abs(num);
+		while (num > 0)
+		{
+			++ret;
+			num = num / 10;
+		}
+		return ret;
+	}
 }
