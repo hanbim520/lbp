@@ -756,13 +756,14 @@ public class GameData
 		_lotteryMatchCount = PlayerPrefs.GetInt("lotteryMatchCount", 0);
 		lotteryMaxMatch = CryptoPrefs.GetInt("lotteryMaxMatch", 0);
 		lotteryWinIdx.Clear();
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < 20; ++i)
 		{
 			string key = "lotteryMatchIdx" + i.ToString();
 			if (CryptoPrefs.HasKey(key))
 				lotteryWinIdx.Add(CryptoPrefs.GetInt(key));
 		}
-		if (lotteryMaxMatch == 0 && lotteryEnable)
+		if (lotteryEnable && 
+		    lotteryWinIdx.Count == 0)
 		{
 			CalcLotteryIdx();
 			lotteryMatchCount = 0;
@@ -819,13 +820,13 @@ public class GameData
 		int count = Utils.GetRandom(9, 12);					// 共有多少场出彩金
 		int sumMatch = 2400;								// 2天内的场次数 (一场90秒 每天15个小时)
 		lotteryWinIdx.Clear();
-		for (int i = 0; i < 10; ++i)
+		for (int i = 0; i < 20; ++i)
 		{
 			string key = "lotteryMatchIdx" + i.ToString();
 			if (CryptoPrefs.HasKey(key))
 				CryptoPrefs.DeleteKey(key);
 		}
-		while (lotteryWinIdx.Count >= count)
+		while (lotteryWinIdx.Count < count)
 		{
 			int index = Utils.GetRandom(1, sumMatch);
 			if (!lotteryWinIdx.Contains(index))

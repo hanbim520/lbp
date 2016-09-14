@@ -302,7 +302,7 @@ public class ServerLogic : GameLogic
 		if (!isLucky)
 			return;
 
-		string strBall = ballValue.ToString();
+		string strBall = ballValue == 37 ? "00" : ballValue.ToString();
 		int tmpLuckSum;
 		if (clientBetFields.TryGetValue(strBall, out tmpLuckSum))
 			curLuckySum = tmpLuckSum;
@@ -370,8 +370,8 @@ public class ServerLogic : GameLogic
 			int noBetCount = noBetSingle.Count;
 			// 判断要不要出彩金，出的话不中。
 			Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Minute);
-//			int ret = Utils.GetRandom(0, 20);
-			int ret = 12;
+			int ret = Utils.GetRandom(0, 20);
+//			int ret = 12;
 			// 出彩金
 			if (ret == 12 && noBetCount > 0)
 			{
@@ -458,15 +458,21 @@ public class ServerLogic : GameLogic
 				if (isLucky)
 				{
 					int selfBet;
-					if (betFields.TryGetValue(ballValue.ToString(), out selfBet))
+					string betField = ballValue == 37 ? "00" : ballValue.ToString();
+					if (betFields.TryGetValue(betField, out selfBet))
 					{
 						if (selfBet >= GameData.GetInstance().lotteryCondition)
 						{
+							float selfRatio = (float)selfBet / (float)curLuckySum;
+							float othersRatio = 1.0f -  selfRatio;
 							luckyWin = Mathf.FloorToInt((float)GameData.GetInstance().lotteryDigit * 
-							                           ((float)selfBet / (float)curLuckySum) * 
+							                            selfRatio * 
 							                           ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
 							if (luckyWin > 0)
 							{
+								othersLucyWin = Mathf.FloorToInt((float)GameData.GetInstance().lotteryDigit * 
+								                                 othersRatio * 
+								                                 ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
 								GameData.GetInstance().lotteryDigit -= (luckyWin + othersLucyWin);
 								ui.CreateGoldenRain();
 							}
@@ -567,14 +573,6 @@ public class ServerLogic : GameLogic
 			if (gamePhase >= GamePhase.ShowResult)
 				return;
 			CollectBetRecords(ref words);
-		}
-		else if (instr == NetInstr.LuckWin)
-		{
-			int luckyWin;
-			if (int.TryParse(words[1], out luckyWin))
-			{
-				othersLucyWin += luckyWin;
-			}
 		}
 		else if (instr == NetInstr.GetTotalBet)
 		{

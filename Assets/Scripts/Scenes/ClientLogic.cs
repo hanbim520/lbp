@@ -227,8 +227,6 @@ public class ClientLogic : GameLogic
 						                           ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
 						if (luckyWin > 0)
 						{
-							string msg = NetInstr.LuckWin.ToString() + ":" + luckyWin.ToString();
-							uclient.SendToServer(msg);
 							ui.CreateGoldenRain();
 						}
 					}
