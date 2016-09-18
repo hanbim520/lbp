@@ -133,7 +133,6 @@ public class GoldfingerUtils : MonoBehaviour
 			timerHeartBeat = null;
 		}
 
-		int len = data.Length;
 		if (data.Length >= kMaxCOM2DataLength)
 		{
 			if (data[0] == 0xA5 && data[1] == 0x58 && data[2] == 0x57)

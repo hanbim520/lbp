@@ -52,7 +52,6 @@ public class GameData
 	public int currentWin;			// 当次赢分（有跳码时候用）
 	public int totalWin;			// 总赢分
 	public int cardCredits;			// 优惠卡送的分
-	public int lotteryCredits;		// 彩金送的分
 	public Queue<KeyinKeoutRecord> keyinKeoutRecords = new Queue<KeyinKeoutRecord>();		// 上下分 投退币流水账
     private int _printTimes;   // 打码次数
     public int printTimes
@@ -80,6 +79,7 @@ public class GameData
         get { return zongYa; }
         set
         {
+			zongYa = value;
             CryptoPrefs.SetInt("zongYa", zongYa);
             CryptoPrefs.Save();
         }
@@ -89,11 +89,56 @@ public class GameData
         get { return zongPei; }
         set
         {
+			zongPei = value;
             CryptoPrefs.SetInt("zongPei", zongPei);
             CryptoPrefs.Save();
         }
     }
-
+	private int _lotteryCredits;
+	public int lotteryCredits		// 彩金送的分 显示在总账上面
+	{
+		get { return _lotteryCredits; }
+		set
+		{
+			_lotteryCredits = value;
+			CryptoPrefs.SetInt("lotteryCredits", _lotteryCredits);
+			CryptoPrefs.Save();
+		}
+	}
+	private int _jackpotDaybook;	// 彩金送的分 显示在流水账上面
+	public int jackpotDaybook
+	{
+		get { return _jackpotDaybook; }
+		set
+		{
+			_jackpotDaybook = value;
+			CryptoPrefs.SetInt("jackpotDaybook", _jackpotDaybook);
+			CryptoPrefs.Save();
+		}
+	}
+	private int _vipCredits;		// vip卡送出的分 显示在总账上面
+	public int vipCredits
+	{
+		get { return _vipCredits; }
+		set
+		{
+			_vipCredits = value;
+			CryptoPrefs.SetInt("vipCredits", _vipCredits);
+			CryptoPrefs.Save();
+		}
+	}
+	private int _vipDaybook;		// vip卡送出的分 显示在流水账上面
+	public int vipDaybook
+	{
+		get { return _vipDaybook; }
+		set
+		{
+			_vipDaybook = value;
+			CryptoPrefs.SetInt("vipDaybook", _vipDaybook);
+			CryptoPrefs.Save();
+		}
+	}
+	
 
     private int _lineId = 586;        // 线号
     public int lineId
@@ -402,6 +447,10 @@ public class GameData
 		CryptoPrefs.SetInt("cardCredits", cardCredits);
 		CryptoPrefs.SetInt("currentZongShang", currentZongShang);
 		CryptoPrefs.SetInt("currentZongXia", currentZongXia);
+		CryptoPrefs.SetInt("lotteryCredits", _lotteryCredits);
+		CryptoPrefs.SetInt("jackpotDaybook", _jackpotDaybook);
+		CryptoPrefs.SetInt("vipCredits", _vipCredits);
+		CryptoPrefs.SetInt("vipDaybook", _vipDaybook);
         CryptoPrefs.Save();
     }
 
@@ -419,11 +468,15 @@ public class GameData
 		printTimes = 0;
 		currentZongShang = 0;
 		currentZongXia = 0;
+		_lotteryCredits = 0;
+		_jackpotDaybook = 0;
+		_vipCredits = 0;
+		_vipDaybook = 0;
     }
 
     public void ReadDataFromDisk()
     {
-//        PlayerPrefs.DeleteAll();
+//    	PlayerPrefs.DeleteAll();
         int firstWrite = PlayerPrefs.GetInt("FirstWrite", 0);
         if (firstWrite == 0)
         {
@@ -495,6 +548,10 @@ public class GameData
 			_printTimes = CryptoPrefs.GetInt("printTimes");
 			currentZongShang = CryptoPrefs.GetInt("currentZongShang");
 			currentZongXia = CryptoPrefs.GetInt("currentZongXia");
+			_lotteryCredits = CryptoPrefs.GetInt("lotteryCredits", 0);
+			_jackpotDaybook = CryptoPrefs.GetInt("jackpotDaybook", 0);
+			_vipCredits = CryptoPrefs.GetInt("vipCredits", 0);
+			_vipDaybook = CryptoPrefs.GetInt("vipDaybook", 0);
 
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
@@ -799,6 +856,10 @@ public class GameData
         cardCredits = 0;
 		currentZongShang = 0;
 		currentZongXia = 0;
+		_lotteryCredits = 0;
+		_jackpotDaybook = 0;
+		_vipDaybook = 0;
+		_vipCredits = 0;
         SaveAccount();
 		return true;
     }

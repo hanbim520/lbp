@@ -79,7 +79,7 @@ public class ServerLogic : GameLogic
 			}
 			else if (Input.GetKeyUp(KeyCode.B))
 			{
-				GameEventManager.OnChangeScene(Scenes.Backend);
+				GameEventManager.OnEnterBackend();
 			}
 		}
 #endif
@@ -485,6 +485,8 @@ public class ServerLogic : GameLogic
 		AppendLast10(totalCredits, totalCredits + win + luckyWin, currentBet, win, luckyWin, ballValue);
 		win += luckyWin;	// 加上彩金送的分
         GameData.GetInstance().ZongPei += win;
+		GameData.GetInstance().lotteryCredits += luckyWin;	// 保存送出去的彩金 显示在总账
+		GameData.GetInstance().jackpotDaybook += luckyWin;	// 保存送出去的彩金 显示在流水账
 		currentBet = 0;
 		totalCredits += win;
 		if (totalCredits <= 0)

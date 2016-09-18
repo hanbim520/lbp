@@ -118,7 +118,7 @@ public class BillAcceptorUtils : MonoBehaviour
 				verifyPhase  = 0;
 				billValue    = 0;
 				powerUpPhase = 0;
-				PrintLog(string.Format("Bill Acceptor Exception Code:{0:X}", data[i]));
+//				PrintLog(string.Format("Bill Acceptor Exception Code:{0:X}", data[i]));
 			}
 		}
 //		PrintData(ref data);
