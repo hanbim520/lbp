@@ -34,6 +34,7 @@ public struct NetInstr
 	public const int GetTotalBet		= 14; // 获取分机的总压分
 	public const int SyncInputDevice	= 15; // 同步输入设备
     public const int SyncTSLanguage     = 16; // 同步路单的语言
+	public const int IndicateIdentity	= 17; // 1:分机 2:路单屏幕
 }
 
 // Use for network

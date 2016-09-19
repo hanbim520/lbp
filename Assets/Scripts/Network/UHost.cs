@@ -112,14 +112,14 @@ public class UHost : MonoBehaviour
 	private void HandleConnectEvent(int connectionId)
 	{
 		Debug.Log("Connect event. connectionId: " + connectionId);
-		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers)
+		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers + 1)
         {
 			return;
         }
 
 		allConnections.Add(connectionId);
 		++numOfConnecting;
-		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers)
+		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers + 1)
 		{
 //			StopBroadcast();
 			GameEventManager.TriggerGameStart();
