@@ -113,7 +113,7 @@ public struct KeyinKeoutRecord
     public int keout;
     public int toubi;
     public int tuibi;
-	public int card;
+	public int card;	// VIP卡送分(原优惠卡分)
 }
 
 // 分机账目

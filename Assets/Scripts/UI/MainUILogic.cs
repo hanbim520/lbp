@@ -519,6 +519,7 @@ public class MainUILogic : MonoBehaviour
 		if (lastBetCredit > gameLogic.totalCredits)
             return;
 
+		int betChipCount = GameData.GetInstance().betChipValues.Count;
         if (displayClassic.activeSelf)
         {
             string rootPath = "Canvas/38 Fields/Classic/Valid Fields";
@@ -527,7 +528,7 @@ public class MainUILogic : MonoBehaviour
                 rootPath = "Canvas/37 Fields/Classic/Valid Fields";
             }
             GameObject root = GameObject.Find(rootPath);
-            string prefabPath = "BigChip/BC0";
+            string prefabPath = "BigChip/BC";
             if (root != null)
             {
 				int betValue = 0;
@@ -540,7 +541,14 @@ public class MainUILogic : MonoBehaviour
                     Transform target = root.transform.FindChild(info.Key);
                     if (target != null)
                     {
-                        Object prefab = (Object)Resources.Load(prefabPath);
+						int chipIdx = 0;
+						for (int i = 0; i < betChipCount; ++i)
+						{
+							if (info.Value >= GameData.GetInstance().betChipValues[i])
+								chipIdx = i;
+						}
+
+						Object prefab = (Object)Resources.Load(prefabPath + chipIdx);
                         GameObject chip = (GameObject)Instantiate(prefab);
                         chip.transform.SetParent(fieldChipsRoot.transform);
                         chip.transform.localScale = Vector3.one;
@@ -583,13 +591,13 @@ public class MainUILogic : MonoBehaviour
                     if (info.Key == "00" && fields37.activeSelf)
                         continue;
 
-                    string prefabPath = "SmallChip/SC0";
+                    string prefabPath = "SmallChip/SC";
                     Transform target;
                     int fieldName;
                     string name = info.Key;
                     if (int.TryParse(info.Key, out fieldName) || string.Equals(info.Key, "00"))
                     {
-                        prefabPath = "BigChip/BC0";
+                        prefabPath = "BigChip/BC";
                         name = "e" + name;
                         target = ceRoot.transform.FindChild(name);
                     }
@@ -600,7 +608,14 @@ public class MainUILogic : MonoBehaviour
                     
                     if (target != null)
                     {
-                        Object prefab = (Object)Resources.Load(prefabPath);
+						int chipIdx = 0;
+						for (int i = 0; i < betChipCount; ++i)
+						{
+							if (info.Value >= GameData.GetInstance().betChipValues[i])
+								chipIdx = i;
+						}
+
+                        Object prefab = (Object)Resources.Load(prefabPath + chipIdx);
                         GameObject chip = (GameObject)Instantiate(prefab);
                         chip.transform.SetParent(fieldChipsRoot.transform);
                         chip.transform.localScale = Vector3.one;

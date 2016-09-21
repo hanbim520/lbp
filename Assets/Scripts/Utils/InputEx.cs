@@ -281,8 +281,18 @@ public class InputEx : MonoBehaviour
 		}
 		else
 		{
-//			if (inputEnable && Input.GetMouseButtonUp(0))
-			if (Input.GetMouseButtonUp(0))
+			if (Input.touches.Length > 0)
+			{
+				Touch t = Input.GetTouch(0);
+				if (t.phase == TouchPhase.Ended)
+				{
+					float lcdx, lcdy;
+					Utils.ScreenSpaceToUISpace(t.position.x, t.position.y, out lcdx, out lcdy);
+					inputPosition = new Vector2(lcdx, lcdy);
+					return;
+				}
+			}
+			else if (Input.GetMouseButtonUp(0))
 			{
 				float lcdx, lcdy;
 				Utils.ScreenSpaceToUISpace(Input.mousePosition.x, Input.mousePosition.y, out lcdx, out lcdy);
@@ -307,8 +317,18 @@ public class InputEx : MonoBehaviour
 		}
 		else
 		{
-			if (inputEnable && Input.GetMouseButtonDown(0))
-//			if (Input.GetMouseButtonDown(0))
+			if (Input.touches.Length > 0)
+			{
+				Touch t = Input.GetTouch(0);
+				if (t.phase == TouchPhase.Began)
+				{
+					float lcdx, lcdy;
+					Utils.ScreenSpaceToUISpace(t.position.x, t.position.y, out lcdx, out lcdy);
+					inputPosition = new Vector2(lcdx, lcdy);
+					return;
+				}
+			}
+			else if (inputEnable && Input.GetMouseButtonDown(0))
 			{
 				float lcdx, lcdy;
 				Utils.ScreenSpaceToUISpace(Input.mousePosition.x, Input.mousePosition.y, out lcdx, out lcdy);

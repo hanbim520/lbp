@@ -7,10 +7,10 @@ public class StartInfo : MonoBehaviour
 	{
 		GameData.GetInstance().ReadDataFromDisk();
 		LoadUpdateUtils();
+		Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
 		if (GameData.GetInstance().deviceIndex > 0 && 
 		    GameData.GetInstance().deviceIndex < GameData.GetInstance().monitorDeviceIndex)
 		{
-			Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
 //			LoadInputDevice();
 			LoadHIDUtils();
 			LoadNetwork();
