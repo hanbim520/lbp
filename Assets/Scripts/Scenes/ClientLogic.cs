@@ -199,6 +199,10 @@ public class ClientLogic : GameLogic
             {
                 win += peilv * item.Value;
                 ui.AddWinChip(item.Key);
+				if (peilv == 36)
+				{
+					ui.AddWinChip("e" + item.Key);
+				}
             }
         }
 		// 赢取的彩金数

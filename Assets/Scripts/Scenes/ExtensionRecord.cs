@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using PathologicalGames;
 
 public class ExtensionRecord : MonoBehaviour
 {
@@ -118,18 +119,26 @@ public class ExtensionRecord : MonoBehaviour
 		if (root != null) 
 		{
 			string path = "Bet Chips/";
+			int count = GameData.GetInstance().betChipValues.Count;
 			foreach (BetInfo info in betRecord.bets)
 			{
 				Transform location = root.FindChild(info.betField);
 				if (location != null)
 				{
-					Object prefab = (Object)Resources.Load(path + "BetChip0");
-					GameObject chip = (GameObject)Instantiate(prefab); 
+					int chipIdx = 0;
+					for (int i = 0; i < count; ++i)
+					{
+						if (info.betValue >= GameData.GetInstance().betChipValues[i])
+							chipIdx = i;
+					}
+//					Object prefab = (Object)Resources.Load(path + "BetChip" + chipIdx.ToString());
+//					GameObject chip = (GameObject)Instantiate(prefab); 
+					GameObject chip = PoolManager.Pools["Stuff"].Spawn("BetChip" + chipIdx.ToString()).gameObject;
 					chip.transform.SetParent(betChipsRoot);
 					chip.transform.localPosition = location.localPosition;
 					chip.transform.localScale = Vector3.one;
 					chip.transform.GetChild(0).GetComponent<Text>().text = info.betValue.ToString();
-					prefab = null;
+//					prefab = null;
 				}
 				else
 				{

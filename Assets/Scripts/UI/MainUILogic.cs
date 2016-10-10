@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using PathologicalGames;
 
 public class MainUILogic : MonoBehaviour
 {
@@ -248,12 +249,10 @@ public class MainUILogic : MonoBehaviour
 								if (item.Value >= GameData.GetInstance().betChipValues[i])
 									chipIdx = i;
 							}
-							string prefabPath = "BigChip/BC" + chipIdx;
-							Object prefab = (Object)Resources.Load(prefabPath);
-							GameObject chip = (GameObject)Instantiate(prefab);
+							string prefabPath = "BC" + chipIdx.ToString();
+							GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath).gameObject;
 							chip.transform.SetParent(fieldChipsRoot.transform);
 							chip.transform.localScale = Vector3.one;
-							prefab = null;
 							Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
 							                                target.localPosition.y * target.parent.localScale.y,
 							                                0);
@@ -290,7 +289,7 @@ public class MainUILogic : MonoBehaviour
 						}
 
 						List<string> prefabPath = new List<string>();
-						prefabPath.Add("SmallChip/SC" + chipIdx.ToString());
+						prefabPath.Add("SC" + chipIdx.ToString());
 						List<Transform> target = new List<Transform>();
 						int fieldName;
 						List<string> name = new List<string>();
@@ -304,23 +303,21 @@ public class MainUILogic : MonoBehaviour
 						// 设置大筹码
 						if (int.TryParse(item.Key, out fieldName) || string.Equals(item.Key, "00"))
 						{
-							prefabPath.Add("BigChip/BC" + chipIdx.ToString());
+							prefabPath.Add("BC" + chipIdx.ToString());
 							string eName = "e" + item.Key;
 							name.Add(eName);
 							tmpTarget = ceRoot.transform.FindChild(eName);
 							if (tmpTarget != null)
 								target.Add(tmpTarget);
 						}
-
+						
 						if (target.Count > 0)
 						{
 							for (int i = 0; i < prefabPath.Count; ++i)
 							{
-								Object prefab = (Object)Resources.Load(prefabPath[i]);
-								GameObject chip = (GameObject)Instantiate(prefab);
+								GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath[i]).gameObject;
 								chip.transform.SetParent(fieldChipsRoot.transform);
 								chip.transform.localScale = Vector3.one;
-								prefab = null;
 								Vector3 targetPos = new Vector3(target[i].localPosition.x * target[i].parent.localScale.x,
 								                                target[i].localPosition.y * target[i].parent.localScale.y,
 								                                0);
@@ -502,8 +499,8 @@ public class MainUILogic : MonoBehaviour
     // 加中的筹码
     public void AddWinChip(string fieldName)
     {
-        if (string.Equals(fieldName.Substring(0, 1), "e"))
-            return;
+//        if (string.Equals(fieldName.Substring(0, 1), "e"))
+//            return;
         Transform t = fieldChipsRoot.transform.FindChild(fieldName);
         if (t != null)
             winChips.Add(t);
@@ -528,7 +525,7 @@ public class MainUILogic : MonoBehaviour
                 rootPath = "Canvas/37 Fields/Classic/Valid Fields";
             }
             GameObject root = GameObject.Find(rootPath);
-            string prefabPath = "BigChip/BC";
+            string prefabPath = "BC";
             if (root != null)
             {
 				int betValue = 0;
@@ -548,11 +545,9 @@ public class MainUILogic : MonoBehaviour
 								chipIdx = i;
 						}
 
-						Object prefab = (Object)Resources.Load(prefabPath + chipIdx);
-                        GameObject chip = (GameObject)Instantiate(prefab);
-                        chip.transform.SetParent(fieldChipsRoot.transform);
+						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
+						chip.transform.SetParent(fieldChipsRoot.transform);
                         chip.transform.localScale = Vector3.one;
-                        prefab = null;
                         Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
                                                         target.localPosition.y * target.parent.localScale.y,
                                                         0);
@@ -591,37 +586,37 @@ public class MainUILogic : MonoBehaviour
                     if (info.Key == "00" && fields37.activeSelf)
                         continue;
 
-                    string prefabPath = "SmallChip/SC";
-                    Transform target;
+                    string prefabPath = "SC";
+                    Transform target1 = null;
+                    Transform target2 = null;	// 为了恢复小的单点筹码
                     int fieldName;
                     string name = info.Key;
                     if (int.TryParse(info.Key, out fieldName) || string.Equals(info.Key, "00"))
                     {
-                        prefabPath = "BigChip/BC";
+                        prefabPath = "BC";
                         name = "e" + name;
-                        target = ceRoot.transform.FindChild(name);
+                        target1 = ceRoot.transform.FindChild(name);
+						target2 = vfRoot.transform.FindChild(info.Key);
                     }
                     else
                     {
-                        target = vfRoot.transform.FindChild(info.Key);
+                        target1 = vfRoot.transform.FindChild(info.Key);
                     }
                     
-                    if (target != null)
+					int chipIdx = 0;
+                    if (target1 != null)
                     {
-						int chipIdx = 0;
 						for (int i = 0; i < betChipCount; ++i)
 						{
 							if (info.Value >= GameData.GetInstance().betChipValues[i])
 								chipIdx = i;
 						}
 
-                        Object prefab = (Object)Resources.Load(prefabPath + chipIdx);
-                        GameObject chip = (GameObject)Instantiate(prefab);
+						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
                         chip.transform.SetParent(fieldChipsRoot.transform);
                         chip.transform.localScale = Vector3.one;
-                        prefab = null;
-                        Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
-                                                        target.localPosition.y * target.parent.localScale.y,
+                        Vector3 targetPos = new Vector3(target1.localPosition.x * target1.parent.localScale.x,
+                                                        target1.localPosition.y * target1.parent.localScale.y,
                                                         0);
                         chip.transform.localPosition = targetPos;
                         chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
@@ -629,6 +624,18 @@ public class MainUILogic : MonoBehaviour
 						betValue += info.Value;
 						gameLogic.betFields.Add(info.Key, info.Value);
                     }
+					if (target2 != null)
+					{
+						GameObject chip = PoolManager.Pools["Stuff"].Spawn("SC" + chipIdx.ToString()).gameObject;
+						chip.transform.SetParent(fieldChipsRoot.transform);
+						chip.transform.localScale = Vector3.one;
+						Vector3 targetPos = new Vector3(target2.localPosition.x * target2.parent.localScale.x,
+						                                target2.localPosition.y * target2.parent.localScale.y,
+						                                0);
+						chip.transform.localPosition = targetPos;
+						chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
+						chip.name = info.Key;
+					}
                 }
 				gameLogic.totalCredits -= betValue;
                 GameData.GetInstance().ZongYa += betValue;
@@ -895,10 +902,10 @@ public class MainUILogic : MonoBehaviour
 			if (bet <= 0)
 				return;
 			
-			string prefabPath = "BigChip/BC";
+			string prefabPath = "BC";
 			if (string.Equals(hitObject.parent.name, "Valid Fields") && 
 			    string.Equals(hitObject.parent.parent.name, "Ellipse"))
-				prefabPath = "SmallChip/SC";
+				prefabPath = "SC";
             int chipIdx = 0;
             if (gameLogic.betFields.ContainsKey(strField))
             {
@@ -912,42 +919,42 @@ public class MainUILogic : MonoBehaviour
 					}
                 }
             }
-            Object prefab = (Object)Resources.Load(prefabPath + chipIdx);
-			GameObject chip = (GameObject)Instantiate(prefab);
+			GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
 			chip.transform.SetParent(fieldChipsRoot.transform);
 			chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
 			chip.transform.localScale = Vector3.one;
 			chip.name = hitObject.name + " temp";
-			prefab = null;
 			
 			chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
 			
 			Vector3 targetPos = new Vector3(hitObject.localPosition.x * hitObject.parent.localScale.x,
 			                                hitObject.localPosition.y * hitObject.parent.localScale.y,
 			                                0);
-			iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
-			                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
+//			iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
+//			                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
+			chip.transform.localPosition = targetPos;
+			FieldChipMoveComplete(hitObject.name + ":" + bet.ToString());
 
 			if (isEllipse)
 			{
 				Transform targetObject = hitObject.parent.parent.FindChild("Valid Fields/" + strField);
 				if (targetObject == null)
 					return;
-				prefabPath = "SmallChip/SC";
-				prefab = (Object)Resources.Load(prefabPath + chipIdx);
-				chip = (GameObject)Instantiate(prefab);
+				prefabPath = "SC";
+				chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
 				chip.transform.SetParent(fieldChipsRoot.transform);
 				chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
 				chip.transform.localScale = Vector3.one;
 				chip.name = targetObject.name + " temp";
-				prefab = null;
 				chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
 				
 				targetPos = new Vector3(targetObject.localPosition.x * targetObject.parent.localScale.x,
 				                        targetObject.localPosition.y * targetObject.parent.localScale.y,
 				                        0);
-				iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
-				                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", targetObject.name + ":" + bet.ToString()));
+//				iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
+//				                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", targetObject.name + ":" + bet.ToString()));
+				chip.transform.localPosition = targetPos;
+				FieldChipMoveComplete(targetObject.name + ":" + bet.ToString());
 			}
 		}
 		catch(System.Exception ex)
