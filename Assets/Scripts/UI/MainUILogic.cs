@@ -1170,21 +1170,22 @@ public class MainUILogic : MonoBehaviour
 			string chooseEffectPath = string.Empty;
 			if (GameData.GetInstance().displayType == 0)	// 传统压分区
 			{
-				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Classic/Choose Effect/" : "Canvas/38 Fields/Classic/Choose Effect/";
+				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Jackpot Points Classic/" : "Canvas/38 Fields/Jackpot Points Classic/";
 				jackpot.transform.localScale = Vector3.one;
 			}
 			else
 			{
-				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Ellipse/Choose Effect/" : "Canvas/38 Fields/Ellipse/Choose Effect/";
+				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Jackpot Points Ellipse/" : "Canvas/38 Fields/Jackpot Points Ellipse/";
 				jackpot.transform.localScale = Vector3.one * 0.5f;
 			}
+			print(chooseEffectPath + refrenceName);
 			jackpot.transform.localPosition = GameObject.Find(chooseEffectPath + refrenceName).transform.localPosition;
 			if (GameData.GetInstance().displayType == 1)	// 椭圆压分区
 			{
 				GameObject go = Instantiate(jackpot);
 				go.transform.SetParent(root.transform);
 				go.transform.localPosition = GameObject.Find(chooseEffectPath + "e" + refrenceName).transform.localPosition;
-				go.transform.localScale = Vector3.one;
+				go.transform.localScale = Vector3.one * 0.7f;
 			}
 		}
 		prefab = null;
