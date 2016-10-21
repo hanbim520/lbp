@@ -50,6 +50,12 @@ public static class GameEventManager
 	public static event GameEvent SyncInputDevice;  				// 同步输入设备
 	public static event RakeInitEvent RakeInit;
 	public static event GameEvent EnterBackend;
+	public static event GameEventWithId WinLightSignal;				// 中奖信号灯
+
+	public static void OnWinLightSignal(int signal)
+	{
+		if (WinLightSignal != null) WinLightSignal(signal);
+	}
 
 	public static void OnEnterBackend()
 	{

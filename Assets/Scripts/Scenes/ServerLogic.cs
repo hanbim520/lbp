@@ -248,6 +248,7 @@ public class ServerLogic : GameLogic
 		{
 			Utils.SetSeed();
 			StartCoroutine(SimulateBallValue(Utils.GetRandom(0, GameData.GetInstance().maxNumberOfFields)));
+//			StartCoroutine(SimulateBallValue(1));
 		}
     }
 
@@ -314,6 +315,16 @@ public class ServerLogic : GameLogic
 	// 计算彩金号码
 	private int[] CalcLottery()
 	{
+		if (GameData.isDemo)
+		{
+			int jackpotNum = Random.Range(1, 4);
+			if (jackpotNum == 1)
+				return new int[]{Random.Range(0 ,37)};
+			else if (jackpotNum == 2)
+				return new int[]{Random.Range(0, 19), Random.Range(19, 37)};
+			else
+				return new int[]{Random.Range(0, 13), Random.Range(13, 25), Random.Range(25, 37)};
+		}
 		// 单点压分号码
 		List<int> betSingle = new List<int>();
 		foreach (KeyValuePair<string, int> item in clientBetFields)
@@ -430,6 +441,8 @@ public class ServerLogic : GameLogic
 
 		// 正常赢取的筹码数
 		int win = 0;	
+		// 有中奖(用来判断是否闪烁中奖灯)
+		bool bBingo = false;
 		foreach (KeyValuePair<string, int> item in betFields)
 		{
 			int peilv = Utils.IsBingo(item.Key, ballValue);
@@ -441,8 +454,12 @@ public class ServerLogic : GameLogic
 				{
                 	ui.AddWinChip("e" + item.Key);
 				}
+				if (!bBingo)
+					bBingo = true;
 			}
 		}
+		if (bBingo)
+			GameEventManager.OnWinLightSignal(1);
 		// 赢取的彩金数
 		int luckyWin = 0;	
 		if (GameData.GetInstance().lotteryEnable)
@@ -560,7 +577,8 @@ public class ServerLogic : GameLogic
 		totalBets.Clear();
 		ui.StopFlash();
         ui.StopFlashLotteries();
-    }
+		GameEventManager.OnWinLightSignal(0);
+	}
 
     public void HandleRecData(ref string[] words, int connectionId)
     {

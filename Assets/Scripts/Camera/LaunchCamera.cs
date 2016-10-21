@@ -70,7 +70,8 @@ public class LaunchCamera : MonoBehaviour
 			{
 				bFoundWebcam = true;
 				cameraName = devices[0].name;  
-				cameraTexture = new WebCamTexture(cameraName, 640, 480, 30);  
+//				cameraTexture = new WebCamTexture(cameraName, 640, 480, 30);  
+				cameraTexture = new WebCamTexture(cameraName, 1280, 720, 60);  
 				cameraTexture.Play();  
 				isPlay = true;  
 			}

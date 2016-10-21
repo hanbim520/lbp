@@ -30,18 +30,23 @@ public class GoldfingerUtils : MonoBehaviour
 	private int iLow 			= 0;
 	private int iBlowOrDoor 	= 0;
 	private int iCellNum 		= 0;
+	private int iLight			= 0;		// 中奖灯
 
 	private Timer timerHeartBeat;			// 用来检测断连的计时器
-
+	private float lightElapsed	= 0;		// 中奖灯闪烁计时
+	private const float lightDuration = 0.4f; // 中奖灯闪烁间隔
+	private bool bTurnOnLight	= false;
 	
 	void Start()
 	{
 		DontDestroyOnLoad(this);
 		OpenCOM();
+		GameEventManager.WinLightSignal += WinLightSignal;
 	}
 
 	void OnDestroy()
 	{
+		GameEventManager.WinLightSignal -= WinLightSignal;
 		CloseCOM();
 	}
 
@@ -96,6 +101,8 @@ public class GoldfingerUtils : MonoBehaviour
 			RevGoldfingerData();
 			revGoldFingerDataElapsed = 0;
 		}
+
+		FlashWinLight();
 	}
 
 	private void UpdateTimers()
@@ -234,7 +241,7 @@ public class GoldfingerUtils : MonoBehaviour
 			0xD5, 0x58, 0x57, 14, iBlowOrDoor,
 			iHight, iLow, iCellNum, 0, 0,
 			0, 0, 0, 0, 0,
-			0, 0, 0, 0, 0, 0};
+			0, 0, iLight, 0, 0, 0};
 		int[] temp = new int[17];
 		System.Array.Copy(outData, 1, temp, 0, 17);
 		int crc = Utils.CrcAddXor(temp, 17);
@@ -284,19 +291,39 @@ public class GoldfingerUtils : MonoBehaviour
 
 	}
 
+	public void WinLightSignal(int signal)
+	{
+		iLight = signal;
+		bTurnOnLight = signal == 1;
+	}
+
+	// 闪烁中奖灯
+	private void FlashWinLight()
+	{
+		if (bTurnOnLight)
+		{
+			lightElapsed += Time.deltaTime;
+			if (lightElapsed > lightDuration)
+			{
+				lightElapsed = 0;
+				iLight = iLight == 1 ? 0 : 1;
+			}
+		}
+	}
+
 	private void PrintData(ref int[] data, bool bEvent = false)
 	{
-		string log = "data.Length:" + data.Length + "--";
-		for (int i = 0; i < data.Length; ++i)
-		{
-			if (i > 0 && i % 20 == 0)
-				log += "\n";
-			log += string.Format("{0:X}", data[i]) + ", ";
-		}
-		if (!bEvent)
-		DebugConsole.Log(log);
-		else
-		GameEventManager.OnDebugLog(0, log);
+//		string log = "data.Length:" + data.Length + "--";
+//		for (int i = 0; i < data.Length; ++i)
+//		{
+//			if (i > 0 && i % 20 == 0)
+//				log += "\n";
+//			log += string.Format("{0:X}", data[i]) + ", ";
+//		}
+//		if (!bEvent)
+//		DebugConsole.Log(log);
+//		else
+//		GameEventManager.OnDebugLog(0, log);
 	}
 
 //	void OnGUI()

@@ -192,6 +192,8 @@ public class ClientLogic : GameLogic
         
 		// 正常赢取的筹码数
         int win = 0;
+		// 有中奖(用来判断是否闪烁中奖灯)
+		bool bBingo = false;
         foreach (KeyValuePair<string, int> item in betFields)
         {
             int peilv = Utils.IsBingo(item.Key, ballValue);
@@ -203,8 +205,12 @@ public class ClientLogic : GameLogic
 				{
 					ui.AddWinChip("e" + item.Key);
 				}
+				if (!bBingo)
+					bBingo = true;
             }
         }
+		if (bBingo)
+			GameEventManager.OnWinLightSignal(1);
 		// 赢取的彩金数
 		int luckyWin = 0;	
 		// 计算自己赢了多少彩金
@@ -271,6 +277,7 @@ public class ClientLogic : GameLogic
 		lotteryValues.Clear();
         ui.StopFlash();
         ui.StopFlashLotteries();
+		GameEventManager.OnWinLightSignal(0);
     }
 
     private void NotifyMsg(ref string msg)

@@ -125,6 +125,14 @@ public class MainUILogic : MonoBehaviour
 		lblRemember = GameObject.Find("Canvas/Credit/Remember").GetComponent<Text>();
 
 		countdown.transform.FindChild("Text").GetComponent<Text>().text = GameData.GetInstance().betTimeLimit.ToString();
+		GameObject demoGo = GameObject.Find("Canvas/Demo");
+		if (demoGo != null)
+		{
+			if (GameData.isDemo)
+				GameObject.Find("Canvas/Demo").SetActive(true);
+			else
+				GameObject.Find("Canvas/Demo").SetActive(false);
+		}
 	}
 
 	public void ChangeLanguage(Transform hitObject)
@@ -1178,7 +1186,6 @@ public class MainUILogic : MonoBehaviour
 				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Jackpot Points Ellipse/" : "Canvas/38 Fields/Jackpot Points Ellipse/";
 				jackpot.transform.localScale = Vector3.one * 0.5f;
 			}
-			print(chooseEffectPath + refrenceName);
 			jackpot.transform.localPosition = GameObject.Find(chooseEffectPath + refrenceName).transform.localPosition;
 			if (GameData.GetInstance().displayType == 1)	// 椭圆压分区
 			{
