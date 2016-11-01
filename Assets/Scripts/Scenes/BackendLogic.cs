@@ -70,7 +70,7 @@ public class BackendLogic : MonoBehaviour
 		    GameData.GetInstance().remainMins <= 0)
 		{
 			tipPrintCode.SetActive(true);
-			tipPrintCode.transform.FindChild("Text").GetComponent<Text>().text = strClearAccoutTip[GameData.GetInstance().language];
+			tipPrintCode.transform.FindChild("Text").GetComponent<Text>().text = strClearAccoutTip[GameData.GetInstance().backendLanguage];
 		}
 		else
 			tipPrintCode.SetActive(false);
@@ -265,13 +265,13 @@ public class BackendLogic : MonoBehaviour
 			{
 				dlgCalc.SetActive(true);
 				dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
-				calcTitle.text = strSysPassword[GameData.GetInstance().language];
+				calcTitle.text = strSysPassword[GameData.GetInstance().backendLanguage];
 				calcContent.text = string.Empty;
 				calcPassword.text = string.Empty;
 				passwordMode = 3;
 			}
 			else
-				ShowWarning(strSetError[GameData.GetInstance().language], true);
+				ShowWarning(strSetError[GameData.GetInstance().backendLanguage], true);
 		}
 		else if (string.Compare(name, "account2") == 0)
 		{
@@ -279,20 +279,20 @@ public class BackendLogic : MonoBehaviour
 			{
 				dlgCalc.SetActive(true);
 				dlgCalc.transform.localPosition = new Vector3(100, 200, 0);
-				calcTitle.text = strAccountPassword[GameData.GetInstance().language];
+				calcTitle.text = strAccountPassword[GameData.GetInstance().backendLanguage];
 				calcContent.text = string.Empty;
 				calcPassword.text = string.Empty;
 				passwordMode = 2;
 			}
 			else
-				ShowWarning(strSetError[GameData.GetInstance().language], true);
+				ShowWarning(strSetError[GameData.GetInstance().backendLanguage], true);
 		}
 		else if (string.Compare(name, "lottery2") == 0)
 		{
 			if (GameData.GetInstance().deviceIndex == 1)
 				InitLotterySetting();
 			else
-				ShowWarning(strSetError[GameData.GetInstance().language], true);
+				ShowWarning(strSetError[GameData.GetInstance().backendLanguage], true);
 		}
 		else if (string.Compare(name, "exit2") == 0)
 		{
@@ -302,7 +302,7 @@ public class BackendLogic : MonoBehaviour
 		{
 			dlgCalc.SetActive(true);
 			dlgCalc.transform.localPosition = new Vector3(100, 40, 0);
-			calcTitle.text = strDeviceId[GameData.GetInstance().language];
+			calcTitle.text = strDeviceId[GameData.GetInstance().backendLanguage];
 			calcContent.text = string.Empty;
 			calcPassword.text = string.Empty;
 			passwordMode = 0;
@@ -342,7 +342,7 @@ public class BackendLogic : MonoBehaviour
 		if (go != null)
 		{
 			string[] msg = {"Setting device, please wait.", "正在设置，请稍后！"};
-			ShowWarning(msg[GameData.GetInstance().language], true, 4.0f);
+			ShowWarning(msg[GameData.GetInstance().backendLanguage], true, 4.0f);
 
 			SerialMousePort mouse = go.GetComponent<SerialMousePort>();
 			TouchScreenPort touchScreen = go.GetComponent<TouchScreenPort>();
@@ -399,7 +399,7 @@ public class BackendLogic : MonoBehaviour
 		}
 		dlgCalc.SetActive(true);
 		dlgCalc.transform.localPosition = new Vector3(100, 40, 0);
-        int idx = GameData.GetInstance().language;
+        int idx = GameData.GetInstance().backendLanguage;
         dlgPassword.SetActive(false);
         SetCalcTitle(strPassword[idx], Color.black);
         SetCalcContent(string.Empty, Color.white);
@@ -421,7 +421,7 @@ public class BackendLogic : MonoBehaviour
 			passwordMode = 4;
 			passwordPhase = 0;
 			passwordType = 0;
-			calcTitle.text = strAdminPassword[GameData.GetInstance().language];
+			calcTitle.text = strAdminPassword[GameData.GetInstance().backendLanguage];
 			calcTitle.color = Color.black;
 			calcPassword.text = calcContent.text = string.Empty;
 			dlgCalc.SetActive(true);
@@ -448,7 +448,7 @@ public class BackendLogic : MonoBehaviour
 		SetInputDevice();
 
 		// Device id
-		int idx = GameData.GetInstance().language;
+		int idx = GameData.GetInstance().backendLanguage;
 		if (GameData.GetInstance().deviceIndex <= 0)
 			deviceId[idx].text = string.Empty;
 		else
@@ -459,7 +459,7 @@ public class BackendLogic : MonoBehaviour
 	{
 		if (GameData.GetInstance().deviceIndex > 1)
 		{
-			ShowWarning(strSetError[GameData.GetInstance().language], true);
+			ShowWarning(strSetError[GameData.GetInstance().backendLanguage], true);
 			return;
 		}
 
@@ -496,7 +496,7 @@ public class BackendLogic : MonoBehaviour
     {
 		if (GameData.GetInstance().deviceIndex > 1)
 		{
-			ShowWarning(strSetError[GameData.GetInstance().language], true);
+			ShowWarning(strSetError[GameData.GetInstance().backendLanguage], true);
 			return;
 		}
         menuMain.SetActive(false);
@@ -676,7 +676,7 @@ public class BackendLogic : MonoBehaviour
     {
         GameObject en = menu.transform.FindChild("EN").gameObject;
         GameObject cn = menu.transform.FindChild("CN").gameObject;
-        if (GameData.GetInstance().language == 0)
+        if (GameData.GetInstance().backendLanguage == 0)
         {
             en.SetActive(true);
             cn.SetActive(false);
@@ -787,7 +787,7 @@ public class BackendLogic : MonoBehaviour
     {
         if (passwordMode == 1)				// 修改密码
         {
-			int idx = GameData.GetInstance().language;
+			int idx = GameData.GetInstance().backendLanguage;
 			if (passwordPhase == 0)			// 输入原密码
 			{
 				if (((Utils.StringIsEquals(txtPassword, GameData.GetInstance().systemPassword) || 
@@ -866,7 +866,7 @@ public class BackendLogic : MonoBehaviour
 			}
 			else
 			{
-				calcContent.text = strError[GameData.GetInstance().language];
+				calcContent.text = strError[GameData.GetInstance().backendLanguage];
 				calcContent.color = Color.red;
 				calcPassword.text = string.Empty;
 				txtPassword = null;
@@ -881,7 +881,7 @@ public class BackendLogic : MonoBehaviour
 			}
 			else
 			{
-				calcContent.text = strError[GameData.GetInstance().language];
+				calcContent.text = strError[GameData.GetInstance().backendLanguage];
 				calcContent.color = Color.red;
 				calcPassword.text = string.Empty;
 				txtPassword = null;
@@ -895,7 +895,7 @@ public class BackendLogic : MonoBehaviour
 			}
 			else
 			{
-				ShowWarning(strErrorPW[GameData.GetInstance().language], true);
+				ShowWarning(strErrorPW[GameData.GetInstance().backendLanguage], true);
 			}
 			passwordMode = 0;
 			calcPassword.text = string.Empty;
@@ -928,10 +928,10 @@ public class BackendLogic : MonoBehaviour
 				if (int.TryParse(calcContent.text, out value))
 				{
 					if (value == 0)
-						deviceId[GameData.GetInstance().language].text = string.Empty;
+						deviceId[GameData.GetInstance().backendLanguage].text = string.Empty;
 					else
 					{
-						deviceId[GameData.GetInstance().language].text = value.ToString();
+						deviceId[GameData.GetInstance().backendLanguage].text = value.ToString();
 						GameData.GetInstance().deviceIndex = value;
 						GameData.GetInstance().SaveDeviceIndex();
 					}
@@ -1000,7 +1000,7 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().lotteryRate = values[2];
 			GameData.GetInstance().lotteryAllocation = values[3];
 			GameData.GetInstance().SaveSetting();
-            int idx = GameData.GetInstance().language;
+            int idx = GameData.GetInstance().backendLanguage;
 			ShowWarning(Notifies.saveSuccess[idx], true);
 		}
 	}
@@ -1053,7 +1053,7 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().beginSessions = values[22];
 			GameData.GetInstance().maxNumberOfFields = values[23];
 			GameData.GetInstance().SaveSetting();
-            int idx = GameData.GetInstance().language;
+            int idx = GameData.GetInstance().backendLanguage;
             ShowWarning(Notifies.saveSuccess[idx], true);
         }
     }
@@ -1163,13 +1163,9 @@ public class BackendLogic : MonoBehaviour
 		{
 			value = Mathf.Clamp(value, 1, 100);
 		}
-		else if (string.Equals(name, "allocation"))
+		else if (string.Equals(name, "allocation") || Utils.StringIsEquals(name, "jackpot lv"))
 		{
 			value = Mathf.Clamp(value, 0, 100);
-		}
-		else if (Utils.StringIsEquals(name, "jackpot lv"))
-		{
-			value = Mathf.Clamp(value, 0, 9);
 		}
 		else if (Utils.StringIsEquals(name, "monitor language"))
 		{
@@ -1249,7 +1245,7 @@ public class BackendLogic : MonoBehaviour
     private void PrintCodeFail()
     {
         Debug.Log("PrintCodeFail");
-		ShowWarning(strError[GameData.GetInstance().language], true);
+		ShowWarning(strError[GameData.GetInstance().backendLanguage], true);
     }
 
     private void ClearAccount()
@@ -1263,7 +1259,7 @@ public class BackendLogic : MonoBehaviour
 		}
 		else
 		{
-			ShowWarning(strClearAccountFailed[GameData.GetInstance().language], true, 3.0f);
+			ShowWarning(strClearAccountFailed[GameData.GetInstance().backendLanguage], true, 3.0f);
 		}
     }
 
@@ -1319,5 +1315,14 @@ public class BackendLogic : MonoBehaviour
 			totalNum.FindChild("winnings").GetComponent<Text>().text = winnings.ToString();
 		totalNum.FindChild("total winnings").GetComponent<Text>().text = totalWin.ToString();
 		totalNum.FindChild("card").GetComponent<Text>().text = card.ToString();
+	}
+
+	private void SetBackendLanguage()
+	{
+		int lang = GameData.GetInstance().backendLanguage;
+		lang = lang == 0 ? 1 : 0;
+		GameData.GetInstance().backendLanguage = lang;
+		SetLanguage(menuMain);
+		GameData.GetInstance().SaveBackendLanguage();
 	}
 }

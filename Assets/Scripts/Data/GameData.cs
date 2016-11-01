@@ -34,7 +34,7 @@ public class GameData
 	public int maxNumberOfFields; 	// 37 or 38
 	public int beginSessions;		// 起始场次
 	public int maxNumberOfChips;	// 1 ~ 6
-	public int lotteryLv;			// 彩金档位(0-9)
+	public int lotteryLv;			// 彩金档位(1-100)
 	public int lotteryCondition;	// 彩金押分起始分值(1-100000)
 	public int lotteryBase;			// 起始彩金(0-100000)
 	public int lotteryRate;			// 彩金累计千分比(1-100)
@@ -179,6 +179,7 @@ public class GameData
         }
     }
 
+	#region 带控制的彩金参数
 	private int _lotteryMatchCount;		// 彩金场次记数
 	public int lotteryMatchCount
 	{
@@ -192,6 +193,21 @@ public class GameData
 	}
 	public int lotteryMaxMatch;			// 彩金场次的最大序号
 	public List<int> lotteryWinIdx = new List<int>();	// 会中的彩金场次
+	#endregion
+	
+	#region 不带控制的彩金参数
+	private int _jackpotMatchCount;	
+	public int jackpotMatchCount
+	{
+		get { return _jackpotMatchCount; }
+		set
+		{
+			_jackpotMatchCount = value;
+			CryptoPrefs.SetInt("jackpotMatchCount", _jackpotMatchCount);
+			CryptoPrefs.Save();
+		}
+	}
+	#endregion
 
     public int deviceIndex;     // 机台序号 1, 2, 3...
 	public string deviceGuid;	// 发给加密芯片做验证
@@ -213,6 +229,7 @@ public class GameData
 
 	// Custom setting
 	public int language;			// 0:EN 1:CN
+	public int backendLanguage;		// 后台语言 0:EN 1:CN
 	public int displayType; 		// 0:classic 1:ellipse
 	public string systemPassword;	// 设置密码
 	public string accountPassword;	// 查询密码
@@ -269,7 +286,7 @@ public class GameData
 	// 彩金功能开关
 	public bool lotteryEnable
 	{
-		get { return lotteryAllocation > 0; }
+		get { return lotteryAllocation > 0 && lotteryLv > 0; }
 	}
 
 	public int monitorDeviceIndex = 101;	// 路单屏的机器id (大于等于这个号都是路单屏)
@@ -399,7 +416,7 @@ public class GameData
 		couponsKeyinRatio = 10;	// 1%~100%
 		couponsKeoutRatio = 4;	
 		beginSessions = 100;
-		lotteryLv = 4;
+		lotteryLv = 50;
 		lotteryCondition = 100;
 		lotteryBase = 1000;
 		lotteryRate = 10;
@@ -411,6 +428,7 @@ public class GameData
 	public void DefaultCustom()
 	{
 		language = 0;		// EN
+		backendLanguage = 0;// EN
 		displayType = 0;	// classic
 		systemPassword = "888888";
 		accountPassword = "888888";
@@ -427,6 +445,7 @@ public class GameData
 		CryptoPrefs.SetString("accountPassword", accountPassword);
 		CryptoPrefs.SetString("adminPassword", adminPassword);
 		PlayerPrefs.SetInt("language", language);
+		PlayerPrefs.SetInt("backendLanguage", backendLanguage);
 		PlayerPrefs.SetInt("displayType", displayType);
 		PlayerPrefs.SetInt("isCardMode", isCardMode);
 		PlayerPrefs.SetInt("inputDevice", inputDevice);
@@ -556,6 +575,7 @@ public class GameData
 
 			// Custom setting
 			language = PlayerPrefs.GetInt("language");
+			backendLanguage = PlayerPrefs.GetInt("backendLanguage", 0);
 			displayType = PlayerPrefs.GetInt("displayType");
 			systemPassword = CryptoPrefs.GetString("systemPassword");
 			accountPassword = CryptoPrefs.GetString("accountPassword");
@@ -645,6 +665,12 @@ public class GameData
 	public void SaveLanguage()
 	{
 		PlayerPrefs.SetInt("language", language);
+		PlayerPrefs.Save();
+	}
+
+	public void SaveBackendLanguage()
+	{
+		PlayerPrefs.SetInt("backendLanguage", backendLanguage);
 		PlayerPrefs.Save();
 	}
 
@@ -826,6 +852,7 @@ public class GameData
 			CalcLotteryIdx();
 			lotteryMatchCount = 0;
 		}
+		_jackpotMatchCount = CryptoPrefs.GetInt("jackpotMatchCount", 0);
 	}
 
 	public void SavePrintTimes()

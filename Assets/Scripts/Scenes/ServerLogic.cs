@@ -145,6 +145,7 @@ public class ServerLogic : GameLogic
 		ui.RefreshLblWin("0");
         ui.RefreshLblCredits(totalCredits.ToString());
 		ui.Countdown();
+		GameEventManager.OnStartCountdown();
     }
 
     private void CountdownComplete()
@@ -312,19 +313,34 @@ public class ServerLogic : GameLogic
 		host.SendToAll(msg);
 	}
 
-	// 计算彩金号码
+	// 不带控制的出彩金
 	private int[] CalcLottery()
 	{
-		if (GameData.isDemo)
+		int dif = GameData.GetInstance().lotteryLv; // 多少场出一次彩金
+		int count = GameData.GetInstance().jackpotMatchCount;
+		++count;
+		int[] ret = new int[0];
+		if (count == dif)
 		{
+			// 出彩金
 			int jackpotNum = Random.Range(1, 4);
 			if (jackpotNum == 1)
-				return new int[]{Random.Range(0 ,37)};
+				ret = new int[]{Random.Range(0 ,37)};
 			else if (jackpotNum == 2)
-				return new int[]{Random.Range(0, 19), Random.Range(19, 37)};
+				ret = new int[]{Random.Range(0, 19), Random.Range(19, 37)};
 			else
-				return new int[]{Random.Range(0, 13), Random.Range(13, 25), Random.Range(25, 37)};
+				ret = new int[]{Random.Range(0, 13), Random.Range(13, 25), Random.Range(25, 37)};
 		}
+		if (count >= dif)
+			count = 0;
+		GameData.GetInstance().jackpotMatchCount = count;
+
+		return ret;
+	}
+
+	// 带控制的出彩金
+	private int[] CalcLottery2()
+	{
 		// 单点压分号码
 		List<int> betSingle = new List<int>();
 		foreach (KeyValuePair<string, int> item in clientBetFields)
@@ -371,7 +387,7 @@ public class ServerLogic : GameLogic
 						retArray.Add(value);
 						++i;
 					}
-                }
+				}
 				return retArray.ToArray();
 			}
 		}
@@ -382,7 +398,7 @@ public class ServerLogic : GameLogic
 			// 判断要不要出彩金，出的话不中。
 			Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Minute);
 			int ret = Utils.GetRandom(0, 20);
-//			int ret = 12;
+			//			int ret = 12;
 			// 出彩金
 			if (ret == 12 && noBetCount > 0)
 			{
@@ -399,11 +415,11 @@ public class ServerLogic : GameLogic
 					}
 				}
 				return retArray.ToArray();
-//				return new int[]{7, 17, 27};
+				//				return new int[]{7, 17, 27};
 			}
 		}
 		return new int[0];
-//		return new int[]{7, 17, 27};
+		//		return new int[]{7, 17, 27};
 	}
 
 	private IEnumerator ShowResult()

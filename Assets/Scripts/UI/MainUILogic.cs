@@ -48,6 +48,7 @@ public class MainUILogic : MonoBehaviour
 	private List<Transform> flashObjects = new List<Transform>();	// 显示压中结果的区域(亮色)
     private List<Transform> winChips = new List<Transform>();        // 赢的筹码
     private Timer timerHideWarning;
+	private Timer timerCountdown;									// 倒计时
     private string[] strCardError = new string[]{"If you want to use Presented\nCredits, you have to use up all\ncredits, and then keyin agian.",
         "要使用优惠卡，\n须从0分开始充值。"};
 	// 认球错误
@@ -57,6 +58,8 @@ public class MainUILogic : MonoBehaviour
 		"通讯故障，请重启机器！\n故障号：" + BreakdownType.USBDisconnect};
 	private string[] strTimeoutError = {"Communication failures.\nPlease reboot device!\nError code:" + BreakdownType.RecognizeBallTimeout, 
 		"通讯故障，请重启机器！\n故障号：" + BreakdownType.RecognizeBallTimeout};
+	private string[] strBallHaventFallError = {"Communication failures.\nPlease reboot device!\nError code:" + BreakdownType.BallHaventFall, 
+		"通讯故障，请重启机器！\n故障号：" + BreakdownType.BallHaventFall};
 	
 	void Awake()
     {
@@ -441,6 +444,7 @@ public class MainUILogic : MonoBehaviour
         foreach (Transform child in fieldChipsRoot.transform)
             Destroy(child.gameObject);
 		GameEventManager.OnClearAll();
+		ClearSingleSigns();
 	}
 
 	// 清除桌面筹码 不返还给玩家
@@ -452,6 +456,7 @@ public class MainUILogic : MonoBehaviour
 		foreach (Transform child in fieldChipsRoot.transform)
 			Destroy(child.gameObject);
 		GameEventManager.OnCleanAll();
+		ClearSingleSigns();
 	}
 
 	// 清除没有中的筹码
@@ -543,6 +548,7 @@ public class MainUILogic : MonoBehaviour
                     if (info.Key == "00" && fields37.activeSelf)
                         continue;
 
+					ShowSingleSign(info.Key);
                     Transform target = root.transform.FindChild(info.Key);
                     if (target != null)
                     {
@@ -594,6 +600,7 @@ public class MainUILogic : MonoBehaviour
                     if (info.Key == "00" && fields37.activeSelf)
                         continue;
 
+					ShowSingleSign(info.Key);
                     string prefabPath = "SC";
                     Transform target1 = null;
                     Transform target2 = null;	// 为了恢复小的单点筹码
@@ -879,6 +886,13 @@ public class MainUILogic : MonoBehaviour
 				GameEventManager.OnClear(hitObject.name);
 				eraser.SetActive(false);
 				mouseIcon.gameObject.SetActive(true);
+
+				string fieldName = hitObject.name;
+				if (string.Equals(fieldName.Substring(0, 1), "e"))
+				{
+					fieldName = fieldName.Substring(1);
+				}
+				ClearSingleSign(fieldName);
 				return;
 			}
 			
@@ -964,6 +978,7 @@ public class MainUILogic : MonoBehaviour
 				chip.transform.localPosition = targetPos;
 				FieldChipMoveComplete(targetObject.name + ":" + bet.ToString());
 			}
+			ShowSingleSign(strField);
 		}
 		catch(System.Exception ex)
 		{
@@ -1106,19 +1121,25 @@ public class MainUILogic : MonoBehaviour
 		}
 		timeLimit = GameData.GetInstance().betTimeLimit;
 		ResetCountdown();
-		Timer t = TimerManager.GetInstance().CreateTimer(1, TimerType.Loop, timeLimit);
-		t.Tick += CountdownTick;
-		t.OnComplete += CountdownComplete;
+		timerCountdown = TimerManager.GetInstance().CreateTimer(1, TimerType.Loop, timeLimit);
+		timerCountdown.Tick += CountdownTick;
+		timerCountdown.OnComplete += CountdownComplete;
 		iTween.ValueTo(gameObject, iTween.Hash("from", 1, "to", 0, "time", timeLimit,
 		                                       "onupdate", "UpdateProgress", "onupdatetarget", gameObject));
-		t.Start();
+		timerCountdown.Start();
 		AudioController.Play("makeyourbets");
 		GameEventManager.OnPrompt(PromptId.PleaseBet, -1);
 	}
 
 	private void UpdateProgress(float value)
 	{
-		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = value;
+		if (!gameLogic.IsPause())
+			countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = value;
+		if (!gameLogic.IsPause() &&
+		    gameLogic.goldfingerUtils.GetRealtimeBallVal() > 0)
+		{
+			GameEventManager.OnBreakdownTip(BreakdownType.BallHaventFall);
+		}
 	}
 
 	private void CountdownTick()
@@ -1160,7 +1181,7 @@ public class MainUILogic : MonoBehaviour
 		if (lotteries.Count == 0)
 			yield break;
 
-		GameObject root = GameObject.Find("Canvas/LotteryEffectRoot");
+		GameObject root = GameObject.Find("Canvas/JackpotsRoot");
 		string resPath = "Effects/";
 
 		Object prefab = null;
@@ -1202,7 +1223,7 @@ public class MainUILogic : MonoBehaviour
 
 	public void StopFlashLotteries()
 	{
-		GameObject root = GameObject.Find("Canvas/LotteryEffectRoot");
+		GameObject root = GameObject.Find("Canvas/JackpotsRoot");
 		foreach (Transform t in root.transform)
 		{
 			t.gameObject.SetActive(false);
@@ -1326,6 +1347,7 @@ public class MainUILogic : MonoBehaviour
 			flashObjects.Clear();
 		}
 		crown.SetActive(false);
+		ClearSingleSigns();
 	}
 
 	public void ChangeFlash()
@@ -1376,6 +1398,11 @@ public class MainUILogic : MonoBehaviour
 		else if (breakdownType == BreakdownType.RecognizeBallTimeout)
 		{
 			ShowWarning(strTimeoutError[language]);
+		}
+		else if (breakdownType == BreakdownType.BallHaventFall)
+		{
+			ShowWarning(strBallHaventFallError[language]);
+			TimerManager.GetInstance().RemoveTimer(timerCountdown.timerId);
 		}
 	}
 
@@ -1467,5 +1494,54 @@ public class MainUILogic : MonoBehaviour
 	{
 		SetDisplay();
 		SetBetChips();
+	}
+
+	// 清除所有单点押分标志
+	private void ClearSingleSigns()
+	{
+		string path = GameData.GetInstance().maxNumberOfFields == 38 ? "38 Fields/DanDian" : "37 Fields/DanDian";
+		GameObject root = GameObject.Find("Canvas/" + path);
+		if (root != null)
+		{
+			int childCount = root.transform.childCount;
+			for (int i = 0; i < childCount; ++i)
+			{
+				Transform child = root.transform.GetChild(i);
+				Image img = child.GetComponent<Image>();
+				Color c = img.color;
+				c.a = 0;
+				img.color = c;
+			}
+		}
+	}
+
+	// 清除单点押分标志
+	private void ClearSingleSign(string fieldName)
+	{
+		string path = GameData.GetInstance().maxNumberOfFields == 38 ? "38 Fields/DanDian" : "37 Fields/DanDian";
+		GameObject root = GameObject.Find("Canvas/" + path);
+		if (root != null)
+		{
+			Transform child = root.transform.FindChild(fieldName);
+			Image img = child.GetComponent<Image>();
+			Color c = img.color;
+			c.a = 0;
+			img.color = c;
+		}
+	}
+
+	// 显示单点押分标志
+	private void ShowSingleSign(string fieldName)
+	{
+		string path = GameData.GetInstance().maxNumberOfFields == 38 ? "38 Fields/DanDian" : "37 Fields/DanDian";
+		GameObject root = GameObject.Find("Canvas/" + path);
+		if (root != null)
+		{
+			Transform child = root.transform.FindChild(fieldName);
+			Image img = child.GetComponent<Image>();
+			Color c = img.color;
+			c.a = 1;
+			img.color = c;
+		}
 	}
 }

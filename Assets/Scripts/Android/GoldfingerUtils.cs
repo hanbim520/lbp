@@ -36,17 +36,24 @@ public class GoldfingerUtils : MonoBehaviour
 	private float lightElapsed	= 0;		// 中奖灯闪烁计时
 	private const float lightDuration = 0.4f; // 中奖灯闪烁间隔
 	private bool bTurnOnLight	= false;
-	
+
+	private int realtimeBallVal = 0;		// 大于0表示孔里有球
+	private bool bCheckBallFall = false;	// 检查轨道上是否有球
+
 	void Start()
 	{
 		DontDestroyOnLoad(this);
 		OpenCOM();
 		GameEventManager.WinLightSignal += WinLightSignal;
+		GameEventManager.StartCountdown += StartCountdown;
+		GameEventManager.EndCountdown += EndCountdown;
 	}
 
 	void OnDestroy()
 	{
 		GameEventManager.WinLightSignal -= WinLightSignal;
+		GameEventManager.StartCountdown -= StartCountdown;
+		GameEventManager.EndCountdown -= EndCountdown;
 		CloseCOM();
 	}
 
@@ -155,6 +162,10 @@ public class GoldfingerUtils : MonoBehaviour
 					return;
 				}
 
+				if (bCheckBallFall)
+				{
+					realtimeBallVal = data[9];
+				}
 				// 吹风
 				if (data[4] == 0x55)
 				{
@@ -190,6 +201,7 @@ public class GoldfingerUtils : MonoBehaviour
 					{
 						phase = kPhaseCloseGate;
 						bOpenGate = false;
+						realtimeBallVal = 0;
 						GameEventManager.OnCloseGate();
 					}
 				}
@@ -309,6 +321,21 @@ public class GoldfingerUtils : MonoBehaviour
 				iLight = iLight == 1 ? 0 : 1;
 			}
 		}
+	}
+
+	public int GetRealtimeBallVal()
+	{
+		return realtimeBallVal;
+	}
+
+	private void StartCountdown()
+	{
+		bCheckBallFall = true;
+	}
+
+	private void EndCountdown()
+	{
+		bCheckBallFall = false;
 	}
 
 	private void PrintData(ref int[] data, bool bEvent = false)

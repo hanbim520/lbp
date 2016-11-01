@@ -591,6 +591,11 @@ public class GameLogic : MonoBehaviour
 		isPause = pause;
 	}
 
+	public bool IsPause()
+	{
+		return isPause;
+	}
+
 	private void OpenGate()
 	{
 		if (Application.platform == RuntimePlatform.LinuxPlayer)

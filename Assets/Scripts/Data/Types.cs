@@ -144,4 +144,5 @@ public struct BreakdownType
 	public static int RecognizeBall = 1;	// 两次认球结果不同
 	public static int USBDisconnect = 2;	// 与HID通讯不上
 	public static int RecognizeBallTimeout = 3;	// 认球超时
+	public static int BallHaventFall = 4;	// 球没有落下
 }
