@@ -11,7 +11,7 @@ public class GameData
 {
 	public static bool debug 		= false;		// 是否模拟出球
 	public static bool controlCode	= false;		// 是否打码
-	public static bool isDemo		= true;			// 演示版本(总出彩金)
+	public static bool isDemo		= false;			// 演示版本(总出彩金)
 
     // Setting menu
     public int betTimeLimit;
@@ -196,6 +196,7 @@ public class GameData
 	#endregion
 	
 	#region 不带控制的彩金参数
+	// 彩金场次计数
 	private int _jackpotMatchCount;	
 	public int jackpotMatchCount
 	{
@@ -204,6 +205,18 @@ public class GameData
 		{
 			_jackpotMatchCount = value;
 			CryptoPrefs.SetInt("jackpotMatchCount", _jackpotMatchCount);
+			CryptoPrefs.Save();
+		}
+	}
+	// 中彩金的场次
+	private int _jackpotBingoIdx;
+	public int jackpotBingoIdx
+	{
+		get { return _jackpotBingoIdx; }
+		set
+		{
+			_jackpotBingoIdx = value;
+			CryptoPrefs.SetInt("jackpotBingoIdx", _jackpotBingoIdx);
 			CryptoPrefs.Save();
 		}
 	}
@@ -853,6 +866,7 @@ public class GameData
 			lotteryMatchCount = 0;
 		}
 		_jackpotMatchCount = CryptoPrefs.GetInt("jackpotMatchCount", 0);
+		_jackpotBingoIdx = CryptoPrefs.GetInt("jackpotBingoIdx", 0);
 	}
 
 	public void SavePrintTimes()

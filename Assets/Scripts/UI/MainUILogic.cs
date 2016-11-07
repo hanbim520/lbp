@@ -1533,6 +1533,9 @@ public class MainUILogic : MonoBehaviour
 	// 显示单点押分标志
 	private void ShowSingleSign(string fieldName)
 	{
+		int fieldVal;
+		if (!int.TryParse(fieldName, out fieldVal))
+			return;
 		string path = GameData.GetInstance().maxNumberOfFields == 38 ? "38 Fields/DanDian" : "37 Fields/DanDian";
 		GameObject root = GameObject.Find("Canvas/" + path);
 		if (root != null)

@@ -316,11 +316,17 @@ public class ServerLogic : GameLogic
 	// 不带控制的出彩金
 	private int[] CalcLottery()
 	{
-		int dif = GameData.GetInstance().lotteryLv; // 多少场出一次彩金
-		int count = GameData.GetInstance().jackpotMatchCount;
+		int dif = GameData.GetInstance().lotteryLv; 			// 多少场出一次彩金
+		int count = GameData.GetInstance().jackpotMatchCount;	// 当前第几场
+		int bingoIdx = GameData.GetInstance().jackpotBingoIdx;	// 第几场bingo
 		++count;
 		int[] ret = new int[0];
-		if (count == dif)
+		if (bingoIdx == 0)
+		{
+			bingoIdx = Random.Range(1, dif + 1);
+			GameData.GetInstance().jackpotBingoIdx = bingoIdx;
+		}
+		if (count == bingoIdx)
 		{
 			// 出彩金
 			int jackpotNum = Random.Range(1, 4);
@@ -332,7 +338,10 @@ public class ServerLogic : GameLogic
 				ret = new int[]{Random.Range(0, 13), Random.Range(13, 25), Random.Range(25, 37)};
 		}
 		if (count >= dif)
+		{
 			count = 0;
+			GameData.GetInstance().jackpotBingoIdx = Random.Range(1, dif + 1);
+		}
 		GameData.GetInstance().jackpotMatchCount = count;
 
 		return ret;

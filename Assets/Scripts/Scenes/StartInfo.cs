@@ -7,6 +7,7 @@ public class StartInfo : MonoBehaviour
 	{
 		GameData.GetInstance().ReadDataFromDisk();
 		LoadUpdateUtils();
+//		GameData.GetInstance().deviceIndex = 101;
 		if (GameData.GetInstance().deviceIndex > 0 && 
 		    GameData.GetInstance().deviceIndex < GameData.GetInstance().monitorDeviceIndex)
 		{
