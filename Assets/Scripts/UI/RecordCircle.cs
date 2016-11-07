@@ -7,6 +7,7 @@ public class RecordCircle : MonoBehaviour
 {
 	public int fieldsCount = 37;
 	public Sprite[] bgs;
+	public Sprite[] histogramColors;	// 柱状体颜色
 	public GameObject flashImg;
 	private Image[] triangles;
 	private Image bgBall;
@@ -92,11 +93,11 @@ public class RecordCircle : MonoBehaviour
         {
             triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
             if (GameData.GetInstance().hotValues.Contains(item.Key))
-                triangles[item.Key].color = new Color(1f, 0.3960f, 0.004f);
+				triangles[item.Key].overrideSprite = histogramColors[0];
             else if (GameData.GetInstance().coldValues.Contains(item.Key))
-				triangles[item.Key].color = new Color(0.4196f, 0.9960f, 0.9255f);
+				triangles[item.Key].overrideSprite = histogramColors[1];
 			else
-				triangles[item.Key].color = new Color(0.6078f, 0.6392f, 0.6510f);
+				triangles[item.Key].overrideSprite = histogramColors[2];
         }
         int currentValue = records[count - 1];
         if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)
