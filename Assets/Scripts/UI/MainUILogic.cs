@@ -529,116 +529,141 @@ public class MainUILogic : MonoBehaviour
 		if (lastBetCredit > gameLogic.totalCredits)
             return;
 
+		// 检查是否超过限注
+		string checkLimitMsg = NetInstr.CheckRepeatAble.ToString();
+		foreach (KeyValuePair<string, int> item in gameLogic.betFields)
+		{
+			checkLimitMsg += string.Format(":{0}:{1}", item.Key, item.Value);
+		}
+		checkLimitMsg += string.Format(":{0}:{1}", "repeats", -1);
+		foreach (KeyValuePair<string, int> item in GameData.GetInstance().lastBets)
+		{
+			checkLimitMsg += string.Format(":{0}:{1}", item.Key, item.Value);
+		}
+		if (GameData.GetInstance().deviceIndex == 1)
+		{
+			char[] delimiterChars = {':'};
+			string[] words = checkLimitMsg.Split(delimiterChars);
+			((ServerLogic)gameLogic).HandleCheckRepeatAble(false, 0, ref words);
+		}
+		else
+		{
+			((ClientLogic)gameLogic).clientSocket.SendToServer(checkLimitMsg);
+		}
+    }
+
+	public void RepeatEventCB()
+	{
 		int betChipCount = GameData.GetInstance().betChipValues.Count;
-        if (displayClassic.activeSelf)
-        {
-            string rootPath = "Canvas/38 Fields/Classic/Valid Fields";
-            if (GameData.GetInstance().maxNumberOfFields == 37)
-            {
-                rootPath = "Canvas/37 Fields/Classic/Valid Fields";
-            }
-            GameObject root = GameObject.Find(rootPath);
-            string prefabPath = "BC";
-            if (root != null)
-            {
+		if (displayClassic.activeSelf)
+		{
+			string rootPath = "Canvas/38 Fields/Classic/Valid Fields";
+			if (GameData.GetInstance().maxNumberOfFields == 37)
+			{
+				rootPath = "Canvas/37 Fields/Classic/Valid Fields";
+			}
+			GameObject root = GameObject.Find(rootPath);
+			string prefabPath = "BC";
+			if (root != null)
+			{
 				int betValue = 0;
 				ClearAllEvent(null);
-                foreach (KeyValuePair<string, int> info in GameData.GetInstance().lastBets)
-                {
-                    if (info.Key == "00" && fields37.activeSelf)
-                        continue;
-
+				foreach (KeyValuePair<string, int> info in GameData.GetInstance().lastBets)
+				{
+					if (info.Key == "00" && fields37.activeSelf)
+						continue;
+					
 					ShowSingleSign(info.Key);
-                    Transform target = root.transform.FindChild(info.Key);
-                    if (target != null)
-                    {
+					Transform target = root.transform.FindChild(info.Key);
+					if (target != null)
+					{
 						int chipIdx = 0;
 						for (int i = 0; i < betChipCount; ++i)
 						{
 							if (info.Value >= GameData.GetInstance().betChipValues[i])
 								chipIdx = i;
 						}
-
+						
 						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
 						chip.transform.SetParent(fieldChipsRoot.transform);
-                        chip.transform.localScale = Vector3.one;
-                        Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
-                                                        target.localPosition.y * target.parent.localScale.y,
-                                                        0);
-                        chip.transform.localPosition = targetPos;
-                        chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
-                        chip.name = info.Key;
+						chip.transform.localScale = Vector3.one;
+						Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
+						                                target.localPosition.y * target.parent.localScale.y,
+						                                0);
+						chip.transform.localPosition = targetPos;
+						chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
+						chip.name = info.Key;
 						betValue += info.Value;
 						gameLogic.betFields.Add(info.Key, info.Value);
-                    }
-                }
+					}
+				}
 				gameLogic.totalCredits -= betValue;
-                GameData.GetInstance().ZongYa += betValue;
+				GameData.GetInstance().ZongYa += betValue;
 				gameLogic.currentBet += betValue;
 				RefreshLblCredits(gameLogic.totalCredits.ToString());
 				RefreshLblBet(gameLogic.currentBet.ToString());
-            }
-        }
-        else
-        {
-            string vfRootPath = "Canvas/38 Fields/Ellipse/Valid Fields";
-            string ceRootPath = "Canvas/38 Fields/Ellipse/Choose Effect";
-            if (GameData.GetInstance().maxNumberOfFields == 37)
-            {
-                vfRootPath = "Canvas/37 Fields/Ellipse/Valid Fields";
-                ceRootPath = "Canvas/37 Fields/Ellipse/Choose Effect";
-            }
-            GameObject vfRoot = GameObject.Find(vfRootPath);
-            GameObject ceRoot = GameObject.Find(ceRootPath);
-            //Choose Effect
-            if (vfRoot != null && ceRoot != null)
-            {
+			}
+		}
+		else
+		{
+			string vfRootPath = "Canvas/38 Fields/Ellipse/Valid Fields";
+			string ceRootPath = "Canvas/38 Fields/Ellipse/Choose Effect";
+			if (GameData.GetInstance().maxNumberOfFields == 37)
+			{
+				vfRootPath = "Canvas/37 Fields/Ellipse/Valid Fields";
+				ceRootPath = "Canvas/37 Fields/Ellipse/Choose Effect";
+			}
+			GameObject vfRoot = GameObject.Find(vfRootPath);
+			GameObject ceRoot = GameObject.Find(ceRootPath);
+			//Choose Effect
+			if (vfRoot != null && ceRoot != null)
+			{
 				int betValue = 0;
 				ClearAllEvent(null);
 				foreach (KeyValuePair<string, int> info in GameData.GetInstance().lastBets)
 				{
-                    if (info.Key == "00" && fields37.activeSelf)
-                        continue;
-
+					if (info.Key == "00" && fields37.activeSelf)
+						continue;
+					
 					ShowSingleSign(info.Key);
-                    string prefabPath = "SC";
-                    Transform target1 = null;
-                    Transform target2 = null;	// 为了恢复小的单点筹码
-                    int fieldName;
-                    string name = info.Key;
-                    if (int.TryParse(info.Key, out fieldName) || string.Equals(info.Key, "00"))
-                    {
-                        prefabPath = "BC";
-                        name = "e" + name;
-                        target1 = ceRoot.transform.FindChild(name);
+					string prefabPath = "SC";
+					Transform target1 = null;
+					Transform target2 = null;	// 为了恢复小的单点筹码
+					int fieldName;
+					string name = info.Key;
+					if (int.TryParse(info.Key, out fieldName) || string.Equals(info.Key, "00"))
+					{
+						prefabPath = "BC";
+						name = "e" + name;
+						target1 = ceRoot.transform.FindChild(name);
 						target2 = vfRoot.transform.FindChild(info.Key);
-                    }
-                    else
-                    {
-                        target1 = vfRoot.transform.FindChild(info.Key);
-                    }
-                    
+					}
+					else
+					{
+						target1 = vfRoot.transform.FindChild(info.Key);
+					}
+					
 					int chipIdx = 0;
-                    if (target1 != null)
-                    {
+					if (target1 != null)
+					{
 						for (int i = 0; i < betChipCount; ++i)
 						{
 							if (info.Value >= GameData.GetInstance().betChipValues[i])
 								chipIdx = i;
 						}
-
+						
 						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
-                        chip.transform.SetParent(fieldChipsRoot.transform);
-                        chip.transform.localScale = Vector3.one;
-                        Vector3 targetPos = new Vector3(target1.localPosition.x * target1.parent.localScale.x,
-                                                        target1.localPosition.y * target1.parent.localScale.y,
-                                                        0);
-                        chip.transform.localPosition = targetPos;
-                        chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
-                        chip.name = name;
+						chip.transform.SetParent(fieldChipsRoot.transform);
+						chip.transform.localScale = Vector3.one;
+						Vector3 targetPos = new Vector3(target1.localPosition.x * target1.parent.localScale.x,
+						                                target1.localPosition.y * target1.parent.localScale.y,
+						                                0);
+						chip.transform.localPosition = targetPos;
+						chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
+						chip.name = name;
 						betValue += info.Value;
 						gameLogic.betFields.Add(info.Key, info.Value);
-                    }
+					}
 					if (target2 != null)
 					{
 						GameObject chip = PoolManager.Pools["Stuff"].Spawn("SC" + chipIdx.ToString()).gameObject;
@@ -651,15 +676,15 @@ public class MainUILogic : MonoBehaviour
 						chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
 						chip.name = info.Key;
 					}
-                }
+				}
 				gameLogic.totalCredits -= betValue;
-                GameData.GetInstance().ZongYa += betValue;
+				GameData.GetInstance().ZongYa += betValue;
 				gameLogic.currentBet += betValue;
 				RefreshLblCredits(gameLogic.totalCredits.ToString());
 				RefreshLblBet(gameLogic.currentBet.ToString());
-            }
-        }
-    }
+			}
+		}
+	}
 
 	// 退币按钮
 	public void BackTicketEvent(Transform hitObject)
@@ -895,7 +920,7 @@ public class MainUILogic : MonoBehaviour
 				ClearSingleSign(fieldName);
 				return;
 			}
-			
+
 			// Clear light effects
 //			foreach (Transform t in lightEffects)
 //			{
@@ -986,6 +1011,93 @@ public class MainUILogic : MonoBehaviour
 		}
 	}
 
+	public void FieldClickCB(string strField, int betVal)
+	{
+		try
+		{
+			bool isEllipse = GameData.GetInstance().displayType == 1;
+			bool is38Type = GameData.GetInstance().maxNumberOfFields == 38;
+			Transform hitObject;
+			string rootPath = "Canvas/";
+			if (is38Type)
+				rootPath += "38 Fields/";
+			else
+				rootPath += "37 Fields/";
+			if (!isEllipse)
+				rootPath += "Classic/Valid Fields/";
+			else
+			{
+				int num;
+				if (int.TryParse(strField, out num))
+					rootPath += "Ellipse/Choose Effect/e";
+				else
+					rootPath += "Ellipse/Valid Fields/";
+			}
+			rootPath += strField;
+			hitObject = GameObject.Find(rootPath).transform;
+
+			string prefabPath = "BC";
+			if (string.Equals(hitObject.parent.name, "Valid Fields") && 
+			    string.Equals(hitObject.parent.parent.name, "Ellipse"))
+				prefabPath = "SC";
+			int chipIdx = 0;
+			if (gameLogic.betFields.ContainsKey(strField))
+			{
+				int credit = gameLogic.betFields[strField];
+				int count = GameData.GetInstance().betChipValues.Count;
+				for (int i = 0; i < count; ++i)
+				{
+					if (credit >= GameData.GetInstance().betChipValues[i])
+					{
+						chipIdx = i;
+					}
+				}
+			}
+			GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
+			chip.transform.SetParent(fieldChipsRoot.transform);
+			chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
+			chip.transform.localScale = Vector3.one;
+			chip.name = hitObject.name + " temp";
+			
+			chip.transform.GetChild(0).GetComponent<Text>().text = betVal.ToString();
+			
+			Vector3 targetPos = new Vector3(hitObject.localPosition.x * hitObject.parent.localScale.x,
+			                                hitObject.localPosition.y * hitObject.parent.localScale.y,
+			                                0);
+			//			iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
+			//			                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
+			chip.transform.localPosition = targetPos;
+			FieldChipMoveComplete(hitObject.name + ":" + betVal.ToString());
+
+			if (isEllipse)
+			{
+				Transform targetObject = hitObject.parent.parent.FindChild("Valid Fields/" + strField);
+				if (targetObject == null)
+					return;
+				prefabPath = "SC";
+				chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
+				chip.transform.SetParent(fieldChipsRoot.transform);
+				chip.transform.localPosition = betChipsRoot.transform.Find("BetChip" + curChipIdx + "(Clone)").localPosition;
+				chip.transform.localScale = Vector3.one;
+				chip.name = targetObject.name + " temp";
+				chip.transform.GetChild(0).GetComponent<Text>().text = betVal.ToString();
+				
+				targetPos = new Vector3(targetObject.localPosition.x * targetObject.parent.localScale.x,
+				                        targetObject.localPosition.y * targetObject.parent.localScale.y,
+				                        0);
+				//				iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
+				//				                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", targetObject.name + ":" + bet.ToString()));
+				chip.transform.localPosition = targetPos;
+				FieldChipMoveComplete(targetObject.name + ":" + betVal.ToString());
+			}
+			ShowSingleSign(strField);
+		}
+		catch(UnityException ex)
+		{
+			Debug.Log(ex.ToString());
+		}
+	}
+
 	private void FieldChipMoveComplete(string param)
 	{
 		char[] separator = {':'};
@@ -1046,6 +1158,19 @@ public class MainUILogic : MonoBehaviour
 		if (!IsDlgActived())
 			DetectInputEvents();
 		UpdateTimer();
+
+		if (Input.GetKeyDown(KeyCode.UpArrow))
+		{
+			GameEventManager.OnKeyinOnce();
+		}
+		else if (Input.GetKeyDown(KeyCode.DownArrow))
+		{
+			GameEventManager.OnKeout();
+		}
+		else if (Input.GetKeyDown(KeyCode.B))
+		{
+			GameEventManager.OnEnterBackend();
+		}
 	}
 
 	private void DetectInputEvents()
@@ -1135,11 +1260,11 @@ public class MainUILogic : MonoBehaviour
 	{
 		if (!gameLogic.IsPause())
 			countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = value;
-		if (!gameLogic.IsPause() &&
-		    gameLogic.goldfingerUtils.GetRealtimeBallVal() > 0)
-		{
-			GameEventManager.OnBreakdownTip(BreakdownType.BallHaventFall);
-		}
+//		if (!gameLogic.IsPause() &&
+//		    gameLogic.goldfingerUtils.GetRealtimeBallVal() > 0)
+//		{
+//			GameEventManager.OnBreakdownTip(BreakdownType.BallHaventFall);
+//		}
 	}
 
 	private void CountdownTick()

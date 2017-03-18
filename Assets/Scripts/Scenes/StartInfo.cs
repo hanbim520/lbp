@@ -1,22 +1,78 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.Collections;
 
 public class StartInfo : MonoBehaviour
 {
+	public Text txtWarning;
+	public GameObject objDlgWarning;
+
 	void Start()
+	{
+			InitLoading();
+		
+//		if (GameData.debug)
+//			InitLoading();
+//		else
+//			CheckEncryChip();
+	}
+
+	// 校验加密芯片
+	private void CheckEncryChip()
+	{
+		// 获取加密芯片的UUID
+		EncryptChip.encryption_chip_open ();
+		byte[] uuidArray = new byte[255];
+		int uuidLen = EncryptChip.encryption_chip_get_uuid (uuidArray, 255);
+		if (uuidLen <= 0)
+		{
+			// 没有检测到加密芯片
+			objDlgWarning.SetActive(true);
+			txtWarning.text = "Error: Cannot find encry chip!";
+		}
+		else 
+		{
+			string localUUID = GameData.GetInstance().EncryChipUUID;
+			string temp = "";
+			for (int i = 0; i < uuidLen; i++) 
+			{
+				temp += string.Format ("{0:X2}", uuidArray [i]);
+			}
+			if (string.IsNullOrEmpty(localUUID))
+			{
+				GameData.GetInstance().EncryChipUUID = temp;
+				InitLoading();
+			}
+			else
+			{
+				if (string.Compare(temp, localUUID) == 0)
+				{
+					InitLoading();
+				}
+				else
+				{
+					objDlgWarning.SetActive(true);
+					txtWarning.text = "Error: Encry chip is invalid!";
+				}
+			}
+		}
+	}
+
+	// 初始化加载各种工具
+	private void InitLoading()
 	{
 		GameData.GetInstance().ReadDataFromDisk();
 		LoadUpdateUtils();
-//		GameData.GetInstance().deviceIndex = 101;
+		//		GameData.GetInstance().deviceIndex = 101;
 		if (GameData.GetInstance().deviceIndex > 0 && 
 		    GameData.GetInstance().deviceIndex < GameData.GetInstance().monitorDeviceIndex)
 		{
 			Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
-//			LoadInputDevice();
+			//			LoadInputDevice();
 			LoadHIDUtils();
 			LoadNetwork();
-//			TextDB.LoadFile();
-
+			//			TextDB.LoadFile();
+			
 			GameData.GetInstance().NextLevelName = Scenes.Main;
 			Application.LoadLevel(Scenes.Loading);
 		}

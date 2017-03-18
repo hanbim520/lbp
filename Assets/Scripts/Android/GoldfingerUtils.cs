@@ -25,12 +25,16 @@ public class GoldfingerUtils : MonoBehaviour
 	private bool bOpenGate = false;
 	private bool bEnterBackend = false;
 	private bool bOpenKey = false;
+	private bool bKeyout  = false;
 
 	private int iHight 			= 0;
 	private int iLow 			= 0;
 	private int iBlowOrDoor 	= 0;
 	private int iCellNum 		= 0;
 	private int iLight			= 0;		// 中奖灯
+	private int iPayCoin 		= 0;		// 退币信号
+	private int iPayCoinHight 	= 0;		// 退币高位
+	private int iPayCoinLow		= 0;		// 退币低位
 
 	private Timer timerHeartBeat;			// 用来检测断连的计时器
 	private float lightElapsed	= 0;		// 中奖灯闪烁计时
@@ -39,6 +43,10 @@ public class GoldfingerUtils : MonoBehaviour
 
 	private int realtimeBallVal = 0;		// 大于0表示孔里有球
 	private bool bCheckBallFall = false;	// 检查轨道上是否有球
+
+	private float kHoldKeyinDur = 1.0f;		// 长按上分时间
+	private float holdKeyinDelta= 0.0f;		// 长按上分键计时
+	private bool bHoldKeyin		= false;	// 长按上分键成立
 
 	void Start()
 	{
@@ -158,7 +166,7 @@ public class GoldfingerUtils : MonoBehaviour
 				if (data[15] != Utils.CrcAddXor(temp, 14))
 				{
 					// 校验不通过
-					DebugConsole.Log("校验不通过");
+//					DebugConsole.Log("校验不通过");
 					return;
 				}
 
@@ -221,19 +229,62 @@ public class GoldfingerUtils : MonoBehaviour
 							GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
 					}
 				}
-				if (!bOpenKey && data[13] == 0x20)	// 物理钥匙(原上分)
+				if (data[10] != 0)	// 投币
+				{
+					GameEventManager.OnReceiveCoin(data[10]);
+				}
+				if (data[11] != 0)	// 退币
+				{
+					GameEventManager.OnPayCoinCallback(data[11]);
+				}
+//				if (!bOpenKey && data[13] == 0x20)			// 功能菜单(原上分)
+				if (data[13] == 0x20)						// 物理键上分(17A)
 				{
 					bOpenKey = true;
-					GameEventManager.OnOpenKey();
+					// 弹出功能菜单
+//					GameEventManager.OnOpenKey();
+					if (!bHoldKeyin)
+					{
+						holdKeyinDelta += Time.deltaTime;
+						if (holdKeyinDelta > kHoldKeyinDur)
+						{
+							bHoldKeyin = true;
+						}
+					}
 				}
 				else if (bOpenKey && data[13] == 0)
 				{
 					bOpenKey = false;
+
+					holdKeyinDelta = 0;
+					if (!bHoldKeyin)
+					{
+						// 短按上分
+						GameEventManager.OnKeyinOnce();
+					}
+					else
+					{
+						bHoldKeyin = false;
+						// 长按上分
+						GameEventManager.OnKeyinHold();
+					}
+				}
+				if(!bKeyout && data[14] == 0x20)			// 物理键下分(25A)
+				{
+					bKeyout = true;
+					GameEventManager.OnKeout();
+				}
+				else if (bKeyout && data[14] == 0)
+				{
+					bKeyout = false;
 				}
 
-				if (!bEnterBackend && data[13] == 0x40)	// 设置按键(原触屏版设置)
+				if (!bEnterBackend && data[13] == 0x40)		// 设置按键(原触屏版设置)
 				{
-					GameEventManager.OnEnterBackend();
+					// 进后台前输入密码
+//					GameEventManager.OnEnterBackend();
+					// 弹出功能菜单
+					GameEventManager.OnOpenKey();
 				}
 				else if (bEnterBackend && data[13] == 0)
 				{
@@ -251,8 +302,8 @@ public class GoldfingerUtils : MonoBehaviour
 	{
 		int[] outData = new int[]{
 			0xD5, 0x58, 0x57, 14, iBlowOrDoor,
-			iHight, iLow, iCellNum, 0, 0,
-			0, 0, 0, 0, 0,
+			iHight, iLow, iCellNum, iPayCoin, iPayCoinHight,
+			iPayCoinLow, 0, 0, 0, 0,
 			0, 0, iLight, 0, 0, 0};
 		int[] temp = new int[17];
 		System.Array.Copy(outData, 1, temp, 0, 17);
@@ -264,6 +315,8 @@ public class GoldfingerUtils : MonoBehaviour
 		iLow = 0;
 		iBlowOrDoor = 0;
 		iCellNum = 0;
+		iPayCoinHight = 0;
+		iPayCoinLow = 0;
 	}
 
 	// 开门
@@ -289,7 +342,9 @@ public class GoldfingerUtils : MonoBehaviour
 
 	public void PayCoin(int coinNum)
 	{
-
+		iPayCoin = 1;
+		iPayCoinHight = coinNum >> 8 & 0xff;
+		iPayCoinLow = coinNum & 0xff;
 	}
 
 	// 没有加密芯片 不用验证
@@ -300,7 +355,9 @@ public class GoldfingerUtils : MonoBehaviour
 
 	public void StopPayCoin()
 	{
-
+		iPayCoin = 0;
+		iPayCoinHight = 0;
+		iPayCoinLow = 0;
 	}
 
 	public void WinLightSignal(int signal)
@@ -340,17 +397,17 @@ public class GoldfingerUtils : MonoBehaviour
 
 	private void PrintData(ref int[] data, bool bEvent = false)
 	{
-//		string log = "data.Length:" + data.Length + "--";
-//		for (int i = 0; i < data.Length; ++i)
-//		{
-//			if (i > 0 && i % 20 == 0)
-//				log += "\n";
-//			log += string.Format("{0:X}", data[i]) + ", ";
-//		}
-//		if (!bEvent)
-//		DebugConsole.Log(log);
-//		else
-//		GameEventManager.OnDebugLog(0, log);
+		string log = "data.Length:" + data.Length + "--";
+		for (int i = 0; i < data.Length; ++i)
+		{
+			if (i > 0 && i % 20 == 0)
+				log += "\n";
+			log += string.Format("{0:X}", data[i]) + ", ";
+		}
+		if (!bEvent)
+		DebugConsole.Log(log);
+		else
+		GameEventManager.OnDebugLog(0, log);
 	}
 
 //	void OnGUI()

@@ -6,12 +6,14 @@ using System.Collections.Generic;
 /*
 {0,13,1,00,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24,36}
 {36,13,1,00,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24,0}
+{36,11,30,8,23,10,37,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26,0,32,15,19,4,21,2,25,17,34,6,27,13}
  */
 public class GameData
 {
-	public static bool debug 		= false;		// 是否模拟出球
+	public static bool debug 		= true;		// 是否模拟出球
 	public static bool controlCode	= false;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
+	public static RouletteType rouletteType = RouletteType.Special1;	// 轮盘数字排列类型
 
     // Setting menu
     public int betTimeLimit;
@@ -19,13 +21,20 @@ public class GameData
 	public int gameDifficulty;
     public int baoji;
 	public List<int> betChipValues = new List<int>();
-	public int max36Value;
-	public int max18Value;
-	public int max12Value;
-	public int max9Value;
-	public int max6Value;
-	public int max3Value;
-	public int max2Value;
+	public int max36Value;			// 单台限注36倍
+	public int max18Value;			// 单台限注18倍
+	public int max12Value;			// 单台限注12倍
+	public int max9Value;			// 单台限注9倍
+	public int max6Value;			// 单台限注6倍
+	public int max3Value;			// 单台限注3倍
+	public int max2Value;			// 单台限注2倍
+	public int allMax36Val;			// 全台限注36倍
+	public int allMax18Val;			// 全台限注18倍
+	public int allMax12Val;			// 全台限注12倍
+	public int allMax9Val;			// 全台限注9倍
+	public int allMax6Val;			// 全台限注6倍
+	public int allMax3Val;			// 全台限注3倍
+	public int allMax2Val;			// 全台限注2倍
 	public int powerOffCompensate;	// 0--断电吃分 1--断电赔付
 	// 优惠卡分限
 	public int couponsStart;
@@ -224,6 +233,18 @@ public class GameData
 
     public int deviceIndex;     // 机台序号 1, 2, 3...
 	public string deviceGuid;	// 发给加密芯片做验证
+	public string EncryChipUUID // android板加密芯片的uuid
+	{
+		get 
+		{
+			return CryptoPrefs.GetString("EncryChipUUID", string.Empty);
+		}
+		set
+		{
+			CryptoPrefs.SetString("EncryChipUUID", value);
+			CryptoPrefs.Save();
+		}
+	}
 
 	// Serial mouse coordinates
 	public float serialMouseX;
@@ -263,6 +284,10 @@ public class GameData
 
 	public int[] ballValue38 = new int[]{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24};
 	public int[] ballValue37 = new int[]{26,0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3};
+	private int[,] ballValues = new int[,]{
+		{36,13,1,37,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24},
+		{36,11,30,8,23,10,37,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26,0,32,15,19,4,21,2,25,17,34,6,27,13}
+	};
 
 	// For host
 	private int connectClientsTime = 10;
@@ -317,45 +342,95 @@ public class GameData
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 //		deviceIndex = 1;
 
-        colorTable.Add(37, ResultType.Green);    // 37: 00
-		colorTable.Add(0, ResultType.Green);
-		colorTable.Add(1, ResultType.Red);
-		colorTable.Add(3, ResultType.Red);
-		colorTable.Add(5, ResultType.Red);
-		colorTable.Add(7, ResultType.Red);
-		colorTable.Add(9, ResultType.Red);
-		colorTable.Add(12, ResultType.Red);
-		colorTable.Add(14, ResultType.Red);
-		colorTable.Add(16, ResultType.Red);
-		colorTable.Add(18, ResultType.Red);
-		colorTable.Add(19, ResultType.Red);
-		colorTable.Add(21, ResultType.Red);
-		colorTable.Add(23, ResultType.Red);
-		colorTable.Add(25, ResultType.Red);
-		colorTable.Add(27, ResultType.Red);
-		colorTable.Add(30, ResultType.Red);
-		colorTable.Add(32, ResultType.Red);
-		colorTable.Add(34, ResultType.Red);
-		colorTable.Add(36, ResultType.Red);
+		if (rouletteType == RouletteType.Standard)
+		{
+			colorTable.Add(37, ResultType.Green);    // 37: 00
+			colorTable.Add(0, ResultType.Green);
+			colorTable.Add(1, ResultType.Red);
+			colorTable.Add(3, ResultType.Red);
+			colorTable.Add(5, ResultType.Red);
+			colorTable.Add(7, ResultType.Red);
+			colorTable.Add(9, ResultType.Red);
+			colorTable.Add(12, ResultType.Red);
+			colorTable.Add(14, ResultType.Red);
+			colorTable.Add(16, ResultType.Red);
+			colorTable.Add(18, ResultType.Red);
+			colorTable.Add(19, ResultType.Red);
+			colorTable.Add(21, ResultType.Red);
+			colorTable.Add(23, ResultType.Red);
+			colorTable.Add(25, ResultType.Red);
+			colorTable.Add(27, ResultType.Red);
+			colorTable.Add(30, ResultType.Red);
+			colorTable.Add(32, ResultType.Red);
+			colorTable.Add(34, ResultType.Red);
+			colorTable.Add(36, ResultType.Red);
+			
+			colorTable.Add(2, ResultType.Black);
+			colorTable.Add(4, ResultType.Black);
+			colorTable.Add(6, ResultType.Black);
+			colorTable.Add(8, ResultType.Black);
+			colorTable.Add(10, ResultType.Black);
+			colorTable.Add(11, ResultType.Black);
+			colorTable.Add(13, ResultType.Black);
+			colorTable.Add(15, ResultType.Black);
+			colorTable.Add(17, ResultType.Black);
+			colorTable.Add(20, ResultType.Black);
+			colorTable.Add(22, ResultType.Black);
+			colorTable.Add(24, ResultType.Black);
+			colorTable.Add(26, ResultType.Black);
+			colorTable.Add(28, ResultType.Black);
+			colorTable.Add(29, ResultType.Black);
+			colorTable.Add(31, ResultType.Black);
+			colorTable.Add(33, ResultType.Black);
+			colorTable.Add(35, ResultType.Black);
+		}
+       	else if (rouletteType == RouletteType.Special1)
+		{
+			colorTable.Add(37, ResultType.Green);
+			colorTable.Add(0, ResultType.Green);
+			colorTable.Add(1, ResultType.Red);
+			colorTable.Add(2, ResultType.Red);
+			colorTable.Add(3, ResultType.Red);
+			colorTable.Add(4, ResultType.Red);
+			colorTable.Add(5, ResultType.Red);
+			colorTable.Add(6, ResultType.Red);
+			colorTable.Add(7, ResultType.Red);
+			colorTable.Add(8, ResultType.Red);
+			colorTable.Add(9, ResultType.Red);
+			colorTable.Add(10, ResultType.Red);
+			colorTable.Add(11, ResultType.Red);
+			colorTable.Add(12, ResultType.Red);
+			colorTable.Add(13, ResultType.Red);
+			colorTable.Add(14, ResultType.Red);
+			colorTable.Add(15, ResultType.Red);
+			colorTable.Add(16, ResultType.Red);
+			colorTable.Add(17, ResultType.Red);
+			colorTable.Add(18, ResultType.Red);
 
-		colorTable.Add(2, ResultType.Black);
-		colorTable.Add(4, ResultType.Black);
-		colorTable.Add(6, ResultType.Black);
-		colorTable.Add(8, ResultType.Black);
-		colorTable.Add(10, ResultType.Black);
-		colorTable.Add(11, ResultType.Black);
-		colorTable.Add(13, ResultType.Black);
-		colorTable.Add(15, ResultType.Black);
-		colorTable.Add(17, ResultType.Black);
-		colorTable.Add(20, ResultType.Black);
-		colorTable.Add(22, ResultType.Black);
-		colorTable.Add(24, ResultType.Black);
-		colorTable.Add(26, ResultType.Black);
-		colorTable.Add(28, ResultType.Black);
-		colorTable.Add(29, ResultType.Black);
-		colorTable.Add(31, ResultType.Black);
-        colorTable.Add(33, ResultType.Black);
-        colorTable.Add(35, ResultType.Black);
+			colorTable.Add(19, ResultType.Black);
+			colorTable.Add(20, ResultType.Black);
+			colorTable.Add(21, ResultType.Black);
+			colorTable.Add(22, ResultType.Black);
+			colorTable.Add(23, ResultType.Black);
+			colorTable.Add(24, ResultType.Black);
+			colorTable.Add(25, ResultType.Black);
+			colorTable.Add(26, ResultType.Black);
+			colorTable.Add(27, ResultType.Black);
+			colorTable.Add(28, ResultType.Black);
+			colorTable.Add(29, ResultType.Black);
+			colorTable.Add(30, ResultType.Black);
+			colorTable.Add(31, ResultType.Black);
+			colorTable.Add(32, ResultType.Black);
+			colorTable.Add(33, ResultType.Black);
+			colorTable.Add(34, ResultType.Black);
+			colorTable.Add(35, ResultType.Black);
+			colorTable.Add(36, ResultType.Black);
+		}
+		int ballValCount = ballValue38.Length;
+		int rtype = (int)rouletteType;
+		for (int i = 0; i < ballValCount; ++i)
+			ballValue38[i] = ballValues[rtype, i];
+		
 	}
 
     private static GameData instance;
@@ -390,6 +465,13 @@ public class GameData
 		PlayerPrefs.SetInt("max6Value", max6Value);
 		PlayerPrefs.SetInt("max3Value", max3Value);
 		PlayerPrefs.SetInt("max2Value", max2Value);
+		PlayerPrefs.SetInt("allMax36Val", allMax36Val);
+		PlayerPrefs.SetInt("allMax18Val", allMax18Val);
+		PlayerPrefs.SetInt("allMax12Val", allMax12Val);
+		PlayerPrefs.SetInt("allMax9Val", allMax9Val);
+		PlayerPrefs.SetInt("allMax6Val", allMax6Val);
+		PlayerPrefs.SetInt("allMax3Val", allMax3Val);
+		PlayerPrefs.SetInt("allMax2Val", allMax2Val);
 		PlayerPrefs.SetInt("couponsStart", couponsStart);
 		PlayerPrefs.SetInt("couponsKeyinRatio", couponsKeyinRatio);
 		PlayerPrefs.SetInt("couponsKeoutRatio", couponsKeoutRatio);
@@ -425,6 +507,13 @@ public class GameData
 		max6Value = 100;
 		max3Value = 100;
 		max2Value = 100;
+		allMax36Val = 800;
+		allMax18Val = 800;
+		allMax12Val = 800;
+		allMax9Val = 800;
+		allMax6Val = 800;
+		allMax3Val = 800;
+		allMax2Val = 800;
 		couponsStart = 100;
 		couponsKeyinRatio = 10;	// 1%~100%
 		couponsKeoutRatio = 4;	
@@ -555,6 +644,13 @@ public class GameData
 			max6Value = PlayerPrefs.GetInt("max6Value");
 			max3Value = PlayerPrefs.GetInt("max3Value");
 			max2Value = PlayerPrefs.GetInt("max2Value");
+			allMax36Val = PlayerPrefs.GetInt("allMax36Val");
+			allMax18Val = PlayerPrefs.GetInt("allMax18Val");
+			allMax12Val = PlayerPrefs.GetInt("allMax12Val");
+			allMax9Val = PlayerPrefs.GetInt("allMax9Val");
+			allMax6Val = PlayerPrefs.GetInt("allMax6Val");
+			allMax3Val = PlayerPrefs.GetInt("allMax3Val");
+			allMax2Val = PlayerPrefs.GetInt("allMax2Val");
 			couponsStart = PlayerPrefs.GetInt("couponsStart");
 			couponsKeyinRatio = PlayerPrefs.GetInt("couponsKeyinRatio");
 			couponsKeoutRatio = PlayerPrefs.GetInt("couponsKeoutRatio");

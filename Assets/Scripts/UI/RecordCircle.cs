@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class RecordCircle : MonoBehaviour
 {
 	public int fieldsCount = 37;
-	public Sprite[] bgs;
+	public Sprite[] bgs;				// 球的颜色
 	public Sprite[] histogramColors;	// 柱状体颜色
 	public GameObject flashImg;
 	private Image[] triangles;

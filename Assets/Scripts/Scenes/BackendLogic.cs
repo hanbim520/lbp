@@ -58,6 +58,7 @@ public class BackendLogic : MonoBehaviour
 
     void Start()
     {
+		GameData.GetInstance().ReadDataFromDisk();
         printCodeTimes = 0;
         preInputState = InputEx.inputEnable;
         mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
@@ -509,7 +510,7 @@ public class BackendLogic : MonoBehaviour
 		calcPassword.text = string.Empty;
 		calcTitle.text = string.Empty;
 
-        SetLanguage(menuSetting);
+//        SetLanguage(menuSetting);
 
         GameData ga = GameData.GetInstance();
 		string[] datas = new string[]{ga.betTimeLimit.ToString(), ga.coinToScore.ToString(), ga.baoji.ToString(), ga.gameDifficulty.ToString(), 
@@ -521,15 +522,24 @@ public class BackendLogic : MonoBehaviour
         Transform root = menuSetting.transform.FindChild("Valid Fields");
         if (root != null)
         {
+			int pageIdx = 0;
 			int count = datas.Length - 1;
             for (int i = 0; i <= count; ++i)
             {
-                Transform str = root.GetChild(i).FindChild("Text");
+                Transform str = root.GetChild(pageIdx).GetChild(i).FindChild("Text");
                 if (str != null)
                 {
                     str.GetComponent<Text>().text = datas[i];
                 }
             }
+			pageIdx = 1;
+			root.GetChild(pageIdx).GetChild(0).FindChild("Text").GetComponent<Text>().text = ga.allMax36Val.ToString();
+			root.GetChild(pageIdx).GetChild(1).FindChild("Text").GetComponent<Text>().text = ga.allMax18Val.ToString();
+			root.GetChild(pageIdx).GetChild(2).FindChild("Text").GetComponent<Text>().text = ga.allMax12Val.ToString();
+			root.GetChild(pageIdx).GetChild(3).FindChild("Text").GetComponent<Text>().text = ga.allMax9Val.ToString();
+			root.GetChild(pageIdx).GetChild(4).FindChild("Text").GetComponent<Text>().text = ga.allMax6Val.ToString();
+			root.GetChild(pageIdx).GetChild(5).FindChild("Text").GetComponent<Text>().text = ga.allMax3Val.ToString();
+			root.GetChild(pageIdx).GetChild(6).FindChild("Text").GetComponent<Text>().text = ga.allMax2Val.ToString();
         }
     }
 
@@ -1007,14 +1017,15 @@ public class BackendLogic : MonoBehaviour
 
     private void SaveSetting()
     {
-        List<int> values = new List<int>();
+        List<int> page1Val = new List<int>();
+        List<int> page2Val = new List<int>();
         Transform root = menuSetting.transform.FindChild("Valid Fields");
         if (root != null)
         {
-            int count = root.childCount;
+            int count = root.GetChild(0).childCount;
             for (int i = 0; i < count; ++i)
             {
-                Transform str = root.GetChild(i).FindChild("Text");
+                Transform str = root.GetChild(0).GetChild(i).FindChild("Text");
                 if (str != null)
                 {
                     int value;
@@ -1023,36 +1034,61 @@ public class BackendLogic : MonoBehaviour
                         content = content.Substring(0, content.Length - 1);
                     if (int.TryParse(content, out value))
                     {
-                        values.Add(value);
+                        page1Val.Add(value);
                     }
                 }
             }
 
-            GameData.GetInstance().betTimeLimit = values[0];
-            GameData.GetInstance().coinToScore = values[1];
-            GameData.GetInstance().baoji = values[2];
-            GameData.GetInstance().gameDifficulty = values[3];
-            GameData.GetInstance().betChipValues[0] = values[4];
-            GameData.GetInstance().betChipValues[1] = values[5];
-            GameData.GetInstance().betChipValues[2] = values[6];
-            GameData.GetInstance().betChipValues[3] = values[7];
-            GameData.GetInstance().betChipValues[4] = values[8];
-            GameData.GetInstance().betChipValues[5] = values[9];
-            GameData.GetInstance().max36Value = values[10];
-            GameData.GetInstance().max18Value = values[11];
-            GameData.GetInstance().max12Value = values[12];
-            GameData.GetInstance().max9Value = values[13];
-            GameData.GetInstance().max6Value = values[14];
-            GameData.GetInstance().max3Value = values[15];
-            GameData.GetInstance().max2Value = values[16];
-			GameData.GetInstance().lotteryLv = values[17];
-			GameData.GetInstance().lotteryCondition = values[18];
-			GameData.GetInstance().lotteryBase = values[19];
-			GameData.GetInstance().lotteryRate = values[20];
-			GameData.GetInstance().lotteryAllocation = values[21];
-			GameData.GetInstance().beginSessions = values[22];
-			GameData.GetInstance().maxNumberOfFields = values[23];
+            GameData.GetInstance().betTimeLimit = page1Val[0];
+            GameData.GetInstance().coinToScore = page1Val[1];
+            GameData.GetInstance().baoji = page1Val[2];
+            GameData.GetInstance().gameDifficulty = page1Val[3];
+            GameData.GetInstance().betChipValues[0] = page1Val[4];
+            GameData.GetInstance().betChipValues[1] = page1Val[5];
+            GameData.GetInstance().betChipValues[2] = page1Val[6];
+            GameData.GetInstance().betChipValues[3] = page1Val[7];
+            GameData.GetInstance().betChipValues[4] = page1Val[8];
+            GameData.GetInstance().betChipValues[5] = page1Val[9];
+            GameData.GetInstance().max36Value = page1Val[10];
+            GameData.GetInstance().max18Value = page1Val[11];
+            GameData.GetInstance().max12Value = page1Val[12];
+            GameData.GetInstance().max9Value = page1Val[13];
+            GameData.GetInstance().max6Value = page1Val[14];
+            GameData.GetInstance().max3Value = page1Val[15];
+            GameData.GetInstance().max2Value = page1Val[16];
+			GameData.GetInstance().lotteryLv = page1Val[17];
+			GameData.GetInstance().lotteryCondition = page1Val[18];
+			GameData.GetInstance().lotteryBase = page1Val[19];
+			GameData.GetInstance().lotteryRate = page1Val[20];
+			GameData.GetInstance().lotteryAllocation = page1Val[21];
+			GameData.GetInstance().beginSessions = page1Val[22];
+			GameData.GetInstance().maxNumberOfFields = page1Val[23];
+
+			count = root.GetChild(1).childCount;
+			for (int i = 0; i < count; ++i)
+			{
+				Transform str = root.GetChild(1).GetChild(i).FindChild("Text");
+				if (str != null)
+				{
+					int value;
+					string content = str.GetComponent<Text>().text;
+					if (content.Contains("%"))
+						content = content.Substring(0, content.Length - 1);
+					if (int.TryParse(content, out value))
+					{
+						page2Val.Add(value);
+					}
+				}
+			}
+			GameData.GetInstance().allMax36Val = page2Val[0];
+			GameData.GetInstance().allMax18Val = page2Val[1];
+			GameData.GetInstance().allMax12Val = page2Val[2];
+			GameData.GetInstance().allMax9Val = page2Val[3];
+			GameData.GetInstance().allMax6Val = page2Val[4];
+			GameData.GetInstance().allMax3Val = page2Val[5];
+			GameData.GetInstance().allMax2Val = page2Val[6];
 			GameData.GetInstance().SaveSetting();
+			
             int idx = GameData.GetInstance().backendLanguage;
             ShowWarning(Notifies.saveSuccess[idx], true);
         }

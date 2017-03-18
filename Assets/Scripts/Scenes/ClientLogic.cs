@@ -5,6 +5,10 @@ using System.Collections.Generic;
 public class ClientLogic : GameLogic
 {
 	private UClient uclient;
+	public UClient clientSocket
+	{
+		get { return uclient; }
+	}
 
     private void Init()
     {
@@ -54,12 +58,18 @@ public class ClientLogic : GameLogic
 	{
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.ClientDisconnect += ClientDisconnect;
+		GameEventManager.FieldClick += Bet;
+        GameEventManager.Clear += Clear;
+        GameEventManager.ClearAll += ClearAll;
     }
     
     private void UnregisterListener()
     {
         GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.ClientDisconnect -= ClientDisconnect;
+		GameEventManager.FieldClick -= Bet;
+        GameEventManager.Clear -= Clear;
+        GameEventManager.ClearAll -= ClearAll;
     }
 	
 	public void HandleRecData(int instr, ref string[] words)
@@ -95,6 +105,19 @@ public class ClientLogic : GameLogic
 		else if (instr == NetInstr.GetTotalBet)
 		{
 		    SendTotalBet();
+		}
+		else if (instr == NetInstr.BetAbleValue)
+		{
+			BetCallback(ref words);
+		}
+		else if (instr == NetInstr.CheckRepeatAble)
+		{
+			int val;
+			if (int.TryParse(words[1], out val))
+			{
+				if (val == 1)
+					ui.RepeatEventCB();
+			}
 		}
 	}
 
@@ -326,4 +349,113 @@ public class ClientLogic : GameLogic
 		GameData.GetInstance().ReadRecords();
         GameEventManager.OnRefreshRecord(ballValue);
     }
+
+	protected int Bet(string field, int betVal)
+	{
+		if (totalCredits <= 0)
+			return 0;
+		// 剩下的筹码小于押分
+		if (totalCredits - betVal < 0)
+			betVal = totalCredits;
+		
+		// 计算分机限注
+		int maxBet = Utils.GetMaxBet(field);
+		if (betFields.ContainsKey(field))
+		{
+			betVal = MaxBet(maxBet, betFields[field], betVal);
+		}
+		else
+		{
+			betVal = MaxBet(maxBet, 0, betVal);
+		}
+		// 计算全台限注
+		string msg = NetInstr.BetAbleValue.ToString() + ":" + field + ":" + betVal.ToString();
+		uclient.SendToServer(msg);
+		
+//		if (betVal > 0)
+//		{
+//			if (betFields.ContainsKey(field))
+//			{
+//				betFields[field] += betVal;
+//			}
+//			else
+//			{
+//				betFields.Add(field, betVal);
+//			}
+//			GameData.GetInstance().ZongYa += betVal;
+//			currentBet += betVal;
+//			totalCredits -= betVal;
+//			ui.RefreshLblCredits(totalCredits.ToString());
+//			ui.RefreshLblBet(currentBet.ToString());
+//		}
+//		return betVal;
+		return 0;
+	}
+
+	// 服务器发送回来某押分区能押多少分(用于计算全台限注)
+	private void BetCallback(ref string[] words)
+	{
+		string field = words[1];
+		int betVal;
+		if (int.TryParse(words[2], out betVal))
+		{
+			if (betVal > 0)
+			{
+				if (betFields.ContainsKey(field))
+				{
+					betFields[field] += betVal;
+				}
+				else
+				{
+					betFields.Add(field, betVal);
+				}
+				GameData.GetInstance().ZongYa += betVal;
+				currentBet += betVal;
+				totalCredits -= betVal;
+				ui.RefreshLblCredits(totalCredits.ToString());
+				ui.RefreshLblBet(currentBet.ToString());
+				ui.FieldClickCB(field, betVal);
+			}
+		}
+	}
+
+	protected void Clear(string fieldName)
+	{
+		if (string.Equals(fieldName.Substring(0, 1), "e"))
+		{
+			fieldName = fieldName.Substring(1);
+		}
+		if (betFields.ContainsKey(fieldName))
+		{
+			int betVal = betFields[fieldName];
+			totalCredits += betVal;
+			GameData.GetInstance().ZongYa -= betVal;
+			currentBet -= betVal;
+			betFields.Remove(fieldName);
+			// 通知主机 修改全台限注
+			string msg = string.Format("{0}:{1}:{2}", NetInstr.ClearBets, fieldName, betVal);
+			uclient.SendToServer(msg);
+		}
+		ui.RefreshLblCredits(totalCredits.ToString());
+		ui.RefreshLblBet(currentBet.ToString());
+	}
+
+	protected void ClearAll()
+	{
+		if (betFields.Count == 0)
+			return;
+
+		string msg = NetInstr.ClearBets.ToString();
+		foreach (KeyValuePair<string, int> item in betFields)
+		{
+			totalCredits += item.Value;
+			msg += string.Format(":{0}:{1}", item.Key, item.Value);
+		}
+		uclient.SendToServer(msg);
+		GameData.GetInstance().ZongYa -= currentBet;
+		currentBet = 0;
+		betFields.Clear();
+		ui.RefreshLblCredits(totalCredits.ToString());
+		ui.RefreshLblBet(currentBet.ToString());
+	}
 }

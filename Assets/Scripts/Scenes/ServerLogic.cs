@@ -9,9 +9,11 @@ public class ServerLogic : GameLogic
 
 	private const float kCalcRemainTime = 60.0f;
 	private float remainTimeIntever = 0.0f;
-	// 保存分机和主机在当前局的压分记录(用来计算压中的彩金分数)
-	private Dictionary<string, int> clientBetFields = new Dictionary<string, int>();
-	// 保存分机和主机在当前局的总压分
+	// 保存所有机台在当前局的压分记录 (用来计算全台限注)
+	public Dictionary<string, int> clientBets = new Dictionary<string, int>();
+	// 保存所有机台符合中彩金条件的压分记录 (用来计算压中的彩金分数)
+	public Dictionary<string, int> betForLucky = new Dictionary<string, int>();
+	// 保存所有机台在当前局的总压分
 	private List<int> totalBets = new List<int>();
 	private Timer timerConnectClients = null;
 	private int othersLucyWin = 0;	// 其他分机中的彩金数额
@@ -48,6 +50,9 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown += CountdownComplete;
 		GameEventManager.BallValue += RecBallValue;
 		GameEventManager.CloseGate += CloseGate;
+		GameEventManager.FieldClick += Bet;
+        GameEventManager.Clear += Clear;
+        GameEventManager.ClearAll += ClearAll;
     }
 
     private void UnregisterListener()
@@ -57,6 +62,9 @@ public class ServerLogic : GameLogic
 		GameEventManager.EndCountdown -= CountdownComplete;
 		GameEventManager.BallValue -= RecBallValue;
 		GameEventManager.CloseGate -= CloseGate;
+		GameEventManager.FieldClick -= Bet;
+        GameEventManager.Clear -= Clear;
+        GameEventManager.ClearAll -= ClearAll;
     }
 
 	protected override void Update()
@@ -182,7 +190,7 @@ public class ServerLogic : GameLogic
 		{
 			// 保存主机台的压分情况
 			if (item.Value >= GameData.GetInstance().lotteryCondition)
-				clientBetFields.Add(item.Key, item.Value);
+				betForLucky.Add(item.Key, item.Value);
 			serverBets += item.Value;
 		}
 		totalBets.Add(serverBets);
@@ -306,7 +314,7 @@ public class ServerLogic : GameLogic
 
 		string strBall = ballValue == 37 ? "00" : ballValue.ToString();
 		int tmpLuckSum;
-		if (clientBetFields.TryGetValue(strBall, out tmpLuckSum))
+		if (betForLucky.TryGetValue(strBall, out tmpLuckSum))
 			curLuckySum = tmpLuckSum;
 
 		string msg = NetInstr.LuckSum.ToString() + ":" + curLuckySum.ToString();
@@ -352,7 +360,7 @@ public class ServerLogic : GameLogic
 	{
 		// 单点压分号码
 		List<int> betSingle = new List<int>();
-		foreach (KeyValuePair<string, int> item in clientBetFields)
+		foreach (KeyValuePair<string, int> item in betForLucky)
 		{
 			int key;
 			if (string.Compare(item.Key, "00") == 0)
@@ -598,7 +606,8 @@ public class ServerLogic : GameLogic
 		othersLucyWin = 0;
 		lotteryValues.Clear();
         betFields.Clear();
-		clientBetFields.Clear();
+		betForLucky.Clear();
+		clientBets.Clear();
 		totalBets.Clear();
 		ui.StopFlash();
         ui.StopFlashLotteries();
@@ -629,7 +638,67 @@ public class ServerLogic : GameLogic
 				return;
 			CollectTotalBets(ref words);
 		}
+		else if (instr == NetInstr.BetAbleValue)
+		{
+			string field = words[1];
+			int wantBat;
+			if (int.TryParse(words[2], out wantBat))
+			{
+				SendBetAbleValue(true, connectionId, field, wantBat);
+			}
+		}
+		else if (instr == NetInstr.ClearBets)
+		{
+			HandleClearInstr(ref words);
+		}
+		else if (instr == NetInstr.CheckRepeatAble)
+		{
+			HandleCheckRepeatAble(true, connectionId, ref words);
+		}
     }
+
+	/// <summary>
+	/// 发送给分机该押分区能押的分数(用于全台限注).
+	/// </summary>
+	/// <param name="isClient">是否是分机.</param>
+	/// <param name="connectionId">分机联网id.</param>
+	/// <param name="field">押分区.</param>
+	/// <param name="wantBatVal">希望押的分数.</param>
+	private void SendBetAbleValue(bool isClient, int connectionId, string field, int wantBatVal)
+	{
+		int canBetVal = wantBatVal;						// 还能押的分数
+		int maxBet = Utils.GetAllMaxBet(field); 		// 全台限注额度
+		if (maxBet > 0)	// 开启了全台限注的情况
+		{
+			if (clientBets.ContainsKey(field))
+			{
+				int betted = clientBets[field];			// 已经押的分数
+				int remain = maxBet - betted;
+				if (remain < wantBatVal)
+					canBetVal = remain;
+				else
+					canBetVal = wantBatVal;
+				clientBets[field] += canBetVal;
+			}
+			else
+			{
+				if (wantBatVal < maxBet)
+					canBetVal = wantBatVal;
+				else
+					canBetVal = maxBet;
+				clientBets.Add(field, canBetVal);
+			}
+		}
+		if (isClient)
+		{
+			string msg = NetInstr.BetAbleValue.ToString() + ":" + field + ":" + canBetVal;
+			host.SendToPeer(msg, connectionId);
+		}
+		else
+		{
+			BetCallback(field, canBetVal);
+		}
+	}
 
 	// 保存其他客户端在当前局的压分情况
 	private void CollectBetRecords(ref string[] words)
@@ -638,12 +707,12 @@ public class ServerLogic : GameLogic
 			return;
 		for (int idx = 1; idx < words.Length; idx += 2)
 		{
-			if (clientBetFields.ContainsKey(words[idx]))
+			if (betForLucky.ContainsKey(words[idx]))
 			{
 				int value;
 				if (int.TryParse(words[idx + 1], out value))
 				{
-					clientBetFields[words[idx]] += value;
+					betForLucky[words[idx]] += value;
 				}
 			}
 			else
@@ -652,7 +721,7 @@ public class ServerLogic : GameLogic
 				if (int.TryParse(words[idx + 1], out value))
 				{
 					string key = words[idx];
-					clientBetFields.Add(key, value);
+					betForLucky.Add(key, value);
 				}
 			}
 		}
@@ -727,5 +796,172 @@ public class ServerLogic : GameLogic
 				log += string.Format("{0}:{1}, ", i, PlayerPrefs.GetInt("ballValue" + i, 0));
 		}
 		GameEventManager.OnDebugLog(2, log);
+	}
+
+	protected int Bet(string field, int betVal)
+	{
+		if (totalCredits <= 0)
+			return 0;
+		// 剩下的筹码小于押分
+		if (totalCredits - betVal < 0)
+			betVal = totalCredits;
+		
+		// 计算分机限注
+		int maxBet = Utils.GetMaxBet(field);
+		if (betFields.ContainsKey(field))
+		{
+			betVal = MaxBet(maxBet, betFields[field], betVal);
+		}
+		else
+		{
+			betVal = MaxBet(maxBet, 0, betVal);
+		}
+		// 计算全台限注
+		SendBetAbleValue(false, 0, field, betVal);
+		
+//		if (betVal > 0)
+//		{
+//			if (betFields.ContainsKey(field))
+//			{
+//				betFields[field] += betVal;
+//			}
+//			else
+//			{
+//				betFields.Add(field, betVal);
+//			}
+//			GameData.GetInstance().ZongYa += betVal;
+//			currentBet += betVal;
+//			totalCredits -= betVal;
+//			ui.RefreshLblCredits(totalCredits.ToString());
+//			ui.RefreshLblBet(currentBet.ToString());
+//		}
+//		return betVal;
+		return 0;
+	}
+
+	// 计算完全台限注的回调
+	private void BetCallback(string field, int betVal)
+	{
+		if (betVal > 0)
+		{
+			if (betFields.ContainsKey(field))
+			{
+				betFields[field] += betVal;
+			}
+			else
+			{
+				betFields.Add(field, betVal);
+			}
+			GameData.GetInstance().ZongYa += betVal;
+			currentBet += betVal;
+			totalCredits -= betVal;
+			ui.RefreshLblCredits(totalCredits.ToString());
+			ui.RefreshLblBet(currentBet.ToString());
+			ui.FieldClickCB(field, betVal);
+		}
+	}
+
+	protected void Clear(string fieldName)
+	{
+		if (string.Equals(fieldName.Substring(0, 1), "e"))
+		{
+			fieldName = fieldName.Substring(1);
+		}
+		if (betFields.ContainsKey(fieldName))
+		{
+			int betVal = betFields[fieldName];
+			totalCredits += betVal;
+			GameData.GetInstance().ZongYa -= betVal;
+			currentBet -= betVal;
+			betFields.Remove(fieldName);
+			// 修改全台限注
+			if (clientBets.ContainsKey(fieldName))
+				clientBets[fieldName] -= betVal;
+		}
+		ui.RefreshLblCredits(totalCredits.ToString());
+		ui.RefreshLblBet(currentBet.ToString());
+	}
+
+	private void HandleClearInstr(ref string[] words)
+	{
+		for (int i = 1; i < words.Length; i += 2)
+		{
+			string field = words[i];
+			int betVal;
+			if (int.TryParse(words[i + 1], out betVal))
+			{
+				if (clientBets.ContainsKey(field))
+					clientBets[field] -= betVal;
+			}
+		}
+	}
+
+	protected void ClearAll()
+	{
+		if (betFields.Count == 0)
+			return;
+
+		foreach (KeyValuePair<string, int> item in betFields)
+		{
+			totalCredits += item.Value;
+			if (clientBets.ContainsKey(item.Key))
+				clientBets[item.Key] -= item.Value;
+		}
+		GameData.GetInstance().ZongYa -= currentBet;
+		currentBet = 0;
+		betFields.Clear();
+		ui.RefreshLblCredits(totalCredits.ToString());
+		ui.RefreshLblBet(currentBet.ToString());
+	}
+
+	public void HandleCheckRepeatAble(bool isClient, int connectionId, ref string[] words)
+	{
+		int ret = 1; // 0:表示不可以续押 1:表示可以续押
+		Dictionary<string, int> tmp = new Dictionary<string, int>(clientBets);
+		bool isRepeatData = false;
+		for (int i = 1; i < words.Length; i += 2)
+		{
+
+			if (string.Compare(words[i], "repeats") == 0)
+			{
+				isRepeatData = true;
+				continue;
+			}
+			string field = words[i];
+			int betVal;
+			if (int.TryParse(words[i + 1], out betVal))
+			{
+				if (isRepeatData)	// 准备重复押的分数
+				{
+					// 检查分机限注
+					if (betVal > Utils.GetMaxBet(field))
+					{
+						ret = 0;
+						break;
+					}
+					// 检查全台限注
+					if (betVal > Utils.GetAllMaxBet(field))
+					{
+						ret = 0;
+						break;
+					}
+				}
+				else 				// 已押的分数
+				{
+					if (tmp.ContainsKey(field))
+						tmp[field] -= betVal;
+				}
+			}
+		}
+		if (isClient)
+		{
+			string msg = string.Format("{0}:{1}", NetInstr.CheckRepeatAble, ret);
+			host.SendToPeer(msg, connectionId);
+		}
+		else
+		{
+			if (ret == 1)
+				ui.RepeatEventCB();
+		}
 	}
 }

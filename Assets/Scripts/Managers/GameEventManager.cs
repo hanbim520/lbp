@@ -29,6 +29,8 @@ public static class GameEventManager
     public static event FieldClickEvent FieldClick;
 	public static event KeyinEvent Keyin;							// 上分
 	public static event GameEvent Keout;							// 下分
+	public static event GameEvent KeyinOnce;						// 短按上分键上分
+	public static event GameEvent KeyinHold;						// 长按上分键上分
     public static event GameEventWithId ReceiveCoin;				// 投币
 	public static event GameEvent PayCoin;							// 退币
     public static event GameEventWithId PayCoinCallback;			// 退币机发来的退币数
@@ -194,6 +196,16 @@ public static class GameEventManager
 	public static void OnHIDDisconnected()
 	{
 		if (HIDDisconnected != null) HIDDisconnected();
+	}
+
+	public static void OnKeyinOnce()
+	{
+		if (KeyinOnce != null) KeyinOnce();
+	}
+
+	public static void OnKeyinHold()
+	{
+		if (KeyinHold != null) KeyinHold();
 	}
 
 	// 上分

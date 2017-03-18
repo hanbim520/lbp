@@ -85,7 +85,7 @@ public class GameLogic : MonoBehaviour
 	protected bool bFirstOpenGate = false;
 
 	// Field -- Bet
-	public Dictionary<string, int> betFields = new Dictionary<string, int>();
+	public Dictionary<string, int> betFields = new Dictionary<string, int>();		// 本机押分情况
     public MainUILogic ui;
 	public HIDUtils hidUtils;
 	public GoldfingerUtils goldfingerUtils;
@@ -186,13 +186,12 @@ public class GameLogic : MonoBehaviour
 		GameEventManager.ReceiveCoin += ReceiveCoin;
 		GameEventManager.PayCoin += PayCoin;
 		GameEventManager.PayCoinCallback += PayCoinCallback;
-        GameEventManager.ClearAll += ClearAll;
-        GameEventManager.Clear += Clear;
         GameEventManager.CleanAll += CleanAll;
-		GameEventManager.FieldClick += Bet;
 		GameEventManager.HIDDisconnected += HIDDisconnected;
 		GameEventManager.HIDConnected += HIDConnected;
         GameEventManager.ChangeScene += ReadyToChangeScene;
+		GameEventManager.KeyinOnce += KeyinOnce;
+		GameEventManager.KeyinHold += KeyinHold;
     }
 
     private void UnregisterEvents()
@@ -202,13 +201,12 @@ public class GameLogic : MonoBehaviour
 		GameEventManager.ReceiveCoin -= ReceiveCoin;
 		GameEventManager.PayCoin -= PayCoin;
 		GameEventManager.PayCoinCallback -= PayCoinCallback;
-        GameEventManager.ClearAll -= ClearAll;
-        GameEventManager.Clear -= Clear;
         GameEventManager.CleanAll -= CleanAll;
-		GameEventManager.FieldClick -= Bet;
 		GameEventManager.HIDConnected -= HIDConnected;
 		GameEventManager.HIDDisconnected -= HIDDisconnected;
         GameEventManager.ChangeScene -= ReadyToChangeScene;
+		GameEventManager.KeyinOnce -= KeyinOnce;
+		GameEventManager.KeyinHold -= KeyinHold;
     }
 
 	// 投币
@@ -336,6 +334,18 @@ public class GameLogic : MonoBehaviour
 		ui.RefreshLblCredits(totalCredits.ToString());
 	}
 
+	protected void KeyinOnce()
+	{
+		int betVal = GameData.GetInstance().betChipValues[ui.CurChipIdx];
+		Keyin(betVal);
+	}
+
+	protected void KeyinHold()
+	{
+		int betVal = GameData.GetInstance().betChipValues[ui.CurChipIdx] * 10;
+		Keyin(betVal);
+	}
+
 	// 上分
     protected void Keyin(int delta, int coinNum = 0)
     {
@@ -411,82 +421,22 @@ public class GameLogic : MonoBehaviour
 		}
     }
 
-    protected void ClearAll()
-    {
-        foreach (KeyValuePair<string, int> item in betFields)
-        {
-            totalCredits += item.Value;
-        }
-        GameData.GetInstance().ZongYa -= currentBet;
-        currentBet = 0;
-        betFields.Clear();
-        ui.RefreshLblCredits(totalCredits.ToString());
-        ui.RefreshLblBet(currentBet.ToString());
-    }
-    
-    protected void Clear(string fieldName)
-    {
-        if (string.Equals(fieldName.Substring(0, 1), "e"))
-        {
-            fieldName = fieldName.Substring(1);
-        }
-        if (betFields.ContainsKey(fieldName))
-        {
-            totalCredits += betFields[fieldName];
-            GameData.GetInstance().ZongYa -= betFields[fieldName];
-            currentBet -= betFields[fieldName];
-            betFields.Remove(fieldName);
-        }
-        ui.RefreshLblCredits(totalCredits.ToString());
-        ui.RefreshLblBet(currentBet.ToString());
-    }
-
     protected void CleanAll()
     {
         betFields.Clear();
     }
 
-	// 限注
+	/// <summary>
+	/// 计算限注
+	/// </summary>
+	/// <returns>能押注的金额.</returns>
+	/// <param name="maxVal">最大押注金额.</param>
+	/// <param name="originalVal">已经押注金额.</param>
+	/// <param name="betVal">欲单次押注金额.</param>
 	protected int MaxBet(int maxVal, int originalVal, int betVal)
 	{
 		if (originalVal + betVal > maxVal)
 			betVal = maxVal - originalVal;
-		return betVal;
-	}
-
-	protected int Bet(string field, int betVal)
-	{
-		if (totalCredits <= 0)
-			return 0;
-		// 剩下的筹码小于押分
-		if (totalCredits - betVal < 0)
-			betVal = totalCredits;
-		
-		int maxBet = Utils.GetMaxBet(field);
-		if (betFields.ContainsKey(field))
-		{
-			betVal = MaxBet(maxBet, betFields[field], betVal);
-		}
-		else
-		{
-			betVal = MaxBet(maxBet, 0, betVal);
-		}
-		if (betVal > 0)
-		{
-			if (betFields.ContainsKey(field))
-			{
-				betFields[field] += betVal;
-			}
-			else
-			{
-				betFields.Add(field, betVal);
-			}
-            GameData.GetInstance().ZongYa += betVal;
-			currentBet += betVal;
-			totalCredits -= betVal;
-			ui.RefreshLblCredits(totalCredits.ToString());
-			ui.RefreshLblBet(currentBet.ToString());
-		}
 		return betVal;
 	}
 

@@ -57,10 +57,21 @@
      <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\RegisteredComponent.cs" />
      <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\SystemTime.cs" />
      <Compile Include="Assets\AudioToolkit\Shared Auxiliary Code\UnitySingleton.cs" />
+     <Compile Include="Assets\PoolManagerExampleFiles\Scripts\CreationExample.cs" />
+     <Compile Include="Assets\PoolManagerExampleFiles\Scripts\InstanceHandlerDelegateExample.cs" />
+     <Compile Include="Assets\PoolManagerExampleFiles\Scripts\OnCreatedDelegateExample.cs" />
+     <Compile Include="Assets\PoolManagerExampleFiles\Scripts\OnSpawnedExample.cs" />
+     <Compile Include="Assets\PoolManagerExampleFiles\Scripts\ParticleWaitTest.cs" />
+     <Compile Include="Assets\PoolManagerExampleFiles\Scripts\ReallySimpleAudioSpawner.cs" />
+     <Compile Include="Assets\PoolManagerExampleFiles\Scripts\ReallySimpleParticleSpawner.cs" />
+     <Compile Include="Assets\PoolManagerExampleFiles\Scripts\SimpleSpawner.cs" />
      <Compile Include="Assets\Scripts\Android\AndroidHidPort.cs" />
      <Compile Include="Assets\Scripts\Android\AndroidSerialPort.cs" />
      <Compile Include="Assets\Scripts\Android\BillAcceptorUtils.cs" />
+     <Compile Include="Assets\Scripts\Android\Eeprom.cs" />
+     <Compile Include="Assets\Scripts\Android\EncryptChip.cs" />
      <Compile Include="Assets\Scripts\Android\GoldfingerUtils.cs" />
+     <Compile Include="Assets\Scripts\Camera\LaunchCamera.cs" />
      <Compile Include="Assets\Scripts\Data\GameData.cs" />
      <Compile Include="Assets\Scripts\Data\TextDB.cs" />
      <Compile Include="Assets\Scripts\Data\Types.cs" />
@@ -79,6 +90,7 @@
      <Compile Include="Assets\Scripts\Network\NetworkObject.cs" />
      <Compile Include="Assets\Scripts\Network\UClient.cs" />
      <Compile Include="Assets\Scripts\Network\UHost.cs" />
+     <Compile Include="Assets\Scripts\Network\UStats.cs" />
      <Compile Include="Assets\Scripts\NetworkDiscovery.cs" />
      <Compile Include="Assets\Scripts\Scenes\Account.cs" />
      <Compile Include="Assets\Scripts\Scenes\BackendLogic.cs" />
@@ -88,6 +100,7 @@
      <Compile Include="Assets\Scripts\Scenes\RebootSystem.cs" />
      <Compile Include="Assets\Scripts\Scenes\ServerLogic.cs" />
      <Compile Include="Assets\Scripts\Scenes\StartInfo.cs" />
+     <Compile Include="Assets\Scripts\Scenes\TopStatistics.cs" />
      <Compile Include="Assets\Scripts\Scenes\TouchCheck.cs" />
      <Compile Include="Assets\Scripts\Test\CameraPrintLog.cs" />
      <Compile Include="Assets\Scripts\Test\TestBillAcceptor.cs" />
@@ -95,6 +108,7 @@
      <Compile Include="Assets\Scripts\Test\TestCoinDevice.cs" />
      <Compile Include="Assets\Scripts\Test\TestEncryChip.cs" />
      <Compile Include="Assets\Scripts\Test\TestJson.cs" />
+     <Compile Include="Assets\Scripts\Test\TestMultiTouch.cs" />
      <Compile Include="Assets\Scripts\Test\TestPlayerPrebs.cs" />
      <Compile Include="Assets\Scripts\Test\TestResolution.cs" />
      <Compile Include="Assets\Scripts\Test\TestUSB.cs" />
@@ -114,11 +128,13 @@
      <Compile Include="Assets\Scripts\UI\MainUILogic.cs" />
      <Compile Include="Assets\Scripts\UI\MouseRay.cs" />
      <Compile Include="Assets\Scripts\UI\OddsTip.cs" />
+     <Compile Include="Assets\Scripts\UI\PageControl.cs" />
      <Compile Include="Assets\Scripts\UI\Prompts.cs" />
      <Compile Include="Assets\Scripts\UI\Rake.cs" />
      <Compile Include="Assets\Scripts\UI\RecordBar.cs" />
      <Compile Include="Assets\Scripts\UI\RecordBarText.cs" />
      <Compile Include="Assets\Scripts\UI\RecordCircle.cs" />
+     <Compile Include="Assets\Scripts\UI\RecordCircle2.cs" />
      <Compile Include="Assets\Scripts\UI\RecordFew.cs" />
      <Compile Include="Assets\Scripts\UI\RecordMost.cs" />
      <Compile Include="Assets\Scripts\UI\Records.cs" />
@@ -172,6 +188,7 @@
      <None Include="Assets\Plugins\Android\AndroidManifest.xml" />
      <None Include="Assets\Android\AndroidManifest.xml" />
      <None Include="Assets\StreamingAssets\Lanuages.txt" />
+     <None Include="Assets\Plugins\PathologicalGames\readme.txt" />
  <Reference Include="UnityEngine.UI">
  <HintPath>D:/Program Files (x86)/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>
@@ -187,6 +204,10 @@
  <Reference Include="UnityEditor.iOS.Extensions.Xcode">
  <HintPath>D:/Program Files (x86)/Unity/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
  </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass-vs.csproj">
+      <Project>{C556F40F-A5EB-EDA5-DDBC-004FD15AD763}</Project>      <Name>Assembly-CSharp-firstpass-vs</Name>    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

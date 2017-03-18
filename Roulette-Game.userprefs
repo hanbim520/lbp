@@ -1,14 +1,19 @@
 ﻿<Properties GitUserInfo="UsingGIT">
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Test\TestCOM.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\UI\RecordCircle.cs">
     <Files>
-      <File FileName="Assets\Scripts\Android\GoldfingerUtils.cs" Line="144" Column="6" />
-      <File FileName="Assets\Scripts\UI\MainUILogic.cs" Line="1415" Column="6" />
-      <File FileName="Assets\Scripts\UI\DebugLogUtil.cs" Line="31" Column="3" />
-      <File FileName="Assets\Scripts\Utils\HIDUtils.cs" Line="476" Column="13" />
-      <File FileName="Assets\Scripts\Managers\GameEventManager.cs" Line="53" Column="23" />
-      <File FileName="Assets\Scripts\Scenes\ServerLogic.cs" Line="457" Column="8" />
-      <File FileName="Assets\Scripts\Test\TestCOM.cs" Line="31" Column="13" />
+      <File FileName="Assets\Scripts\Scenes\StartInfo.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\UI\MainUILogic.cs" Line="1664" Column="77" />
+      <File FileName="Assets\Scripts\Scenes\ServerLogic.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Scenes\GameLogic.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Scenes\ClientLogic.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Data\GameData.cs" Line="16" Column="65" />
+      <File FileName="Assets\Scripts\Android\GoldfingerUtils.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Managers\GameEventManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Scenes\ExtensionRecord.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Data\Types.cs" Line="156" Column="132" />
+      <File FileName="Assets\Scripts\Dlgs\CardDlg.cs" Line="244" Column="6" />
+      <File FileName="Assets\Scripts\UI\RecordCircle.cs" Line="8" Column="28" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

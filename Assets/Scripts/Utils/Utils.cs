@@ -311,6 +311,27 @@ public static class Utils
 		return maxBet;
 	}
 
+	public static int GetAllMaxBet(string fieldName)
+	{
+		int allMaxBet = 0;
+		int odds = GetOdds(fieldName);
+		if (odds == 36)
+			allMaxBet = GameData.GetInstance().allMax36Val;
+		else if (odds == 18)
+			allMaxBet = GameData.GetInstance().allMax18Val;
+		else if (odds == 12)
+			allMaxBet = GameData.GetInstance().allMax12Val;
+		else if (odds == 9)
+			allMaxBet = GameData.GetInstance().allMax9Val;
+		else if (odds == 6)
+			allMaxBet = GameData.GetInstance().allMax6Val;
+		else if (odds == 3)
+			allMaxBet = GameData.GetInstance().allMax3Val;
+		else if (odds == 2)
+			allMaxBet = GameData.GetInstance().allMax2Val;
+		return allMaxBet;
+	}
+
 	public static string GetSystemTime()
 	{
 		return DateTime.Now.Date.ToShortDateString() + " " + DateTime.Now.ToString("HH:mm:ss");

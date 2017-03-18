@@ -26,7 +26,7 @@ public struct NetInstr
 	public const int CheckAccount       = 5;
 	public const int ClearAccount       = 6;
 	public const int ClearCurrentWin    = 7;
-	public const int GetBetRecords      = 8;
+	public const int GetBetRecords      = 8;  // 在出彩金前获取所有分机的押分情况
     public const int LotteryNum         = 9;  // 同步彩金号码
     public const int SyncRecords        = 10; // sync last 100 records
 	public const int LuckSum			= 11; // 同步当前局压中彩金的总筹码数
@@ -35,6 +35,9 @@ public struct NetInstr
 	public const int SyncInputDevice	= 15; // 同步输入设备
     public const int SyncTSLanguage     = 16; // 同步路单的语言
 	public const int IndicateIdentity	= 17; // 1:分机 2:路单屏幕
+	public const int BetAbleValue		= 18; // 向主机询问某押分区能押分的值(用于检测分机限注和全台限注)
+	public const int ClearBets			= 19; // 向主机发送清除分机押分的情况
+	public const int CheckRepeatAble	= 20; // 询问主机是否可以重复押分
 }
 
 // Use for network
@@ -145,4 +148,11 @@ public struct BreakdownType
 	public static int USBDisconnect = 2;	// 与HID通讯不上
 	public static int RecognizeBallTimeout = 3;	// 认球超时
 	public static int BallHaventFall = 4;	// 球没有落下
+}
+
+// 轮盘类型
+public enum RouletteType
+{
+	Standard = 0, 	// 国际标准 {36,13,1,00,27,10,25,29,12,8,19,31,18,6,21,33,16,4,23,35,14,2,0,28,9,26,30,11,7,20,32,17,5,22,34,15,3,24,0}
+	Special1		// 
 }

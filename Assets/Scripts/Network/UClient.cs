@@ -193,6 +193,7 @@ public class UClient : MonoBehaviour
 	{
 		int betTimeLimit, coinToScore, baoji;
 		int max36Value, max18Value, max12Value, max9Value, max6Value, max3Value, max2Value;
+		int allMax36Val, allMax18Val, allMax12Val, allMax9Val, allMax6Val, allMax3Val, allMax2Val;
 		int betChipValue0, betChipValue1, betChipValue2, betChipValue3, betChipValue4, betChipValue5;
 		int couponsStart, couponsKeyinRatio, couponsKeoutRatio;
 		int maxNumberOfFields;
@@ -277,6 +278,20 @@ public class UClient : MonoBehaviour
 			GameData.GetInstance().powerOffCompensate = powerOffCompensate;
 		if (int.TryParse(words[30], out topScreenLanguage))
 			GameData.GetInstance().topScreenLanguage = topScreenLanguage;
+		if (int.TryParse(words[31], out allMax36Val))
+			GameData.GetInstance().allMax36Val = allMax36Val;
+		if (int.TryParse(words[32], out allMax18Val))
+			GameData.GetInstance().allMax18Val = allMax18Val;
+		if (int.TryParse(words[33], out allMax12Val))
+			GameData.GetInstance().allMax12Val = allMax12Val;
+		if (int.TryParse(words[34], out allMax9Val))
+			GameData.GetInstance().allMax9Val = allMax9Val;
+		if (int.TryParse(words[35], out allMax6Val))
+			GameData.GetInstance().allMax6Val = allMax6Val;
+		if (int.TryParse(words[36], out allMax3Val))
+			GameData.GetInstance().allMax3Val = allMax3Val;
+		if (int.TryParse(words[37], out allMax2Val))
+			GameData.GetInstance().allMax2Val = allMax2Val;
 
 		GameData.GetInstance().SaveSetting();
 		GameEventManager.OnSyncUI();
