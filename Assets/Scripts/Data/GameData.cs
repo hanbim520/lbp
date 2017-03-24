@@ -10,10 +10,10 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug 		= true;		// 是否模拟出球
+	public static bool debug 		= false;		// 是否模拟出球
 	public static bool controlCode	= false;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
-	public static RouletteType rouletteType = RouletteType.Special1;	// 轮盘数字排列类型
+	public static RouletteType rouletteType = RouletteType.Standard;	// 轮盘数字排列类型
 
     // Setting menu
     public int betTimeLimit;
@@ -342,90 +342,46 @@ public class GameData
         deviceIndex = PlayerPrefs.GetInt("deviceIndex", 0);
 //		deviceIndex = 1;
 
-		if (rouletteType == RouletteType.Standard)
-		{
-			colorTable.Add(37, ResultType.Green);    // 37: 00
-			colorTable.Add(0, ResultType.Green);
-			colorTable.Add(1, ResultType.Red);
-			colorTable.Add(3, ResultType.Red);
-			colorTable.Add(5, ResultType.Red);
-			colorTable.Add(7, ResultType.Red);
-			colorTable.Add(9, ResultType.Red);
-			colorTable.Add(12, ResultType.Red);
-			colorTable.Add(14, ResultType.Red);
-			colorTable.Add(16, ResultType.Red);
-			colorTable.Add(18, ResultType.Red);
-			colorTable.Add(19, ResultType.Red);
-			colorTable.Add(21, ResultType.Red);
-			colorTable.Add(23, ResultType.Red);
-			colorTable.Add(25, ResultType.Red);
-			colorTable.Add(27, ResultType.Red);
-			colorTable.Add(30, ResultType.Red);
-			colorTable.Add(32, ResultType.Red);
-			colorTable.Add(34, ResultType.Red);
-			colorTable.Add(36, ResultType.Red);
-			
-			colorTable.Add(2, ResultType.Black);
-			colorTable.Add(4, ResultType.Black);
-			colorTable.Add(6, ResultType.Black);
-			colorTable.Add(8, ResultType.Black);
-			colorTable.Add(10, ResultType.Black);
-			colorTable.Add(11, ResultType.Black);
-			colorTable.Add(13, ResultType.Black);
-			colorTable.Add(15, ResultType.Black);
-			colorTable.Add(17, ResultType.Black);
-			colorTable.Add(20, ResultType.Black);
-			colorTable.Add(22, ResultType.Black);
-			colorTable.Add(24, ResultType.Black);
-			colorTable.Add(26, ResultType.Black);
-			colorTable.Add(28, ResultType.Black);
-			colorTable.Add(29, ResultType.Black);
-			colorTable.Add(31, ResultType.Black);
-			colorTable.Add(33, ResultType.Black);
-			colorTable.Add(35, ResultType.Black);
-		}
-       	else if (rouletteType == RouletteType.Special1)
-		{
-			colorTable.Add(37, ResultType.Green);
-			colorTable.Add(0, ResultType.Green);
-			colorTable.Add(1, ResultType.Red);
-			colorTable.Add(2, ResultType.Red);
-			colorTable.Add(3, ResultType.Red);
-			colorTable.Add(4, ResultType.Red);
-			colorTable.Add(5, ResultType.Red);
-			colorTable.Add(6, ResultType.Red);
-			colorTable.Add(7, ResultType.Red);
-			colorTable.Add(8, ResultType.Red);
-			colorTable.Add(9, ResultType.Red);
-			colorTable.Add(10, ResultType.Red);
-			colorTable.Add(11, ResultType.Red);
-			colorTable.Add(12, ResultType.Red);
-			colorTable.Add(13, ResultType.Red);
-			colorTable.Add(14, ResultType.Red);
-			colorTable.Add(15, ResultType.Red);
-			colorTable.Add(16, ResultType.Red);
-			colorTable.Add(17, ResultType.Red);
-			colorTable.Add(18, ResultType.Red);
-
-			colorTable.Add(19, ResultType.Black);
-			colorTable.Add(20, ResultType.Black);
-			colorTable.Add(21, ResultType.Black);
-			colorTable.Add(22, ResultType.Black);
-			colorTable.Add(23, ResultType.Black);
-			colorTable.Add(24, ResultType.Black);
-			colorTable.Add(25, ResultType.Black);
-			colorTable.Add(26, ResultType.Black);
-			colorTable.Add(27, ResultType.Black);
-			colorTable.Add(28, ResultType.Black);
-			colorTable.Add(29, ResultType.Black);
-			colorTable.Add(30, ResultType.Black);
-			colorTable.Add(31, ResultType.Black);
-			colorTable.Add(32, ResultType.Black);
-			colorTable.Add(33, ResultType.Black);
-			colorTable.Add(34, ResultType.Black);
-			colorTable.Add(35, ResultType.Black);
-			colorTable.Add(36, ResultType.Black);
-		}
+		colorTable.Add(37, ResultType.Green);    // 37: 00
+		colorTable.Add(0, ResultType.Green);
+		colorTable.Add(1, ResultType.Red);
+		colorTable.Add(3, ResultType.Red);
+		colorTable.Add(5, ResultType.Red);
+		colorTable.Add(7, ResultType.Red);
+		colorTable.Add(9, ResultType.Red);
+		colorTable.Add(12, ResultType.Red);
+		colorTable.Add(14, ResultType.Red);
+		colorTable.Add(16, ResultType.Red);
+		colorTable.Add(18, ResultType.Red);
+		colorTable.Add(19, ResultType.Red);
+		colorTable.Add(21, ResultType.Red);
+		colorTable.Add(23, ResultType.Red);
+		colorTable.Add(25, ResultType.Red);
+		colorTable.Add(27, ResultType.Red);
+		colorTable.Add(30, ResultType.Red);
+		colorTable.Add(32, ResultType.Red);
+		colorTable.Add(34, ResultType.Red);
+		colorTable.Add(36, ResultType.Red);
+		
+		colorTable.Add(2, ResultType.Black);
+		colorTable.Add(4, ResultType.Black);
+		colorTable.Add(6, ResultType.Black);
+		colorTable.Add(8, ResultType.Black);
+		colorTable.Add(10, ResultType.Black);
+		colorTable.Add(11, ResultType.Black);
+		colorTable.Add(13, ResultType.Black);
+		colorTable.Add(15, ResultType.Black);
+		colorTable.Add(17, ResultType.Black);
+		colorTable.Add(20, ResultType.Black);
+		colorTable.Add(22, ResultType.Black);
+		colorTable.Add(24, ResultType.Black);
+		colorTable.Add(26, ResultType.Black);
+		colorTable.Add(28, ResultType.Black);
+		colorTable.Add(29, ResultType.Black);
+		colorTable.Add(31, ResultType.Black);
+		colorTable.Add(33, ResultType.Black);
+		colorTable.Add(35, ResultType.Black);
+       
 		int ballValCount = ballValue38.Length;
 		int rtype = (int)rouletteType;
 		for (int i = 0; i < ballValCount; ++i)

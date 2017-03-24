@@ -8,9 +8,9 @@ public class GoldfingerUtils : MonoBehaviour
 {
 	private AndroidSerialPort sp;		// 金手指通讯
 
-	private const float kRevGoldFingerDataInterval	= 0.1f;
+	private const float kRevGoldFingerDataInterval	= 0.05f;
 	private float revGoldFingerDataElapsed			= 0f;
-	private const float kParseDataInterval			= 0.09f;
+	private const float kParseDataInterval			= 0.05f;
 	private float parseDataElapsed					= 0f;
 
 	private int phase = 0; 
@@ -44,7 +44,7 @@ public class GoldfingerUtils : MonoBehaviour
 	private int realtimeBallVal = 0;		// 大于0表示孔里有球
 	private bool bCheckBallFall = false;	// 检查轨道上是否有球
 
-	private float kHoldKeyinDur = 1.0f;		// 长按上分时间
+	private float kHoldKeyinDur = 0.4f;		// 长按上分时间
 	private float holdKeyinDelta= 0.0f;		// 长按上分键计时
 	private bool bHoldKeyin		= false;	// 长按上分键成立
 
@@ -237,6 +237,10 @@ public class GoldfingerUtils : MonoBehaviour
 				{
 					GameEventManager.OnPayCoinCallback(data[11]);
 				}
+				if (data[12] == 0x01)	// 物理退币按键按下
+				{
+					GameEventManager.OnPayCoin();
+				}
 //				if (!bOpenKey && data[13] == 0x20)			// 功能菜单(原上分)
 				if (data[13] == 0x20)						// 物理键上分(17A)
 				{
@@ -246,9 +250,12 @@ public class GoldfingerUtils : MonoBehaviour
 					if (!bHoldKeyin)
 					{
 						holdKeyinDelta += Time.deltaTime;
+//						DebugConsole.Log(holdKeyinDelta.ToString());
 						if (holdKeyinDelta > kHoldKeyinDur)
 						{
 							bHoldKeyin = true;
+							// 长按上分
+							GameEventManager.OnKeyinHold();
 						}
 					}
 				}
@@ -266,7 +273,7 @@ public class GoldfingerUtils : MonoBehaviour
 					{
 						bHoldKeyin = false;
 						// 长按上分
-						GameEventManager.OnKeyinHold();
+//						GameEventManager.OnKeyinHold();
 					}
 				}
 				if(!bKeyout && data[14] == 0x20)			// 物理键下分(25A)
@@ -397,17 +404,17 @@ public class GoldfingerUtils : MonoBehaviour
 
 	private void PrintData(ref int[] data, bool bEvent = false)
 	{
-		string log = "data.Length:" + data.Length + "--";
-		for (int i = 0; i < data.Length; ++i)
-		{
-			if (i > 0 && i % 20 == 0)
-				log += "\n";
-			log += string.Format("{0:X}", data[i]) + ", ";
-		}
-		if (!bEvent)
-		DebugConsole.Log(log);
-		else
-		GameEventManager.OnDebugLog(0, log);
+//		string log = "data.Length:" + data.Length + "--";
+//		for (int i = 0; i < data.Length; ++i)
+//		{
+//			if (i > 0 && i % 20 == 0)
+//				log += "\n";
+//			log += string.Format("{0:X}", data[i]) + ", ";
+//		}
+//		if (!bEvent)
+//		DebugConsole.Log(log);
+//		else
+//		GameEventManager.OnDebugLog(0, log);
 	}
 
 //	void OnGUI()

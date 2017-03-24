@@ -6,15 +6,13 @@ public class StartInfo : MonoBehaviour
 {
 	public Text txtWarning;
 	public GameObject objDlgWarning;
-
+	public GameObject[] objCircalRecords;
+	
 	void Start()
 	{
-			InitLoading();
-		
-//		if (GameData.debug)
-//			InitLoading();
-//		else
-//			CheckEncryChip();
+		SetRouletteType();
+		InitLoading();
+//		CheckEncryChip();
 	}
 
 	// 校验加密芯片
@@ -140,6 +138,20 @@ public class StartInfo : MonoBehaviour
 			GameObject go = (GameObject)Instantiate(prefab);
 			go.name = "NetworkObject";
 			prefab = null;
+		}
+	}
+
+	void SetRouletteType()
+	{
+		if (GameData.rouletteType == RouletteType.Standard)
+		{
+			objCircalRecords[0].SetActive(true);
+			objCircalRecords[1].SetActive(false);
+		}
+		else if (GameData.rouletteType == RouletteType.Special1)
+		{
+			objCircalRecords[0].SetActive(false);
+			objCircalRecords[1].SetActive(true);
 		}
 	}
 }

@@ -5,11 +5,13 @@ using System.Collections;
 public class LoadLevelAsync : MonoBehaviour
 {
     public Image progressBar;
-
+	public GameObject[] objCircalRecords;
+	
     private AsyncOperation async;
 
     void Start()
     {
+		SetRouletteType();
         progressBar.fillAmount = 0.05f;
         StartCoroutine(LoadLevel());
     }
@@ -50,4 +52,18 @@ public class LoadLevelAsync : MonoBehaviour
 
         yield return async;
     }
+
+	void SetRouletteType()
+	{
+		if (GameData.rouletteType == RouletteType.Standard)
+		{
+			objCircalRecords[0].SetActive(true);
+			objCircalRecords[1].SetActive(false);
+		}
+		else if (GameData.rouletteType == RouletteType.Special1)
+		{
+			objCircalRecords[0].SetActive(false);
+			objCircalRecords[1].SetActive(true);
+		}
+	}
 }

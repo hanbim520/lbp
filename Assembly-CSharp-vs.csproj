@@ -140,6 +140,7 @@
      <Compile Include="Assets\Scripts\UI\Records.cs" />
      <Compile Include="Assets\Scripts\UI\RollingNumber.cs" />
      <Compile Include="Assets\Scripts\UI\ScrollingImage.cs" />
+     <Compile Include="Assets\Scripts\UI\SetEllipseBG.cs" />
      <Compile Include="Assets\Scripts\Utils\CryptoPrefs.cs" />
      <Compile Include="Assets\Scripts\Utils\DebugConsole.cs" />
      <Compile Include="Assets\Scripts\Utils\FlashImage.cs" />

@@ -4,11 +4,22 @@ using System.Collections;
 // 顶部路单屏
 public class TopStatistics : MonoBehaviour
 {
+	public GameObject[] objCircleRecords;	// 0:国际38孔排列 1:特殊38孔排列
 	private UStats ustats;
 	
 	void Start()
 	{
 		ustats = GetComponent<UStats>();
+		if (GameData.rouletteType == RouletteType.Standard)
+		{
+			objCircleRecords[0].SetActive(true);
+			objCircleRecords[1].SetActive(false);
+		}
+		else if (GameData.rouletteType == RouletteType.Special1)
+		{
+			objCircleRecords[0].SetActive(false);
+			objCircleRecords[1].SetActive(true);
+		}
         SetLanguage();
 	}
 

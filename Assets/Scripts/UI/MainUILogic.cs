@@ -18,6 +18,7 @@ public class MainUILogic : MonoBehaviour
     public GameObject dlgCard;
 	public GameObject dlgYesNO;
 	public GameObject[] cardExplains;
+	public GameObject[] objCircalRecords;	// 0:国际38孔排列 1:特殊38孔排列
 
 	public int CurChipIdx
 	{
@@ -84,6 +85,7 @@ public class MainUILogic : MonoBehaviour
 		SetLanguage();
 		SetDisplay();
 		SetBetChips();
+		SetRouletteType();
         RegisterEvents();
 	}
 
@@ -1159,17 +1161,24 @@ public class MainUILogic : MonoBehaviour
 			DetectInputEvents();
 		UpdateTimer();
 
-		if (Input.GetKeyDown(KeyCode.UpArrow))
+		if (GameData.debug)
 		{
-			GameEventManager.OnKeyinOnce();
-		}
-		else if (Input.GetKeyDown(KeyCode.DownArrow))
-		{
-			GameEventManager.OnKeout();
-		}
-		else if (Input.GetKeyDown(KeyCode.B))
-		{
-			GameEventManager.OnEnterBackend();
+			if (Input.GetKeyDown(KeyCode.UpArrow))
+			{
+				GameEventManager.OnKeyinOnce();
+			}
+			else if (Input.GetKeyDown(KeyCode.DownArrow))
+			{
+				GameEventManager.OnKeout();
+			}
+			else if (Input.GetKeyDown(KeyCode.B))
+			{
+				GameEventManager.OnEnterBackend();
+			}
+			else if (Input.GetKeyDown(KeyCode.R))
+			{
+				GameEventManager.OnReceiveCoin(1);
+			}
 		}
 	}
 
@@ -1670,6 +1679,20 @@ public class MainUILogic : MonoBehaviour
 			Color c = img.color;
 			c.a = 1;
 			img.color = c;
+		}
+	}
+
+	private void SetRouletteType()
+	{
+		if (GameData.rouletteType == RouletteType.Standard)
+		{
+			objCircalRecords[0].SetActive(true);
+			objCircalRecords[1].SetActive(false);
+		}
+		else if (GameData.rouletteType == RouletteType.Special1)
+		{
+			objCircalRecords[0].SetActive(false);
+			objCircalRecords[1].SetActive(true);
 		}
 	}
 }
