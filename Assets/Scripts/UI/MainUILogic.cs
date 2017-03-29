@@ -1093,6 +1093,7 @@ public class MainUILogic : MonoBehaviour
 				FieldChipMoveComplete(targetObject.name + ":" + betVal.ToString());
 			}
 			ShowSingleSign(strField);
+			AudioController.Play("betClick");
 		}
 		catch(UnityException ex)
 		{
@@ -1263,6 +1264,7 @@ public class MainUILogic : MonoBehaviour
 		timerCountdown.Start();
 		AudioController.Play("makeyourbets");
 		GameEventManager.OnPrompt(PromptId.PleaseBet, -1);
+		AudioController.PlayMusic("bgMusic");
 	}
 
 	private void UpdateProgress(float value)
@@ -1287,6 +1289,7 @@ public class MainUILogic : MonoBehaviour
 		Debug.Log("ui CountdownComplete");
 		GameEventManager.OnEndCountdown();
 		AudioController.Play("nomorebets");
+		AudioController.StopMusic(0.5f);
 		GameEventManager.OnPrompt(PromptId.NoMoreBet, -1);
 	}
 
@@ -1684,15 +1687,28 @@ public class MainUILogic : MonoBehaviour
 
 	private void SetRouletteType()
 	{
-		if (GameData.rouletteType == RouletteType.Standard)
+		if (GameData.GetInstance().maxNumberOfFields == 38)
 		{
-			objCircalRecords[0].SetActive(true);
-			objCircalRecords[1].SetActive(false);
-		}
-		else if (GameData.rouletteType == RouletteType.Special1)
-		{
-			objCircalRecords[0].SetActive(false);
-			objCircalRecords[1].SetActive(true);
+			string prefabPath = "";
+			if (GameData.rouletteType == RouletteType.Standard)
+			{
+				objCircalRecords[0].SetActive(true);
+				objCircalRecords[1].SetActive(false);
+				prefabPath = "Ellipse38/Standard/DanDian";
+			}
+			else if (GameData.rouletteType == RouletteType.Special1)
+			{
+				objCircalRecords[0].SetActive(false);
+				objCircalRecords[1].SetActive(true);
+				prefabPath = "Ellipse38/Speial1/DanDian";
+			}
+
+			Object prefab = (Object)Resources.Load(prefabPath);
+			GameObject objDandian = (GameObject)Instantiate(prefab);
+			objDandian.name = "DanDian";
+			objDandian.transform.SetParent(GameObject.Find("Canvas/38 Fields").transform);
+			objDandian.transform.localPosition = Vector3.zero;
+			objDandian.transform.localScale = Vector3.one;
 		}
 	}
 }

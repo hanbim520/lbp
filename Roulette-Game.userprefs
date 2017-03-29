@@ -1,20 +1,13 @@
 ﻿<Properties GitUserInfo="UsingGIT">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Data\GameData.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Scenes\StartInfo.cs">
     <Files>
       <File FileName="Assets\Scripts\Scenes\StartInfo.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\UI\MainUILogic.cs" Line="1583" Column="2" />
+      <File FileName="Assets\Scripts\UI\MainUILogic.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Scenes\ServerLogic.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Scenes\GameLogic.cs" Line="220" Column="2" />
+      <File FileName="Assets\Scripts\Scenes\GameLogic.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Scenes\ClientLogic.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Data\GameData.cs" Line="21" Column="28" />
-      <File FileName="Assets\Scripts\Android\GoldfingerUtils.cs" Line="242" Column="29" />
-      <File FileName="Assets\Scripts\Managers\GameEventManager.cs" Line="250" Column="25" />
       <File FileName="Assets\Scripts\UI\SetEllipseBG.cs" Line="1" Column="1" />
-      <File FileName="Assets\Scripts\Android\BillAcceptorUtils.cs" Line="114" Column="22" />
-      <File FileName="Assets\Scripts\Scenes\BackendLogic.cs" Line="999" Column="16" />
-      <File FileName="Assets\Scripts\Utils\HIDUtils.cs" Line="302" Column="30" />
-      <File FileName="Assets\Scripts\UI\DlgYesNO.cs" Line="122" Column="32" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
