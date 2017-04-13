@@ -1,6 +1,6 @@
 ﻿<Properties GitUserInfo="UsingGIT">
-  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Scenes\StartInfo.cs">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\Scripts\Android\AndroidSerialPort.cs">
     <Files>
       <File FileName="Assets\Scripts\Scenes\StartInfo.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\UI\MainUILogic.cs" Line="1" Column="1" />
@@ -8,6 +8,10 @@
       <File FileName="Assets\Scripts\Scenes\GameLogic.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\Scenes\ClientLogic.cs" Line="1" Column="1" />
       <File FileName="Assets\Scripts\UI\SetEllipseBG.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Managers\GameEventManager.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Data\GameData.cs" Line="1" Column="1" />
+      <File FileName="Assets\Scripts\Android\GoldfingerUtils.cs" Line="144" Column="12" />
+      <File FileName="Assets\Scripts\Android\AndroidSerialPort.cs" Line="81" Column="8" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

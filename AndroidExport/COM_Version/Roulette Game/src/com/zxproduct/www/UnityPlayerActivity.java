@@ -76,6 +76,11 @@ public class UnityPlayerActivity extends Activity
 	// Quit Unity
 	@Override protected void onDestroy ()
 	{
+		if (mReadThread != null)
+			mReadThread.stop();
+		
+		if (mWriteThread != null)
+			mWriteThread.stop();
 		closeSerialPort();
 		mUnityPlayer.quit();
 		super.onDestroy();
@@ -131,7 +136,7 @@ public class UnityPlayerActivity extends Activity
 	private final String kNameCOM2	= "ttyS2";
 	private final String kNameCOM3	= "ttyS3";
 	private final String kNameCOM4	= "ttyS4";
-	private final int kMaxRevDataLen = 18;	// 从金手指回传的数据长度
+	private final int kMaxRevDataLen = 20;	// 从金手指回传的数据长度
 	Map<Integer, String> ttySDic = new HashMap<Integer, String>();
 	private List<SerialPort> serialPorts = new ArrayList<SerialPort>();
 	private List<InputStream> inputStreams = new ArrayList<InputStream>();
@@ -263,6 +268,8 @@ public class UnityPlayerActivity extends Activity
 				{
 					CallCSLog("ReadThread Exception:" + e.toString());
 					e.printStackTrace();
+					mReadThread = new ReadThread();
+					mReadThread.start();
 					return;
 				}
 			}
@@ -305,6 +312,8 @@ public class UnityPlayerActivity extends Activity
 				{
 					CallCSLog("WriteThread Exception:" + e.toString());
 					e.printStackTrace();
+					mWriteThread = new WriteThread();
+					mWriteThread.start();
 					return;
 				}
 			}
@@ -362,12 +371,18 @@ public class UnityPlayerActivity extends Activity
 					sp.close();
 				serialPorts.clear();
 			}
+			writeQueues.clear();
+			readQueues.clear();
+			inputStreams.clear();
+			outputStreams.clear();
+			ttySDic.clear();
+			inputParsePhases.clear();
 			
-			if (mReadThread != null)
-				mReadThread.stop();
-			
-			if (mWriteThread != null)
-				mWriteThread.stop();
+//			if (mReadThread != null)
+//				mReadThread.stop();
+//			
+//			if (mWriteThread != null)
+//				mWriteThread.stop();
 		}
 		catch(Exception ex)
 		{

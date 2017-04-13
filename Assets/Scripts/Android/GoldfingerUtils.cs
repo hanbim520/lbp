@@ -48,6 +48,8 @@ public class GoldfingerUtils : MonoBehaviour
 	private float holdKeyinDelta= 0.0f;		// 长按上分键计时
 	private bool bHoldKeyin		= false;	// 长按上分键成立
 
+	bool isConntected = false;
+
 	void Start()
 	{
 		DontDestroyOnLoad(this);
@@ -71,6 +73,7 @@ public class GoldfingerUtils : MonoBehaviour
 		sp.Open();
 		if (sp.GetPortId() >= 0)
 		{
+			isConntected = true;
 			StartCoroutine(AfterConnHID());
 		}
 		else
@@ -81,6 +84,7 @@ public class GoldfingerUtils : MonoBehaviour
 
 	public void CloseCOM()
 	{
+		isConntected = false;
 		if (sp != null)
 			sp.Close();
 	}
@@ -101,6 +105,9 @@ public class GoldfingerUtils : MonoBehaviour
 
 	void Update()
 	{
+		if (!isConntected)
+			return;
+
 		UpdateTimers();
 
 		parseDataElapsed += Time.deltaTime;
@@ -161,9 +168,9 @@ public class GoldfingerUtils : MonoBehaviour
 			{
 				PrintData(ref data, true);
 				// 校验数据
-				int[] temp = new int[14];
-				System.Array.Copy(data, 1, temp, 0, 14);
-				if (data[15] != Utils.CrcAddXor(temp, 14))
+				int[] temp = new int[16];
+				System.Array.Copy(data, 1, temp, 0, 16);
+				if (data[17] != Utils.CrcAddXor(temp, 16))
 				{
 					// 校验不通过
 //					DebugConsole.Log("校验不通过");
@@ -297,10 +304,18 @@ public class GoldfingerUtils : MonoBehaviour
 				{
 					bEnterBackend = false;
 				}
+				if (data[15] != 0)							// 拨码开关sw1
+				{
+
+				}
+				if (data[16] != 0)							// 拨码开关sw2
+				{
+
+				}
 			}
 			else
 			{
-				DebugConsole.Log("不合格");
+//				DebugConsole.Log("不合格");
 			}
 		}
 	}
@@ -311,11 +326,11 @@ public class GoldfingerUtils : MonoBehaviour
 			0xD5, 0x58, 0x57, 14, iBlowOrDoor,
 			iHight, iLow, iCellNum, iPayCoin, iPayCoinHight,
 			iPayCoinLow, 0, 0, 0, 0,
-			0, 0, iLight, 0, 0, 0};
-		int[] temp = new int[17];
-		System.Array.Copy(outData, 1, temp, 0, 17);
-		int crc = Utils.CrcAddXor(temp, 17);
-		outData[18] = crc;
+			0, 0, iLight, 0, 0, 0, 0, 0, 0};
+		int[] temp = new int[20];
+		System.Array.Copy(outData, 1, temp, 0, 20);
+		int crc = Utils.CrcAddXor(temp, 20);
+		outData[21] = crc;
 		sp.WriteData(ref outData);
 
 		iHight = 0;

@@ -13,7 +13,7 @@ public class GameData
 	public static bool debug 		= false;		// 是否模拟出球
 	public static bool controlCode	= false;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
-	public static RouletteType rouletteType = RouletteType.Standard;	// 轮盘数字排列类型
+	public static RouletteType rouletteType = RouletteType.Special1;	// 轮盘数字排列类型
 
     // Setting menu
     public int betTimeLimit;
