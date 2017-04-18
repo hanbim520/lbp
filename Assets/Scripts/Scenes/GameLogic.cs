@@ -79,7 +79,8 @@ public class GameLogic : MonoBehaviour
 	protected string[] strTuiBroken = new string[]{"Ticket back device is broken,\nplease contact assistance.", "退币器故障，请\n联系服务员。"};
     protected bool bChangeScene = false;    // From main scene to anothers
     protected string strNextSceneName;
-	protected Timer timerPayCoin;
+    protected Timer timerPayCoin;
+	protected Timer timerRevCoin;
     protected int payCoinCount = 0;             // 已退币的个数
     protected int expectedPayCoinCount = 0;     // 期望要退币的个数
 	protected bool bFirstOpenGate = false;
@@ -99,6 +100,8 @@ public class GameLogic : MonoBehaviour
 	{
 		if (timerPayCoin != null)
 			timerPayCoin.Update(Time.deltaTime);
+        if (timerRevCoin != null)
+            timerRevCoin.Update(Time.deltaTime);
 	}
 
     // 断电重启恢复
@@ -192,6 +195,8 @@ public class GameLogic : MonoBehaviour
         GameEventManager.ChangeScene += ReadyToChangeScene;
 		GameEventManager.KeyinOnce += KeyinOnce;
 		GameEventManager.KeyinHold += KeyinHold;
+        GameEventManager.DetectPayCoinError += DetectPayCoinError;
+        GameEventManager.DetectRevCoinError += DetectRevCoinError;
     }
 
     private void UnregisterEvents()
@@ -207,14 +212,37 @@ public class GameLogic : MonoBehaviour
         GameEventManager.ChangeScene -= ReadyToChangeScene;
 		GameEventManager.KeyinOnce -= KeyinOnce;
 		GameEventManager.KeyinHold -= KeyinHold;
+        GameEventManager.DetectPayCoinError -= DetectPayCoinError;
+        GameEventManager.DetectRevCoinError -= DetectRevCoinError;
     }
 
 	// 投币
 	protected void ReceiveCoin(int count)
 	{
+        if (timerRevCoin != null)
+        {
+            timerRevCoin.Restart();
+        }
+
 		int score = count * GameData.GetInstance().coinToScore;
 		GameEventManager.OnKeyin(score, count);
 	}
+
+    protected void DetectRevCoinError()
+    {
+        if (timerRevCoin != null)
+            return;
+
+        timerRevCoin = new Timer(3, 1);
+        timerRevCoin.Tick += DetectRevCoinComplete;
+        timerRevCoin.Start();
+    }
+
+    protected void DetectRevCoinComplete()
+    {
+        timerRevCoin = null;
+        goldfingerUtils.StopRevCoin();
+    }
 
 	// 退币
 	protected void PayCoin()
@@ -240,11 +268,21 @@ public class GameLogic : MonoBehaviour
 		int coinNum = totalCredits / GameData.GetInstance().coinToScore;
 		payCoinCount = 0;
 		expectedPayCoinCount = coinNum;
-		timerPayCoin = new Timer(3, 1);
-		timerPayCoin.Tick += DetectPayCoinComplete;
-		timerPayCoin.Start();
+//		timerPayCoin = new Timer(3, 1);
+//		timerPayCoin.Tick += DetectPayCoinComplete;
+//		timerPayCoin.Start();
 		PayCoin(coinNum);
 	}
+
+    protected void DetectPayCoinError()
+    {
+        if (timerPayCoin != null)
+            return;
+
+        timerPayCoin = new Timer(3, 1);
+        timerPayCoin.Tick += DetectPayCoinComplete;
+        timerPayCoin.Start();
+    }
 
 	protected void DetectPayCoinComplete()
 	{
@@ -281,8 +319,11 @@ public class GameLogic : MonoBehaviour
 		if (payCoinCount >= expectedPayCoinCount)
 		{
 			StopPayCoin();
-            timerPayCoin.Stop();
-            timerPayCoin = null;
+            if (timerPayCoin != null)
+            {
+                timerPayCoin.Stop();
+                timerPayCoin = null;
+            }
 			// 剩余分数
 			totalCredits -= scoreNum;
 

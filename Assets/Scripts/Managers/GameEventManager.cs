@@ -53,6 +53,18 @@ public static class GameEventManager
 	public static event RakeInitEvent RakeInit;
 	public static event GameEvent EnterBackend;
 	public static event GameEventWithId WinLightSignal;				// 中奖信号灯
+    public static event GameEvent DetectPayCoinError;
+    public static event GameEvent DetectRevCoinError;
+
+    public static void OnDetectRevCoinError()
+    {
+        if (DetectRevCoinError != null) DetectRevCoinError();
+    }
+
+    public static void OnDetectPayCoinError()
+    {
+        if (DetectPayCoinError != null) DetectPayCoinError();
+    }
 
 	public static void OnWinLightSignal(int signal)
 	{

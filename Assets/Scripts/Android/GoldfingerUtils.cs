@@ -8,7 +8,7 @@ public class GoldfingerUtils : MonoBehaviour
 {
 	private AndroidSerialPort sp;		// 金手指通讯
 
-	private const float kRevGoldFingerDataInterval	= 0.05f;
+	private const float kRevGoldFingerDataInterval	= 0.1f;
 	private float revGoldFingerDataElapsed			= 0f;
 	private const float kParseDataInterval			= 0.05f;
 	private float parseDataElapsed					= 0f;
@@ -35,6 +35,10 @@ public class GoldfingerUtils : MonoBehaviour
 	private int iPayCoin 		= 0;		// 退币信号
 	private int iPayCoinHight 	= 0;		// 退币高位
 	private int iPayCoinLow		= 0;		// 退币低位
+    private int iLastPaySum     = 0;
+
+    private int iRevCoin        = 0;        // 停止收币信号
+    private int iLastRevCoin    = 0;
 
 	private Timer timerHeartBeat;			// 用来检测断连的计时器
 	private float lightElapsed	= 0;		// 中奖灯闪烁计时
@@ -168,9 +172,9 @@ public class GoldfingerUtils : MonoBehaviour
 			{
 				PrintData(ref data, true);
 				// 校验数据
-				int[] temp = new int[16];
-				System.Array.Copy(data, 1, temp, 0, 16);
-				if (data[17] != Utils.CrcAddXor(temp, 16))
+				int[] temp = new int[24];
+				System.Array.Copy(data, 1, temp, 0, 24);
+				if (data[25] != Utils.CrcAddXor(temp, 24))
 				{
 					// 校验不通过
 //					DebugConsole.Log("校验不通过");
@@ -236,20 +240,20 @@ public class GoldfingerUtils : MonoBehaviour
 							GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
 					}
 				}
-				if (data[10] != 0)	// 投币
-				{
-					GameEventManager.OnReceiveCoin(data[10]);
-				}
-				if (data[11] != 0)	// 退币
-				{
-					GameEventManager.OnPayCoinCallback(data[11]);
-				}
-				if (data[12] == 0x01)	// 物理退币按键按下
+//				if (data[10] != 0)	// 投币
+//				{
+//					GameEventManager.OnReceiveCoin(data[10]);
+//				}
+//				if (data[11] != 0)	// 退币
+//				{
+//					GameEventManager.OnPayCoinCallback(data[11]);
+//				}
+				if ((data[12] & 0x01) == 0x01)	// 物理退币按键按下
 				{
 					GameEventManager.OnPayCoin();
 				}
 //				if (!bOpenKey && data[13] == 0x20)			// 功能菜单(原上分)
-				if (data[13] == 0x20)						// 物理键上分(17A)
+				if ((data[13] & 0x20) == 0x20)						// 物理键上分(17A)
 				{
 					bOpenKey = true;
 					// 弹出功能菜单
@@ -266,7 +270,7 @@ public class GoldfingerUtils : MonoBehaviour
 						}
 					}
 				}
-				else if (bOpenKey && data[13] == 0)
+				else if (bOpenKey && ((data[13] & 0x20) == 0))
 				{
 					bOpenKey = false;
 
@@ -283,7 +287,7 @@ public class GoldfingerUtils : MonoBehaviour
 //						GameEventManager.OnKeyinHold();
 					}
 				}
-				if(!bKeyout && data[14] == 0x20)			// 物理键下分(25A)
+                if(!bKeyout && ((data[14] & 0x20) == 0x20))			// 物理键下分(25A)
 				{
 					bKeyout = true;
 					GameEventManager.OnKeout();
@@ -293,14 +297,14 @@ public class GoldfingerUtils : MonoBehaviour
 					bKeyout = false;
 				}
 
-				if (!bEnterBackend && data[13] == 0x40)		// 设置按键(原触屏版设置)
+				if (!bEnterBackend && ((data[13] & 0x40) == 0x40))		// 设置按键(原触屏版设置)
 				{
 					// 进后台前输入密码
 //					GameEventManager.OnEnterBackend();
 					// 弹出功能菜单
 					GameEventManager.OnOpenKey();
 				}
-				else if (bEnterBackend && data[13] == 0)
+				else if (bEnterBackend && ((data[13] & 0x40) == 0))
 				{
 					bEnterBackend = false;
 				}
@@ -312,6 +316,33 @@ public class GoldfingerUtils : MonoBehaviour
 				{
 
 				}
+                int totalRevCoin = data[17] | (data[18] << 8) | (data[19] << 16) | (data[20] << 24);
+                if (totalRevCoin > iLastRevCoin)
+                {
+                    int deltaRev = totalRevCoin - iLastRevCoin;
+                    GameEventManager.OnReceiveCoin(deltaRev);       // 投币
+                }
+                else
+                {
+                    GameEventManager.OnDetectRevCoinError();
+                }
+                iLastRevCoin = totalRevCoin;
+
+                int totalPayCoin = data[21] | (data[22] << 8) | (data[23] << 16) | (data[24] << 24);
+                if (iPayCoin == 1)                                  // 退币
+                {
+                    int deltaPay = totalPayCoin - iLastPaySum;
+                    if (deltaPay > 0)
+                    {
+                        GameEventManager.OnPayCoinCallback(deltaPay);
+                    }
+                    else
+                    {
+                        GameEventManager.OnDetectPayCoinError();
+                    }
+                }
+                iLastPaySum = totalPayCoin;
+
 			}
 			else
 			{
@@ -326,12 +357,13 @@ public class GoldfingerUtils : MonoBehaviour
 			0xD5, 0x58, 0x57, 14, iBlowOrDoor,
 			iHight, iLow, iCellNum, iPayCoin, iPayCoinHight,
 			iPayCoinLow, 0, 0, 0, 0,
-			0, 0, iLight, 0, 0, 0, 0, 0, 0};
+            iRevCoin, 0, iLight, 0, 0, 0, 0, 0, 0};
 		int[] temp = new int[20];
 		System.Array.Copy(outData, 1, temp, 0, 20);
 		int crc = Utils.CrcAddXor(temp, 20);
 		outData[21] = crc;
 		sp.WriteData(ref outData);
+//        DebugConsole.Log(Utils.ToString(ref outData));
 
 		iHight = 0;
 		iLow = 0;
@@ -339,6 +371,7 @@ public class GoldfingerUtils : MonoBehaviour
 		iCellNum = 0;
 		iPayCoinHight = 0;
 		iPayCoinLow = 0;
+        iRevCoin = 0;
 	}
 
 	// 开门
@@ -431,6 +464,11 @@ public class GoldfingerUtils : MonoBehaviour
 //		else
 //		GameEventManager.OnDebugLog(0, log);
 	}
+
+    public void StopRevCoin()
+    {
+        iRevCoin = 1;
+    }
 
 //	void OnGUI()
 //	{

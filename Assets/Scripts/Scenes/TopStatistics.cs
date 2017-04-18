@@ -4,24 +4,39 @@ using System.Collections;
 // 顶部路单屏
 public class TopStatistics : MonoBehaviour
 {
-	public GameObject[] objCircleRecords;	// 0:国际38孔排列 1:特殊38孔排列
+	public GameObject[] objCircleRecords;	// 0:国际38孔排列 1:特殊38孔排列 2:37
 	private UStats ustats;
 	
 	void Start()
 	{
 		ustats = GetComponent<UStats>();
-		if (GameData.rouletteType == RouletteType.Standard)
-		{
-			objCircleRecords[0].SetActive(true);
-			objCircleRecords[1].SetActive(false);
-		}
-		else if (GameData.rouletteType == RouletteType.Special1)
-		{
-			objCircleRecords[0].SetActive(false);
-			objCircleRecords[1].SetActive(true);
-		}
+        SetRouletteType();
         SetLanguage();
 	}
+
+    private void SetRouletteType()
+    {
+        if (GameData.GetInstance().maxNumberOfFields == 38)
+        {
+            if (GameData.rouletteType == RouletteType.Standard)
+            {
+                objCircleRecords[0].SetActive(true);
+                objCircleRecords[1].SetActive(false);
+            }
+            else if (GameData.rouletteType == RouletteType.Special1)
+            {
+                objCircleRecords[0].SetActive(false);
+                objCircleRecords[1].SetActive(true);
+            }
+            objCircleRecords[2].SetActive(false);
+        }
+        else
+        {
+            objCircleRecords[0].SetActive(false);
+            objCircleRecords[1].SetActive(false);
+            objCircleRecords[2].SetActive(true);
+        }
+    }
 
     private void SetLanguage()
     {
@@ -98,6 +113,9 @@ public class TopStatistics : MonoBehaviour
 		int lotteryDigit;
 		int lotteryAlloc;
 		int topScreenLanguge;
+        int maxNumberOfFields;
+        if(int.TryParse(words[20], out maxNumberOfFields))
+            GameData.GetInstance().maxNumberOfFields = maxNumberOfFields;
 		if (int.TryParse(words[26], out lotteryAlloc))
 			GameData.GetInstance().lotteryAllocation = lotteryAlloc;
 		if (int.TryParse(words[28], out lotteryDigit))
@@ -109,6 +127,7 @@ public class TopStatistics : MonoBehaviour
 			GameData.GetInstance().topScreenLanguage = topScreenLanguge;
 		GameData.GetInstance().SaveSetting();
 		SetLanguage();
+        SetRouletteType();
 	}
 
 	private void HandleGamePhase(ref string[] words)

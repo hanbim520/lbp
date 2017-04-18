@@ -7,6 +7,17 @@ using System.Collections;
 
 public static class Utils
 {
+    public static string ToString(ref int[] data)
+    {
+        string str = "";
+        int len = data.Length;
+        for (int i = 0; i < len; ++i)
+        {
+            str += string.Format("{0:X}, ", data[i]);
+        }
+        return str;
+    }
+
 	public static byte[] StringToBytes(string str)
 	{
 		byte[] bytes = new byte[str.Length * sizeof(char)];

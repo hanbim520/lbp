@@ -136,7 +136,7 @@ public class UnityPlayerActivity extends Activity
 	private final String kNameCOM2	= "ttyS2";
 	private final String kNameCOM3	= "ttyS3";
 	private final String kNameCOM4	= "ttyS4";
-	private final int kMaxRevDataLen = 20;	// 从金手指回传的数据长度
+	private final int kMaxRevDataLen = 28;	// 从金手指回传的数据长度
 	Map<Integer, String> ttySDic = new HashMap<Integer, String>();
 	private List<SerialPort> serialPorts = new ArrayList<SerialPort>();
 	private List<InputStream> inputStreams = new ArrayList<InputStream>();
