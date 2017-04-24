@@ -88,11 +88,17 @@ public class RecordCircle2 : MonoBehaviour
         }
         foreach (int item in records)
         {
+			if (item == 37 && GameData.GetInstance().maxNumberOfFields == 37)
+				continue;
+
             dict[item] += 1;
         }
 		// 设置柱状体长度和颜色
         foreach (var item in dict)
         {
+			if (item.Key == 37 && GameData.GetInstance().maxNumberOfFields == 37)
+				continue;
+
             triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
             if (GameData.GetInstance().hotValues.Contains(item.Key))
 				triangles[item.Key].overrideSprite = histogramColors[0];
@@ -117,10 +123,13 @@ public class RecordCircle2 : MonoBehaviour
 
 		// 闪烁当前的号码
 		bFlashEnable = true;
-		Transform targetImg = triangles[currentValue].transform;
-		flashImg.transform.localPosition = targetImg.localPosition;
-		flashImg.transform.localRotation = targetImg.localRotation;
-		flashImg.transform.localScale = Vector3.one;
+		if (currentValue == 37 && GameData.GetInstance().maxNumberOfFields != 37)
+		{
+			Transform targetImg = triangles[currentValue].transform;
+			flashImg.transform.localPosition = targetImg.localPosition;
+			flashImg.transform.localRotation = targetImg.localRotation;
+			flashImg.transform.localScale = Vector3.one;
+		}
 
 		// 显示各个球号的出现次数
 		Transform timesRoot = transform.FindChild("times");

@@ -42,6 +42,9 @@ public class RecordFew : MonoBehaviour
 		}
 		foreach (int item in GameData.GetInstance().records)
 		{
+			if (item == 37 && GameData.GetInstance().maxNumberOfFields == 37)
+				continue;
+
 			dict[item] += 1;
 		}
         List<KeyValuePair<int, int>> lst = new List<KeyValuePair<int, int>>(dict);

@@ -1271,11 +1271,11 @@ public class MainUILogic : MonoBehaviour
 	{
 		if (!gameLogic.IsPause())
 			countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = value;
-//		if (!gameLogic.IsPause() &&
-//		    gameLogic.goldfingerUtils.GetRealtimeBallVal() > 0)
-//		{
-//			GameEventManager.OnBreakdownTip(BreakdownType.BallHaventFall);
-//		}
+		if (!gameLogic.IsPause() &&
+		    gameLogic.goldfingerUtils.GetRealtimeBallVal() > 0)
+		{
+			GameEventManager.OnBreakdownTip(BreakdownType.BallHaventFall);
+		}
 	}
 
 	private void CountdownTick()

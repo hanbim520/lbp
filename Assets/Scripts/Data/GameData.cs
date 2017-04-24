@@ -10,7 +10,7 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-    public static bool debug 		= false;		// 是否模拟出球
+	public static bool debug 		= false;		// 是否模拟出球
 	public static bool controlCode	= false;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
 	public static RouletteType rouletteType = RouletteType.Special1;	// 轮盘数字排列类型
@@ -565,6 +565,7 @@ public class GameData
 			DefaultCustom();
 			SaveCustom();
             PlayerPrefs.SetInt("FirstWrite", 1);
+			RandomRecords();
         }
         else
         {
@@ -1063,4 +1064,117 @@ public class GameData
         PlayerPrefs.SetInt("topScreenLanguage", topScreenLanguage);
         PlayerPrefs.Save();
     }
+
+	private void RandomRecords()
+	{
+		SaveRecord(12);
+		SaveRecord(12);
+		SaveRecord(12);
+		SaveRecord(12);
+		SaveRecord(12);
+		SaveRecord(14);
+		SaveRecord(23);
+		SaveRecord(14);
+		SaveRecord(23);
+		SaveRecord(23);
+		
+		SaveRecord(1);
+		SaveRecord(2);
+		SaveRecord(4);
+		SaveRecord(6);
+		SaveRecord(4);
+		SaveRecord(13);
+		SaveRecord(11);
+		SaveRecord(10);
+		SaveRecord(9);
+		SaveRecord(2);
+		
+		SaveRecord(0);
+		SaveRecord(12);
+		SaveRecord(4);
+		SaveRecord(15);
+		SaveRecord(16);
+		SaveRecord(13);
+		SaveRecord(11);
+		SaveRecord(10);
+		SaveRecord(0);
+		SaveRecord(2);
+		
+		SaveRecord(0);
+		SaveRecord(2);
+		SaveRecord(4);
+		SaveRecord(6);
+		SaveRecord(0);
+		SaveRecord(13);
+		SaveRecord(11);
+		SaveRecord(10);
+		SaveRecord(9);
+		SaveRecord(2);
+		
+		SaveRecord(1);
+		SaveRecord(2);
+		SaveRecord(4);
+		SaveRecord(6);
+		SaveRecord(4);
+		SaveRecord(13);
+		SaveRecord(11);
+		SaveRecord(10);
+		SaveRecord(9);
+		SaveRecord(2);
+		
+		SaveRecord(9);
+		SaveRecord(8);
+		SaveRecord(7);
+		SaveRecord(6);
+		SaveRecord(5);
+		SaveRecord(14);
+		SaveRecord(19);
+		SaveRecord(17);
+		SaveRecord(9);
+		SaveRecord(2);
+		
+		SaveRecord(21);
+		SaveRecord(22);
+		SaveRecord(24);
+		SaveRecord(26);
+		SaveRecord(24);
+		SaveRecord(23);
+		SaveRecord(11);
+		SaveRecord(10);
+		SaveRecord(3);
+		SaveRecord(1);
+		
+		SaveRecord(31);
+		SaveRecord(32);
+		SaveRecord(34);
+		SaveRecord(36);
+		SaveRecord(4);
+		SaveRecord(13);
+		SaveRecord(35);
+		SaveRecord(10);
+		SaveRecord(9);
+		SaveRecord(2);
+		
+		SaveRecord(1);
+		SaveRecord(3);
+		SaveRecord(7);
+		SaveRecord(6);
+		SaveRecord(5);
+		SaveRecord(13);
+		SaveRecord(11);
+		SaveRecord(10);
+		SaveRecord(9);
+		SaveRecord(2);
+		
+		SaveRecord(1);
+		SaveRecord(32);
+		SaveRecord(4);
+		SaveRecord(6);
+		SaveRecord(4);
+		SaveRecord(13);
+		SaveRecord(11);
+		SaveRecord(10);
+		SaveRecord(9);
+		SaveRecord(2);
+	}
 }

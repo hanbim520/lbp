@@ -70,51 +70,61 @@ public class RecordCircle : MonoBehaviour
     private IEnumerator RefreshView()
     {
 		// 为了等冷热号处理结束
-        yield return new WaitForSeconds(1.0f);
-        int count = GameData.GetInstance().records.Count;
-        int[] records = GameData.GetInstance().records.ToArray();
-        if (count == 0)
-        {
-            foreach (Image item in triangles)
-                item.fillAmount = 0;
-            yield break;
-        }
-        int sum = 100;
-        Dictionary<int, int> dict = new Dictionary<int, int>();
-        for (int i = 0; i < fieldsCount; ++i)
-        {
-            dict.Add(i, 0);
-        }
-        foreach (int item in records)
-        {
-            dict[item] += 1;
-        }
-        foreach (var item in dict)
-        {
-            triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
-            if (GameData.GetInstance().hotValues.Contains(item.Key))
+		yield return new WaitForSeconds(1.0f);
+		int count = GameData.GetInstance().records.Count;
+		int[] records = GameData.GetInstance().records.ToArray();
+		if (count == 0)
+		{
+			foreach (Image item in triangles)
+				item.fillAmount = 0;
+			yield break;
+		}
+		int sum = 100;
+		Dictionary<int, int> dict = new Dictionary<int, int>();
+		for (int i = 0; i < fieldsCount; ++i)
+		{
+			dict.Add(i, 0);
+		}
+		foreach (int item in records)
+		{
+			if (item == 37 && GameData.GetInstance().maxNumberOfFields == 37)
+				continue;
+
+			dict[item] += 1;
+		}
+		foreach (var item in dict)
+		{
+			if (item.Key == 37 && GameData.GetInstance().maxNumberOfFields == 37)
+				continue;
+			
+			triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
+			if (GameData.GetInstance().hotValues.Contains(item.Key))
 				triangles[item.Key].overrideSprite = histogramColors[0];
-            else if (GameData.GetInstance().coldValues.Contains(item.Key))
+			else if (GameData.GetInstance().coldValues.Contains(item.Key))
 				triangles[item.Key].overrideSprite = histogramColors[1];
 			else
 				triangles[item.Key].overrideSprite = histogramColors[2];
-        }
-        int currentValue = records[count - 1];
-        if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)
-            bgBall.overrideSprite = bgs[0];
-        else if (GameData.GetInstance().colorTable[currentValue] == ResultType.Black)
-            bgBall.overrideSprite = bgs[1];
-        else
-            bgBall.overrideSprite = bgs[2];
-        if (currentValue != 37)
-            txtNum.text = currentValue.ToString();
-        else
-            txtNum.text = "00";
-
+		}
+		int currentValue = records[count - 1];
+		currentValue = 37;
+		if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)
+			bgBall.overrideSprite = bgs[0];
+		else if (GameData.GetInstance().colorTable[currentValue] == ResultType.Black)
+			bgBall.overrideSprite = bgs[1];
+		else
+			bgBall.overrideSprite = bgs[2];
+		if (currentValue != 37)
+			txtNum.text = currentValue.ToString();
+		else
+			txtNum.text = "00";
+		
 		bFlashEnable = true;
-		Transform targetImg = triangles[currentValue].transform;
-		flashImg.transform.localPosition = targetImg.localPosition;
-		flashImg.transform.localRotation = targetImg.localRotation;
-		flashImg.transform.localScale = Vector3.one;
+		if (currentValue == 37 && GameData.GetInstance().maxNumberOfFields != 37)
+		{
+			Transform targetImg = triangles[currentValue].transform;
+			flashImg.transform.localPosition = targetImg.localPosition;
+			flashImg.transform.localRotation = targetImg.localRotation;
+			flashImg.transform.localScale = Vector3.one;
+		}
     }
 }
