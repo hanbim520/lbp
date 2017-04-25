@@ -546,7 +546,7 @@ public class ServerLogic : GameLogic
 		if (totalCredits <= 0)
 			ui.DisableCardMode();
 		
-		yield return new WaitForSeconds(5);
+		yield return new WaitForSeconds(2);
 
         // sync lottery digit
         int totalLottery = GameData.GetInstance().lotteryDigit;

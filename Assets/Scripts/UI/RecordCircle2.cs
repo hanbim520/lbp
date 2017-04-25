@@ -123,7 +123,11 @@ public class RecordCircle2 : MonoBehaviour
 
 		// 闪烁当前的号码
 		bFlashEnable = true;
-		if (currentValue == 37 && GameData.GetInstance().maxNumberOfFields != 37)
+		if (currentValue == 37 && GameData.GetInstance().maxNumberOfFields == 37)
+		{
+
+		}
+		else
 		{
 			Transform targetImg = triangles[currentValue].transform;
 			flashImg.transform.localPosition = targetImg.localPosition;

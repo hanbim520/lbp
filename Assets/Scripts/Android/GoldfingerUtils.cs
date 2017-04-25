@@ -19,6 +19,7 @@ public class GoldfingerUtils : MonoBehaviour
 	public const int kPhaseOpenGate 				= 3;
 	public const int kPhaseCloseGate 				= 4;
 	public const int kPhaseDetectBallValue 			= 5;
+	public const int kPhaseDetectBallValue2			= 6;	// 第2次认球
 
 	private const int kMaxCOM2DataLength			= 18;
 	private bool bBlowedBall = false;
@@ -39,6 +40,10 @@ public class GoldfingerUtils : MonoBehaviour
 
     private int iRevCoin        = 0;        // 停止收币信号
     private int iLastRevCoin    = 0;
+
+	private	int iRevValRound	= 0;		// 第1次收到球号时的圈数
+	private int iRevValCell		= 0;		// 第1次收到球号时的格数
+	private int iFirstBallVal	= 0;		// 第1次认球的球号
 
 	private Timer timerHeartBeat;			// 用来检测断连的计时器
 	private float lightElapsed	= 0;		// 中奖灯闪烁计时
@@ -234,10 +239,47 @@ public class GoldfingerUtils : MonoBehaviour
 						PrintData(ref data);
 						idx -= 1;
 						phase = kPhaseDetectBallValue;
+//						if (GameData.GetInstance().maxNumberOfFields == 38)
+//							GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
+//						else if (GameData.GetInstance().maxNumberOfFields == 37)
+//							GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
+
+						iRevValRound = data[7];
+						iRevValCell = data[8];
 						if (GameData.GetInstance().maxNumberOfFields == 38)
-							GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
+							iFirstBallVal = GameData.GetInstance().ballValue38[idx];
 						else if (GameData.GetInstance().maxNumberOfFields == 37)
-							GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
+							iFirstBallVal = GameData.GetInstance().ballValue37[idx];
+					}
+				}
+				if (phase == kPhaseDetectBallValue)
+				{
+					int deltaCell = data[8] - iRevValCell;
+					if (data[7] != iRevValRound &&
+					    deltaCell >= 0)
+					{
+						int idx = data[6];
+						if (idx > 0)
+						{
+							idx -= 1;
+							phase = kPhaseDetectBallValue2;
+							int secondBallVal = -1;
+							if (GameData.GetInstance().maxNumberOfFields == 38)
+								secondBallVal = GameData.GetInstance().ballValue38[idx];
+							else if (GameData.GetInstance().maxNumberOfFields == 37)
+								secondBallVal = GameData.GetInstance().ballValue37[idx];
+							if (secondBallVal == iFirstBallVal)
+							{
+								if (GameData.GetInstance().maxNumberOfFields == 38)
+									GameEventManager.OnBallValue(GameData.GetInstance().ballValue38[idx]);
+								else if (GameData.GetInstance().maxNumberOfFields == 37)
+									GameEventManager.OnBallValue(GameData.GetInstance().ballValue37[idx]);
+							}
+							else
+							{
+								GameEventManager.OnBreakdownTip(BreakdownType.RecognizeBall);
+							}
+						}
 					}
 				}
 //				if (data[10] != 0)	// 投币

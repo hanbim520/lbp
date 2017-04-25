@@ -96,7 +96,7 @@ public class RecordCircle : MonoBehaviour
 		{
 			if (item.Key == 37 && GameData.GetInstance().maxNumberOfFields == 37)
 				continue;
-			
+
 			triangles[item.Key].fillAmount = (float)item.Value * 10 / sum;
 			if (GameData.GetInstance().hotValues.Contains(item.Key))
 				triangles[item.Key].overrideSprite = histogramColors[0];
@@ -106,7 +106,6 @@ public class RecordCircle : MonoBehaviour
 				triangles[item.Key].overrideSprite = histogramColors[2];
 		}
 		int currentValue = records[count - 1];
-		currentValue = 37;
 		if (GameData.GetInstance().colorTable[currentValue] == ResultType.Red)
 			bgBall.overrideSprite = bgs[0];
 		else if (GameData.GetInstance().colorTable[currentValue] == ResultType.Black)
@@ -119,7 +118,11 @@ public class RecordCircle : MonoBehaviour
 			txtNum.text = "00";
 		
 		bFlashEnable = true;
-		if (currentValue == 37 && GameData.GetInstance().maxNumberOfFields != 37)
+		if (currentValue == 37 && GameData.GetInstance().maxNumberOfFields == 37)
+		{
+
+		}
+		else
 		{
 			Transform targetImg = triangles[currentValue].transform;
 			flashImg.transform.localPosition = targetImg.localPosition;
