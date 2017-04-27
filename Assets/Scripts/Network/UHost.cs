@@ -133,7 +133,7 @@ public class UHost : MonoBehaviour
 		GameData gd = GameData.GetInstance();
         string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9}:{10}:" +
 		                           "{11}:{12}:{13}:{14}:{15}:{16}:{17}:{18}:{19}:{20}:{21}:{22}:{23}:{24}:{25}:{26}:{27}:{28}:{29}:{30}:" +
-		                           "{31}:{32}:{33}:{34}:{35}:{36}:{37}", 
+                                   "{31}:{32}:{33}:{34}:{35}:{36}:{37}:{38}", 
 		                           NetInstr.SyncData, 
                                    gd.betTimeLimit, gd.coinToScore, gd.baoji,
                                    gd.betChipValues[0], gd.betChipValues[1], gd.betChipValues[2],
@@ -147,7 +147,8 @@ public class UHost : MonoBehaviour
                                    gd.lotteryDigit,
 		                           gd.powerOffCompensate, gd.topScreenLanguage,
 		                           gd.allMax36Val, gd.allMax18Val, gd.allMax12Val, gd.allMax9Val, 
-		                           gd.allMax6Val, gd.allMax3Val, gd.allMax2Val);
+		                           gd.allMax6Val, gd.allMax3Val, gd.allMax2Val,
+                                   gd.lotteryLv);
 		SendToPeer(msg, connectionId);
 	}
 

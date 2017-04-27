@@ -62,6 +62,7 @@ public class GameLogic : MonoBehaviour
 		get { return isLock; }
 		set { isLock = value; }
 	}
+    public bool bCanBet = true;
 
 
     protected int _totalCredits = 0;
@@ -305,17 +306,21 @@ public class GameLogic : MonoBehaviour
 				GameData.GetInstance().SaveAccount();
 			}
 		}
+        bCanBet = true;
 	}
 	
 	protected void PayCoinCallback(int count)
 	{
+        bCanBet = false;
 		if (timerPayCoin != null)
 		{
 			timerPayCoin.Restart();
 		}
 		payCoinCount += count;
-		// 退分量
-		int scoreNum = payCoinCount * GameData.GetInstance().coinToScore;
+        // 总退分量
+//		int scoreNum = payCoinCount * GameData.GetInstance().coinToScore;
+        // 当前退分量
+        int deltaNum = count * GameData.GetInstance().coinToScore;
 		if (payCoinCount >= expectedPayCoinCount)
 		{
 			StopPayCoin();
@@ -324,27 +329,24 @@ public class GameLogic : MonoBehaviour
                 timerPayCoin.Stop();
                 timerPayCoin = null;
             }
-			// 剩余分数
-			totalCredits -= scoreNum;
-
-			GameData.GetInstance().AppendKeyinKeoutRecords(0, scoreNum, 0, payCoinCount, 0);
-			GameData.GetInstance().zongTui += payCoinCount;
-			GameData.GetInstance().zongXia += scoreNum;
-			GameData.GetInstance().currentZongXia += scoreNum;
-			GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
-			GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
-			GameData.GetInstance().SaveAccount();
-			
-			ui.RefreshLblCredits(totalCredits.ToString());
-			return;
+            bCanBet = true;
 		}
-		// 剩余分数
-		int residue = totalCredits - scoreNum;
-		ui.RefreshLblCredits(residue.ToString());
-	}
-
-	// 下分
-	protected void Keout()
+        // 剩余分数
+        totalCredits -= deltaNum;
+        
+        GameData.GetInstance().AppendKeyinKeoutRecords(0, deltaNum, 0, count, 0);
+        GameData.GetInstance().zongTui += count;
+        GameData.GetInstance().zongXia += deltaNum;
+        GameData.GetInstance().currentZongXia += deltaNum;
+        GameData.GetInstance().totalWin = GameData.GetInstance().zongShang - GameData.GetInstance().zongXia;
+        GameData.GetInstance().currentWin = GameData.GetInstance().currentZongShang - GameData.GetInstance().currentZongXia;
+        GameData.GetInstance().SaveAccount();
+        
+        ui.RefreshLblCredits(totalCredits.ToString());
+    }
+    
+    // 下分
+    protected void Keout()
 	{
 		ui.ActiveDlgCard(false);
 		if (totalCredits <= 0)
@@ -595,7 +597,10 @@ public class GameLogic : MonoBehaviour
 		}
 		else if (Application.platform == RuntimePlatform.Android)
 		{
-			goldfingerUtils.OpenGate();
+//			goldfingerUtils.OpenGate();
+            Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
+            int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
+            goldfingerUtils.BlowBall(time);
 		}
 	}
 	

@@ -198,7 +198,7 @@ public class UClient : MonoBehaviour
 		int couponsStart, couponsKeyinRatio, couponsKeoutRatio;
 		int maxNumberOfFields;
 		int lineId, machineId;
-		int lotteryCondition, lotteryBase, lotteryRate, lotteryAlloc, lotteryDigit;
+		int lotteryCondition, lotteryBase, lotteryRate, lotteryAlloc, lotteryDigit, lotteryLv;
 		int inputDevice;
 		int powerOffCompensate;
 		int topScreenLanguage;
@@ -292,6 +292,8 @@ public class UClient : MonoBehaviour
 			GameData.GetInstance().allMax3Val = allMax3Val;
 		if (int.TryParse(words[37], out allMax2Val))
 			GameData.GetInstance().allMax2Val = allMax2Val;
+        if (int.TryParse(words[38], out lotteryLv))
+            GameData.GetInstance().lotteryLv = lotteryLv;
 
 		GameData.GetInstance().SaveSetting();
 		GameEventManager.OnSyncUI();

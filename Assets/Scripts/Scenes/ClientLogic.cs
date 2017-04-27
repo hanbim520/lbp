@@ -180,6 +180,7 @@ public class ClientLogic : GameLogic
 
     private void Countdown()
     {
+        ClearVariables();
         if (ui.CurChipIdx != -1)
             ui.chooseBetEffect.SetActive(true);
         ui.RefreshLblWin("0");

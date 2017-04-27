@@ -871,7 +871,8 @@ public class MainUILogic : MonoBehaviour
 	public void FieldDownEvent(Transform hitObject)
 	{
 		if (eraser.activeSelf || curChipIdx == -1 || 
-		    gameLogic.LogicPhase != GamePhase.Countdown)
+		    gameLogic.LogicPhase != GamePhase.Countdown ||
+            !gameLogic.bCanBet)
 			return;
 
 //        if (string.Equals(hitObject.name.Substring(0, 1), "e"))
@@ -935,7 +936,8 @@ public class MainUILogic : MonoBehaviour
 			if (curChipIdx == -1 || 
 			    gameLogic.LogicPhase != GamePhase.Countdown ||
 			    GameData.GetInstance().IsCardMode == CardMode.Ready ||
-			    gameLogic.IsLock)
+			    gameLogic.IsLock ||
+                !gameLogic.bCanBet)
 				return;
 
 			bool isEllipse = false;
@@ -1483,6 +1485,16 @@ public class MainUILogic : MonoBehaviour
 				t.GetComponent<FlashImage>().StopFlash();
 			flashObjects.Clear();
 		}
+        Transform transDisplay = displayClassic.activeSelf ? displayClassic.transform : displayEllipse.transform;
+        if (transDisplay.gameObject.activeSelf)
+        {
+            Transform root = transDisplay.transform.FindChild("Choose Effect");
+            FlashImage[] imgs = root.GetComponentsInChildren<FlashImage>();
+            foreach (FlashImage img in imgs)
+            {
+                img.StopFlash();
+            }
+        }
 		crown.SetActive(false);
 		ClearSingleSigns();
 	}

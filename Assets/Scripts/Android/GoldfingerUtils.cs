@@ -252,11 +252,13 @@ public class GoldfingerUtils : MonoBehaviour
 							iFirstBallVal = GameData.GetInstance().ballValue37[idx];
 					}
 				}
+                // 二次认球
 				if (phase == kPhaseDetectBallValue)
 				{
 					int deltaCell = data[8] - iRevValCell;
-					if (data[7] != iRevValRound &&
-					    deltaCell >= 0)
+                    int deltaRound = Mathf.Abs(data[7] - iRevValRound);
+                    if ((deltaRound >= 1 && deltaCell >= 0) ||
+                        (deltaRound >= 2))
 					{
 						int idx = data[6];
 						if (idx > 0)
