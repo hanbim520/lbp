@@ -256,7 +256,7 @@ public class ClientLogic : GameLogic
 				{
 					if (selfBet >= GameData.GetInstance().lotteryCondition)
 					{
-						luckyWin = Mathf.CeilToInt((float)GameData.GetInstance().lotteryDigit * 
+                        luckyWin = Mathf.FloorToInt((float)GameData.GetInstance().lotteryDigit * 
 						                           ((float)selfBet / (float)curLuckySum) * 
 						                           ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
 						if (luckyWin > 0)
@@ -278,7 +278,7 @@ public class ClientLogic : GameLogic
         if (totalCredits <= 0)
             ui.DisableCardMode();
         
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(0.2f);
         
         ui.RefreshLblBet("0");
         if (win > 0)

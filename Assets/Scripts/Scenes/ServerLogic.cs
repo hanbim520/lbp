@@ -222,7 +222,7 @@ public class ServerLogic : GameLogic
 			host.SendToAll(NetInstr.SyncLottery.ToString() + ":" + totalLottery.ToString());
 			GameEventManager.OnLotteryChange(totalLottery);
 
-			int[] lotteries = CalcLottery();
+            int[] lotteries = CalcLottery();
             if (lotteries.Length > 0)
             {
                 string msg = NetInstr.LotteryNum.ToString();
@@ -324,7 +324,7 @@ public class ServerLogic : GameLogic
 	// 不带控制的出彩金
 	private int[] CalcLottery()
 	{
-		int dif = GameData.GetInstance().lotteryLv; 			// 多少场出一次彩金
+        int dif = GameData.GetInstance().lotteryLv;             // 多少场出一次彩金
 		int count = GameData.GetInstance().jackpotMatchCount;	// 当前第几场
 		int bingoIdx = GameData.GetInstance().jackpotBingoIdx;	// 第几场bingo
 		++count;
@@ -509,6 +509,7 @@ public class ServerLogic : GameLogic
 						break;
 					}
 				}
+                float othersRatio = 1.0f;
 				if (isLucky)
 				{
 					int selfBet;
@@ -518,24 +519,24 @@ public class ServerLogic : GameLogic
 						if (selfBet >= GameData.GetInstance().lotteryCondition)
 						{
 							float selfRatio = (float)selfBet / (float)curLuckySum;
-							float othersRatio = 1.0f -  selfRatio;
+							othersRatio = 1.0f - selfRatio;
 							luckyWin = Mathf.FloorToInt((float)GameData.GetInstance().lotteryDigit * 
 							                            selfRatio * 
 							                           ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
 							if (luckyWin > 0)
 							{
-								othersLucyWin = Mathf.FloorToInt((float)GameData.GetInstance().lotteryDigit * 
-								                                 othersRatio * 
-								                                 ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
-								GameData.GetInstance().lotteryDigit -= (luckyWin + othersLucyWin);
 								ui.CreateGoldenRain();
 							}
-						}
-					}
+                        }
+                    }
 				}
-			}
-		}
-		AppendLastBets(currentBet);
+                othersLucyWin = Mathf.FloorToInt((float)GameData.GetInstance().lotteryDigit * 
+                                                 othersRatio * 
+                                                 ((float)GameData.GetInstance().lotteryAllocation * 0.01f));
+                GameData.GetInstance().lotteryDigit -= (luckyWin + othersLucyWin);
+            }
+        }
+        AppendLastBets(currentBet);
 		AppendLast10(totalCredits, totalCredits + win + luckyWin, currentBet, win, luckyWin, ballValue);
 		win += luckyWin;	// 加上彩金送的分
         GameData.GetInstance().ZongPei += win;
@@ -546,7 +547,7 @@ public class ServerLogic : GameLogic
 		if (totalCredits <= 0)
 			ui.DisableCardMode();
 		
-		yield return new WaitForSeconds(2);
+		yield return new WaitForSeconds(0.2f);
 
         // sync lottery digit
         int totalLottery = GameData.GetInstance().lotteryDigit;
