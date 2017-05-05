@@ -453,7 +453,10 @@ public class BackendLogic : MonoBehaviour
 		if (GameData.GetInstance().deviceIndex <= 0)
 			deviceId[idx].text = string.Empty;
 		else
-			deviceId[idx].text = GameData.GetInstance().deviceIndex.ToString();
+        {
+            deviceId[0].text = GameData.GetInstance().deviceIndex.ToString();
+			deviceId[1].text = GameData.GetInstance().deviceIndex.ToString();
+        }
     }
 
 	private void InitLotterySetting()
@@ -941,7 +944,8 @@ public class BackendLogic : MonoBehaviour
 						deviceId[GameData.GetInstance().backendLanguage].text = string.Empty;
 					else
 					{
-						deviceId[GameData.GetInstance().backendLanguage].text = value.ToString();
+                        deviceId[0].text = value.ToString();
+						deviceId[1].text = value.ToString();
 						GameData.GetInstance().deviceIndex = value;
 						GameData.GetInstance().SaveDeviceIndex();
 					}

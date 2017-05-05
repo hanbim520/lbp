@@ -25,8 +25,10 @@ public class LaunchCamera : MonoBehaviour
 	void Start()  
 	{  
 		canvasScaler = GetComponent<CanvasScaler>();
-		SetResolution();
-		SetWCTProperties();
+//		SetResolution();
+//		SetWCTProperties();
+        Screen.SetResolution(1920, 1080, true);
+        SetWCTProperties2();
 		StartCoroutine(RequestWebCam());  
 	}  
 	
@@ -57,6 +59,19 @@ public class LaunchCamera : MonoBehaviour
 		wctX = ratioPosX * canvasScaler.referenceResolution.x;
 		wctY = ratioPosY * canvasScaler.referenceResolution.y;
 	}
+
+    private void SetWCTProperties2()
+    {
+        float ratioWidth = Mathf.Abs(leftTop.localPosition.x - rightBottom.localPosition.x) / canvasScaler.referenceResolution.x;
+        float ratioHeight = Mathf.Abs(leftTop.localPosition.y - rightBottom.localPosition.y) / canvasScaler.referenceResolution.y;
+        wctWidth = ratioWidth * canvasScaler.referenceResolution.x;
+        wctHeight = ratioHeight * canvasScaler.referenceResolution.y;
+
+        float ratioPosX = (leftTop.localPosition.x - (-canvasScaler.referenceResolution.x / 2.0f)) / canvasScaler.referenceResolution.x;
+        float ratioPosY = Mathf.Abs(leftTop.localPosition.y - (canvasScaler.referenceResolution.y / 2.0f)) / canvasScaler.referenceResolution.y;
+        wctX = ratioPosX * canvasScaler.referenceResolution.x;
+        wctY = ratioPosY * canvasScaler.referenceResolution.y;
+    }
 
 	//  尝试打开摄像头
 	private IEnumerator RequestWebCam()  

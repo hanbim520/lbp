@@ -1642,7 +1642,7 @@ public class MainUILogic : MonoBehaviour
 	private void SyncUI()
 	{
 		SetDisplay();
-		SetBetChips();
+//		SetBetChips();
 	}
 
 	// 清除所有单点押分标志
