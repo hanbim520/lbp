@@ -233,7 +233,9 @@ public class CardDlg : MonoBehaviour
 	{
 		if (passwordMode)
 		{
-			if ((Utils.StringIsEquals(txtPassword, GameData.GetInstance().systemPassword) && passwordType == 1) ||
+            if (((Utils.StringIsEquals(txtPassword, GameData.GetInstance().systemPassword) && passwordType == 1) || 
+                (Utils.StringIsEquals(txtPassword, GameData.GetInstance().accountPassword) && passwordType == 1) ||
+                (Utils.StringIsEquals(txtPassword, GameData.GetInstance().adminPassword) && passwordType == 1)) ||
 			    (Utils.StringIsEquals(txtPassword, GameData.GetInstance().accountPassword) && passwordType == 2))
 			{
 				if (passwordType == 1)			// 输入设置密码

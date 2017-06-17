@@ -10,7 +10,7 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug 		= false;		// 是否模拟出球
+    public static bool debug 		= false;		// 是否模拟出球
 	public static bool controlCode	= false;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
 	public static RouletteType rouletteType = RouletteType.Special1;	// 轮盘数字排列类型
@@ -594,16 +594,16 @@ public class GameData
 						++maxNumberOfChips;
 				}
 			}
-			max36Value = PlayerPrefs.GetInt("max36Value");
+            max36Value = PlayerPrefs.GetInt("max36Value");
 			max18Value = PlayerPrefs.GetInt("max18Value");
 			max12Value = PlayerPrefs.GetInt("max12Value");
 			max9Value = PlayerPrefs.GetInt("max9Value");
 			max6Value = PlayerPrefs.GetInt("max6Value");
 			max3Value = PlayerPrefs.GetInt("max3Value");
 			max2Value = PlayerPrefs.GetInt("max2Value");
-			allMax36Val = PlayerPrefs.GetInt("allMax36Val");
-			allMax18Val = PlayerPrefs.GetInt("allMax18Val");
-			allMax12Val = PlayerPrefs.GetInt("allMax12Val");
+            allMax36Val = PlayerPrefs.GetInt("allMax36Val");
+            allMax18Val = PlayerPrefs.GetInt("allMax18Val");
+            allMax12Val = PlayerPrefs.GetInt("allMax12Val");
 			allMax9Val = PlayerPrefs.GetInt("allMax9Val");
 			allMax6Val = PlayerPrefs.GetInt("allMax6Val");
 			allMax3Val = PlayerPrefs.GetInt("allMax3Val");
@@ -613,7 +613,7 @@ public class GameData
 			couponsKeoutRatio = PlayerPrefs.GetInt("couponsKeoutRatio");
 			beginSessions = PlayerPrefs.GetInt("beginSessions");
             maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
-			lotteryLv = PlayerPrefs.GetInt("lotteryLv");
+            lotteryLv = PlayerPrefs.GetInt("lotteryLv");
 			lotteryCondition = PlayerPrefs.GetInt("lotteryCondition");
 			lotteryBase = PlayerPrefs.GetInt("lotteryBase");
 			lotteryRate = PlayerPrefs.GetInt("lotteryRate");

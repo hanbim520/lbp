@@ -915,54 +915,69 @@ public class ServerLogic : GameLogic
 		ui.RefreshLblBet(currentBet.ToString());
 	}
 
-	public void HandleCheckRepeatAble(bool isClient, int connectionId, ref string[] words)
-	{
-		int ret = 1; // 0:表示不可以续押 1:表示可以续押
-		Dictionary<string, int> tmp = new Dictionary<string, int>(clientBets);
-		bool isRepeatData = false;
-		for (int i = 1; i < words.Length; i += 2)
-		{
-
-			if (string.Compare(words[i], "repeats") == 0)
-			{
-				isRepeatData = true;
-				continue;
-			}
-			string field = words[i];
-			int betVal;
-			if (int.TryParse(words[i + 1], out betVal))
-			{
-				if (isRepeatData)	// 准备重复押的分数
-				{
-					// 检查分机限注
-					if (betVal > Utils.GetMaxBet(field))
-					{
-						ret = 0;
-						break;
-					}
-					// 检查全台限注
-					if (betVal > Utils.GetAllMaxBet(field))
-					{
-						ret = 0;
-						break;
-					}
-				}
-				else 				// 已押的分数
-				{
-					if (tmp.ContainsKey(field))
-						tmp[field] -= betVal;
-				}
-			}
-		}
-		if (isClient)
-		{
-			string msg = string.Format("{0}:{1}", NetInstr.CheckRepeatAble, ret);
-			host.SendToPeer(msg, connectionId);
-		}
-		else
-		{
-			if (ret == 1)
-				ui.RepeatEventCB();
-		}
-	}
+    public void HandleCheckRepeatAble(bool isClient, int connectionId, ref string[] words)
+    {
+        int ret = 1; // 0:表示不可以续押 1:表示可以续押
+        bool isRepeatData = false;
+        for (int i = 1; i < words.Length; i += 2)
+        {
+            
+            if (string.Compare(words[i], "repeats") == 0)
+            {
+                isRepeatData = true;
+                continue;
+            }
+            string field = words[i];
+            int betVal;
+            if (int.TryParse(words[i + 1], out betVal))
+            {
+                if (isRepeatData)   // 准备重复押的分数
+                {
+                    // 检查分机限注
+                    if (betVal > Utils.GetMaxBet(field))
+                    {
+                        ret = 0;
+                        break;
+                    }
+                    // 检查全台限注
+                    int allMaxBet = Utils.GetAllMaxBet(field);
+                    int alreadyBet;
+                    if (clientBets.TryGetValue(field, out alreadyBet))
+                    {
+                        if ((alreadyBet + betVal) > allMaxBet)
+                        {
+                            ret = 0;
+                            break;
+                        }
+                        else
+                        {
+                            clientBets[field] += betVal;
+                        }
+                    }
+                    else
+                    {
+                        if (betVal > allMaxBet)
+                        {
+                            ret = 0;
+                            break;
+                        }
+                        else
+                        {
+                            clientBets.Add(field, betVal);
+                        }
+                    }
+                }
+            }
+        }
+        if (isClient)
+        {
+            string msg = string.Format("{0}:{1}", NetInstr.CheckRepeatAble, ret);
+            host.SendToPeer(msg, connectionId);
+        }
+        else
+        {
+            if (ret == 1)
+                ui.RepeatEventCB();
+        }
+    }
 }
