@@ -1266,7 +1266,8 @@ public class MainUILogic : MonoBehaviour
 		timerCountdown.Start();
 		AudioController.Play("makeyourbets");
 		GameEventManager.OnPrompt(PromptId.PleaseBet, -1);
-		AudioController.PlayMusic("bgMusic");
+        if (GameData.GetInstance().deviceIndex == 1)
+		    AudioController.PlayMusic("bgMusic");
 	}
 
 	private void UpdateProgress(float value)
@@ -1291,7 +1292,8 @@ public class MainUILogic : MonoBehaviour
 		Debug.Log("ui CountdownComplete");
 		GameEventManager.OnEndCountdown();
 		AudioController.Play("nomorebets");
-		AudioController.StopMusic(0.5f);
+        if (GameData.GetInstance().deviceIndex == 1)
+		    AudioController.StopMusic(0.5f);
 		GameEventManager.OnPrompt(PromptId.NoMoreBet, -1);
 	}
 

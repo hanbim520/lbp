@@ -1062,6 +1062,12 @@ public class BackendLogic : MonoBehaviour
             GameData.GetInstance().max2Value = page1Val[16];
 			GameData.GetInstance().lotteryLv = page1Val[17];
 			GameData.GetInstance().lotteryCondition = page1Val[18];
+            if (page1Val[19] != GameData.GetInstance().lotteryBase)
+            {
+                GameData.GetInstance().lotteryDigit = page1Val[19];
+                CryptoPrefs.SetInt("lotteryDigit", page1Val[19]);
+                CryptoPrefs.Save();
+            }
 			GameData.GetInstance().lotteryBase = page1Val[19];
 			GameData.GetInstance().lotteryRate = page1Val[20];
 			GameData.GetInstance().lotteryAllocation = page1Val[21];

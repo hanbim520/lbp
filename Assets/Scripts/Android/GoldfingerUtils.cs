@@ -427,8 +427,11 @@ public class GoldfingerUtils : MonoBehaviour
 	}
 
 	// 吹风
-	public void BlowBall(int blowTime)
+//    public void BlowBall(int blowTime)
+	public IEnumerator BlowBall(int blowTime)
 	{
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0, 6));
+
 		iBlowOrDoor = 3;
 		iHight = blowTime >> 8 & 0xff;
 		iLow = blowTime & 0xff;

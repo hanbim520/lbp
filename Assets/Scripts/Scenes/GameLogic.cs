@@ -600,7 +600,7 @@ public class GameLogic : MonoBehaviour
 //			goldfingerUtils.OpenGate();
             Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
             int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
-            goldfingerUtils.BlowBall(time);
+            StartCoroutine(goldfingerUtils.BlowBall(time));
 		}
 	}
 	
@@ -617,7 +617,7 @@ public class GameLogic : MonoBehaviour
 		if (Application.platform == RuntimePlatform.LinuxPlayer)
 			hidUtils.PayCoin(coinNum);
 		else if (Application.platform == RuntimePlatform.Android)
-			goldfingerUtils.PayCoin(coinNum);
+            goldfingerUtils.PayCoin(coinNum);
 	}
 	
 	private void SendCheckInfo()
@@ -633,6 +633,7 @@ public class GameLogic : MonoBehaviour
 		if (Application.platform == RuntimePlatform.LinuxPlayer)
 			hidUtils.BlowBall(time);
 		else if (Application.platform == RuntimePlatform.Android)
-			goldfingerUtils.BlowBall(time);
+//            goldfingerUtils.BlowBall(time);
+			StartCoroutine(goldfingerUtils.BlowBall(time));
 	}
 }
