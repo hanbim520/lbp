@@ -63,6 +63,7 @@ public class GameLogic : MonoBehaviour
 		set { isLock = value; }
 	}
     public bool bCanBet = true;
+    public bool isPayingCoin = false;
 
 
     protected int _totalCredits = 0;
@@ -248,9 +249,11 @@ public class GameLogic : MonoBehaviour
 	// 退币
 	protected void PayCoin()
 	{
-		if (totalCredits <= 0)
+		if (totalCredits <= 0 ||
+            isPayingCoin)
 			return;
 
+        isPayingCoin = true;
 		if (GameData.GetInstance().IsCardMode == CardMode.YES)
 		{
 			int couponsKeout = GameData.GetInstance().couponsKeoutRatio * rememberCredits;
@@ -307,11 +310,13 @@ public class GameLogic : MonoBehaviour
 			}
 		}
         bCanBet = true;
+        isPayingCoin = false;
 	}
 	
 	protected void PayCoinCallback(int count)
 	{
         bCanBet = false;
+        isPayingCoin = true;
 		if (timerPayCoin != null)
 		{
 			timerPayCoin.Restart();
@@ -330,6 +335,7 @@ public class GameLogic : MonoBehaviour
                 timerPayCoin = null;
             }
             bCanBet = true;
+            isPayingCoin = false;
 		}
         // 剩余分数
         totalCredits -= deltaNum;
@@ -349,7 +355,8 @@ public class GameLogic : MonoBehaviour
     protected void Keout()
 	{
 		ui.ActiveDlgCard(false);
-		if (totalCredits <= 0)
+		if (totalCredits <= 0 ||
+            isPayingCoin)
 			return;
 
 		if (GameData.GetInstance().IsCardMode == CardMode.YES)
@@ -379,12 +386,18 @@ public class GameLogic : MonoBehaviour
 
 	protected void KeyinOnce()
 	{
+        if (isPayingCoin)
+            return;
+
 		int betVal = GameData.GetInstance().betChipValues[ui.CurChipIdx];
 		Keyin(betVal);
 	}
 
 	protected void KeyinHold()
 	{
+        if (isPayingCoin)
+            return;
+
 		int betVal = GameData.GetInstance().betChipValues[ui.CurChipIdx] * 10;
 		Keyin(betVal);
 	}
@@ -633,7 +646,6 @@ public class GameLogic : MonoBehaviour
 		if (Application.platform == RuntimePlatform.LinuxPlayer)
 			hidUtils.BlowBall(time);
 		else if (Application.platform == RuntimePlatform.Android)
-//            goldfingerUtils.BlowBall(time);
 			StartCoroutine(goldfingerUtils.BlowBall(time));
 	}
 }

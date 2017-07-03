@@ -142,6 +142,10 @@ public class MainUILogic : MonoBehaviour
 
 	public void ChangeLanguage(Transform hitObject)
 	{
+        if (gameLogic.isPayingCoin ||
+            IsDlgActived())
+            return;
+
 		if (GameData.GetInstance().language == 0)		// EN
 		{
 			GameData.GetInstance().language = 1;
@@ -187,7 +191,9 @@ public class MainUILogic : MonoBehaviour
 
 	public void ChangeDisplay()
 	{
-		if (gameLogic.LogicPhase >= GamePhase.Run)
+		if (gameLogic.LogicPhase >= GamePhase.Run ||
+            gameLogic.isPayingCoin ||
+            IsDlgActived())
 			return;
 
 		if (GameData.GetInstance().displayType == 0)	// classic
@@ -415,6 +421,10 @@ public class MainUILogic : MonoBehaviour
 
 	public void ClearEvent(Transform hitObject)
 	{
+        if (gameLogic.isPayingCoin ||
+            IsDlgActived())
+            return;
+
 		if (eraser.activeSelf)
 		{
 			eraser.SetActive(false);
@@ -435,6 +445,10 @@ public class MainUILogic : MonoBehaviour
 	// 清除桌面筹码 并返还给玩家
 	public void ClearAllEvent(Transform hitObject)
 	{
+        if (gameLogic.isPayingCoin ||
+            IsDlgActived())
+            return;
+
 		if (eraser.activeSelf)
 		{
 			eraser.SetActive(false);
@@ -524,7 +538,7 @@ public class MainUILogic : MonoBehaviour
 	public void RepeatEvent()
 	{
         int count = GameData.GetInstance().lastBets.Count;
-		if (count == 0 || gameLogic.LogicPhase != GamePhase.Countdown)
+		if (gameLogic.isPayingCoin || IsDlgActived() || count == 0 || gameLogic.LogicPhase != GamePhase.Countdown)
             return;
 
 		int lastBetCredit = GameData.GetInstance().lastBetCredit;
@@ -691,11 +705,14 @@ public class MainUILogic : MonoBehaviour
 	// 退币按钮
 	public void BackTicketEvent(Transform hitObject)
 	{
-		if (gameLogic.betFields.Count > 0 ||
-            gameLogic.totalCredits == 0)
+        if (gameLogic.isPayingCoin ||
+            IsDlgActived())
+            return;
+
+		if (gameLogic.totalCredits == 0)
 			return;
 
-		ActiveDlgYesNO(true);
+        ActiveDlgYesNO(true);
 	}
 
 	// 优惠卡按钮
@@ -870,44 +887,22 @@ public class MainUILogic : MonoBehaviour
 
 	public void FieldDownEvent(Transform hitObject)
 	{
-		if (eraser.activeSelf || curChipIdx == -1 || 
+		if (IsDlgActived() || eraser.activeSelf || curChipIdx == -1 || 
 		    gameLogic.LogicPhase != GamePhase.Countdown ||
             !gameLogic.bCanBet)
 			return;
-
-//        if (string.Equals(hitObject.name.Substring(0, 1), "e"))
-//        {
-//            lightEffects.Add(hitObject);
-//        }
-//        else
-//        {
-//            Transform effectRoot = hitObject.parent.parent.FindChild("Choose Effect");
-//            if (effectRoot != null)
-//            {
-//                char[] separater = {'-'};
-//                string[] names = hitObject.name.Split(separater);
-//                foreach (string str in names)
-//                {
-//                    Transform effect = effectRoot.FindChild(str);
-//                    if (effect != null)
-//                    {
-//                        lightEffects.Add(effect);
-//                    }
-//                }
-//            }
-//        }
-//        foreach (Transform t in lightEffects)
-//        {
-//            Color c = t.GetComponent<Image>().color;
-//            c.a = 255;
-//            t.GetComponent<Image>().color = c;
-//        }
     }
 
 	public void FieldClickEvent(Transform hitObject)
 	{
 		try
 		{
+            if (gameLogic.isPayingCoin)
+                return;
+
+            if (IsDlgActived())
+                return;
+
 			if (eraser.activeSelf)
 			{
 				Destroy(fieldChipsRoot.transform.FindChild(hitObject.name).gameObject);
@@ -923,15 +918,6 @@ public class MainUILogic : MonoBehaviour
 				ClearSingleSign(fieldName);
 				return;
 			}
-
-			// Clear light effects
-//			foreach (Transform t in lightEffects)
-//			{
-//				Color c = t.GetComponent<Image>().color;
-//				c.a = 0;
-//				t.GetComponent<Image>().color = c;
-//			}
-//			lightEffects.Clear();
 			
 			if (curChipIdx == -1 || 
 			    gameLogic.LogicPhase != GamePhase.Countdown ||
@@ -1126,6 +1112,10 @@ public class MainUILogic : MonoBehaviour
 
 	public void ChipButtonEvent(Transform hitObject)
 	{
+        if (IsDlgActived() ||
+            gameLogic.isPayingCoin)
+            return;
+
 		if (eraser.activeSelf)
 		{
 			eraser.SetActive(false);
@@ -1290,6 +1280,11 @@ public class MainUILogic : MonoBehaviour
 	private void CountdownComplete()
 	{
 		Debug.Log("ui CountdownComplete");
+        if (eraser.activeSelf)
+        {
+            eraser.SetActive(false);
+            mouseIcon.gameObject.SetActive(true);
+        }
 		GameEventManager.OnEndCountdown();
 		AudioController.Play("nomorebets");
         if (GameData.GetInstance().deviceIndex == 1)
@@ -1586,6 +1581,9 @@ public class MainUILogic : MonoBehaviour
 
 	public void ActiveDlgCard(bool active)
 	{
+        if (gameLogic.isPayingCoin)
+            return;
+
 		if (active)
 		{
 			if (!dlgCard.activeSelf)

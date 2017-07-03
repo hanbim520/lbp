@@ -70,6 +70,11 @@ public class ServerLogic : GameLogic
 	protected override void Update()
     {
 		base.Update();
+        if (Input.GetKeyUp(KeyCode.Tab))
+        {
+            GameData.GetInstance().RemoveStatisticBalls();
+            StatisticBall(-1);
+        }
 #if UNITY_EDITOR
 		if (GameData.debug)
 		{
@@ -250,7 +255,7 @@ public class ServerLogic : GameLogic
 		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
 //		int[] t = new int[]{1200, 1500, 2000, 2500, 3000};
 //		int time = t[Utils.GetRandom(0, 5)];
-		GameEventManager.OnDebugLog(1, string.Format("吹风：{0}毫秒", time));
+//		GameEventManager.OnDebugLog(1, string.Format("吹风：{0}毫秒", time));
         if (!GameData.debug)
 		    base.BlowBall(time);
 		else
@@ -787,16 +792,24 @@ public class ServerLogic : GameLogic
 
 	private void StatisticBall(int ballValue)
 	{
-		GameData.GetInstance().StatisticBall(ballValue);
+        if (ballValue >= 0)
+		    GameData.GetInstance().StatisticBall(ballValue);
+
 		string log = "";
+        int sum = 0;
+        for (int i = 0; i < GameData.GetInstance().maxNumberOfFields; ++i)
+        {
+            sum += PlayerPrefs.GetInt("ballValue" + i, 0);
+        }
 		for (int i = 0; i < GameData.GetInstance().maxNumberOfFields; ++i)
 		{
+            int count = PlayerPrefs.GetInt("ballValue" + i, 0);
+            log += string.Format("{0}:{1:0.0}%, ", i, sum > 0 ? (float)count / sum * 100 : 0f);
 			if (i % 10 == 0 && i > 0)
-				log += string.Format("{0}:{1},\n", i, PlayerPrefs.GetInt("ballValue" + i, 0));
-			else
-				log += string.Format("{0}:{1}, ", i, PlayerPrefs.GetInt("ballValue" + i, 0));
+                log += "\n";
 		}
-		GameEventManager.OnDebugLog(2, log);
+//        GameEventManager.OnDebugLog(1, string.Format("Total: {0}", sum));
+//		GameEventManager.OnDebugLog(2, log);
 	}
 
 	protected int Bet(string field, int betVal)

@@ -53,11 +53,16 @@ public class GoldfingerUtils : MonoBehaviour
 	private int realtimeBallVal = 0;		// 大于0表示孔里有球
 	private bool bCheckBallFall = false;	// 检查轨道上是否有球
 
+    private const float kTRevCoinErrTime  = 1.0f;
+    private float revCoinErrElapsed = 0;
 	private float kHoldKeyinDur = 0.4f;		// 长按上分时间
 	private float holdKeyinDelta= 0.0f;		// 长按上分键计时
 	private bool bHoldKeyin		= false;	// 长按上分键成立
 
 	bool isConntected = false;
+
+    private int curDelayIdx         = -1;
+    private List<float> delayBlowTimes  = new List<float>();
 
 	void Start()
 	{
@@ -236,6 +241,9 @@ public class GoldfingerUtils : MonoBehaviour
 					int idx = data[6];
 					if (idx > 0)
 					{
+                        if (idx == 39)
+                            idx = 1;
+                        GameEventManager.OnDebugLog(0, string.Format("K1 index: {0}", idx));
 						PrintData(ref data);
 						idx -= 1;
 						phase = kPhaseDetectBallValue;
@@ -250,6 +258,7 @@ public class GoldfingerUtils : MonoBehaviour
 							iFirstBallVal = GameData.GetInstance().ballValue38[idx];
 						else if (GameData.GetInstance().maxNumberOfFields == 37)
 							iFirstBallVal = GameData.GetInstance().ballValue37[idx];
+                        GameEventManager.OnDebugLog(0, string.Format("K1 {0}: {1}", idx, iFirstBallVal));
 					}
 				}
                 // 二次认球
@@ -279,33 +288,22 @@ public class GoldfingerUtils : MonoBehaviour
 							}
 							else
 							{
+                                GameEventManager.OnDebugLog(1, string.Format("K2 {0}: {1}", idx, secondBallVal));
 								GameEventManager.OnBreakdownTip(BreakdownType.RecognizeBall);
 							}
 						}
 					}
 				}
-//				if (data[10] != 0)	// 投币
-//				{
-//					GameEventManager.OnReceiveCoin(data[10]);
-//				}
-//				if (data[11] != 0)	// 退币
-//				{
-//					GameEventManager.OnPayCoinCallback(data[11]);
-//				}
 				if ((data[12] & 0x01) == 0x01)	// 物理退币按键按下
 				{
 					GameEventManager.OnPayCoin();
 				}
-//				if (!bOpenKey && data[13] == 0x20)			// 功能菜单(原上分)
 				if ((data[13] & 0x20) == 0x20)						// 物理键上分(17A)
 				{
 					bOpenKey = true;
-					// 弹出功能菜单
-//					GameEventManager.OnOpenKey();
 					if (!bHoldKeyin)
 					{
 						holdKeyinDelta += Time.deltaTime;
-//						DebugConsole.Log(holdKeyinDelta.ToString());
 						if (holdKeyinDelta > kHoldKeyinDur)
 						{
 							bHoldKeyin = true;
@@ -368,7 +366,12 @@ public class GoldfingerUtils : MonoBehaviour
                 }
                 else
                 {
-                    GameEventManager.OnDetectRevCoinError();
+                    revCoinErrElapsed += Time.deltaTime;
+                    if (revCoinErrElapsed > kTRevCoinErrTime)
+                    {
+                        revCoinErrElapsed = 0;
+                        GameEventManager.OnDetectRevCoinError();
+                    }
                 }
                 iLastRevCoin = totalRevCoin;
 
@@ -427,10 +430,9 @@ public class GoldfingerUtils : MonoBehaviour
 	}
 
 	// 吹风
-//    public void BlowBall(int blowTime)
 	public IEnumerator BlowBall(int blowTime)
 	{
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0, 6));
+        yield return new WaitForSeconds(UnityEngine.Random.Range(0.0f, 6.0f));
 
 		iBlowOrDoor = 3;
 		iHight = blowTime >> 8 & 0xff;
@@ -438,9 +440,45 @@ public class GoldfingerUtils : MonoBehaviour
 		Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second);
 		// 控制吹风在轮盘转到第几个格子后启动
 		iCellNum = Utils.GetRandom(1, GameData.GetInstance().maxNumberOfFields);
-
-//		DebugConsole.Log("BlowBall: " + blowTime);
 	}
+
+    // 吹风
+//    public IEnumerator BlowBall(int blowTime)
+//    {
+//        float maxDelay = 5.8f;
+//        if (curDelayIdx == -1 ||
+//            curDelayIdx > delayBlowTimes.Count - 1)
+//        {
+//            int maxNumberOfFields = GameData.GetInstance().maxNumberOfFields;
+//            float delta = maxDelay / maxNumberOfFields;
+//            
+//            List<int> tmp = new List<int>();
+//            for (int i = 0; i < maxNumberOfFields; ++i)
+//                tmp.Add(i);
+//            
+//            delayBlowTimes.Clear();
+//            Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second);
+//            for (int i = 0; i < maxNumberOfFields - 1; ++i)
+//            {
+//                int index = UnityEngine.Random.Range(0, tmp.Count);
+//                delayBlowTimes.Add(tmp[index] * delta);
+//                tmp.RemoveAt(index);
+//            }
+//            delayBlowTimes.Add(tmp[0] * delta);
+//            
+//            curDelayIdx = 0;
+//        }
+//        float delayTime = delayBlowTimes[curDelayIdx++];
+//        GameEventManager.OnDebugLog(0, string.Format("Delay: {0:0.00}", delayTime));
+//        yield return new WaitForSeconds(delayTime);
+//        
+//        iBlowOrDoor = 3;
+//        iHight = blowTime >> 8 & 0xff;
+//        iLow = blowTime & 0xff;
+//        Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second);
+//        // 控制吹风在轮盘转到第几个格子后启动
+//        iCellNum = Utils.GetRandom(1, GameData.GetInstance().maxNumberOfFields);
+//    }
 
 	public void PayCoin(int coinNum)
 	{
@@ -509,7 +547,7 @@ public class GoldfingerUtils : MonoBehaviour
 //		if (!bEvent)
 //		DebugConsole.Log(log);
 //		else
-//		GameEventManager.OnDebugLog(0, log);
+//		GameEventManager.OnDebugLog(2, log);
 	}
 
     public void StopRevCoin()

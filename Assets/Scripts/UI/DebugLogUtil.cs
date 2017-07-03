@@ -21,12 +21,14 @@ public class DebugLogUtil : MonoBehaviour
 		{
 			bool visible = debuglog[2].gameObject.activeSelf;
 			debuglog[2].gameObject.SetActive(!visible);
+            visible = debuglog[1].gameObject.activeSelf;
+            debuglog[1].gameObject.SetActive(!visible);
 		}
 	}
 
 	void DebugLog(int eventId, string log)
 	{
-		if (eventId == 0)
+//		if (eventId == 0)
 		debuglog[eventId].text = log;
 	}
 }

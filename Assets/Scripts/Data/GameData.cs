@@ -1008,6 +1008,15 @@ public class GameData
 		PlayerPrefs.Save();
 	}
 
+    // 删除各个号码出现的次数
+    public void RemoveStatisticBalls()
+    {
+        int count = maxNumberOfFields;
+        for (int i = 0; i < maxNumberOfFields; ++i)
+            PlayerPrefs.SetInt("ballValue" + i, 0);
+        PlayerPrefs.Save();
+    }
+
 	public void RemoveLastBet()
 	{
 		int count = PlayerPrefs.GetInt("lastBet_count");
