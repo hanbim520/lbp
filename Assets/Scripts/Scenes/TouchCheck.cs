@@ -157,7 +157,7 @@ public class TouchCheck : MonoBehaviour
 
 	private void StartScene()
 	{
-		Application.LoadLevel(Scenes.StartInfo);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.StartInfo);
 	}
 
 	private void CheckAgain()

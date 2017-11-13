@@ -56,15 +56,16 @@ public class RecordCircle : MonoBehaviour
 		triangles = new Image[fieldsCount];
 		for (int i = 0; i < fieldsCount; ++i)
 		{
-			triangles[i] = transform.FindChild("T" + i).GetComponent<Image>();
+			triangles[i] = transform.Find("T" + i).GetComponent<Image>();
 		}
-		bgBall = transform.FindChild("Bg").GetComponent<Image>();
-		txtNum = transform.FindChild("Text").GetComponent<Text>();
+		bgBall = transform.Find("Bg").GetComponent<Image>();
+		txtNum = transform.Find("Text").GetComponent<Text>();
 	}
 
 	private void HandleRefreshRecord(int result = -1)
 	{
-        StartCoroutine(RefreshView());
+		if (gameObject.activeSelf)
+        	StartCoroutine(RefreshView());
 	}
 
     private IEnumerator RefreshView()

@@ -44,7 +44,7 @@ public class RebootSystem : MonoBehaviour
         // TODO: Save all settings
         // TODO: Reboot system
 		GameData.GetInstance().NextLevelName = Scenes.StartInfo;
-        Application.LoadLevel(Scenes.Loading);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.Loading);
     }
 
     private void UpdateMessage(int countdown)

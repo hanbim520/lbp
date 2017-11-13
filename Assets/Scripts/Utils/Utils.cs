@@ -341,6 +341,7 @@ public static class Utils
 		else if (odds == 2)
 			allMaxBet = GameData.GetInstance().allMax2Val;
 		return allMaxBet;
+//		return int.MaxValue;
 	}
 
 	public static string GetSystemTime()
@@ -376,7 +377,7 @@ public static class Utils
 
 #if UNITY_ANDROID
 		int seed = (int)System.DateTime.Now.ToUniversalTime().ToBinary();
-		UnityEngine.Random.seed = seed;
+		UnityEngine.Random.InitState(seed);
 #endif
 	}
 
@@ -387,7 +388,7 @@ public static class Utils
 		#endif
 
 #if UNITY_ANDROID
-        UnityEngine.Random.seed = seed;
+		UnityEngine.Random.InitState(seed);
 #endif
     }
 

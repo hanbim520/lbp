@@ -48,7 +48,7 @@ public class SetEllipseBG : MonoBehaviour
 		{
 			string name = i != 37 ? string.Format("e{0}", i) : "e00";
 //			print(name);
-			objChooseEffect.transform.FindChild(name).GetComponent<ButtonEvent>().receiver = uilogic;
+			objChooseEffect.transform.Find(name).GetComponent<ButtonEvent>().receiver = uilogic;
 		}
 	}
 }

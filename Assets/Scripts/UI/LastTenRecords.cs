@@ -49,7 +49,7 @@ public class LastTenRecords : MonoBehaviour
 			if (GameData.GetInstance().colorTable[r[i]] == ResultType.Red)
 			{
 				records[j].transform.GetComponent<Image>().overrideSprite = imgs[0];
-				records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
+				records[j].transform.Find("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
                 if (j == 0)
 					records[j].transform.localPosition = new Vector3(pos.x, 365.4f, 0);
@@ -59,7 +59,7 @@ public class LastTenRecords : MonoBehaviour
 			else if (GameData.GetInstance().colorTable[r[i]] == ResultType.Black)
 			{
 				records[j].transform.GetComponent<Image>().overrideSprite = imgs[1];
-				records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
+				records[j].transform.Find("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
                 if (j == 0)
 					records[j].transform.localPosition = new Vector3(pos.x, 365.4f, 0);
@@ -70,9 +70,9 @@ public class LastTenRecords : MonoBehaviour
 			{
 				records[j].transform.GetComponent<Image>().overrideSprite = imgs[2];
 				if (r[i] == 0)
-					records[j].transform.FindChild("Text").GetComponent<Text>().text = "0";
+					records[j].transform.Find("Text").GetComponent<Text>().text = "0";
 				else if (r[i] == 37)
-					records[j].transform.FindChild("Text").GetComponent<Text>().text = "00";
+					records[j].transform.Find("Text").GetComponent<Text>().text = "00";
 				Vector3 pos = records[j].transform.localPosition;
                 if (j == 0)
 					records[j].transform.localPosition = new Vector3(pos.x, 365.4f, 0);

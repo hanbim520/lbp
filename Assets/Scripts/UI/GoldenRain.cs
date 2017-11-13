@@ -14,7 +14,7 @@ public class GoldenRain : MonoBehaviour
 		for (int i = 0; i < transform.childCount; ++i)
 		{
 			Transform t = transform.GetChild(i);
-            Random.seed = i;
+			Random.InitState(i);
 			iTween.MoveTo(t.gameObject, iTween.Hash("y", -460, "islocal", true, "time", Random.Range(2.0f, 4.0f), "easetype", iTween.EaseType.easeInCubic,
 			                                "oncomplete", "OnComplete", "oncompletetarget", gameObject, "oncompleteparams", t.gameObject));
 		}

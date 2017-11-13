@@ -129,7 +129,7 @@ public class MainUILogic : MonoBehaviour
         lblBet = GameObject.Find("Canvas/Credit/Bet").GetComponent<Text>();
 		lblRemember = GameObject.Find("Canvas/Credit/Remember").GetComponent<Text>();
 
-		countdown.transform.FindChild("Text").GetComponent<Text>().text = GameData.GetInstance().betTimeLimit.ToString();
+		countdown.transform.Find("Text").GetComponent<Text>().text = GameData.GetInstance().betTimeLimit.ToString();
 		GameObject demoGo = GameObject.Find("Canvas/Demo");
 		if (demoGo != null)
 		{
@@ -259,7 +259,7 @@ public class MainUILogic : MonoBehaviour
 					foreach (KeyValuePair<string, int> item in betFields)
 					{
 						int count = GameData.GetInstance().betChipValues.Count;
-						Transform target = root.transform.FindChild(item.Key);
+						Transform target = root.transform.Find(item.Key);
 						if (target != null)
 						{
 							int chipIdx = 0;
@@ -315,7 +315,7 @@ public class MainUILogic : MonoBehaviour
 						name.Add(item.Key);
 
 						// 设置小筹码
-						Transform tmpTarget = vfRoot.transform.FindChild(item.Key);
+						Transform tmpTarget = vfRoot.transform.Find(item.Key);
 						if (tmpTarget != null)
 							target.Add(tmpTarget);
 
@@ -325,7 +325,7 @@ public class MainUILogic : MonoBehaviour
 							prefabPath.Add("BC" + chipIdx.ToString());
 							string eName = "e" + item.Key;
 							name.Add(eName);
-							tmpTarget = ceRoot.transform.FindChild(eName);
+							tmpTarget = ceRoot.transform.Find(eName);
 							if (tmpTarget != null)
 								target.Add(tmpTarget);
 						}
@@ -530,7 +530,7 @@ public class MainUILogic : MonoBehaviour
     {
 //        if (string.Equals(fieldName.Substring(0, 1), "e"))
 //            return;
-        Transform t = fieldChipsRoot.transform.FindChild(fieldName);
+        Transform t = fieldChipsRoot.transform.Find(fieldName);
         if (t != null)
             winChips.Add(t);
     }
@@ -590,7 +590,7 @@ public class MainUILogic : MonoBehaviour
 						continue;
 					
 					ShowSingleSign(info.Key);
-					Transform target = root.transform.FindChild(info.Key);
+					Transform target = root.transform.Find(info.Key);
 					if (target != null)
 					{
 						int chipIdx = 0;
@@ -651,12 +651,12 @@ public class MainUILogic : MonoBehaviour
 					{
 						prefabPath = "BC";
 						name = "e" + name;
-						target1 = ceRoot.transform.FindChild(name);
-						target2 = vfRoot.transform.FindChild(info.Key);
+						target1 = ceRoot.transform.Find(name);
+						target2 = vfRoot.transform.Find(info.Key);
 					}
 					else
 					{
-						target1 = vfRoot.transform.FindChild(info.Key);
+						target1 = vfRoot.transform.Find(info.Key);
 					}
 					
 					int chipIdx = 0;
@@ -858,7 +858,7 @@ public class MainUILogic : MonoBehaviour
             }
             else
             {
-                Transform effectRoot = hitObject.parent.parent.FindChild("Choose Effect");
+                Transform effectRoot = hitObject.parent.parent.Find("Choose Effect");
 				if (effectRoot != null)
 				{
 					char[] separater = {'-'};
@@ -867,7 +867,7 @@ public class MainUILogic : MonoBehaviour
 					List<Transform> effects = new List<Transform>();
 					foreach (string str in names)
 					{
-						Transform effect = effectRoot.FindChild(str);
+						Transform effect = effectRoot.Find(str);
 						if (effect != null)
 						{
 							Color c = effect.GetComponent<Image>().color;
@@ -905,7 +905,7 @@ public class MainUILogic : MonoBehaviour
 
 			if (eraser.activeSelf)
 			{
-				Destroy(fieldChipsRoot.transform.FindChild(hitObject.name).gameObject);
+				Destroy(fieldChipsRoot.transform.Find(hitObject.name).gameObject);
 				GameEventManager.OnClear(hitObject.name);
 				eraser.SetActive(false);
 				mouseIcon.gameObject.SetActive(true);
@@ -974,7 +974,7 @@ public class MainUILogic : MonoBehaviour
 
 			if (isEllipse)
 			{
-				Transform targetObject = hitObject.parent.parent.FindChild("Valid Fields/" + strField);
+				Transform targetObject = hitObject.parent.parent.Find("Valid Fields/" + strField);
 				if (targetObject == null)
 					return;
 				prefabPath = "SC";
@@ -1061,7 +1061,7 @@ public class MainUILogic : MonoBehaviour
 
 			if (isEllipse)
 			{
-				Transform targetObject = hitObject.parent.parent.FindChild("Valid Fields/" + strField);
+				Transform targetObject = hitObject.parent.parent.Find("Valid Fields/" + strField);
 				if (targetObject == null)
 					return;
 				prefabPath = "SC";
@@ -1093,8 +1093,8 @@ public class MainUILogic : MonoBehaviour
 	{
 		char[] separator = {':'};
 		string[] str = param.Split(separator);
-		Transform old = fieldChipsRoot.transform.FindChild(str[0]);
-		Transform newOne = fieldChipsRoot.transform.FindChild(str[0] + " temp");
+		Transform old = fieldChipsRoot.transform.Find(str[0]);
+		Transform newOne = fieldChipsRoot.transform.Find(str[0] + " temp");
 
 		int betVal;
 		if (old != null)
@@ -1170,7 +1170,7 @@ public class MainUILogic : MonoBehaviour
 			}
 			else if (Input.GetKeyDown(KeyCode.R))
 			{
-				GameEventManager.OnReceiveCoin(1);
+				GameEventManager.OnReceiveCoin(1000);
 			}
 		}
 	}
@@ -1263,18 +1263,21 @@ public class MainUILogic : MonoBehaviour
 	private void UpdateProgress(float value)
 	{
 		if (!gameLogic.IsPause())
-			countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = value;
-		if (!gameLogic.IsPause() &&
-		    gameLogic.goldfingerUtils.GetRealtimeBallVal() > 0)
+			countdown.transform.Find("progress").GetComponent<Image>().fillAmount = value;
+		if (Application.platform != RuntimePlatform.OSXEditor)
 		{
-			GameEventManager.OnBreakdownTip(BreakdownType.BallHaventFall);
+			if (!gameLogic.IsPause() &&
+				gameLogic.goldfingerUtils.GetRealtimeBallVal() > 0)
+			{
+				GameEventManager.OnBreakdownTip(BreakdownType.BallHaventFall);
+			}
 		}
 	}
 
 	private void CountdownTick()
 	{
 		--timeLimit;
-		countdown.transform.FindChild("Text").GetComponent<Text>().text = timeLimit.ToString();
+		countdown.transform.Find("Text").GetComponent<Text>().text = timeLimit.ToString();
 	}
 
 	private void CountdownComplete()
@@ -1294,8 +1297,8 @@ public class MainUILogic : MonoBehaviour
 
 	public void ResetCountdown()
 	{
-		countdown.transform.FindChild("Text").GetComponent<Text>().text = GameData.GetInstance().betTimeLimit.ToString();
-		countdown.transform.FindChild("progress").GetComponent<Image>().fillAmount = 1;
+		countdown.transform.Find("Text").GetComponent<Text>().text = GameData.GetInstance().betTimeLimit.ToString();
+		countdown.transform.Find("progress").GetComponent<Image>().fillAmount = 1;
 	}
 
 	// 生成中彩票的金币雨
@@ -1393,8 +1396,8 @@ public class MainUILogic : MonoBehaviour
         else
             strResult = "00";
 
-		Transform target = displayClassic.activeSelf ? displayClassic.transform.FindChild("Choose Effect/" + strResult) : 
-						   displayEllipse.transform.FindChild("Choose Effect/" + "e" + strResult);
+		Transform target = displayClassic.activeSelf ? displayClassic.transform.Find("Choose Effect/" + strResult) : 
+						   displayEllipse.transform.Find("Choose Effect/" + "e" + strResult);
 		if (target != null)
 		{
 			flashObject = target;
@@ -1436,8 +1439,8 @@ public class MainUILogic : MonoBehaviour
 			
 			foreach (string name in flashAreas)
 			{
-				Transform t = displayClassic.activeSelf ? displayClassic.transform.FindChild("Choose Effect/" + name) : 
-							  displayEllipse.transform.FindChild("Choose Effect/" + name);
+				Transform t = displayClassic.activeSelf ? displayClassic.transform.Find("Choose Effect/" + name) : 
+							  displayEllipse.transform.Find("Choose Effect/" + name);
 				if (t != null)
 				{
 					FlashImage fo = t.gameObject.AddComponent<FlashImage>();
@@ -1450,7 +1453,7 @@ public class MainUILogic : MonoBehaviour
 		else if (displayEllipse.activeSelf)
 		{
 			// 闪烁小区域里面的0/00
-			Transform t = displayEllipse.transform.FindChild("Choose Effect/" + strResult); 
+			Transform t = displayEllipse.transform.Find("Choose Effect/" + strResult); 
 			if (t != null)
 			{
 				FlashImage fo = t.gameObject.AddComponent<FlashImage>();
@@ -1485,7 +1488,7 @@ public class MainUILogic : MonoBehaviour
         Transform transDisplay = displayClassic.activeSelf ? displayClassic.transform : displayEllipse.transform;
         if (transDisplay.gameObject.activeSelf)
         {
-            Transform root = transDisplay.transform.FindChild("Choose Effect");
+            Transform root = transDisplay.transform.Find("Choose Effect");
             FlashImage[] imgs = root.GetComponentsInChildren<FlashImage>();
             foreach (FlashImage img in imgs)
             {
@@ -1557,7 +1560,7 @@ public class MainUILogic : MonoBehaviour
 		if (dlgWarning != null && !dlgWarning.activeSelf)
 		{
 			dlgWarning.SetActive(true);
-			dlgWarning.transform.FindChild("Text").GetComponent<Text>().text = str;
+			dlgWarning.transform.Find("Text").GetComponent<Text>().text = str;
 			if (autoDisappear)
 			{
                 timerHideWarning = new Timer(duration, 0);
@@ -1636,7 +1639,7 @@ public class MainUILogic : MonoBehaviour
     public void ActiveBackendTip(string tip)
     {
         backendTip.SetActive(true);
-        backendTip.transform.FindChild("Text").GetComponent<Text>().text = tip;
+        backendTip.transform.Find("Text").GetComponent<Text>().text = tip;
     }
 
 	private void SyncUI()
@@ -1671,7 +1674,7 @@ public class MainUILogic : MonoBehaviour
 		GameObject root = GameObject.Find("Canvas/" + path);
 		if (root != null)
 		{
-			Transform child = root.transform.FindChild(fieldName);
+			Transform child = root.transform.Find(fieldName);
 			Image img = child.GetComponent<Image>();
 			Color c = img.color;
 			c.a = 0;
@@ -1689,7 +1692,7 @@ public class MainUILogic : MonoBehaviour
 		GameObject root = GameObject.Find("Canvas/" + path);
 		if (root != null)
 		{
-			Transform child = root.transform.FindChild(fieldName);
+			Transform child = root.transform.Find(fieldName);
 			Image img = child.GetComponent<Image>();
 			Color c = img.color;
 			c.a = 1;

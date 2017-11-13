@@ -72,17 +72,17 @@ public class StartInfo : MonoBehaviour
 			//			TextDB.LoadFile();
 			
 			GameData.GetInstance().NextLevelName = Scenes.Main;
-			Application.LoadLevel(Scenes.Loading);
+			UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.Loading);
 		}
 		else if (GameData.GetInstance().deviceIndex >= GameData.GetInstance().monitorDeviceIndex)
 		{
 			GameData.GetInstance().NextLevelName = Scenes.TopStatistics;
-			Application.LoadLevel(Scenes.Loading);
+			UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.Loading);
 		}
 		else
 		{
 			Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
-			Application.LoadLevel(Scenes.Backend);
+			UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.Backend);
 		}
 	}
 

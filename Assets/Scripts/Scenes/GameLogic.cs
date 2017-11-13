@@ -589,7 +589,7 @@ public class GameLogic : MonoBehaviour
     {
         bChangeScene = false;
         GameData.GetInstance().NextLevelName = strNextSceneName;
-        Application.LoadLevel(Scenes.Loading);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.Loading);
     }
 
 	public void SetPause(bool pause)

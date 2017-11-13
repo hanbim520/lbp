@@ -18,7 +18,7 @@ public class LoadLevelAsync : MonoBehaviour
 
     private IEnumerator LoadLevel()
     {
-        async = Application.LoadLevelAsync(GameData.GetInstance().NextLevelName);
+		async = UnityEngine.SceneManagement.SceneManager.LoadSceneAsync(GameData.GetInstance().NextLevelName);
         async.allowSceneActivation = false;
 
         while (!async.isDone)

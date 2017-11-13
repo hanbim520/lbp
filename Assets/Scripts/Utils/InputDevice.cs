@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 // 加载处理相应输入设备的脚本: 触摸屏 串口鼠标
 public class InputDevice : MonoBehaviour
@@ -7,9 +8,15 @@ public class InputDevice : MonoBehaviour
 	void Start()
 	{
 		DontDestroyOnLoad(this);
+		SceneManager.sceneLoaded += OnSceneLoaded;
 	}
 
-	void OnLevelWasLoaded(int level)
+	void OnDestroy()
+	{
+		SceneManager.sceneLoaded -= OnSceneLoaded;
+	}
+
+	void OnSceneLoaded(Scene scence, LoadSceneMode mod)
 	{
 		LoadDeviceComponent();
 	}

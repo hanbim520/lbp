@@ -75,22 +75,22 @@ public class RecordMost : MonoBehaviour
             if (GameData.GetInstance().colorTable[key] == ResultType.Red)
             {
 				mostGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[0];
-				mostGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = key.ToString();
+				mostGO[count].transform.GetChild(0).Find("Text").GetComponent<Text>().text = key.ToString();
             }
             else if (GameData.GetInstance().colorTable[key] == ResultType.Black)
             {
 				mostGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[1];
-				mostGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = key.ToString();
+				mostGO[count].transform.GetChild(0).Find("Text").GetComponent<Text>().text = key.ToString();
             }
             else
             {
 				mostGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[2];
 				if (key == 0)
-					mostGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = "0";
+					mostGO[count].transform.GetChild(0).Find("Text").GetComponent<Text>().text = "0";
 				else
-					mostGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = "00";
+					mostGO[count].transform.GetChild(0).Find("Text").GetComponent<Text>().text = "00";
             }
-			mostGO[count].transform.GetChild(1).FindChild("Text").GetComponent<Text>().text = string.Format("x{0}", mostValues[key]);
+			mostGO[count].transform.GetChild(1).Find("Text").GetComponent<Text>().text = string.Format("x{0}", mostValues[key]);
 			++count;
         }
     }

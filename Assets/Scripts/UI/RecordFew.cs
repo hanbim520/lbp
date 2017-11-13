@@ -75,22 +75,22 @@ public class RecordFew : MonoBehaviour
 			if (GameData.GetInstance().colorTable[key] == ResultType.Red)
             {
 				fewGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[0];
-				fewGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = key.ToString();
+				fewGO[count].transform.GetChild(0).Find("Text").GetComponent<Text>().text = key.ToString();
             }
 			else if (GameData.GetInstance().colorTable[key] == ResultType.Black)
             {
 				fewGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[1];
-				fewGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = key.ToString();
+				fewGO[count].transform.GetChild(0).Find("Text").GetComponent<Text>().text = key.ToString();
             }
             else
             {
 				fewGO[count].transform.GetChild(0).GetComponent<Image>().overrideSprite = images[2];
 				if (key == 0)
-					fewGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = "0";
+					fewGO[count].transform.GetChild(0).Find("Text").GetComponent<Text>().text = "0";
 				else
-					fewGO[count].transform.GetChild(0).FindChild("Text").GetComponent<Text>().text = "00";
+					fewGO[count].transform.GetChild(0).Find("Text").GetComponent<Text>().text = "00";
             }
-			fewGO[count].transform.GetChild(1).FindChild("Text").GetComponent<Text>().text = string.Format("x{0}", fewValues[key]);
+			fewGO[count].transform.GetChild(1).Find("Text").GetComponent<Text>().text = string.Format("x{0}", fewValues[key]);
 			++count;
         }
 	}

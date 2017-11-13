@@ -56,10 +56,10 @@ public class RecordCircle2 : MonoBehaviour
 		triangles = new Image[fieldsCount];
 		for (int i = 0; i < fieldsCount; ++i)
 		{
-			triangles[i] = transform.FindChild("histogram").FindChild(i.ToString()).GetComponent<Image>();
+			triangles[i] = transform.Find("histogram").Find(i.ToString()).GetComponent<Image>();
 		}
-		bgBall = transform.FindChild("current ball").FindChild("bg").GetComponent<Image>();
-		txtNum = transform.FindChild("current ball").FindChild("num").GetComponent<Text>();
+		bgBall = transform.Find("current ball").Find("bg").GetComponent<Image>();
+		txtNum = transform.Find("current ball").Find("num").GetComponent<Text>();
 	}
 
 	private void HandleRefreshRecord(int result = -1)
@@ -136,17 +136,17 @@ public class RecordCircle2 : MonoBehaviour
 		}
 
 		// 显示各个球号的出现次数
-		Transform timesRoot = transform.FindChild("times");
+		Transform timesRoot = transform.Find("times");
 		if (timesRoot != null)
 		{
 			for (int i = 0; i < fieldsCount; ++i)
 			{
-				Transform item = timesRoot.FindChild(i.ToString());
+				Transform item = timesRoot.Find(i.ToString());
 				item.GetComponent<Text>().text = dict[i].ToString();
 			}
 		}
 		// 计算各个区域的百分比
-		Transform percentsRoot = transform.FindChild("percents");
+		Transform percentsRoot = transform.Find("percents");
 		if (percentsRoot != null)
 		{
 			int _1to18 = 0;
@@ -170,20 +170,20 @@ public class RecordCircle2 : MonoBehaviour
 				if (GameData.GetInstance().colorTable[item] == ResultType.Red)
 					++_red;
 			}
-			percentsRoot.FindChild("1to18").GetComponent<Text>().text = _1to18.ToString();
+			percentsRoot.Find("1to18").GetComponent<Text>().text = _1to18.ToString();
 			int _19to36 = sum - _1to18 - _green;
-			percentsRoot.FindChild("19to36").GetComponent<Text>().text = _19to36.ToString();
-			percentsRoot.FindChild("odd").GetComponent<Text>().text = _odd.ToString();
+			percentsRoot.Find("19to36").GetComponent<Text>().text = _19to36.ToString();
+			percentsRoot.Find("odd").GetComponent<Text>().text = _odd.ToString();
 			int _even = sum - _odd - _green;
-			percentsRoot.FindChild("even").GetComponent<Text>().text = _even.ToString();
+			percentsRoot.Find("even").GetComponent<Text>().text = _even.ToString();
 			int _3rd12 = sum - _1st12 - _2nd12;
-			percentsRoot.FindChild("3rd12").GetComponent<Text>().text = _3rd12.ToString();
-			percentsRoot.FindChild("2nd12").GetComponent<Text>().text = _2nd12.ToString();
-			percentsRoot.FindChild("1st12").GetComponent<Text>().text = _1st12.ToString();
-			percentsRoot.FindChild("green").GetComponent<Text>().text = _green.ToString();
-			percentsRoot.FindChild("red").GetComponent<Text>().text = _red.ToString();
+			percentsRoot.Find("3rd12").GetComponent<Text>().text = _3rd12.ToString();
+			percentsRoot.Find("2nd12").GetComponent<Text>().text = _2nd12.ToString();
+			percentsRoot.Find("1st12").GetComponent<Text>().text = _1st12.ToString();
+			percentsRoot.Find("green").GetComponent<Text>().text = _green.ToString();
+			percentsRoot.Find("red").GetComponent<Text>().text = _red.ToString();
 			int _black = sum - _red - _green;
-			percentsRoot.FindChild("black").GetComponent<Text>().text = _black.ToString();
+			percentsRoot.Find("black").GetComponent<Text>().text = _black.ToString();
 		}
     }
 }

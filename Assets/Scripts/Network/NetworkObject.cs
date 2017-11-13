@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class NetworkObject : MonoBehaviour
 {
@@ -7,9 +8,15 @@ public class NetworkObject : MonoBehaviour
 	void Start()
 	{
 		DontDestroyOnLoad(this);
+		SceneManager.sceneLoaded += OnSceneLoaded;
 	}
-	
-	void OnLevelWasLoaded(int level)
+
+	void OnDestroy()
+	{
+		SceneManager.sceneLoaded -= OnSceneLoaded;
+	}
+
+	void OnSceneLoaded(Scene scence, LoadSceneMode mod)
 	{
 		UClient networkClient = gameObject.GetComponent<UClient>();
 		UHost networkHost = gameObject.GetComponent<UHost>();

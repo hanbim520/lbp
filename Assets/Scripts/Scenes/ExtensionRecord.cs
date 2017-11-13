@@ -54,7 +54,7 @@ public class ExtensionRecord : MonoBehaviour
     public void ExitEvent()
     {
         GameData.GetInstance().NextLevelName = Scenes.Main;
-        Application.LoadLevel(Scenes.Loading);
+		UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.Loading);
     }
 
     public void LanguageEvent()
@@ -115,14 +115,14 @@ public class ExtensionRecord : MonoBehaviour
 			Destroy(child.gameObject);
 
 		// Recover bet fields
-		Transform root = displayType[0].activeSelf ? displayType[0].transform.FindChild("Valid Fields") : displayType[1].transform.FindChild("Valid Fields");
+		Transform root = displayType[0].activeSelf ? displayType[0].transform.Find("Valid Fields") : displayType[1].transform.Find("Valid Fields");
 		if (root != null) 
 		{
 			string path = "Bet Chips/";
 			int count = GameData.GetInstance().betChipValues.Count;
 			foreach (BetInfo info in betRecord.bets)
 			{
-				Transform location = root.FindChild(info.betField);
+				Transform location = root.Find(info.betField);
 				if (location != null)
 				{
 					int chipIdx = 0;

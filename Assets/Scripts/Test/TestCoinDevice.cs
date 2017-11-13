@@ -28,12 +28,12 @@ public class TestCoinDevice : MonoBehaviour
 
 		if (GUI.Button(new Rect(200, 300, 200, 100), "换场景"))
 		{
-			Application.LoadLevel("TestEncryChip 1");
+			UnityEngine.SceneManagement.SceneManager.LoadScene("TestEncryChip 1");
 		}
 
 		if (GUI.Button(new Rect(200, 300, 200, 100), "回主景"))
 		{
-			Application.LoadLevel("TestEncryChip");
+			UnityEngine.SceneManagement.SceneManager.LoadScene("TestEncryChip");
 		}
 	}
 }

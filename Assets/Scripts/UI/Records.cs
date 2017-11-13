@@ -51,8 +51,8 @@ public class Records : MonoBehaviour
                 records[j].SetActive(true);
             if (GameData.GetInstance().colorTable[r[i]] == ResultType.Red)
             {
-				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[0];
-                records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
+				records[j].transform.Find("Image").GetComponent<Image>().overrideSprite = imgs[0];
+                records[j].transform.Find("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
 				if (j != 0)
 					records[j].transform.localPosition = new Vector3(pos.x, redPosY, 0);
@@ -61,8 +61,8 @@ public class Records : MonoBehaviour
             }
             else if (GameData.GetInstance().colorTable[r[i]] == ResultType.Black)
             {
-				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[1];
-                records[j].transform.FindChild("Text").GetComponent<Text>().text = r[i].ToString();
+				records[j].transform.Find("Image").GetComponent<Image>().overrideSprite = imgs[1];
+                records[j].transform.Find("Text").GetComponent<Text>().text = r[i].ToString();
 				Vector3 pos = records[j].transform.localPosition;
 				if (j != 0)
 					records[j].transform.localPosition = new Vector3(pos.x, blackPosY, 0);
@@ -71,11 +71,11 @@ public class Records : MonoBehaviour
             }
             else
             {
-				records[j].transform.FindChild("Image").GetComponent<Image>().overrideSprite = imgs[2];
+				records[j].transform.Find("Image").GetComponent<Image>().overrideSprite = imgs[2];
 				string text = "0";
 				if (r[i] != 0)
 					text = "00";
-                records[j].transform.FindChild("Text").GetComponent<Text>().text = text;
+                records[j].transform.Find("Text").GetComponent<Text>().text = text;
 				Vector3 pos = records[j].transform.localPosition;
 				records[j].transform.localPosition = new Vector3(pos.x, greenPosY, 0);
             }

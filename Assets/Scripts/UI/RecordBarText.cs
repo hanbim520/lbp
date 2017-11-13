@@ -26,7 +26,7 @@ public class RecordBarText : MonoBehaviour
 //        else if (bar.gameObject.name == "Green")
 		if (bar.gameObject.name == "Green")
 		{
-            float redFillAcount = Mathf.Max(transform.parent.parent.FindChild("Red").GetComponent<Image>().fillAmount, minAccount);
+            float redFillAcount = Mathf.Max(transform.parent.parent.Find("Red").GetComponent<Image>().fillAmount, minAccount);
 			float x = -parentWidth * (1.0f - redFillAcount) * 0.50f + fillAccount * 0.50f * parentWidth;
 			transform.localPosition = new Vector3(x, 0, 0);
 		}

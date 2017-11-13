@@ -23,9 +23,9 @@ public class RecordBar : MonoBehaviour
 
 	private void Init()
 	{
-		imgRed = transform.FindChild("Red").GetComponent<Image>();
-		imgBlue = transform.FindChild("Blue").GetComponent<Image>();
-		imgGreen = transform.FindChild("Green").GetComponent<Image>();
+		imgRed = transform.Find("Red").GetComponent<Image>();
+		imgBlue = transform.Find("Blue").GetComponent<Image>();
+		imgGreen = transform.Find("Green").GetComponent<Image>();
 		RefreshRecord();
 	}
 

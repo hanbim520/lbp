@@ -71,7 +71,7 @@ public class BackendLogic : MonoBehaviour
 		    GameData.GetInstance().remainMins <= 0)
 		{
 			tipPrintCode.SetActive(true);
-			tipPrintCode.transform.FindChild("Text").GetComponent<Text>().text = strClearAccoutTip[GameData.GetInstance().backendLanguage];
+			tipPrintCode.transform.Find("Text").GetComponent<Text>().text = strClearAccoutTip[GameData.GetInstance().backendLanguage];
 		}
 		else
 			tipPrintCode.SetActive(false);
@@ -168,14 +168,14 @@ public class BackendLogic : MonoBehaviour
 
         if (preSelected != null)
         {
-            Transform t = preSelected.FindChild("Image");
+            Transform t = preSelected.Find("Image");
             if (t != null)
                 t.gameObject.SetActive(false);
             SetAlpha(preSelected, 0);
         }
         SetAlpha(hitObject, 255);
 
-        Transform img = hitObject.FindChild("Image");
+        Transform img = hitObject.Find("Image");
         if (img != null)
         {
             img.gameObject.SetActive(true);
@@ -297,7 +297,7 @@ public class BackendLogic : MonoBehaviour
 		}
 		else if (string.Compare(name, "exit2") == 0)
 		{
-            Application.LoadLevel(Scenes.StartInfo);
+			UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.StartInfo);
 		}
 		else if (string.Compare(name, "device2 id") == 0)
 		{
@@ -481,13 +481,13 @@ public class BackendLogic : MonoBehaviour
 		GameData ga = GameData.GetInstance();
 		string[] datas = new string[]{ga.lotteryCondition.ToString(), ga.lotteryBase.ToString(), ga.lotteryRate.ToString(), ga.lotteryAllocation.ToString()};
 
-		Transform root = menuLottery.transform.FindChild("Valid Fields");
+		Transform root = menuLottery.transform.Find("Valid Fields");
 		if (root != null)
 		{
 			int count = root.childCount;
 			for (int i = 0; i < count; ++i)
 			{
-				Transform str = root.GetChild(i).FindChild("Text");
+				Transform str = root.GetChild(i).Find("Text");
 				if (str != null)
 				{
 					str.GetComponent<Text>().text = datas[i];
@@ -522,27 +522,27 @@ public class BackendLogic : MonoBehaviour
 			ga.lotteryLv.ToString(), ga.lotteryCondition.ToString(), ga.lotteryBase.ToString(), ga.lotteryRate.ToString(), ga.lotteryAllocation.ToString(),
 			ga.beginSessions.ToString(), ga.maxNumberOfFields.ToString(), ga.topScreenLanguage.ToString()};
 
-        Transform root = menuSetting.transform.FindChild("Valid Fields");
+        Transform root = menuSetting.transform.Find("Valid Fields");
         if (root != null)
         {
 			int pageIdx = 0;
 			int count = datas.Length - 1;
             for (int i = 0; i <= count; ++i)
             {
-                Transform str = root.GetChild(pageIdx).GetChild(i).FindChild("Text");
+                Transform str = root.GetChild(pageIdx).GetChild(i).Find("Text");
                 if (str != null)
                 {
                     str.GetComponent<Text>().text = datas[i];
                 }
             }
 			pageIdx = 1;
-			root.GetChild(pageIdx).GetChild(0).FindChild("Text").GetComponent<Text>().text = ga.allMax36Val.ToString();
-			root.GetChild(pageIdx).GetChild(1).FindChild("Text").GetComponent<Text>().text = ga.allMax18Val.ToString();
-			root.GetChild(pageIdx).GetChild(2).FindChild("Text").GetComponent<Text>().text = ga.allMax12Val.ToString();
-			root.GetChild(pageIdx).GetChild(3).FindChild("Text").GetComponent<Text>().text = ga.allMax9Val.ToString();
-			root.GetChild(pageIdx).GetChild(4).FindChild("Text").GetComponent<Text>().text = ga.allMax6Val.ToString();
-			root.GetChild(pageIdx).GetChild(5).FindChild("Text").GetComponent<Text>().text = ga.allMax3Val.ToString();
-			root.GetChild(pageIdx).GetChild(6).FindChild("Text").GetComponent<Text>().text = ga.allMax2Val.ToString();
+			root.GetChild(pageIdx).GetChild(0).Find("Text").GetComponent<Text>().text = ga.allMax36Val.ToString();
+			root.GetChild(pageIdx).GetChild(1).Find("Text").GetComponent<Text>().text = ga.allMax18Val.ToString();
+			root.GetChild(pageIdx).GetChild(2).Find("Text").GetComponent<Text>().text = ga.allMax12Val.ToString();
+			root.GetChild(pageIdx).GetChild(3).Find("Text").GetComponent<Text>().text = ga.allMax9Val.ToString();
+			root.GetChild(pageIdx).GetChild(4).Find("Text").GetComponent<Text>().text = ga.allMax6Val.ToString();
+			root.GetChild(pageIdx).GetChild(5).Find("Text").GetComponent<Text>().text = ga.allMax3Val.ToString();
+			root.GetChild(pageIdx).GetChild(6).Find("Text").GetComponent<Text>().text = ga.allMax2Val.ToString();
         }
     }
 
@@ -559,9 +559,9 @@ public class BackendLogic : MonoBehaviour
     {
 		host.SendToAll(NetInstr.CheckAccount.ToString());
 		if (accountItemRoot == null)
-			accountItemRoot = menuAccount.transform.FindChild("ItemsRoot");
+			accountItemRoot = menuAccount.transform.Find("ItemsRoot");
 		if (loadingRoot == null)
-			loadingRoot = menuAccount.transform.FindChild("LoadingTextRoot");
+			loadingRoot = menuAccount.transform.Find("LoadingTextRoot");
 
         menuMain.SetActive(false);
         menuSetting.SetActive(false);
@@ -605,7 +605,7 @@ public class BackendLogic : MonoBehaviour
 			int id = item.Key;
 			if (loadingRoot != null)
 			{
-				Transform t = loadingRoot.FindChild("LoadingText" + (id - 1));
+				Transform t = loadingRoot.Find("LoadingText" + (id - 1));
 				if (t != null)
 				{
 					string prefabName = GameData.controlCode ? "Account/AccountItem CC" : "Account/AccountItem NCC";
@@ -614,15 +614,15 @@ public class BackendLogic : MonoBehaviour
 					go.transform.SetParent(accountItemRoot);
 					go.transform.localScale = Vector3.one;
 					go.transform.localPosition = new Vector3(0, t.localPosition.y, 0);
-					go.transform.FindChild("idx").GetComponent<Text>().text = item.Value.deviceIndex.ToString();
-					go.transform.FindChild("keyin").GetComponent<Text>().text = item.Value.keyin.ToString();
-					go.transform.FindChild("keout").GetComponent<Text>().text = item.Value.keout.ToString();
-					go.transform.FindChild("tou").GetComponent<Text>().text = item.Value.receiveCoin.ToString();
-					go.transform.FindChild("tui").GetComponent<Text>().text = item.Value.payCoin.ToString();
+					go.transform.Find("idx").GetComponent<Text>().text = item.Value.deviceIndex.ToString();
+					go.transform.Find("keyin").GetComponent<Text>().text = item.Value.keyin.ToString();
+					go.transform.Find("keout").GetComponent<Text>().text = item.Value.keout.ToString();
+					go.transform.Find("tou").GetComponent<Text>().text = item.Value.receiveCoin.ToString();
+					go.transform.Find("tui").GetComponent<Text>().text = item.Value.payCoin.ToString();
 					if (GameData.controlCode)
-						go.transform.FindChild("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
-					go.transform.FindChild("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
-					go.transform.FindChild("card").GetComponent<Text>().text = item.Value.card.ToString();
+						go.transform.Find("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
+					go.transform.Find("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
+					go.transform.Find("card").GetComponent<Text>().text = item.Value.card.ToString();
 					go.name = GameData.controlCode ? "AccountItem CC" + (id - 1) : "AccountItem NCC" + (id - 1);
 					prefab = null;
 					Destroy(t.gameObject);
@@ -630,16 +630,16 @@ public class BackendLogic : MonoBehaviour
 				else
 				{
 					string name = GameData.controlCode ? "AccountItem CC" + (id - 1) : "AccountItem NCC" + (id - 1);
-					t = accountItemRoot.FindChild(name);
-					t.FindChild("idx").GetComponent<Text>().text = item.Value.deviceIndex.ToString();
-					t.FindChild("keyin").GetComponent<Text>().text = item.Value.keyin.ToString();
-					t.FindChild("keout").GetComponent<Text>().text = item.Value.keout.ToString();
-					t.FindChild("tou").GetComponent<Text>().text = item.Value.receiveCoin.ToString();
-					t.FindChild("tui").GetComponent<Text>().text = item.Value.payCoin.ToString();
+					t = accountItemRoot.Find(name);
+					t.Find("idx").GetComponent<Text>().text = item.Value.deviceIndex.ToString();
+					t.Find("keyin").GetComponent<Text>().text = item.Value.keyin.ToString();
+					t.Find("keout").GetComponent<Text>().text = item.Value.keout.ToString();
+					t.Find("tou").GetComponent<Text>().text = item.Value.receiveCoin.ToString();
+					t.Find("tui").GetComponent<Text>().text = item.Value.payCoin.ToString();
 					if (GameData.controlCode)
-						t.FindChild("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
-					t.FindChild("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
-					t.FindChild("card").GetComponent<Text>().text = item.Value.card.ToString();
+						t.Find("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
+					t.Find("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
+					t.Find("card").GetComponent<Text>().text = item.Value.card.ToString();
 				}
 			}
 		}
@@ -651,14 +651,14 @@ public class BackendLogic : MonoBehaviour
 	{
 		otherDevice.Clear();
 		if (accountItemRoot == null)
-			accountItemRoot = menuAccount.transform.FindChild("ItemsRoot");
+			accountItemRoot = menuAccount.transform.Find("ItemsRoot");
 		if (accountItemRoot != null)
 		{
 			foreach (Transform t in accountItemRoot)
 				Destroy(t.gameObject);
 		}
 
-		Transform loadingRoot = menuAccount.transform.FindChild("LoadingTextRoot");
+		Transform loadingRoot = menuAccount.transform.Find("LoadingTextRoot");
 		if (loadingRoot != null)
 		{
 			foreach (Transform t in loadingRoot)
@@ -687,8 +687,8 @@ public class BackendLogic : MonoBehaviour
 
     private GameObject SetLanguage(GameObject menu)
     {
-        GameObject en = menu.transform.FindChild("EN").gameObject;
-        GameObject cn = menu.transform.FindChild("CN").gameObject;
+        GameObject en = menu.transform.Find("EN").gameObject;
+        GameObject cn = menu.transform.Find("CN").gameObject;
         if (GameData.GetInstance().backendLanguage == 0)
         {
             en.SetActive(true);
@@ -920,7 +920,7 @@ public class BackendLogic : MonoBehaviour
 			// Set setting-menu item
 			if (preSelected != null)
             {
-                Transform target = preSelected.FindChild("Text");
+                Transform target = preSelected.Find("Text");
                 if (target != null)
                 {
                     int value;
@@ -991,13 +991,13 @@ public class BackendLogic : MonoBehaviour
 	private void SaveLottery()
 	{
 		List<int> values = new List<int>();
-		Transform root = menuLottery.transform.FindChild("Valid Fields");
+		Transform root = menuLottery.transform.Find("Valid Fields");
 		if (root != null)
 		{
 			int count = root.childCount;
 			for (int i = 0; i < count; ++i)
 			{
-				Transform str = root.GetChild(i).FindChild("Text");
+				Transform str = root.GetChild(i).Find("Text");
 				if (str != null)
 				{
 					int value;
@@ -1023,13 +1023,13 @@ public class BackendLogic : MonoBehaviour
     {
         List<int> page1Val = new List<int>();
         List<int> page2Val = new List<int>();
-        Transform root = menuSetting.transform.FindChild("Valid Fields");
+        Transform root = menuSetting.transform.Find("Valid Fields");
         if (root != null)
         {
             int count = root.GetChild(0).childCount;
             for (int i = 0; i < count; ++i)
             {
-                Transform str = root.GetChild(0).GetChild(i).FindChild("Text");
+                Transform str = root.GetChild(0).GetChild(i).Find("Text");
                 if (str != null)
                 {
                     int value;
@@ -1077,7 +1077,7 @@ public class BackendLogic : MonoBehaviour
 			count = root.GetChild(1).childCount;
 			for (int i = 0; i < count; ++i)
 			{
-				Transform str = root.GetChild(1).GetChild(i).FindChild("Text");
+				Transform str = root.GetChild(1).GetChild(i).Find("Text");
 				if (str != null)
 				{
 					int value;
@@ -1109,7 +1109,7 @@ public class BackendLogic : MonoBehaviour
         if (warning != null && !warning.activeSelf)
         {
             warning.SetActive(true);
-            warning.transform.FindChild("Text").GetComponent<Text>().text = str;
+            warning.transform.Find("Text").GetComponent<Text>().text = str;
 			if (autoDisappear)
 			{
 				timerHideWarning = new Timer(duration, 0);
@@ -1329,7 +1329,7 @@ public class BackendLogic : MonoBehaviour
 	private void CalcTotalAccount()
 	{
 		string goName = GameData.controlCode ? "TotalNum CC" : "TotalNum NCC";
-		Transform totalNum = accountItemRoot.FindChild(goName);
+		Transform totalNum = accountItemRoot.Find(goName);
 		if (totalNum == null)
 		{
 			string prefabName = GameData.controlCode ? "Account/TotalNum CC" : "Account/TotalNum NCC";
@@ -1353,14 +1353,14 @@ public class BackendLogic : MonoBehaviour
 			totalWin += item.totalWinnings;
 			card += item.card;
 		}
-		totalNum.FindChild("keyin").GetComponent<Text>().text = keyin.ToString();
-		totalNum.FindChild("keout").GetComponent<Text>().text = keout.ToString();
-		totalNum.FindChild("tou").GetComponent<Text>().text = tou.ToString();
-		totalNum.FindChild("tui").GetComponent<Text>().text = tui.ToString();
+		totalNum.Find("keyin").GetComponent<Text>().text = keyin.ToString();
+		totalNum.Find("keout").GetComponent<Text>().text = keout.ToString();
+		totalNum.Find("tou").GetComponent<Text>().text = tou.ToString();
+		totalNum.Find("tui").GetComponent<Text>().text = tui.ToString();
 		if (GameData.controlCode)
-			totalNum.FindChild("winnings").GetComponent<Text>().text = winnings.ToString();
-		totalNum.FindChild("total winnings").GetComponent<Text>().text = totalWin.ToString();
-		totalNum.FindChild("card").GetComponent<Text>().text = card.ToString();
+			totalNum.Find("winnings").GetComponent<Text>().text = winnings.ToString();
+		totalNum.Find("total winnings").GetComponent<Text>().text = totalWin.ToString();
+		totalNum.Find("card").GetComponent<Text>().text = card.ToString();
 	}
 
 	private void SetBackendLanguage()
