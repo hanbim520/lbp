@@ -27,12 +27,20 @@ public class AndroidSerialPort
 	// Note: Java side should be return int[]
 	public int[] ReadData()
 	{
+		if (Application.platform == RuntimePlatform.OSXEditor ||
+			Application.platform == RuntimePlatform.WindowsEditor)
+			return null;
+
 		AndroidJavaObject readMethod = jo.Call<AndroidJavaObject>(strReadMethod, portId);
 		return AndroidJNIHelper.ConvertFromJNIArray<int[]>(readMethod.GetRawObject());
 	}
 
 	public void WriteData(ref int[] data)
 	{
+		if (Application.platform == RuntimePlatform.OSXEditor ||
+			Application.platform == RuntimePlatform.WindowsEditor)
+			return;
+		
 		IntPtr pArr = AndroidJNIHelper.ConvertToJNIArray(data);
 		jvalue[] blah = new jvalue[2];
 		blah[0].l = pArr;
