@@ -21,6 +21,9 @@ public class UClient : MonoBehaviour
 	private ConnectionState connState = ConnectionState.Disconnected;
     private ClientLogic clientLogic;
 
+	float heartbeatElapsed;
+	const float kHeartbeatInterver = 3.0f;
+
 	void OnSceneLoaded(Scene scence, LoadSceneMode mod)
 	{
 		if (clientLogic == null &&
@@ -48,22 +51,20 @@ public class UClient : MonoBehaviour
             Debug.Log(e.ToString());
         }
 	}
-
-	float heartbeatElapsed;
-	float kHeartbeatInterver = 1.0f;
+		
 	void Keepalive()
 	{
 		heartbeatElapsed += Time.deltaTime;
 		if (heartbeatElapsed > kHeartbeatInterver)
 		{
 			heartbeatElapsed = 0;
-			SendToServer("heartbeat");
+			SendToServer("hb");
 		}
 	}
 	
 	void Update()
-	{		
-//		Keepalive();
+	{
+		Keepalive();
 
 		int connectionId; 
 		int channelId; 
@@ -104,9 +105,10 @@ public class UClient : MonoBehaviour
 
 		// build ourselves a config with a couple of channels
 		ConnectionConfig config = new ConnectionConfig();
-		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
+		reliableChannelId = config.AddChannel(QosType.ReliableFragmented);
 		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
 		config.PacketSize = 2000;
+		config.DisconnectTimeout = 5000;
 
 		HostTopology hostconfig = new HostTopology(config, 1);
 		hostId = NetworkTransport.AddHost(hostconfig, port);
@@ -151,7 +153,7 @@ public class UClient : MonoBehaviour
 	private void HandleDataEvent(ref byte[] _recBuffer)
 	{
         string msg = Utils.BytesToString(_recBuffer);
-		Debug.Log("Client HandleDataEvent:" + msg);
+//		Debug.Log("Client HandleDataEvent:" + msg);
 		char[] delimiterChars = {':'};
 		string[] words = msg.Split(delimiterChars);
 		if (words.Length > 0)

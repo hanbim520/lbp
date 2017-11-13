@@ -24,6 +24,9 @@ public class UHost : MonoBehaviour
 	private BackendLogic backLogic;
 	private bool isBroadcasting = false;
 
+	float heartbeatElapsed;
+	const float kHeartbeatInterver = 3.0f;
+
 	public List<int> AllConnections
 	{
 		get { return allConnections; }
@@ -66,9 +69,21 @@ public class UHost : MonoBehaviour
             Debug.Log(e.ToString());
         }
 	}
+		
+	void Keepalive()
+	{
+		heartbeatElapsed += Time.deltaTime;
+		if (heartbeatElapsed > kHeartbeatInterver)
+		{
+			heartbeatElapsed = 0;
+			SendToAll("hb");
+		}
+	}
 
 	void Update()
 	{
+		Keepalive();
+
 		int connectionId; 
 		int channelId; 
 		System.Array.Clear(recBuffer, 0, recBuffer.Length);
@@ -103,9 +118,10 @@ public class UHost : MonoBehaviour
 		NetworkTransport.Init(gconfig);
 
 		ConnectionConfig config = new ConnectionConfig();
-		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
+		reliableChannelId = config.AddChannel(QosType.ReliableFragmented);
 		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
 		config.PacketSize = 2000;
+		config.DisconnectTimeout = 5000;
 
 		HostTopology topology = new HostTopology(config, GameData.GetInstance().MaxNumOfPlayers);
 		hostId = NetworkTransport.AddHost(topology, port);
@@ -235,7 +251,7 @@ public class UHost : MonoBehaviour
     private void HandleDataEvent(ref byte[] _recBuffer, int connectionId)
     {
 		string msg = Utils.BytesToString(_recBuffer);
-        Debug.Log("Server HandleDataEvent:" + msg);
+//        Debug.Log("Server HandleDataEvent:" + msg);
         char[] delimiterChars = {':'};
         string[] words = msg.Split(delimiterChars);
         if (words.Length > 0)
