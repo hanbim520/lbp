@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
+using UnityEngine.SceneManagement;
+using System.Net;
 
 public class UClient : MonoBehaviour
 {
@@ -19,10 +21,10 @@ public class UClient : MonoBehaviour
 	private ConnectionState connState = ConnectionState.Disconnected;
     private ClientLogic clientLogic;
 
-	void OnLevelWasLoaded(int level)
+	void OnSceneLoaded(Scene scence, LoadSceneMode mod)
 	{
 		if (clientLogic == null &&
-		    string.Compare(Application.loadedLevelName, Scenes.Main) == 0)
+			string.Compare(scence.name, Scenes.Main) == 0)
 		{
 			clientLogic = GameObject.Find("ClientLogic").GetComponent<ClientLogic>();
 		}
@@ -30,6 +32,7 @@ public class UClient : MonoBehaviour
 
 	void Start()
 	{
+		SceneManager.sceneLoaded += OnSceneLoaded;
 		SetupClient();
 	}
 
@@ -37,6 +40,7 @@ public class UClient : MonoBehaviour
 	{
         try
         {
+			SceneManager.sceneLoaded -= OnSceneLoaded;
 		    NetworkTransport.RemoveHost(hostId);
         }
         catch(UnityException e)
@@ -44,9 +48,23 @@ public class UClient : MonoBehaviour
             Debug.Log(e.ToString());
         }
 	}
+
+	float heartbeatElapsed;
+	float kHeartbeatInterver = 1.0f;
+	void Keepalive()
+	{
+		heartbeatElapsed += Time.deltaTime;
+		if (heartbeatElapsed > kHeartbeatInterver)
+		{
+			heartbeatElapsed = 0;
+			SendToServer("heartbeat");
+		}
+	}
 	
 	void Update()
 	{		
+//		Keepalive();
+
 		int connectionId; 
 		int channelId; 
 		System.Array.Clear(recBuffer, 0, recBuffer.Length);
@@ -57,7 +75,8 @@ public class UClient : MonoBehaviour
 		{
 		case NetworkEventType.Nothing:         
 			break;
-		case NetworkEventType.ConnectEvent:    
+		case NetworkEventType.ConnectEvent: 
+			print("uclient connected!");
 			break;
 		case NetworkEventType.DataEvent:       
 			if (dataSize > 0)
@@ -66,13 +85,13 @@ public class UClient : MonoBehaviour
 			}
 			break;
 		case NetworkEventType.DisconnectEvent: 
+			Debug.Log("Connected, error:" + error.ToString());
 			HandleDisconnectEvent();
 			break;
 		case NetworkEventType.BroadcastEvent:
 			HandleBroadcast();
 			break;
 		}
-
 	}
 
 	private void SetupClient()
@@ -80,21 +99,20 @@ public class UClient : MonoBehaviour
 		// global config
 		GlobalConfig gconfig = new GlobalConfig();
 		gconfig.ReactorModel = ReactorModel.FixRateReactor;
-		gconfig.ThreadAwakeTimeout = 1;
-		
+		gconfig.ThreadAwakeTimeout = 10;
+		NetworkTransport.Init(gconfig);
+
 		// build ourselves a config with a couple of channels
 		ConnectionConfig config = new ConnectionConfig();
 		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
 		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
-		
-		// create a host topology from the config
+		config.PacketSize = 2000;
+
 		HostTopology hostconfig = new HostTopology(config, 1);
-		
-		// initialise the transport layer
-		NetworkTransport.Init(gconfig);
 		hostId = NetworkTransport.AddHost(hostconfig, port);
 		byte error;
 		NetworkTransport.SetBroadcastCredentials(hostId, broadcastKey, broadcastVersion, broadcastSubversion, out error);
+		print("Broadcast err:" + error);
 	}
 
 	private void HandleBroadcast()
@@ -117,8 +135,10 @@ public class UClient : MonoBehaviour
 
 	private IEnumerator ConnectServer(string serverAddress, int port)
 	{
+		print("uclient ConnectServer: " + serverAddress + ", port: " + port);
 		byte connError;
 		connectionId = NetworkTransport.Connect(hostId, serverAddress, port, 0, out connError);
+		print("connError:" + connError);
 		if (connectionId <= 0)
 		{
 			yield return new WaitForSeconds(reconnServerInterval);
@@ -131,7 +151,7 @@ public class UClient : MonoBehaviour
 	private void HandleDataEvent(ref byte[] _recBuffer)
 	{
         string msg = Utils.BytesToString(_recBuffer);
-        Debug.Log("Client HandleDataEvent: " + msg);
+		Debug.Log("Client HandleDataEvent:" + msg);
 		char[] delimiterChars = {':'};
 		string[] words = msg.Split(delimiterChars);
 		if (words.Length > 0)
@@ -171,6 +191,7 @@ public class UClient : MonoBehaviour
 	private void HandleDisconnectEvent()
 	{
 		Debug.Log("HandleDisconnectEvent");
+		connectionId = 0;
 		connState = ConnectionState.Disconnected;
 		GameEventManager.OnClientDisconnect();
 	}
@@ -179,6 +200,10 @@ public class UClient : MonoBehaviour
 	{
 		try
 		{
+			if (connState == ConnectionState.Disconnected ||
+				connectionId  == 0)
+				return;
+
 			byte[] buffer = Utils.StringToBytes(msg);
 			byte error;
 			NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);

@@ -2,6 +2,7 @@
 using UnityEngine.Networking;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class UHost : MonoBehaviour
 {
@@ -28,15 +29,15 @@ public class UHost : MonoBehaviour
 		get { return allConnections; }
 	}
 
-	void OnLevelWasLoaded(int level)
+	void OnSceneLoaded(Scene scence, LoadSceneMode mod)
 	{
 		if (serverLogic == null && 
-		    string.Compare(Application.loadedLevelName, Scenes.Main) == 0)
+			string.Compare(scence.name, Scenes.Main) == 0)
 		{
 			serverLogic = GameObject.Find("ServerLogic").GetComponent<ServerLogic>();
 		}
 		else if (backLogic == null &&
-		         string.Compare(Application.loadedLevelName, Scenes.Backend) == 0)
+			string.Compare(scence.name, Scenes.Backend) == 0)
 		{
 			backLogic = GameObject.Find("BackendLogic").GetComponent<BackendLogic>();
 		}
@@ -44,6 +45,7 @@ public class UHost : MonoBehaviour
 
 	void Start()
 	{
+		SceneManager.sceneLoaded += OnSceneLoaded;
 		GameEventManager.SyncData += SyncDataToClients;
 		GameEventManager.SyncInputDevice += SyncInputDevice;
 		SetupServer();
@@ -53,6 +55,7 @@ public class UHost : MonoBehaviour
 	{
         try
         {
+			SceneManager.sceneLoaded -= OnSceneLoaded;
 			GameEventManager.SyncData -= SyncDataToClients;
 			GameEventManager.SyncInputDevice -= SyncInputDevice;
             StopBroadcast();
@@ -102,7 +105,8 @@ public class UHost : MonoBehaviour
 		ConnectionConfig config = new ConnectionConfig();
 		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
 		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
-		
+		config.PacketSize = 2000;
+
 		HostTopology topology = new HostTopology(config, GameData.GetInstance().MaxNumOfPlayers);
 		hostId = NetworkTransport.AddHost(topology, port);
 
@@ -199,17 +203,23 @@ public class UHost : MonoBehaviour
 
 	public void StartBroadcast()
 	{
-		if (isBroadcasting)
+		try
 		{
-			return;
+			if (isBroadcasting)
+			{
+				return;
+			}
+			isBroadcasting = true;
+			byte[] msgOutBuffer = Utils.StringToBytes("1");
+			byte err;
+			if (!NetworkTransport.StartBroadcastDiscovery(hostId, port, broadcastKey, broadcastVersion, broadcastSubversion, msgOutBuffer, msgOutBuffer.Length, 1000, out err))
+			{
+				Debug.LogError("NetworkDiscovery StartBroadcast failed err: " + err);
+			}
 		}
-
-		isBroadcasting = true;
-		byte[] msgOutBuffer = Utils.StringToBytes("");
-		byte err;
-		if (!NetworkTransport.StartBroadcastDiscovery(hostId, port, broadcastKey, broadcastVersion, broadcastSubversion, msgOutBuffer, msgOutBuffer.Length, 1000, out err))
+		catch(System.Exception ex)
 		{
-			Debug.LogError("NetworkDiscovery StartBroadcast failed err: " + err);
+			print(ex.ToString());
 		}
 	}
 
