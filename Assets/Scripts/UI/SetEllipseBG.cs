@@ -7,7 +7,6 @@ public class SetEllipseBG : MonoBehaviour
 
 	void Start()
 	{
-		LoadEllipsePrefabs();
 		SetRouletteType();
 	}
 
@@ -22,33 +21,6 @@ public class SetEllipseBG : MonoBehaviour
 		{
 			objCircalRecords[0].SetActive(false);
 			objCircalRecords[1].SetActive(true);
-		}
-	}
-
-	void LoadEllipsePrefabs()
-	{
-		string prefabPath = "";
-		if (GameData.rouletteType == RouletteType.Standard)
-		{
-			prefabPath = "Ellipse38/Standard/Choose Effect";
-		}
-		else if (GameData.rouletteType == RouletteType.Special1)
-		{
-			prefabPath = "Ellipse38/Speial1/Choose Effect";
-		}
-		Object prefab = (Object)Resources.Load(prefabPath);
-		GameObject objChooseEffect = (GameObject)Instantiate(prefab);
-		objChooseEffect.name = "Choose Effect";
-		objChooseEffect.transform.SetParent(transform);
-		objChooseEffect.transform.localPosition = Vector3.zero;
-		objChooseEffect.transform.localScale = Vector3.one;
-
-		GameObject uilogic = GameObject.Find("UILogic");
-		for (int i = 0; i <= 37; ++i)
-		{
-			string name = i != 37 ? string.Format("e{0}", i) : "e00";
-//			print(name);
-			objChooseEffect.transform.Find(name).GetComponent<ButtonEvent>().receiver = uilogic;
 		}
 	}
 }
