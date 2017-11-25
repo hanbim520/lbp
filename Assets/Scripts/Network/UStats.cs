@@ -19,15 +19,30 @@ public class UStats : MonoBehaviour
 	private byte[] recBuffer = new byte[kMaxReceiveMsgSize];
 	private ConnectionState connState = ConnectionState.Disconnected;
 	private TopStatistics gameLogic;
-	
+
+	float heartbeatElapsed;
+	const float kHeartbeatInterver = 3.0f;
+
 	void Start()
 	{
 		gameLogic = GetComponent<TopStatistics>();
 		SetupClient();
 	}
+
+	void Keepalive()
+	{
+		heartbeatElapsed += Time.deltaTime;
+		if (heartbeatElapsed > kHeartbeatInterver)
+		{
+			heartbeatElapsed = 0;
+			SendToServer("hb");
+		}
+	}
 	
 	void Update()
 	{
+		Keepalive();
+
 		int connectionId; 
 		int channelId; 
 		System.Array.Clear(recBuffer, 0, recBuffer.Length);
@@ -39,6 +54,7 @@ public class UStats : MonoBehaviour
 			case NetworkEventType.Nothing:         
 				break;
 			case NetworkEventType.ConnectEvent:    
+				print("uclient connected!");
 				break;
 			case NetworkEventType.DataEvent:       
 				if (dataSize > 0)
@@ -60,21 +76,22 @@ public class UStats : MonoBehaviour
 		// global config
 		GlobalConfig gconfig = new GlobalConfig();
 		gconfig.ReactorModel = ReactorModel.FixRateReactor;
-		gconfig.ThreadAwakeTimeout = 1;
-		
+		gconfig.ThreadAwakeTimeout = 10;
+		NetworkTransport.Init(gconfig);
+
 		// build ourselves a config with a couple of channels
 		ConnectionConfig config = new ConnectionConfig();
-		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
+		reliableChannelId = config.AddChannel(QosType.ReliableFragmented);
 		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
+		config.PacketSize = 2000;
+		config.DisconnectTimeout = 5000;
 		
 		// create a host topology from the config
 		HostTopology hostconfig = new HostTopology(config, 1);
-		
-		// initialise the transport layer
-		NetworkTransport.Init(gconfig);
 		hostId = NetworkTransport.AddHost(hostconfig, port);
 		byte error;
 		NetworkTransport.SetBroadcastCredentials(hostId, broadcastKey, broadcastVersion, broadcastSubversion, out error);
+		print("Broadcast err:" + error);
 	}
 
 	private void HandleDataEvent(ref byte[] _recBuffer)
@@ -96,6 +113,8 @@ public class UStats : MonoBehaviour
 
 	private void HandleDisconnectEvent()
 	{
+		print("ustats HandleDisconnectEvent");
+		connectionId = 0;
 		connState = ConnectionState.Disconnected;
 		GameEventManager.OnClientDisconnect();
 	}
@@ -120,8 +139,10 @@ public class UStats : MonoBehaviour
 
 	private IEnumerator ConnectServer(string serverAddress, int port)
 	{
+		print("ustats ConnectServer: " + serverAddress + ", port: " + port);
 		byte connError;
 		connectionId = NetworkTransport.Connect(hostId, serverAddress, port, 0, out connError);
+		print("ustats connError:" + connError);
 		if (connectionId <= 0)
 		{
 			yield return new WaitForSeconds(reconnServerInterval);
@@ -135,8 +156,13 @@ public class UStats : MonoBehaviour
 	{
 		try
 		{
+			if (connState == ConnectionState.Disconnected ||
+				connectionId  == 0)
+				return;
+			
 			byte[] buffer = Utils.StringToBytes(msg);
 			byte error;
+			print("connectionId:" + connectionId);
 			NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
 		}
 		catch(System.Exception ex)
