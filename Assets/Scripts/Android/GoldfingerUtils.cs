@@ -38,7 +38,7 @@ public class GoldfingerUtils : MonoBehaviour
 	private int iPayCoinLow		= 0;		// 退币低位
     private int iLastPaySum     = 0;
 
-    private int iRevCoin        = 0;        // 停止收币信号
+    private int iRevCoin        = 1;        // 停止收币信号
     private int iLastRevCoin    = 0;
 
 	private	int iRevValRound	= 0;		// 第1次收到球号时的圈数
@@ -53,7 +53,7 @@ public class GoldfingerUtils : MonoBehaviour
 	private int realtimeBallVal = 0;		// 大于0表示孔里有球
 	private bool bCheckBallFall = false;	// 检查轨道上是否有球
 
-    private const float kTRevCoinErrTime  = 1.0f;
+    private const float kTRevCoinErrTime  = 30.0f;
     private float revCoinErrElapsed = 0;
 	private float kHoldKeyinDur = 0.4f;		// 长按上分时间
 	private float holdKeyinDelta= 0.0f;		// 长按上分键计时
