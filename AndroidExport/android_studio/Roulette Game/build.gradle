@@ -24,11 +24,11 @@ dependencies {
 }
 
 android {
-	compileSdkVersion 27
+	compileSdkVersion 22
 	buildToolsVersion '27.0.1'
 
 	defaultConfig {
-		targetSdkVersion 27
+		targetSdkVersion 22
 		applicationId 'com.zxproduct.www'
 	}
 
@@ -37,9 +37,9 @@ android {
 	}
 	signingConfigs { release {
 		storeFile file('/Users/chenxi/Android/Keystore/lunpan/lunpan.jks')
-		storePassword ''
+		storePassword '791227'
 		keyAlias 'lunpan'
-		keyPassword ''
+		keyPassword '791227'
 	} }
 
 	buildTypes {
