@@ -361,6 +361,7 @@ public class GoldfingerUtils : MonoBehaviour
                 int totalRevCoin = data[17] | (data[18] << 8) | (data[19] << 16) | (data[20] << 24);
                 if (totalRevCoin > iLastRevCoin)
                 {
+					revCoinErrElapsed = 0;
                     int deltaRev = totalRevCoin - iLastRevCoin;
                     GameEventManager.OnReceiveCoin(deltaRev);       // 投币
                 }
