@@ -831,26 +831,26 @@ public class ServerLogic : GameLogic
 			betVal = MaxBet(maxBet, 0, betVal);
 		}
 		// 计算全台限注
-		SendBetAbleValue(false, 0, field, betVal);
+//		SendBetAbleValue(false, 0, field, betVal);
 		
-//		if (betVal > 0)
-//		{
-//			if (betFields.ContainsKey(field))
-//			{
-//				betFields[field] += betVal;
-//			}
-//			else
-//			{
-//				betFields.Add(field, betVal);
-//			}
-//			GameData.GetInstance().ZongYa += betVal;
-//			currentBet += betVal;
-//			totalCredits -= betVal;
-//			ui.RefreshLblCredits(totalCredits.ToString());
-//			ui.RefreshLblBet(currentBet.ToString());
-//		}
-//		return betVal;
-		return 0;
+		if (betVal > 0)
+		{
+			if (betFields.ContainsKey(field))
+			{
+				betFields[field] += betVal;
+			}
+			else
+			{
+				betFields.Add(field, betVal);
+			}
+			GameData.GetInstance().ZongYa += betVal;
+			currentBet += betVal;
+			totalCredits -= betVal;
+			ui.RefreshLblCredits(totalCredits.ToString());
+			ui.RefreshLblBet(currentBet.ToString());
+		}
+		return betVal;
+//		return 0;
 	}
 
 	// 计算完全台限注的回调

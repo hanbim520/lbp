@@ -370,27 +370,27 @@ public class ClientLogic : GameLogic
 			betVal = MaxBet(maxBet, 0, betVal);
 		}
 		// 计算全台限注
-		string msg = NetInstr.BetAbleValue.ToString() + ":" + field + ":" + betVal.ToString();
-		uclient.SendToServer(msg);
+//		string msg = NetInstr.BetAbleValue.ToString() + ":" + field + ":" + betVal.ToString();
+//		uclient.SendToServer(msg);
 		
-//		if (betVal > 0)
-//		{
-//			if (betFields.ContainsKey(field))
-//			{
-//				betFields[field] += betVal;
-//			}
-//			else
-//			{
-//				betFields.Add(field, betVal);
-//			}
-//			GameData.GetInstance().ZongYa += betVal;
-//			currentBet += betVal;
-//			totalCredits -= betVal;
-//			ui.RefreshLblCredits(totalCredits.ToString());
-//			ui.RefreshLblBet(currentBet.ToString());
-//		}
-//		return betVal;
-		return 0;
+		if (betVal > 0)
+		{
+			if (betFields.ContainsKey(field))
+			{
+				betFields[field] += betVal;
+			}
+			else
+			{
+				betFields.Add(field, betVal);
+			}
+			GameData.GetInstance().ZongYa += betVal;
+			currentBet += betVal;
+			totalCredits -= betVal;
+			ui.RefreshLblCredits(totalCredits.ToString());
+			ui.RefreshLblBet(currentBet.ToString());
+		}
+		return betVal;
+//		return 0;
 	}
 
 	// 服务器发送回来某押分区能押多少分(用于计算全台限注)

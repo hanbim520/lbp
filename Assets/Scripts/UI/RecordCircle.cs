@@ -64,7 +64,7 @@ public class RecordCircle : MonoBehaviour
 
 	private void HandleRefreshRecord(int result = -1)
 	{
-		if (gameObject.activeSelf)
+		if (gameObject.activeInHierarchy)
         	StartCoroutine(RefreshView());
 	}
 
