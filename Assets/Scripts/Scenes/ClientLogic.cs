@@ -326,7 +326,7 @@ public class ClientLogic : GameLogic
 	{
 		ui.StopFlash();
 		ui.StopFlashLotteries();
-		ui.ClearAllEvent(null);
+//		ui.ClearAllEvent(null);
 	}
 
     private void SyncLast100(ref string[] words)
@@ -388,6 +388,7 @@ public class ClientLogic : GameLogic
 			totalCredits -= betVal;
 			ui.RefreshLblCredits(totalCredits.ToString());
 			ui.RefreshLblBet(currentBet.ToString());
+			AudioController.Play("betClick");
 		}
 		return betVal;
 //		return 0;

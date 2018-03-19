@@ -848,6 +848,7 @@ public class ServerLogic : GameLogic
 			totalCredits -= betVal;
 			ui.RefreshLblCredits(totalCredits.ToString());
 			ui.RefreshLblBet(currentBet.ToString());
+			AudioController.Play("betClick");
 		}
 		return betVal;
 //		return 0;
