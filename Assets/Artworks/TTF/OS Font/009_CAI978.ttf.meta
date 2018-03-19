@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: c731fdd0be31a4ac4af4018218fc8bfd
+timeCreated: 1519881019
+licenseType: Pro
+TrueTypeFontImporter:
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontName: 009-CAI978
+  fontNames:
+  - 009-CAI978
+  fallbackFontReferences: []
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

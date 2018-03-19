@@ -63,6 +63,7 @@ public class UnityPlayerActivity extends Activity
         registerReceiver(mReceiver, intentFilter);
 
         Init();
+        CrashHandler.getInstance().initCrashHandler(getApplication());
     }
 
     @Override protected void onNewIntent(Intent intent)
@@ -484,6 +485,7 @@ public class UnityPlayerActivity extends Activity
     {
         try
         {
+//            filePath += "/udisk0";
             CallCSLog("getFiles:" + filePath);
             File root = new File(filePath);
             if (root.exists())
