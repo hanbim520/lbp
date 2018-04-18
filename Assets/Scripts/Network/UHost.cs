@@ -18,6 +18,7 @@ public class UHost : MonoBehaviour
 	private int unreliableChannelId;
 	private byte[] recBuffer = new byte[kMaxReceiveMsgSize];
 
+	private int maxConnectedCount;
 	private int numOfConnecting = 0;
 	private List<int> allConnections = new List<int>();
 	private ServerLogic serverLogic;
@@ -48,6 +49,7 @@ public class UHost : MonoBehaviour
 
 	void Start()
 	{
+		maxConnectedCount = GameData.GetInstance().MaxNumOfPlayers + 1;
 		SceneManager.sceneLoaded += OnSceneLoaded;
 		GameEventManager.SyncData += SyncDataToClients;
 		GameEventManager.SyncInputDevice += SyncInputDevice;
@@ -82,30 +84,37 @@ public class UHost : MonoBehaviour
 
 	void Update()
 	{
-		Keepalive();
-
-		int connectionId; 
-		int channelId; 
-		System.Array.Clear(recBuffer, 0, recBuffer.Length);
-		int dataSize;
-		byte error;
-		NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, recBuffer.Length, out dataSize, out error);
-		switch (recData)
+		try
 		{
-		case NetworkEventType.Nothing:         
-			break;
-		case NetworkEventType.ConnectEvent:    
-			HandleConnectEvent(connectionId);
-			break;
-		case NetworkEventType.DataEvent: 
-            if (dataSize > 0)
-            {
-                HandleDataEvent(ref recBuffer, connectionId);
-            }
-			break;
-		case NetworkEventType.DisconnectEvent: 
-			HandleDisconnectEvent(connectionId);
-			break;
+//			Keepalive();
+
+			int connectionId; 
+			int channelId; 
+			System.Array.Clear(recBuffer, 0, recBuffer.Length);
+			int dataSize;
+			byte error;
+			NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, recBuffer.Length, out dataSize, out error);
+			switch (recData)
+			{
+			case NetworkEventType.Nothing:         
+				break;
+			case NetworkEventType.ConnectEvent:    
+				HandleConnectEvent(connectionId);
+				break;
+			case NetworkEventType.DataEvent: 
+				if (dataSize > 0)
+				{
+					HandleDataEvent(ref recBuffer, connectionId);
+				}
+				break;
+			case NetworkEventType.DisconnectEvent: 
+				HandleDisconnectEvent(connectionId);
+				break;
+			}
+		}
+		catch(System.Exception ex)
+		{
+			Debug.Log("UHost Update exception:" + ex.ToString());
 		}
 	}
 
@@ -118,12 +127,12 @@ public class UHost : MonoBehaviour
 		NetworkTransport.Init(gconfig);
 
 		ConnectionConfig config = new ConnectionConfig();
-		reliableChannelId = config.AddChannel(QosType.ReliableFragmented);
+		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
 		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
-		config.PacketSize = 2000;
+//		config.PacketSize = 2000;
 		config.DisconnectTimeout = 5000;
 
-		HostTopology topology = new HostTopology(config, GameData.GetInstance().MaxNumOfPlayers);
+		HostTopology topology = new HostTopology(config, maxConnectedCount);
 		hostId = NetworkTransport.AddHost(topology, port);
 
 		StartBroadcast();
@@ -132,14 +141,14 @@ public class UHost : MonoBehaviour
 	private void HandleConnectEvent(int connectionId)
 	{
 		Debug.Log("Connect event. connectionId: " + connectionId);
-		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers + 1)
+		if (numOfConnecting >= maxConnectedCount)
         {
 			return;
         }
 
 		allConnections.Add(connectionId);
 		++numOfConnecting;
-		if (numOfConnecting >= GameData.GetInstance().MaxNumOfPlayers + 1)
+		if (numOfConnecting >= maxConnectedCount)
 		{
 //			StopBroadcast();
 			GameEventManager.TriggerGameStart();
@@ -231,6 +240,10 @@ public class UHost : MonoBehaviour
 			if (!NetworkTransport.StartBroadcastDiscovery(hostId, port, broadcastKey, broadcastVersion, broadcastSubversion, msgOutBuffer, msgOutBuffer.Length, 1000, out err))
 			{
 				Debug.LogError("NetworkDiscovery StartBroadcast failed err: " + err);
+			}
+			else
+			{
+				Debug.Log("NetworkDiscovery StartBroadcast");
 			}
 		}
 		catch(System.Exception ex)

@@ -24,11 +24,11 @@ dependencies {
 }
 
 android {
-	compileSdkVersion 22
+	compileSdkVersion 27
 	buildToolsVersion '27.0.1'
 
 	defaultConfig {
-		targetSdkVersion 22
+		targetSdkVersion 27
 		applicationId 'com.zxproduct.www'
 	}
 

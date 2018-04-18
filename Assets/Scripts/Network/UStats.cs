@@ -41,7 +41,7 @@ public class UStats : MonoBehaviour
 	
 	void Update()
 	{
-		Keepalive();
+//		Keepalive();
 
 		int connectionId; 
 		int channelId; 
@@ -81,9 +81,9 @@ public class UStats : MonoBehaviour
 
 		// build ourselves a config with a couple of channels
 		ConnectionConfig config = new ConnectionConfig();
-		reliableChannelId = config.AddChannel(QosType.ReliableFragmented);
+		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
 		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
-		config.PacketSize = 2000;
+//		config.PacketSize = 2000;
 		config.DisconnectTimeout = 5000;
 		
 		// create a host topology from the config

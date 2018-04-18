@@ -64,34 +64,41 @@ public class UClient : MonoBehaviour
 	
 	void Update()
 	{
-		Keepalive();
-
-		int connectionId; 
-		int channelId; 
-		System.Array.Clear(recBuffer, 0, recBuffer.Length);
-		int dataSize;
-		byte error;
-		NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, recBuffer.Length, out dataSize, out error);
-		switch (recData)
+		try
 		{
-		case NetworkEventType.Nothing:         
-			break;
-		case NetworkEventType.ConnectEvent: 
-			print("uclient connected!");
-			break;
-		case NetworkEventType.DataEvent:       
-			if (dataSize > 0)
+//			Keepalive();
+
+			int connectionId; 
+			int channelId; 
+			System.Array.Clear(recBuffer, 0, recBuffer.Length);
+			int dataSize;
+			byte error;
+			NetworkEventType recData = NetworkTransport.ReceiveFromHost(hostId, out connectionId, out channelId, recBuffer, recBuffer.Length, out dataSize, out error);
+			switch (recData)
 			{
-				HandleDataEvent(ref recBuffer);
+			case NetworkEventType.Nothing:         
+				break;
+			case NetworkEventType.ConnectEvent: 
+				print("uclient connected!");
+				break;
+			case NetworkEventType.DataEvent:       
+				if (dataSize > 0)
+				{
+					HandleDataEvent(ref recBuffer);
+				}
+				break;
+			case NetworkEventType.DisconnectEvent: 
+				Debug.Log("Connected, error:" + error.ToString());
+				HandleDisconnectEvent();
+				break;
+			case NetworkEventType.BroadcastEvent:
+				HandleBroadcast();
+				break;
 			}
-			break;
-		case NetworkEventType.DisconnectEvent: 
-			Debug.Log("Connected, error:" + error.ToString());
-			HandleDisconnectEvent();
-			break;
-		case NetworkEventType.BroadcastEvent:
-			HandleBroadcast();
-			break;
+		}
+		catch(System.Exception ex)
+		{
+			Debug.Log("UClient Update exception:" + ex.ToString());
 		}
 	}
 
@@ -105,9 +112,9 @@ public class UClient : MonoBehaviour
 
 		// build ourselves a config with a couple of channels
 		ConnectionConfig config = new ConnectionConfig();
-		reliableChannelId = config.AddChannel(QosType.ReliableFragmented);
+		reliableChannelId = config.AddChannel(QosType.ReliableSequenced);
 		unreliableChannelId = config.AddChannel(QosType.UnreliableSequenced);
-		config.PacketSize = 2000;
+//		config.PacketSize = 2000;
 		config.DisconnectTimeout = 5000;
 
 		HostTopology hostconfig = new HostTopology(config, 1);
@@ -119,6 +126,7 @@ public class UClient : MonoBehaviour
 
 	private void HandleBroadcast()
 	{
+		print("UClient HandleBroadcast");
 		if (connState != ConnectionState.Disconnected)
 		{
 			return;
@@ -144,10 +152,10 @@ public class UClient : MonoBehaviour
 		if (connectionId <= 0)
 		{
 			yield return new WaitForSeconds(reconnServerInterval);
-			ConnectServer(serverAddress, port);
+			connState = ConnectionState.Disconnected;
+			yield break;
 		}
 		connState = ConnectionState.Connected;
-		yield return null;
 	}
 
 	private void HandleDataEvent(ref byte[] _recBuffer)
