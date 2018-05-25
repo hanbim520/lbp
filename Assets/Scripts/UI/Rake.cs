@@ -37,7 +37,7 @@ public class Rake : MonoBehaviour
 		for (int i = 0; i < chips.Count; ++i)
 		{
 			Transform t = chips[i];
-			if (t.localPosition.x >= chipDeadline)
+			if (t != null && t.localPosition.x >= chipDeadline)
 			{
 				chips.RemoveAt(i);
 				continue;

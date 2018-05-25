@@ -37,6 +37,7 @@ public class GoldfingerUtils : MonoBehaviour
 	private int iPayCoinHight 	= 0;		// 退币高位
 	private int iPayCoinLow		= 0;		// 退币低位
     private int iLastPaySum     = 0;
+	private int iTimes			= 0;		// 发送开门和吹风信号的次数
 
     private int iRevCoin        = 1;        // 停止收币信号
     private int iLastRevCoin    = 0;
@@ -401,6 +402,9 @@ public class GoldfingerUtils : MonoBehaviour
 
 	private void RevGoldfingerData()
 	{
+		if (iBlowOrDoor != 0)
+			++iTimes;
+		
 		int[] outData = new int[]{
 			0xD5, 0x58, 0x57, 14, iBlowOrDoor,
 			iHight, iLow, iCellNum, iPayCoin, iPayCoinHight,
@@ -413,9 +417,14 @@ public class GoldfingerUtils : MonoBehaviour
 		sp.WriteData(ref outData);
 //        DebugConsole.Log(Utils.ToString(ref outData));
 
-		iHight = 0;
-		iLow = 0;
-		iBlowOrDoor = 0;
+		if (iBlowOrDoor != 0 && iTimes >= 5)	// 发送吹风或者开门信号x次后重置
+		{
+			iTimes = 0;
+			iHight = 0;
+			iLow = 0;
+			iBlowOrDoor = 0;
+		}
+
 		iCellNum = 0;
 		iPayCoinHight = 0;
 		iPayCoinLow = 0;

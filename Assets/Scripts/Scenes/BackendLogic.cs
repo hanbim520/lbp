@@ -17,6 +17,7 @@ public class BackendLogic : MonoBehaviour
 	public GameObject[] btnMouse;
 	public GameObject[] btnTouchScreen;
 	public GameObject tipPrintCode;
+	public Dropdown billAcceptorList;
 
     private RectTransform mouseIcon;
     private GameObject downHitObject;
@@ -544,6 +545,7 @@ public class BackendLogic : MonoBehaviour
 			root.GetChild(pageIdx).GetChild(5).Find("Text").GetComponent<Text>().text = ga.allMax3Val.ToString();
 			root.GetChild(pageIdx).GetChild(6).Find("Text").GetComponent<Text>().text = ga.allMax2Val.ToString();
         }
+		billAcceptorList.value = GameData.GetInstance().billAcceptorType;
     }
 
     private int SetActiveTitles(Transform root)
@@ -1097,6 +1099,7 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().allMax6Val = page2Val[4];
 			GameData.GetInstance().allMax3Val = page2Val[5];
 			GameData.GetInstance().allMax2Val = page2Val[6];
+			GameData.GetInstance().billAcceptorType = billAcceptorList.value;
 			GameData.GetInstance().SaveSetting();
 			
             int idx = GameData.GetInstance().backendLanguage;

@@ -121,7 +121,6 @@ public class MainUILogic : MonoBehaviour
 		crown = GameObject.Find("Canvas/crown");
 		crown.SetActive(false);
 		mouseIcon = GameObject.Find("Canvas/mouse icon").GetComponent<RectTransform>();
-		mouseIcon.localPosition = Vector3.zero;
 		fieldChipsRoot = GameObject.Find("Canvas/FieldChipsRoot");
 		countdown = GameObject.Find("Canvas/Countdown");
         lblCredit = GameObject.Find("Canvas/Credit/Credit").GetComponent<Text>();
@@ -269,67 +268,27 @@ public class MainUILogic : MonoBehaviour
 		}
 
 		// 还原压分区筹码
-		if (fieldChipsRoot.transform.childCount > 0)
-		{
-			Dictionary<string, int> betFields = gameLogic.betFields;
-			
-			foreach (Transform t in fieldChipsRoot.transform)
-				Destroy(t.gameObject);
+		Dictionary<string, int> betFields = gameLogic.betFields;
+		
+		foreach (Transform t in fieldChipsRoot.transform)
+			Destroy(t.gameObject);
 
-			// 还原经典压分区筹码
-			if (displayClassic.activeSelf)
+		// 还原经典压分区筹码
+		if (displayClassic.activeSelf)
+		{
+			string rootPath = "Canvas/38 Fields/Classic/Valid Fields";
+			if (GameData.GetInstance().maxNumberOfFields == 37)
 			{
-				string rootPath = "Canvas/38 Fields/Classic/Valid Fields";
-				if (GameData.GetInstance().maxNumberOfFields == 37)
-				{
-					rootPath = "Canvas/37 Fields/Classic/Valid Fields";
-				}
-				GameObject root = GameObject.Find(rootPath);
-				if (root != null)
-				{
-					foreach (KeyValuePair<string, int> item in betFields)
-					{
-						int count = GameData.GetInstance().betChipValues.Count;
-						Transform target = root.transform.Find(item.Key);
-						if (target != null)
-						{
-							int chipIdx = 0;
-							for (int i = 0; i < count; ++i)
-							{
-								if (item.Value >= GameData.GetInstance().betChipValues[i])
-									chipIdx = i;
-							}
-							string prefabPath = "BC" + chipIdx.ToString();
-							GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath).gameObject;
-							chip.transform.SetParent(fieldChipsRoot.transform);
-							chip.transform.localScale = Vector3.one;
-							Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
-							                                target.localPosition.y * target.parent.localScale.y,
-							                                0);
-							chip.transform.localPosition = targetPos;
-							chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
-							chip.name = item.Key;
-						}
-					}
-				}
+				rootPath = "Canvas/37 Fields/Classic/Valid Fields";
 			}
-			// 还原椭圆压分区筹码
-			else 
+			GameObject root = GameObject.Find(rootPath);
+			if (root != null)
 			{
-				string vfRootPath = "Canvas/38 Fields/Ellipse/Valid Fields";
-				string ceRootPath = "Canvas/38 Fields/Ellipse/Choose Effect";
-				if (GameData.GetInstance().maxNumberOfFields == 37)
-				{
-					vfRootPath = "Canvas/37 Fields/Ellipse/Valid Fields";
-					ceRootPath = "Canvas/37 Fields/Ellipse/Choose Effect";
-				}
-				GameObject vfRoot = GameObject.Find(vfRootPath);
-				GameObject ceRoot = GameObject.Find(ceRootPath);
-				//Choose Effect
-				if (vfRoot != null && ceRoot != null)
+				foreach (KeyValuePair<string, int> item in betFields)
 				{
 					int count = GameData.GetInstance().betChipValues.Count;
-					foreach (KeyValuePair<string, int> item in betFields)
+					Transform target = root.transform.Find(item.Key);
+					if (target != null)
 					{
 						int chipIdx = 0;
 						for (int i = 0; i < count; ++i)
@@ -337,44 +296,81 @@ public class MainUILogic : MonoBehaviour
 							if (item.Value >= GameData.GetInstance().betChipValues[i])
 								chipIdx = i;
 						}
+						string prefabPath = "BC" + chipIdx.ToString();
+						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath).gameObject;
+						chip.transform.SetParent(fieldChipsRoot.transform);
+						chip.transform.localScale = Vector3.one;
+						Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
+						                                target.localPosition.y * target.parent.localScale.y,
+						                                0);
+						chip.transform.localPosition = targetPos;
+						chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
+						chip.name = item.Key;
+					}
+				}
+			}
+		}
+		// 还原椭圆压分区筹码
+		else 
+		{
+			string vfRootPath = "Canvas/38 Fields/Ellipse/Valid Fields";
+			string ceRootPath = "Canvas/38 Fields/Ellipse/Choose Effect";
+			if (GameData.GetInstance().maxNumberOfFields == 37)
+			{
+				vfRootPath = "Canvas/37 Fields/Ellipse/Valid Fields";
+				ceRootPath = "Canvas/37 Fields/Ellipse/Choose Effect";
+			}
+			GameObject vfRoot = GameObject.Find(vfRootPath);
+			GameObject ceRoot = GameObject.Find(ceRootPath);
+			//Choose Effect
+			if (vfRoot != null && ceRoot != null)
+			{
+				int count = GameData.GetInstance().betChipValues.Count;
+				foreach (KeyValuePair<string, int> item in betFields)
+				{
+					int chipIdx = 0;
+					for (int i = 0; i < count; ++i)
+					{
+						if (item.Value >= GameData.GetInstance().betChipValues[i])
+							chipIdx = i;
+					}
 
-						List<string> prefabPath = new List<string>();
-						prefabPath.Add("SC" + chipIdx.ToString());
-						List<Transform> target = new List<Transform>();
-						int fieldName;
-						List<string> name = new List<string>();
-						name.Add(item.Key);
+					List<string> prefabPath = new List<string>();
+					prefabPath.Add("SC" + chipIdx.ToString());
+					List<Transform> target = new List<Transform>();
+					int fieldName;
+					List<string> name = new List<string>();
+					name.Add(item.Key);
 
-						// 设置小筹码
-						Transform tmpTarget = vfRoot.transform.Find(item.Key);
+					// 设置小筹码
+					Transform tmpTarget = vfRoot.transform.Find(item.Key);
+					if (tmpTarget != null)
+						target.Add(tmpTarget);
+
+					// 设置大筹码
+					if (int.TryParse(item.Key, out fieldName) || string.Equals(item.Key, "00"))
+					{
+						prefabPath.Add("BC" + chipIdx.ToString());
+						string eName = "e" + item.Key;
+						name.Add(eName);
+						tmpTarget = ceRoot.transform.Find(eName);
 						if (tmpTarget != null)
 							target.Add(tmpTarget);
-
-						// 设置大筹码
-						if (int.TryParse(item.Key, out fieldName) || string.Equals(item.Key, "00"))
+					}
+					
+					if (target.Count > 0)
+					{
+						for (int i = 0; i < prefabPath.Count; ++i)
 						{
-							prefabPath.Add("BC" + chipIdx.ToString());
-							string eName = "e" + item.Key;
-							name.Add(eName);
-							tmpTarget = ceRoot.transform.Find(eName);
-							if (tmpTarget != null)
-								target.Add(tmpTarget);
-						}
-						
-						if (target.Count > 0)
-						{
-							for (int i = 0; i < prefabPath.Count; ++i)
-							{
-								GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath[i]).gameObject;
-								chip.transform.SetParent(fieldChipsRoot.transform);
-								chip.transform.localScale = Vector3.one;
-								Vector3 targetPos = new Vector3(target[i].localPosition.x * target[i].parent.localScale.x,
-								                                target[i].localPosition.y * target[i].parent.localScale.y,
-								                                0);
-								chip.transform.localPosition = targetPos;
-								chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
-								chip.name = name[i];
-							}
+							GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath[i]).gameObject;
+							chip.transform.SetParent(fieldChipsRoot.transform);
+							chip.transform.localScale = Vector3.one;
+							Vector3 targetPos = new Vector3(target[i].localPosition.x * target[i].parent.localScale.x,
+							                                target[i].localPosition.y * target[i].parent.localScale.y,
+							                                0);
+							chip.transform.localPosition = targetPos;
+							chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
+							chip.name = name[i];
 						}
 					}
 				}
@@ -1203,6 +1199,14 @@ public class MainUILogic : MonoBehaviour
 			{
 				GameEventManager.OnReceiveCoin(1000);
 			}
+			else if (Input.GetKeyDown(KeyCode.D))
+			{
+				DoubleEvent();
+			}
+			else if (Input.GetKeyDown(KeyCode.A))
+			{
+				BetSeries(SeriesName.SmallSeries);
+			}
 		}
 	}
 
@@ -1675,7 +1679,7 @@ public class MainUILogic : MonoBehaviour
 
 	private void SyncUI()
 	{
-		SetDisplay();
+//		SetDisplay();
 //		SetBetChips();
 	}
 
@@ -1756,5 +1760,86 @@ public class MainUILogic : MonoBehaviour
 			objDandian.transform.localPosition = Vector3.zero;
 			objDandian.transform.localScale = Vector3.one;
 		}
+	}
+
+	// 不检查全台限注
+	public void RepeatEvent2()
+	{
+		int count = GameData.GetInstance().lastBets.Count;
+		if (count == 0 || 
+			gameLogic.isPayingCoin || 
+			IsDlgActived() || 
+			gameLogic.LogicPhase != GamePhase.Countdown || 
+			gameLogic.IsLock ||
+			!gameLogic.bCanBet)
+			return;
+
+		int lastBetCredit = GameData.GetInstance().lastBetCredit;
+		if (lastBetCredit > gameLogic.totalCredits)
+			return;
+
+		RepeatEventCB();
+	}
+
+	// x2押分
+	public void DoubleEvent()
+	{
+		if (gameLogic.isPayingCoin || 
+			IsDlgActived() || 
+			gameLogic.LogicPhase != GamePhase.Countdown || 
+			gameLogic.IsLock ||
+			!gameLogic.bCanBet)
+			return;
+
+		Dictionary<string, int> dict = new Dictionary<string, int>(gameLogic.betFields);
+		foreach (KeyValuePair<string, int> item in dict)
+			GameEventManager.OnFieldClick(item.Key, item.Value);
+		SetDisplay();
+	}
+
+	string[] smallSeries37 = new string[]{ "5-8", "10-11", "13-16", "23-24", "27-30", "33-36" };			// 都1个注
+	string[] orphaline37 = new string[]{ "1", "6-9", "14-17", "17-20", "31-34" };							// 都1个注
+	string[] zeroSpiel37 = new string[]{ "0-3", "12-15", "26", "32-35" };									// 都1个注
+	string[] biSeries37 = new string[]{ "0-2-3", "4-7", "12-15", "18-21", "19-22", "32-35", "25-26-28-29"}; // "0-2-3"和"25-26-28-29"投2个注，其他1个注
+	// 区域押分(大区 小区 5/8区 其他区)
+	public void BetSeries(SeriesName name)
+	{
+		if (gameLogic.isPayingCoin || 
+			IsDlgActived() || 
+			gameLogic.LogicPhase != GamePhase.Countdown || 
+			gameLogic.IsLock ||
+			!gameLogic.bCanBet)
+			return;
+
+		string[] series = new string[]{""};
+//		if (GameData.GetInstance().maxNumberOfFields == 37)
+//		{
+//			
+//		}
+//		else
+//		{
+//			
+//		}
+		if (name == SeriesName.BigSeries)
+			series = biSeries37;
+		else if (name == SeriesName.SmallSeries)
+			series = smallSeries37;
+		else if (name == SeriesName.Orphaline)
+			series = orphaline37;
+		else if (name == SeriesName.ZeroSpiel)
+			series = zeroSpiel37;
+		
+		int bet = GameData.GetInstance().betChipValues[curChipIdx];
+		foreach (string key in series)
+		{
+			if (string.Compare("0-2-3", key) == 0 ||
+				string.Compare("25-26-28-29", key) == 0)
+			{
+				GameEventManager.OnFieldClick(key, bet * 2);
+				continue;
+			}
+			GameEventManager.OnFieldClick(key, bet);
+		}
+		SetDisplay();
 	}
 }

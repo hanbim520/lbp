@@ -14,7 +14,7 @@ public class GameData
 	public static bool controlCode	= false;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
 	public static RouletteType rouletteType = RouletteType.Standard;	// 轮盘数字排列类型
-	public static string version 	= "3.3.6";
+	public static string version 	= "3.7.2";
 
     // Setting menu
     public int betTimeLimit;
@@ -50,6 +50,7 @@ public class GameData
 	public int lotteryRate;			// 彩金累计千分比(1-100)
 	public int lotteryAllocation; 	// 彩金分配(可设置范围0-100)
 	public int topScreenLanguage;	// 顶部路单屏的语言  0:EN 1:CN
+	public int billAcceptorType;	// 0:JCM 1:ICT
 
     // Account
     public int zongShang;	// 总上分
@@ -440,6 +441,7 @@ public class GameData
 		PlayerPrefs.SetInt("lotteryAllocation", lotteryAllocation);
 		PlayerPrefs.SetInt("powerOffCompensate", powerOffCompensate);
 		PlayerPrefs.SetInt("topScreenLanguage", topScreenLanguage);
+		PlayerPrefs.SetInt("billAcceptorType", billAcceptorType);
         PlayerPrefs.Save();
     }
 
@@ -483,6 +485,7 @@ public class GameData
 		lotteryAllocation = 40;
 		powerOffCompensate = 1;
 		topScreenLanguage = 0;
+		billAcceptorType = 0;
     }
 
 	public void DefaultCustom()
@@ -622,6 +625,7 @@ public class GameData
 			lotteryAllocation = PlayerPrefs.GetInt("lotteryAllocation");
 			powerOffCompensate = PlayerPrefs.GetInt("powerOffCompensate", 1);
 			topScreenLanguage = PlayerPrefs.GetInt("topScreenLanguage", 0);
+			billAcceptorType = PlayerPrefs.GetInt("billAcceptorType", 0);
 
             // Check account menu 
             zongShang = CryptoPrefs.GetInt("zongShang");
