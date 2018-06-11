@@ -16,7 +16,6 @@ public class BackendLogic : MonoBehaviour
 	public Text[] deviceId;				// 机台序号 0:en 1:cn
 	public GameObject[] btnMouse;
 	public GameObject[] btnTouchScreen;
-	public GameObject tipPrintCode;
 	public Dropdown billAcceptorList;
 
     private RectTransform mouseIcon;
@@ -53,9 +52,7 @@ public class BackendLogic : MonoBehaviour
 	private string[] strAdminPassword = new string[]{"Input Admin Password", "请输入管理员密码"};
 	private string[] strDeviceId = new string[]{"Device Id", "请输入设备Id"};
 	private string[] strSetError = new string[]{"Only host device can enter.", "只有主机可以进入"};
-	private string[] strClearAccoutTip = new string[]{"Time's up, please\nreport accounts.", "游戏时间结束，\n请报账打码。"};
 	private string[] strErrorPW = new string[]{"Incorrect Password!", "密码输入错误!"};
-	private string[] strClearAccountFailed = new string[]{"Game credit is not zero,\nclear credit firstly!", "先下完台面上的分,\n再清除账目!"};
 
     void Start()
     {
@@ -68,14 +65,6 @@ public class BackendLogic : MonoBehaviour
         calcPassword = GameObject.Find("Canvas/Calc/Input/Password").GetComponent<Text>();
 		dlgCalc = GameObject.Find("Canvas/Calc");
         calcPassword.text = calcTitle.text = calcContent.text = string.Empty;
-		if (GameData.controlCode &&
-		    GameData.GetInstance().remainMins <= 0)
-		{
-			tipPrintCode.SetActive(true);
-			tipPrintCode.transform.Find("Text").GetComponent<Text>().text = strClearAccoutTip[GameData.GetInstance().backendLanguage];
-		}
-		else
-			tipPrintCode.SetActive(false);
 		InitMain();
 
 		if (GameData.GetInstance().deviceIndex == 1)
@@ -544,17 +533,9 @@ public class BackendLogic : MonoBehaviour
 			root.GetChild(pageIdx).GetChild(4).Find("Text").GetComponent<Text>().text = ga.allMax6Val.ToString();
 			root.GetChild(pageIdx).GetChild(5).Find("Text").GetComponent<Text>().text = ga.allMax3Val.ToString();
 			root.GetChild(pageIdx).GetChild(6).Find("Text").GetComponent<Text>().text = ga.allMax2Val.ToString();
+			root.GetChild(pageIdx).GetChild(7).Find("Text").GetComponent<Text>().text = ga.blowTiming.ToString();
         }
 		billAcceptorList.value = GameData.GetInstance().billAcceptorType;
-    }
-
-    private int SetActiveTitles(Transform root)
-    {
-        int activeIdx = GameData.controlCode ? 0 : 1;
-        int nonactiveIdx = Mathf.Abs(activeIdx - 1);
-        root.GetChild(activeIdx).gameObject.SetActive(true);
-        root.GetChild(nonactiveIdx).gameObject.SetActive(false);
-        return activeIdx;
     }
 
     private void InitAccount()
@@ -571,8 +552,7 @@ public class BackendLogic : MonoBehaviour
 		menuLottery.SetActive(false);
         dlgCalc.SetActive(false);
 
-        GameObject languageRoot = SetLanguage(menuAccount.gameObject);
-        SetActiveTitles(languageRoot.transform);
+        SetLanguage(menuAccount.gameObject);
 
 		otherDevice.Clear();
 		UpdateHostAccount();
@@ -610,7 +590,7 @@ public class BackendLogic : MonoBehaviour
 				Transform t = loadingRoot.Find("LoadingText" + (id - 1));
 				if (t != null)
 				{
-					string prefabName = GameData.controlCode ? "Account/AccountItem CC" : "Account/AccountItem NCC";
+					string prefabName = "Account/AccountItem NCC";
 					Object prefab = (Object)Resources.Load(prefabName);
 					GameObject go = (GameObject)Instantiate(prefab);
 					go.transform.SetParent(accountItemRoot);
@@ -621,25 +601,21 @@ public class BackendLogic : MonoBehaviour
 					go.transform.Find("keout").GetComponent<Text>().text = item.Value.keout.ToString();
 					go.transform.Find("tou").GetComponent<Text>().text = item.Value.receiveCoin.ToString();
 					go.transform.Find("tui").GetComponent<Text>().text = item.Value.payCoin.ToString();
-					if (GameData.controlCode)
-						go.transform.Find("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
 					go.transform.Find("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
 					go.transform.Find("card").GetComponent<Text>().text = item.Value.card.ToString();
-					go.name = GameData.controlCode ? "AccountItem CC" + (id - 1) : "AccountItem NCC" + (id - 1);
+					go.name = "AccountItem NCC" + (id - 1);
 					prefab = null;
 					Destroy(t.gameObject);
 				}
 				else
 				{
-					string name = GameData.controlCode ? "AccountItem CC" + (id - 1) : "AccountItem NCC" + (id - 1);
+					string name = "AccountItem NCC" + (id - 1);
 					t = accountItemRoot.Find(name);
 					t.Find("idx").GetComponent<Text>().text = item.Value.deviceIndex.ToString();
 					t.Find("keyin").GetComponent<Text>().text = item.Value.keyin.ToString();
 					t.Find("keout").GetComponent<Text>().text = item.Value.keout.ToString();
 					t.Find("tou").GetComponent<Text>().text = item.Value.receiveCoin.ToString();
 					t.Find("tui").GetComponent<Text>().text = item.Value.payCoin.ToString();
-					if (GameData.controlCode)
-						t.Find("winnings").GetComponent<Text>().text = item.Value.winnings.ToString();
 					t.Find("total winnings").GetComponent<Text>().text = item.Value.totalWinnings.ToString();
 					t.Find("card").GetComponent<Text>().text = item.Value.card.ToString();
 				}
@@ -1099,6 +1075,7 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().allMax6Val = page2Val[4];
 			GameData.GetInstance().allMax3Val = page2Val[5];
 			GameData.GetInstance().allMax2Val = page2Val[6];
+			GameData.GetInstance().blowTiming = page2Val[7];
 			GameData.GetInstance().billAcceptorType = billAcceptorList.value;
 			GameData.GetInstance().SaveSetting();
 			
@@ -1158,8 +1135,8 @@ public class BackendLogic : MonoBehaviour
         }
         else if (string.Equals(name, "baoji"))
         {
-            if (value > 300000)
-                value = 300000;
+            if (value > 30000000)
+                value = 30000000;
             else if (value < 10000)
                 value = 10000;
         }
@@ -1220,6 +1197,10 @@ public class BackendLogic : MonoBehaviour
 		{
 			value = Mathf.Clamp(value, 0, 1);
 		}
+		else if (Utils.StringIsEquals(name, "blow timing"))
+		{
+			value = Mathf.Clamp(value, 0, 5);
+		}
     }
 
 	public void HandleRecData(ref string[] words, int connectionId)
@@ -1261,9 +1242,10 @@ public class BackendLogic : MonoBehaviour
 	{
 		if (GameData.controlCode)
 		{
-			// 要打码
-			if (!dlgPrintCode.activeSelf)
-				dlgPrintCode.SetActive(true);
+			PlayerPrefs.SetInt("ResetAccount", 1);
+			PlayerPrefs.Save();
+			GameData.GetInstance().NextLevelName = Scenes.StartInfo;
+			UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.Loading);
 		}
 		else
 		{
@@ -1271,7 +1253,7 @@ public class BackendLogic : MonoBehaviour
 		}
 	}
 
-    private void PrintCodeSuccess()
+	private void PrintCodeSuccess(int type)
     {
         dlgPrintCode.SetActive(false);
         printCodeTimes += 1;
@@ -1281,10 +1263,10 @@ public class BackendLogic : MonoBehaviour
         }
 		else
 		{
-			GameData.GetInstance().currentWin = 0;
-			GameData.GetInstance().currentZongShang = 0;
-			GameData.GetInstance().currentZongXia = 0;
-			GameData.GetInstance().SaveAccount();
+//			GameData.GetInstance().currentWin = 0;
+//			GameData.GetInstance().currentZongShang = 0;
+//			GameData.GetInstance().currentZongXia = 0;
+//			GameData.GetInstance().SaveAccount();
 			UpdateHostAccount();
 			string msg = NetInstr.ClearCurrentWin.ToString();
 			host.SendToAll(msg);
@@ -1297,19 +1279,13 @@ public class BackendLogic : MonoBehaviour
 		ShowWarning(strError[GameData.GetInstance().backendLanguage], true);
     }
 
+	// 账目归零
     private void ClearAccount()
     {
-        // 账目归零
-        if (GameData.GetInstance().ClearAccount())
-		{
-			UpdateHostAccount();
-			string msg = NetInstr.ClearAccount.ToString();
-			host.SendToAll(msg);
-		}
-		else
-		{
-			ShowWarning(strClearAccountFailed[GameData.GetInstance().backendLanguage], true, 3.0f);
-		}
+		GameData.GetInstance().ClearAccount();
+		UpdateHostAccount();
+		string msg = NetInstr.ClearAccount.ToString();
+		host.SendToAll(msg);
     }
 
 	private void UpdateHostAccount()
@@ -1322,7 +1298,7 @@ public class BackendLogic : MonoBehaviour
 		item.keout = GameData.GetInstance().zongXia;
 		item.receiveCoin = GameData.GetInstance().zongTou;
 		item.payCoin = GameData.GetInstance().zongTui;
-		item.winnings = GameData.GetInstance().currentWin;
+		item.winnings = GameData.GetInstance().totalWin;
 		item.totalWinnings = GameData.GetInstance().totalWin;
 		item.card = GameData.GetInstance().cardCredits;
 		if (!otherDevice.ContainsKey(deviceIndex))
@@ -1331,11 +1307,11 @@ public class BackendLogic : MonoBehaviour
 
 	private void CalcTotalAccount()
 	{
-		string goName = GameData.controlCode ? "TotalNum CC" : "TotalNum NCC";
+		string goName = "TotalNum NCC";
 		Transform totalNum = accountItemRoot.Find(goName);
 		if (totalNum == null)
 		{
-			string prefabName = GameData.controlCode ? "Account/TotalNum CC" : "Account/TotalNum NCC";
+			string prefabName = "Account/TotalNum NCC";
 			Object prefab = (Object)Resources.Load(prefabName);
 			GameObject go = (GameObject)Instantiate(prefab);
 			go.transform.SetParent(accountItemRoot);
@@ -1360,8 +1336,6 @@ public class BackendLogic : MonoBehaviour
 		totalNum.Find("keout").GetComponent<Text>().text = keout.ToString();
 		totalNum.Find("tou").GetComponent<Text>().text = tou.ToString();
 		totalNum.Find("tui").GetComponent<Text>().text = tui.ToString();
-		if (GameData.controlCode)
-			totalNum.Find("winnings").GetComponent<Text>().text = winnings.ToString();
 		totalNum.Find("total winnings").GetComponent<Text>().text = totalWin.ToString();
 		totalNum.Find("card").GetComponent<Text>().text = card.ToString();
 	}

@@ -6,6 +6,7 @@ using System.IO.Ports;
 // 通过串口与金手指通讯
 public class GoldfingerUtils : MonoBehaviour
 {
+	public bool talkToChip = false;
 	private AndroidSerialPort sp;		// 金手指通讯
 
 	private const float kRevGoldFingerDataInterval	= 0.1f;
@@ -42,6 +43,16 @@ public class GoldfingerUtils : MonoBehaviour
     private int iRevCoin        = 1;        // 停止收币信号
     private int iLastRevCoin    = 0;
 
+	private int iStopWatchS		= 0;		// 码表上分信号 A8
+	private int iStopWatchX		= 0;		// 码表下分信号 B8
+	private int iStopWatchTou	= 0;		// 码表投币信号 A9
+	private int iStopWatchTui	= 0;		// 码表退币信号 B9
+
+	private int stopwatchSNUM	= 0;		// 码表将要上分量
+	private int stopwatchXNUM	= 0;		// 码表将要下分量
+	private int stopwatchTouNUM	= 0;		// 码表将要投币量
+	private int stopwatchTuiNUM	= 0;		// 码表将要退币量
+
 	private	int iRevValRound	= 0;		// 第1次收到球号时的圈数
 	private int iRevValCell		= 0;		// 第1次收到球号时的格数
 	private int iFirstBallVal	= 0;		// 第1次认球的球号
@@ -62,8 +73,6 @@ public class GoldfingerUtils : MonoBehaviour
 
 	bool isConntected = false;
 
-    private int curDelayIdx         = -1;
-    private List<float> delayBlowTimes  = new List<float>();
 
 	void Start()
 	{
@@ -72,6 +81,9 @@ public class GoldfingerUtils : MonoBehaviour
 		GameEventManager.WinLightSignal += WinLightSignal;
 		GameEventManager.StartCountdown += StartCountdown;
 		GameEventManager.EndCountdown += EndCountdown;
+		GameEventManager.TalkChipEnable += TalkChipEnable;
+		GameEventManager.SetChipData += SetChipData;
+		GameEventManager.StopWatch += StopWatchEvent;
 	}
 
 	void OnDestroy()
@@ -79,6 +91,9 @@ public class GoldfingerUtils : MonoBehaviour
 		GameEventManager.WinLightSignal -= WinLightSignal;
 		GameEventManager.StartCountdown -= StartCountdown;
 		GameEventManager.EndCountdown -= EndCountdown;
+		GameEventManager.TalkChipEnable -= TalkChipEnable;
+		GameEventManager.SetChipData -= SetChipData;
+		GameEventManager.StopWatch -= StopWatchEvent;
 		CloseCOM();
 	}
 
@@ -135,7 +150,10 @@ public class GoldfingerUtils : MonoBehaviour
 		revGoldFingerDataElapsed += Time.deltaTime;
 		if (revGoldFingerDataElapsed > kRevGoldFingerDataInterval)
 		{
-			RevGoldfingerData();
+			if (talkToChip)
+				TalkToChip();
+			else
+				RevGoldfingerData();
 			revGoldFingerDataElapsed = 0;
 		}
 
@@ -393,9 +411,119 @@ public class GoldfingerUtils : MonoBehaviour
                 iLastPaySum = totalPayCoin;
 
 			}
+			else if (data[0] == 0xA5 && data[1] == 0x66 && data[2] == 0x77)
+			{
+				// 校验数据
+				int[] temp = new int[24];
+				System.Array.Copy(data, 1, temp, 0, 24);
+				if (data[25] != Utils.CrcAddXor(temp, 24))
+				{
+					TalkToChip();
+					DebugConsole.Log("校验不通过");
+					return;
+				}
+				DebugConsole.Log("芯片回传:" + Utils.ToString(ref data));
+				GameEventManager.OnGetChipData(data);
+			}
 			else
 			{
 //				DebugConsole.Log("不合格");
+			}
+		}
+	}
+
+	int[] outChipDate;		// 传给加密片的数据
+
+	void TalkChipEnable(bool enable)
+	{
+		DebugConsole.Log("TalkChipEnable " + enable);
+		talkToChip = enable;
+	}
+
+	// 发送数据给加密片
+	void TalkToChip()
+	{
+		DebugConsole.Log("TalkToChip1");
+		if (outChipDate == null)
+			return; 
+		
+		DebugConsole.Log("TalkToChip2");
+		sp.WriteData(ref outChipDate);
+		DebugConsole.Log("TalkToChip3");
+		talkToChip = false;
+	}
+
+	void SetChipData(int[] data)
+	{
+		DebugConsole.Log("TalkToChip3");
+		outChipDate = new int[37];
+		outChipDate[0] = 0xD5;
+		outChipDate[1] = 0x66;
+		outChipDate[2] = 0x77;
+		outChipDate[3] = 14;
+		System.Array.Copy(data, 0, outChipDate, 4, 32);
+		int[] tmp = new int[35];
+		System.Array.Copy(outChipDate, 1, tmp, 0, 35);
+		int crc = Utils.CrcAddXor(tmp, 35);
+		outChipDate[36] = crc;
+	}
+
+	void StopWatchEvent(int deltaS, int deltaX, int deltaTou, int deltaTui)
+	{
+		stopwatchSNUM += deltaS;
+		stopwatchXNUM += deltaX;
+		stopwatchTouNUM += deltaTou;
+		stopwatchTuiNUM += deltaTui;
+	}
+
+	void UpdateStopWatchs()
+	{
+		if (stopwatchSNUM > 0)
+		{
+			if (iStopWatchS > 0)
+			{
+				iStopWatchS = 0;
+				--stopwatchSNUM;
+			}
+			else
+			{
+				iStopWatchS = 1;
+			}
+		}
+		if (stopwatchXNUM > 0)
+		{
+			if (iStopWatchX > 0)
+			{
+				iStopWatchX = 0;
+				--stopwatchXNUM;
+			}
+			else
+			{
+				iStopWatchX = 1;
+			}
+		}
+		if (stopwatchTouNUM > 0)
+		{
+			if (iStopWatchTou > 0)
+			{
+				iStopWatchTou = 0;
+				--stopwatchTouNUM;
+			}
+			else
+			{
+				iStopWatchTou = 1;
+			}
+		}
+		if (stopwatchTuiNUM > 0)
+		{
+			if (iStopWatchTui > 0)
+			{
+				iStopWatchTui = 0;
+				--stopwatchTuiNUM;
+			}
+			else
+			{
+				iStopWatchTui = 1;
 			}
 		}
 	}
@@ -404,11 +532,13 @@ public class GoldfingerUtils : MonoBehaviour
 	{
 		if (iBlowOrDoor != 0)
 			++iTimes;
+
+		UpdateStopWatchs();
 		
 		int[] outData = new int[]{
 			0xD5, 0x58, 0x57, 14, iBlowOrDoor,
 			iHight, iLow, iCellNum, iPayCoin, iPayCoinHight,
-			iPayCoinLow, 0, 0, 0, 0,
+			iPayCoinLow, iStopWatchS, iStopWatchX, iStopWatchTou, iStopWatchTui,
             iRevCoin, 0, iLight, 0, 0, 0, 0, 0, 0};
 		int[] temp = new int[20];
 		System.Array.Copy(outData, 1, temp, 0, 20);
@@ -442,7 +572,8 @@ public class GoldfingerUtils : MonoBehaviour
 	// 吹风
 	public IEnumerator BlowBall(int blowTime)
 	{
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0.0f, 6.0f));
+		if (GameData.GetInstance().blowTiming == 0)
+       		yield return new WaitForSeconds(UnityEngine.Random.Range(0.0f, 6.0f));
 
 		iBlowOrDoor = 3;
 		iHight = blowTime >> 8 & 0xff;
@@ -451,44 +582,6 @@ public class GoldfingerUtils : MonoBehaviour
 		// 控制吹风在轮盘转到第几个格子后启动
 		iCellNum = Utils.GetRandom(1, GameData.GetInstance().maxNumberOfFields);
 	}
-
-    // 吹风
-//    public IEnumerator BlowBall(int blowTime)
-//    {
-//        float maxDelay = 5.8f;
-//        if (curDelayIdx == -1 ||
-//            curDelayIdx > delayBlowTimes.Count - 1)
-//        {
-//            int maxNumberOfFields = GameData.GetInstance().maxNumberOfFields;
-//            float delta = maxDelay / maxNumberOfFields;
-//            
-//            List<int> tmp = new List<int>();
-//            for (int i = 0; i < maxNumberOfFields; ++i)
-//                tmp.Add(i);
-//            
-//            delayBlowTimes.Clear();
-//            Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second);
-//            for (int i = 0; i < maxNumberOfFields - 1; ++i)
-//            {
-//                int index = UnityEngine.Random.Range(0, tmp.Count);
-//                delayBlowTimes.Add(tmp[index] * delta);
-//                tmp.RemoveAt(index);
-//            }
-//            delayBlowTimes.Add(tmp[0] * delta);
-//            
-//            curDelayIdx = 0;
-//        }
-//        float delayTime = delayBlowTimes[curDelayIdx++];
-//        GameEventManager.OnDebugLog(0, string.Format("Delay: {0:0.00}", delayTime));
-//        yield return new WaitForSeconds(delayTime);
-//        
-//        iBlowOrDoor = 3;
-//        iHight = blowTime >> 8 & 0xff;
-//        iLow = blowTime & 0xff;
-//        Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second);
-//        // 控制吹风在轮盘转到第几个格子后启动
-//        iCellNum = Utils.GetRandom(1, GameData.GetInstance().maxNumberOfFields);
-//    }
 
 	public void PayCoin(int coinNum)
 	{
@@ -564,19 +657,4 @@ public class GoldfingerUtils : MonoBehaviour
     {
         iRevCoin = 1;
     }
-
-//	void OnGUI()
-//	{
-//		if (GUI.Button(new Rect(250, 200, 150, 100), "开门"))
-//		{
-//			OpenGate();
-//		}
-//		
-//		if (GUI.Button(new Rect(250, 350, 150, 100), "吹风"))
-//		{
-//			Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
-//			int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
-//			BlowBall(time);
-//		}
-//	}
 }

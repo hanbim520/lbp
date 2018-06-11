@@ -10,11 +10,11 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug 		= false;		// 是否模拟出球
-	public static bool controlCode	= false;		// 是否打码
+	public static bool debug 		= true;		// 是否模拟出球
+	public static bool controlCode	= true;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
 	public static RouletteType rouletteType = RouletteType.Standard;	// 轮盘数字排列类型
-	public static string version 	= "3.7.2";
+	public static string version 	= "3.8.0";
 
     // Setting menu
     public int betTimeLimit;
@@ -36,6 +36,7 @@ public class GameData
 	public int allMax6Val;			// 全台限注6倍
 	public int allMax3Val;			// 全台限注3倍
 	public int allMax2Val;			// 全台限注2倍
+	public int blowTiming;			// 提前X秒吹球 [0, 5]
 	public int powerOffCompensate;	// 0--断电吃分 1--断电赔付
 	// 优惠卡分限
 	public int couponsStart;
@@ -59,11 +60,10 @@ public class GameData
     public int zongTui;		// 总退币
     public int zongYa;      // 总押
     public int zongPei;     // 总赔
-	public int currentZongShang;	// 当次总上分
-	public int currentZongXia;		// 当次总下分
-	public int currentWin;			// 当次赢分（有跳码时候用）
 	public int totalWin;			// 总赢分
 	public int cardCredits;			// 优惠卡送的分
+	public int totalZongYa;			// 机台的总押
+	public int totalZongPei;		// 机台的总赔
 	public Queue<KeyinKeoutRecord> keyinKeoutRecords = new Queue<KeyinKeoutRecord>();		// 上下分 投退币流水账
     private int _printTimes;   // 打码次数
     public int printTimes
@@ -75,17 +75,6 @@ public class GameData
 			SavePrintTimes();
 		}
 	}
-    private int _remainMins; // 剩余打码时间
-	public int remainMins
-	{
-        get { return _remainMins; }
-        set
-        {
-            _remainMins = value;
-			PlayerPrefs.SetInt("remainMins", _remainMins);
-            PlayerPrefs.Save();
-        }
-    }
     public int ZongYa
     {
         get { return zongYa; }
@@ -106,6 +95,28 @@ public class GameData
             CryptoPrefs.Save();
         }
     }
+	public int TotalZongYa
+	{
+		get { return totalZongYa; }
+		set
+		{
+			totalZongYa = value;
+			CryptoPrefs.SetInt("totalZongYa", totalZongYa);
+			CryptoPrefs.Save();
+		}
+
+	}
+	public int TotalZongPei
+	{
+		get { return totalZongPei; }
+		set
+		{
+			totalZongPei = value;
+			CryptoPrefs.SetInt("totalZongPei", totalZongPei);
+			CryptoPrefs.Save();
+		}
+	}
+
 	private int _lotteryCredits;
 	public int lotteryCredits		// 彩金送的分 显示在总账上面
 	{
@@ -152,7 +163,7 @@ public class GameData
 	}
 	
 
-    private int _lineId = 586;        // 线号
+    private int _lineId = 111;        // 线号
     public int lineId
     {
         get 
@@ -430,6 +441,7 @@ public class GameData
 		PlayerPrefs.SetInt("allMax6Val", allMax6Val);
 		PlayerPrefs.SetInt("allMax3Val", allMax3Val);
 		PlayerPrefs.SetInt("allMax2Val", allMax2Val);
+		PlayerPrefs.SetInt("blowTiming", blowTiming);
 		PlayerPrefs.SetInt("couponsStart", couponsStart);
 		PlayerPrefs.SetInt("couponsKeyinRatio", couponsKeyinRatio);
 		PlayerPrefs.SetInt("couponsKeoutRatio", couponsKeoutRatio);
@@ -474,6 +486,7 @@ public class GameData
 		allMax6Val = 800;
 		allMax3Val = 800;
 		allMax2Val = 800;
+		blowTiming = 0;
 		couponsStart = 100;
 		couponsKeyinRatio = 10;	// 1%~100%
 		couponsKeoutRatio = 4;	
@@ -525,11 +538,10 @@ public class GameData
         CryptoPrefs.SetInt("zongTui", zongTui);
         CryptoPrefs.SetInt("zongYa", zongYa);
         CryptoPrefs.SetInt("zongPei", zongPei);
-		CryptoPrefs.SetInt("currentWin", currentWin);
 		CryptoPrefs.SetInt("totalWin", totalWin);
+		CryptoPrefs.SetInt("totalZongYa", totalZongYa);
+		CryptoPrefs.SetInt("totalZongPei", totalZongPei);
 		CryptoPrefs.SetInt("cardCredits", cardCredits);
-		CryptoPrefs.SetInt("currentZongShang", currentZongShang);
-		CryptoPrefs.SetInt("currentZongXia", currentZongXia);
 		CryptoPrefs.SetInt("lotteryCredits", _lotteryCredits);
 		CryptoPrefs.SetInt("jackpotDaybook", _jackpotDaybook);
 		CryptoPrefs.SetInt("vipCredits", _vipCredits);
@@ -545,12 +557,11 @@ public class GameData
         zongTui = 0;
         zongYa = 0;
         zongPei = 0;
-		currentWin = 0;
+		totalZongPei = 0;
+		totalZongYa = 0;
 		totalWin = 0;
 		cardCredits = 0;
 		printTimes = 0;
-		currentZongShang = 0;
-		currentZongXia = 0;
 		_lotteryCredits = 0;
 		_jackpotDaybook = 0;
 		_vipCredits = 0;
@@ -575,7 +586,7 @@ public class GameData
         else
         {
             // Setting menu
-            betTimeLimit = PlayerPrefs.GetInt("betTimeLimit");
+			betTimeLimit = PlayerPrefs.GetInt("betTimeLimit");
             coinToScore = PlayerPrefs.GetInt("coinToScore");
 			baoji = PlayerPrefs.GetInt("baoji");
 			gameDifficulty = PlayerPrefs.GetInt("gameDifficulty");
@@ -613,6 +624,7 @@ public class GameData
 			allMax6Val = PlayerPrefs.GetInt("allMax6Val");
 			allMax3Val = PlayerPrefs.GetInt("allMax3Val");
 			allMax2Val = PlayerPrefs.GetInt("allMax2Val");
+			blowTiming = PlayerPrefs.GetInt("blowTiming");
 			couponsStart = PlayerPrefs.GetInt("couponsStart");
 			couponsKeyinRatio = PlayerPrefs.GetInt("couponsKeyinRatio");
 			couponsKeoutRatio = PlayerPrefs.GetInt("couponsKeoutRatio");
@@ -634,12 +646,11 @@ public class GameData
             zongTui = CryptoPrefs.GetInt("zongTui");
             zongYa = CryptoPrefs.GetInt("zongYa");
             zongPei = CryptoPrefs.GetInt("zongPei");
-			currentWin = CryptoPrefs.GetInt("currentWin");
+			totalZongYa = CryptoPrefs.GetInt("totalZongYa");
+			totalZongPei = CryptoPrefs.GetInt("totalZongPei");
 			totalWin = CryptoPrefs.GetInt("totalWin");
 			cardCredits = CryptoPrefs.GetInt("cardCredits");
 			_printTimes = CryptoPrefs.GetInt("printTimes");
-			currentZongShang = CryptoPrefs.GetInt("currentZongShang");
-			currentZongXia = CryptoPrefs.GetInt("currentZongXia");
 			_lotteryCredits = CryptoPrefs.GetInt("lotteryCredits", 0);
 			_jackpotDaybook = CryptoPrefs.GetInt("jackpotDaybook", 0);
 			_vipCredits = CryptoPrefs.GetInt("vipCredits", 0);
@@ -940,29 +951,23 @@ public class GameData
 		PlayerPrefs.Save();
 	}
 
-    public bool ClearAccount()
+    public void ClearAccount()
     {
-		// 桌面上有分 不能清账
-		if (CryptoPrefs.GetInt("totalCredits") > 0)
-			return false;
-
         zongShang = 0;
         zongXia = 0;
         zongYa = 0;
         zongPei = 0;
         zongTou = 0;
         zongTui = 0;
-        currentWin = 0;
         totalWin = 0;
         cardCredits = 0;
-		currentZongShang = 0;
-		currentZongXia = 0;
+		totalZongYa = 0;
+		totalZongPei = 0;
 		_lotteryCredits = 0;
 		_jackpotDaybook = 0;
 		_vipDaybook = 0;
 		_vipCredits = 0;
         SaveAccount();
-		return true;
     }
 
 	// 开始场次加一

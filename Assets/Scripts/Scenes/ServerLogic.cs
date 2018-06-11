@@ -7,8 +7,6 @@ public class ServerLogic : GameLogic
 	private UHost host;
     private float waitSendTime = 0.1f;
 
-	private const float kCalcRemainTime = 60.0f;
-	private float remainTimeIntever = 0.0f;
 	// 保存所有机台在当前局的压分记录 (用来计算全台限注)
 	public Dictionary<string, int> clientBets = new Dictionary<string, int>();
 	// 保存所有机台符合中彩金条件的压分记录 (用来计算压中的彩金分数)
@@ -82,7 +80,7 @@ public class ServerLogic : GameLogic
 			{
 				ui.ActiveDlgCard(true);
 			}
-			else if (Input.GetKeyUp(KeyCode.S))			// Check touch
+			else if (Input.GetKeyUp(KeyCode.C))			// Check touch
 			{
 				GameEventManager.OnChangeScene(Scenes.TouchCheck);
 			}
@@ -90,21 +88,8 @@ public class ServerLogic : GameLogic
 			{
 				GameEventManager.OnOpenKey();
 			}
-			else if (Input.GetKeyUp(KeyCode.B))
-			{
-				GameEventManager.OnEnterBackend();
-			}
 		}
 #endif
-		if (GameData.controlCode)
-		{
-			remainTimeIntever += Time.deltaTime;
-			if (remainTimeIntever >= kCalcRemainTime)
-			{
-				remainTimeIntever = 0;
-				CalcRemainTime();
-			}
-		}
 		UpdateServerTimer();
 	}
 
@@ -163,15 +148,6 @@ public class ServerLogic : GameLogic
 
     private void CountdownComplete()
     {
-//		ui.chooseBetEffect.SetActive(false);
-		// 切换回经典压分区
-//		if (GameData.GetInstance().displayType == 1)
-//		{
-//			GameData.GetInstance().displayType = 0;
-//			GameData.GetInstance().SaveDisplayType();
-//			ui.SetDisplay();
-//		}
-
 		timerConnectClients = new Timer(120, 0);	// 2分钟后不认球 则当故障处理
 		timerConnectClients.Tick += RecogBallTimeout;
 		timerConnectClients.Start();
@@ -251,11 +227,11 @@ public class ServerLogic : GameLogic
     {
 		Debug.Log("BlowBall");
 		gamePhase = GamePhase.Run;
+		if (GameData.GetInstance().blowTiming > 0)	// 已提前吹球
+			return;
+		
 		Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
 		int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
-//		int[] t = new int[]{1200, 1500, 2000, 2500, 3000};
-//		int time = t[Utils.GetRandom(0, 5)];
-//		GameEventManager.OnDebugLog(1, string.Format("吹风：{0}毫秒", time));
         if (!GameData.debug)
 		    base.BlowBall(time);
 		else
@@ -544,9 +520,12 @@ public class ServerLogic : GameLogic
         AppendLastBets(currentBet);
 		AppendLast10(totalCredits, totalCredits + win + luckyWin, currentBet, win, luckyWin, ballValue);
 		win += luckyWin;	// 加上彩金送的分
-        GameData.GetInstance().ZongPei += win;
+        GameData.GetInstance().zongPei += win;
+		GameData.GetInstance().totalZongPei += win;
+		GameData.GetInstance().totalZongYa += currentBet;
 		GameData.GetInstance().lotteryCredits += luckyWin;	// 保存送出去的彩金 显示在总账
 		GameData.GetInstance().jackpotDaybook += luckyWin;	// 保存送出去的彩金 显示在流水账
+		GameData.GetInstance().SaveAccount();
 		currentBet = 0;
 		totalCredits += win;
 		if (totalCredits <= 0)
@@ -661,6 +640,10 @@ public class ServerLogic : GameLogic
 		{
 			HandleCheckRepeatAble(true, connectionId, ref words);
 		}
+		else if (instr == NetInstr.ReportClientProfit)
+		{
+			RevClientProfit(ref words);
+		}
     }
 
 	/// <summary>
@@ -744,31 +727,6 @@ public class ServerLogic : GameLogic
 		{
 			totalBets.Add(totalBet);
 		}
-	}
-
-	// 计算跳码时间
-	public void CalcRemainTime()
-	{
-        int remainMins = GameData.GetInstance().remainMins;
-        if (remainMins <= 0)
-        {
-            GameData.GetInstance().remainMins = 0;
-            GameEventManager.OnChangeScene(Scenes.Backend);
-            return;
-        }
-        else
-        {
-            --remainMins;
-            if (remainMins <= 0)
-            {
-                GameData.GetInstance().remainMins = 0;
-                GameEventManager.OnChangeScene(Scenes.Backend);
-            }
-            else
-            {
-                GameData.GetInstance().remainMins = remainMins;
-            }
-        }
 	}
 
 	private void UpdateServerTimer()
@@ -994,4 +952,13 @@ public class ServerLogic : GameLogic
                 ui.RepeatEventCB();
         }
     }
+
+	public void RevClientProfit(ref string[] words)
+	{
+		int zongya, zongpei;
+		if (int.TryParse(words[1], out zongya))
+			GameData.GetInstance().TotalZongYa += zongya;
+		if (int.TryParse(words[2], out zongpei))
+			GameData.GetInstance().TotalZongPei += zongpei;
+	}
 }

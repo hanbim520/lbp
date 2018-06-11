@@ -7,70 +7,111 @@ public class StartInfo : MonoBehaviour
 	public Text txtWarning;
 	public GameObject objDlgWarning;
 	public GameObject[] objCircalRecords;
-	
+	public Text tipPrintCode;
+	public GameObject objPrinCode;
+
+	float tipElapsed = 0;
+	bool isTipShowed = false;
+
 	void Start()
 	{
+		GameData.GetInstance().ReadDataFromDisk();
+		LoadNetwork();
+		LoadHIDUtils();
+
+		GameEventManager.PrintCodeSuccess += PrintCodeSuccess;
+		GameEventManager.PrintCodeFail += PrintCodeFail;
 		SetRouletteType();
+		int deviceIndex = GameData.GetInstance().deviceIndex;
+		// 判断是否要打码
+		if (GameData.controlCode)
+		{
+			int resetAccount = PlayerPrefs.GetInt("ResetAccount", 0);
+			if (resetAccount > 0)
+			{
+				PlayerPrefs.SetInt("ResetAccount", 0);
+				PlayerPrefs.Save();
+			}
+
+			long remain = ExpiredTicks();
+			if (remain <= 0 ||
+				resetAccount > 0)
+			{
+				tipPrintCode.text = string.Format("Machine Is Expired, Please Unlock!");
+				if (deviceIndex == 1)
+				{
+					// 打码
+					objPrinCode.SetActive(true);
+					return;
+				}
+			}
+			// 显示剩余时间(分钟)
+			int mins = (int)new System.TimeSpan(remain).TotalMinutes;
+			tipPrintCode.text = string.Format("Machine Expires After: {0} mins", mins);
+		}
+
 		InitLoading();
-//		CheckEncryChip();
 	}
 
-	// 校验加密芯片
-	private void CheckEncryChip()
+	void OnDestroy()
 	{
-		// 获取加密芯片的UUID
-		EncryptChip.encryption_chip_open ();
-		byte[] uuidArray = new byte[255];
-		int uuidLen = EncryptChip.encryption_chip_get_uuid (uuidArray, 255);
-		if (uuidLen <= 0)
+		GameEventManager.PrintCodeSuccess -= PrintCodeSuccess;
+		GameEventManager.PrintCodeFail -= PrintCodeFail;
+	}
+
+	void PrintCodeSuccess(int type)
+	{
+		if (type == 40000)	// 清账
 		{
-			// 没有检测到加密芯片
-			objDlgWarning.SetActive(true);
-			txtWarning.text = "Error: Cannot find encry chip!";
+			string msg = NetInstr.ClearAccount.ToString();
+			UHost host = GameObject.Find("NetworkObject").GetComponent<UHost>();
+			host.SendToAll(msg);
 		}
-		else 
+		objPrinCode.SetActive(false);
+		InitLoading();
+	}
+
+	void PrintCodeFail()
+	{
+		objDlgWarning.SetActive(true);
+		txtWarning.text = "Unlock Machine Failed!";
+		isTipShowed = true;
+	}
+
+	void Update()
+	{
+		if (!isTipShowed)
+			return;
+
+		tipElapsed += Time.deltaTime;
+		if (tipElapsed > 2.0f)
 		{
-			string localUUID = GameData.GetInstance().EncryChipUUID;
-			string temp = "";
-			for (int i = 0; i < uuidLen; i++) 
-			{
-				temp += string.Format ("{0:X2}", uuidArray [i]);
-			}
-			if (string.IsNullOrEmpty(localUUID))
-			{
-				GameData.GetInstance().EncryChipUUID = temp;
-				InitLoading();
-			}
-			else
-			{
-				if (string.Compare(temp, localUUID) == 0)
-				{
-					InitLoading();
-				}
-				else
-				{
-					objDlgWarning.SetActive(true);
-					txtWarning.text = "Error: Encry chip is invalid!";
-				}
-			}
+			isTipShowed = false;
+			tipElapsed = 0;
+			objDlgWarning.SetActive(false);
 		}
 	}
 
 	// 初始化加载各种工具
 	private void InitLoading()
 	{
-		GameData.GetInstance().ReadDataFromDisk();
 		LoadUpdateUtils();
+
+		StartCoroutine(NextScene(GameData.controlCode ? 3.0f : 0));
+	}
+
+	IEnumerator NextScene(float delay)
+	{
+		yield return new WaitForSeconds(delay);
 		//		GameData.GetInstance().deviceIndex = 101;
 		if (GameData.GetInstance().deviceIndex > 0 && 
-		    GameData.GetInstance().deviceIndex < GameData.GetInstance().monitorDeviceIndex)
+			GameData.GetInstance().deviceIndex < GameData.GetInstance().monitorDeviceIndex)
 		{
 			Screen.SetResolution(GameData.GetInstance().resolutionWidth, GameData.GetInstance().resolutionHeight, true);
 			//			LoadInputDevice();
-			LoadHIDUtils();
-			LoadNetwork();
 			//			TextDB.LoadFile();
-			
+			LoadBVA();
+
 			GameData.GetInstance().NextLevelName = Scenes.Main;
 			UnityEngine.SceneManagement.SceneManager.LoadScene(Scenes.Loading);
 		}
@@ -141,6 +182,7 @@ public class StartInfo : MonoBehaviour
 		}
 	}
 
+	// 显示正确Logo
 	void SetRouletteType()
 	{
 		if (GameData.rouletteType == RouletteType.Standard)
@@ -153,5 +195,34 @@ public class StartInfo : MonoBehaviour
 			objCircalRecords[0].SetActive(false);
 			objCircalRecords[1].SetActive(true);
 		}
+	}
+
+	void LoadBVA()
+	{
+		#if UNITY_ANDROID
+		if (GameObject.Find("BVA") == null)
+		{
+			Object prefab = (Object)Resources.Load("BVA/BVA");
+			GameObject go = (GameObject)Instantiate(prefab);
+			go.name = "BVAAndroid";
+			prefab = null;
+		}
+		#endif
+	}
+
+	// 返回剩余的打码时间（单位tick)
+	long ExpiredTicks()
+	{
+		string date = PlayerPrefs.GetString("ExpiredDate", string.Empty);
+		if (string.IsNullOrEmpty(date))
+		{
+			System.TimeSpan ts = new System.TimeSpan(7, 0, 0, 0);
+			long next = System.DateTime.Now.Ticks + ts.Ticks;
+			PlayerPrefs.SetString("ExpiredDate", next.ToString());
+			PlayerPrefs.Save();
+			return next;
+		}
+
+		return long.Parse(date) - System.DateTime.Now.Ticks;
 	}
 }

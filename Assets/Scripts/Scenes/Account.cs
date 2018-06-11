@@ -30,13 +30,11 @@ public class Account : MonoBehaviour
 		{
 			if (en != null) en.SetActive(true);
 			if (cn != null) cn.SetActive(false);
-            SetActiveTitles(en.transform.GetChild(1));
 		}
 		else
 		{
 			if (en != null) en.SetActive(false);
 			if (cn != null) cn.SetActive(true);
-            SetActiveTitles(cn.transform.GetChild(1));
 		}
 	}
 
@@ -66,25 +64,14 @@ public class Account : MonoBehaviour
 
 	private void RecoverAccount()
 	{
-        int activeIdx = SetActiveTitles(accountRoot);
+        int activeIdx = 0;
         accountRoot.GetChild(activeIdx).Find("keyin").GetComponent<Text>().text = GameData.GetInstance().zongShang.ToString();
         accountRoot.GetChild(activeIdx).Find("keout").GetComponent<Text>().text = GameData.GetInstance().zongXia.ToString();
         accountRoot.GetChild(activeIdx).Find("tou").GetComponent<Text>().text = GameData.GetInstance().zongTou.ToString();
         accountRoot.GetChild(activeIdx).Find("tui").GetComponent<Text>().text = GameData.GetInstance().zongTui.ToString();
-        if (activeIdx == 0)
-            accountRoot.GetChild(activeIdx).Find("winnings").GetComponent<Text>().text = GameData.GetInstance().currentWin.ToString();
         accountRoot.GetChild(activeIdx).Find("total winnings").GetComponent<Text>().text = GameData.GetInstance().totalWin.ToString();
         accountRoot.GetChild(activeIdx).Find("card").GetComponent<Text>().text = GameData.GetInstance().cardCredits.ToString();
 	}
-
-    private int SetActiveTitles(Transform root)
-    {
-        int activeIdx = GameData.controlCode ? 0 : 1;
-        int nonactiveIdx = Mathf.Abs(activeIdx - 1);
-        root.GetChild(activeIdx).gameObject.SetActive(true);
-        root.GetChild(nonactiveIdx).gameObject.SetActive(false);
-        return activeIdx;
-    }
 
 	public void ExitEvent(Transform hitObject)
 	{

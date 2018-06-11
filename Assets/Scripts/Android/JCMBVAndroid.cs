@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO.Ports;
+using System;
 
-// android上与纸钞机通过com口通讯 
-public class BillAcceptorUtils : MonoBehaviour
+// android上与JCM纸钞机通过com口通讯 
+public class JCMBVAndroid : MonoBehaviour
 {
 	private AndroidSerialPort sp;	// 纸钞机通讯
-	private const float kRevBillAcceptorDataInterval	= 1.0f;
+	private const float kRevBillAcceptorDataInterval	= 0.1f;
 	private float revBillAcceptorDataElapsed			= 0f;
 	private const float kParseDataInterval				= 0.1f;
 	private float parseDataElapsed						= 0f;
@@ -15,31 +16,43 @@ public class BillAcceptorUtils : MonoBehaviour
 	private int verifyPhase 	= 0;	// 验钞阶段
 	private int billValue 		= 0;
 
-	void Start()
-	{
-		DontDestroyOnLoad(this);
-		OpenCOM();
-	}
+	bool bOpen = false;
 
 	void OnDestroy()
 	{
 		CloseCOM();
 	}
 
-	private void OpenCOM()
+	public void OpenCOM(string port)
 	{
-		sp = new AndroidSerialPort("/dev/ttyS1", 9600, Parity.Even, 8, StopBits.One);
-		sp.Open();
+		try
+		{
+			if (bOpen)
+				return;
+
+			sp = new AndroidSerialPort("/dev/" + port, 9600, Parity.Even, 8, StopBits.One);
+			sp.Open();
+			bOpen = true;
+		}
+		catch(Exception ex)
+		{
+			Debug.Log(ex.ToString());
+		}
 	}
 
 	public void CloseCOM()
 	{
+		bOpen = false;
 		if (sp != null)
 			sp.Close();
+		sp = null;
 	}
 	
 	void Update()
 	{
+		if (!bOpen)
+			return;
+		
 		parseDataElapsed += Time.deltaTime;
 		if (parseDataElapsed > kParseDataInterval)
 		{
@@ -147,5 +160,30 @@ public class BillAcceptorUtils : MonoBehaviour
 			log += string.Format("{0:X}", data[i]) + ", ";
 		}
 		DebugConsole.Log(log);
+	}
+
+	public void StartBV()
+	{
+		
+	}
+
+	public void ReturnBill()
+	{
+		
+	}
+
+	public void AcceptBill()
+	{
+		
+	}
+
+	public void DisableBV()
+	{
+
+	}
+
+	public void EnableBV()
+	{
+		
 	}
 }

@@ -237,6 +237,7 @@ public class UClient : MonoBehaviour
 		int inputDevice;
 		int powerOffCompensate;
 		int topScreenLanguage;
+		int billAcceptorType;
 		
 		if(int.TryParse(words[1], out betTimeLimit))
 			GameData.GetInstance().betTimeLimit = betTimeLimit;
@@ -329,6 +330,9 @@ public class UClient : MonoBehaviour
 			GameData.GetInstance().allMax2Val = allMax2Val;
         if (int.TryParse(words[38], out lotteryLv))
             GameData.GetInstance().lotteryLv = lotteryLv;
+		if (int.TryParse(words[39], out billAcceptorType))
+			GameData.GetInstance().billAcceptorType = billAcceptorType;
+		PlayerPrefs.SetString("ExpiredDate", words[40]);
 
 		GameData.GetInstance().SaveSetting();
 		GameEventManager.OnSyncUI();
@@ -340,7 +344,7 @@ public class UClient : MonoBehaviour
 		                           NetInstr.CheckAccount, GameData.GetInstance().deviceIndex, 
 		                           GameData.GetInstance().zongShang, GameData.GetInstance().zongXia,
 		                           GameData.GetInstance().zongTou, GameData.GetInstance().zongTui,
-		                           GameData.GetInstance().currentWin, GameData.GetInstance().totalWin,
+								   GameData.GetInstance().totalWin, GameData.GetInstance().totalWin,
 		                           GameData.GetInstance().cardCredits);
 		SendToServer(msg);
 	}
@@ -353,9 +357,9 @@ public class UClient : MonoBehaviour
 
 	private void ClearCurrentWin()
 	{
-		GameData.GetInstance().currentWin = 0;
-		GameData.GetInstance().currentZongShang = 0;
-		GameData.GetInstance().currentZongXia = 0;
+//		GameData.GetInstance().currentWin = 0;
+//		GameData.GetInstance().currentZongShang = 0;
+//		GameData.GetInstance().currentZongXia = 0;
 		GameData.GetInstance().SaveAccount();
 		SendAccountToHost();
 	}

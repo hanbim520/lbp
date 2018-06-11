@@ -15,10 +15,10 @@
 #define LOGW(...) __android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__)
 #define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-#define   MD5A  0xf2a118d4L
-#define   MD5B  0x6be15889L
-#define   MD5C  0x5f54dc4eL
-#define   MD5D  0x3b0b4233L
+#define   MD5A  0x223458d4L
+#define   MD5B  0x53578f2aL
+#define   MD5C  0x4445534eL
+#define   MD5D  0x87343bf5L
 
 #define  BIT(x)              (1UL << (x))
 /////////////////////////
@@ -228,7 +228,7 @@ char  tmpBuff[20];
     DWORDTOBUFF( &Buff[12], CheckCount);
 	DWORDTOBUFF( &Buff[16], MaxProfit);
 	
-	Md5_A = 0x6bef18d4L; Md5_B = 0x15889fdaL; Md5_C = 0x23a4dc4eL;  Md5_D = 0x3b0bf5feL;
+	Md5_A = 0x67452301L; Md5_B = 0xefcdab89L; Md5_C = 0x98badcfeL;  Md5_D = 0x10325476L;
 	JMD5(  Buff, 20,&result_A,&result_B,&result_C,&result_D);
 	Md5_A = MD5A; Md5_B = MD5B; Md5_C = MD5C;  Md5_D = MD5D;
    	Crc = result_A^result_B^result_C;
@@ -280,25 +280,27 @@ jstring Java_com_zxproduct_www_UnityPlayerActivity_GetCheckPWStringValue(JNIEnv*
 	char *buff = (char*)malloc(size);
 	memcpy(buff, point, size);
 	
-	char* day4byte = (char*)malloc(10);
-	char* altstatus4byte = (char*)malloc(10);
+	char* day4byte = (char*)malloc(4);
+	char* altstatus4byte = (char*)malloc(4);
 	int flag = GetCheckPWStringValue(buff, day4byte, altstatus4byte);	// 0:错误 1:正确
-	int *day = (int*)malloc(4);
-	memcpy(day, day4byte, 4);
 	
 	char* result = (char*)malloc(32);
 	char* strDay = (char*)malloc(10);
+	char* strBom = (char*)malloc(10);
 	sprintf(result, "%d", flag);
-	sprintf(strDay, "%d", *day);
+	sprintf(strDay, "%d", *day4byte);
+	sprintf(strBom, "%d", *altstatus4byte);
 	strcat(result, ":");
 	strcat(result, strDay);
+	strcat(result, ":");
+	strcat(result, strBom);
 	
 	jstring strResult = (*env)->NewStringUTF(env, result);
 	free(buff);
 	free(day4byte);
 	free(altstatus4byte);
-	free(day);
 	free(strDay);
+	free(strBom);
 	free(result);
 	(*env)->ReleaseByteArrayElements(env, recv_buff, point, 0);
 	return strResult;
@@ -328,16 +330,13 @@ int   DecryptIODataFromChip( unsigned char *Input, unsigned short int in_len, un
 {
 	U16  Temp = 0;
 	U16  leng = 0;
-	U16  KeyConst = 0x5975;
+	U16  KeyConst = 0xaa18;
 	U8 XorKey[] = {0x3F,0x2E,0x8A,0xA4,0x5F,0x80,0x17,0xD7,0xDE,0x5B,0x91,0xEF,0x29,0x94,0x77,0xA2,0xAB,0x13,0x1B,0x7A,0x78,0xCF,0x37,0x39,
 		                   0x9E,0x4F,0xA1,0x34,0x71,0xDC,0xBE,0x10,0x96,0xEF,0x1F,0x52,0x70,0x63,0x33,0x1B,0xF3,0xDB,0x9E,0x84,0x49,0xB4,0x8C,0xB8,
 						   0xE9,0xA4,0x18,0x68,0x4B,0xFB,0x76,0xC5,0x8C,0x5B,0x65,0xBD,0x8E,0xB9,0xA3,0x4E};
 	U8    Key1 = 0, Key2 = 0, data = 0;
-	int    Count = 2, i = 0;//, j = 0;
-//	KeyConst ^= (U16)result_A;
-//	KeyConst ^= (U16)result_B;
-//	KeyConst ^= (U16)result_C;
-//	KeyConst ^= (U16)result_D;
+	int    Count = 2, i = 0, j = 0;
+
 	for(  i = 0; i < in_len; i ++ )
 	{
 		Input[i] ^= XorKey[i];
@@ -404,14 +403,13 @@ int EncryptIOData( U8 *Input, U16  in_len, U8 *Output ,U16 EnCryptKey)
 {
 	U16  Temp = 0;
 	U16  leng = 0;
-	U16  KeyConst = 0x5a5a;
+	U16  KeyConst = 0xaa18;
 	Temp = EnCryptKey;
 	U8    Key1 = 0, Key2 = 0, data = 0;
 	int    Count = 2, i = 0, j = 0;
 	U8 XorKey[] = {0x3F,0x2E,0x8A,0xA4,0x5F,0x80,0x17,0xD7,0xDE,0x5B,0x91,0xEF,0x29,0x94,0x77,0xA2,0xAB,0x13,0x1B,0x7A,0x78,0xCF,0x37,0x39,
 		                   0x9E,0x4F,0xA1,0x34,0x71,0xDC,0xBE,0x10,0x96,0xEF,0x1F,0x52,0x70,0x63,0x33,0x1B,0xF3,0xDB,0x9E,0x84,0x49,0xB4,0x8C,0xB8,
 						   0xE9,0xA4,0x18,0x68,0x4B,0xFB,0x76,0xC5,0x8C,0x5B,0x65,0xBD,0x8E,0xB9,0xA3,0x4E};
-
 	do
 	{
 		Key1 = (U8)(EnCryptKey&0x00FF);

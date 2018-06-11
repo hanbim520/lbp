@@ -19,6 +19,10 @@ public class MainUILogic : MonoBehaviour
 	public GameObject dlgYesNO;
 	public GameObject[] cardExplains;
 	public GameObject[] objCircalRecords;	// 0:国际38孔排列 1:特殊38孔排列
+	public GameObject[] objENs;
+	public GameObject[] objCNs;
+	public GameObject[] objClassic;
+	public GameObject[] objEllipse;
 
 	public int CurChipIdx
 	{
@@ -211,11 +215,19 @@ public class MainUILogic : MonoBehaviour
 		{
 			if (setEN != null) setEN.SetActive(true);
 			if (setCN != null) setCN.SetActive(false);
+			foreach (GameObject obj in objENs)
+				obj.SetActive(true);
+			foreach (GameObject obj in objCNs)
+				obj.SetActive(false);
 		}
 		else if (GameData.GetInstance().language == 1)	// CN
 		{
 			if (setEN != null) setEN.SetActive(false);
 			if (setCN != null) setCN.SetActive(true);
+			foreach (GameObject obj in objENs)
+				obj.SetActive(false);
+			foreach (GameObject obj in objCNs)
+				obj.SetActive(true);
 		}
 	}
 
@@ -260,11 +272,19 @@ public class MainUILogic : MonoBehaviour
 		{
 			if (displayClassic != null) displayClassic.SetActive(true);
 			if (displayEllipse != null) displayEllipse.SetActive(false);
+			foreach (GameObject obj in objClassic)
+				obj.SetActive(true);
+			foreach (GameObject obj in objEllipse)
+				obj.SetActive(false);
 		}
 		else if (GameData.GetInstance().displayType == 1)	// 显示ellipse
 		{
 			if (displayClassic != null) displayClassic.SetActive(false);
 			if (displayEllipse != null) displayEllipse.SetActive(true);
+			foreach (GameObject obj in objClassic)
+				obj.SetActive(false);
+			foreach (GameObject obj in objEllipse)
+				obj.SetActive(true);
 		}
 
 		// 还原压分区筹码
@@ -282,31 +302,28 @@ public class MainUILogic : MonoBehaviour
 				rootPath = "Canvas/37 Fields/Classic/Valid Fields";
 			}
 			GameObject root = GameObject.Find(rootPath);
-			if (root != null)
+			foreach (KeyValuePair<string, int> item in betFields)
 			{
-				foreach (KeyValuePair<string, int> item in betFields)
+				int count = GameData.GetInstance().betChipValues.Count;
+				Transform target = root.transform.Find(item.Key);
+				if (target != null)
 				{
-					int count = GameData.GetInstance().betChipValues.Count;
-					Transform target = root.transform.Find(item.Key);
-					if (target != null)
+					int chipIdx = 0;
+					for (int i = 0; i < count; ++i)
 					{
-						int chipIdx = 0;
-						for (int i = 0; i < count; ++i)
-						{
-							if (item.Value >= GameData.GetInstance().betChipValues[i])
-								chipIdx = i;
-						}
-						string prefabPath = "BC" + chipIdx.ToString();
-						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath).gameObject;
-						chip.transform.SetParent(fieldChipsRoot.transform);
-						chip.transform.localScale = Vector3.one;
-						Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
-						                                target.localPosition.y * target.parent.localScale.y,
-						                                0);
-						chip.transform.localPosition = targetPos;
-						chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
-						chip.name = item.Key;
+						if (item.Value >= GameData.GetInstance().betChipValues[i])
+							chipIdx = i;
 					}
+					string prefabPath = "BC" + chipIdx.ToString();
+					GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath).gameObject;
+					chip.transform.SetParent(fieldChipsRoot.transform);
+					chip.transform.localScale = Vector3.one;
+					Vector3 targetPos = new Vector3((target.localPosition.x + target.parent.localPosition.x) * target.parent.localScale.x,
+													(target.localPosition.y + target.parent.localPosition.y) * target.parent.localScale.y,
+													0);
+					chip.transform.localPosition = targetPos;
+					chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
+					chip.name = item.Key;
 				}
 			}
 		}
@@ -322,56 +339,53 @@ public class MainUILogic : MonoBehaviour
 			}
 			GameObject vfRoot = GameObject.Find(vfRootPath);
 			GameObject ceRoot = GameObject.Find(ceRootPath);
-			//Choose Effect
-			if (vfRoot != null && ceRoot != null)
+		
+			int count = GameData.GetInstance().betChipValues.Count;
+			foreach (KeyValuePair<string, int> item in betFields)
 			{
-				int count = GameData.GetInstance().betChipValues.Count;
-				foreach (KeyValuePair<string, int> item in betFields)
+				int chipIdx = 0;
+				for (int i = 0; i < count; ++i)
 				{
-					int chipIdx = 0;
-					for (int i = 0; i < count; ++i)
-					{
-						if (item.Value >= GameData.GetInstance().betChipValues[i])
-							chipIdx = i;
-					}
+					if (item.Value >= GameData.GetInstance().betChipValues[i])
+						chipIdx = i;
+				}
 
-					List<string> prefabPath = new List<string>();
-					prefabPath.Add("SC" + chipIdx.ToString());
-					List<Transform> target = new List<Transform>();
-					int fieldName;
-					List<string> name = new List<string>();
-					name.Add(item.Key);
+				List<string> prefabPath = new List<string>();
+				prefabPath.Add("SC" + chipIdx.ToString());
+				List<Transform> target = new List<Transform>();
+				int fieldName;
+				List<string> name = new List<string>();
+				name.Add(item.Key);
 
-					// 设置小筹码
-					Transform tmpTarget = vfRoot.transform.Find(item.Key);
+				// 设置小筹码
+				Transform tmpTarget = vfRoot.transform.Find(item.Key);
+				if (tmpTarget != null)
+					target.Add(tmpTarget);
+
+				// 设置大筹码
+				if (int.TryParse(item.Key, out fieldName) || string.Equals(item.Key, "00"))
+				{
+					prefabPath.Add("BC" + chipIdx.ToString());
+					string eName = "e" + item.Key;
+					name.Add(eName);
+					tmpTarget = ceRoot.transform.Find(eName);
 					if (tmpTarget != null)
 						target.Add(tmpTarget);
-
-					// 设置大筹码
-					if (int.TryParse(item.Key, out fieldName) || string.Equals(item.Key, "00"))
+				}
+				
+				if (target.Count > 0)
+				{
+					for (int i = 0; i < prefabPath.Count; ++i)
 					{
-						prefabPath.Add("BC" + chipIdx.ToString());
-						string eName = "e" + item.Key;
-						name.Add(eName);
-						tmpTarget = ceRoot.transform.Find(eName);
-						if (tmpTarget != null)
-							target.Add(tmpTarget);
-					}
-					
-					if (target.Count > 0)
-					{
-						for (int i = 0; i < prefabPath.Count; ++i)
-						{
-							GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath[i]).gameObject;
-							chip.transform.SetParent(fieldChipsRoot.transform);
-							chip.transform.localScale = Vector3.one;
-							Vector3 targetPos = new Vector3(target[i].localPosition.x * target[i].parent.localScale.x,
-							                                target[i].localPosition.y * target[i].parent.localScale.y,
-							                                0);
-							chip.transform.localPosition = targetPos;
-							chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
-							chip.name = name[i];
-						}
+						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath[i]).gameObject;
+						chip.transform.SetParent(fieldChipsRoot.transform);
+						chip.transform.localScale = Vector3.one;
+						Vector3 targetPos = new Vector3((target[i].localPosition.x + target[i].parent.localPosition.x) * target[i].parent.localScale.x,
+														(target[i].localPosition.y + target[i].parent.localPosition.y) * target[i].parent.localScale.y,
+						                                0);
+						chip.transform.localPosition = targetPos;
+						chip.transform.GetChild(0).GetComponent<Text>().text = item.Value.ToString();
+						chip.name = name[i];
 					}
 				}
 			}
@@ -434,7 +448,7 @@ public class MainUILogic : MonoBehaviour
 					if (curChipIdx < 0 || curChipIdx >= betChipsNum)
 						curChipIdx = i;
 					if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
-					chooseBetEffect.transform.localPosition = betChip.transform.localPosition + new Vector3(0, 10f, 0);
+					chooseBetEffect.transform.localPosition = betChip.transform.localPosition + new Vector3(-42, 10f, 0);
 				}
 				betChip.transform.localScale = Vector3.one;
 				betChip.GetComponent<ButtonEvent>().receiver = gameObject;
@@ -991,11 +1005,9 @@ public class MainUILogic : MonoBehaviour
 			
 			chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
 			
-			Vector3 targetPos = new Vector3(hitObject.localPosition.x * hitObject.parent.localScale.x,
-			                                hitObject.localPosition.y * hitObject.parent.localScale.y,
+			Vector3 targetPos = new Vector3((hitObject.localPosition.x + hitObject.parent.localPosition.x) * hitObject.parent.localScale.x,
+											(hitObject.localPosition.y + hitObject.parent.localPosition.y) * hitObject.parent.localScale.y,
 			                                0);
-//			iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
-//			                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", hitObject.name + ":" + bet.ToString()));
 			chip.transform.localPosition = targetPos;
 			FieldChipMoveComplete(hitObject.name + ":" + bet.ToString());
 
@@ -1012,11 +1024,9 @@ public class MainUILogic : MonoBehaviour
 				chip.name = targetObject.name + " temp";
 				chip.transform.GetChild(0).GetComponent<Text>().text = bet.ToString();
 				
-				targetPos = new Vector3(targetObject.localPosition.x * targetObject.parent.localScale.x,
-				                        targetObject.localPosition.y * targetObject.parent.localScale.y,
+				targetPos = new Vector3((targetObject.localPosition.x + targetObject.parent.localPosition.x) * targetObject.parent.localScale.x,
+										(targetObject.localPosition.y + targetObject.parent.localPosition.y) * targetObject.parent.localScale.y,
 				                        0);
-//				iTween.MoveTo(chip, iTween.Hash("time", 0.5, "islocal", true, "position", targetPos, 
-//				                                "oncomplete", "FieldChipMoveComplete", "oncompletetarget", gameObject, "oncompleteparams", targetObject.name + ":" + bet.ToString()));
 				chip.transform.localPosition = targetPos;
 				FieldChipMoveComplete(targetObject.name + ":" + bet.ToString());
 			}
@@ -1172,7 +1182,7 @@ public class MainUILogic : MonoBehaviour
 		}
 
 		if (!chooseBetEffect.activeSelf) chooseBetEffect.SetActive(true);
-		chooseBetEffect.transform.localPosition = hitObject.localPosition + new Vector3(0, 10f, 0);
+		chooseBetEffect.transform.localPosition = hitObject.localPosition + new Vector3(-42, 10f, 0);
 	}
 
 	void Update()
@@ -1181,7 +1191,7 @@ public class MainUILogic : MonoBehaviour
 			DetectInputEvents();
 		UpdateTimer();
 
-		if (GameData.debug)
+//		if (GameData.debug)
 		{
 			if (Input.GetKeyDown(KeyCode.UpArrow))
 			{
@@ -1198,14 +1208,6 @@ public class MainUILogic : MonoBehaviour
 			else if (Input.GetKeyDown(KeyCode.R))
 			{
 				GameEventManager.OnReceiveCoin(1000);
-			}
-			else if (Input.GetKeyDown(KeyCode.D))
-			{
-				DoubleEvent();
-			}
-			else if (Input.GetKeyDown(KeyCode.A))
-			{
-				BetSeries(SeriesName.SmallSeries);
 			}
 		}
 	}
@@ -1313,6 +1315,13 @@ public class MainUILogic : MonoBehaviour
 	{
 		--timeLimit;
 		countdown.transform.Find("Text").GetComponent<Text>().text = timeLimit.ToString();
+		if (GameData.GetInstance().deviceIndex == 1 &&
+			GameData.GetInstance().blowTiming == timeLimit)
+		{
+			Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
+			int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
+			gameLogic.BlowBall(time);
+		}
 	}
 
 	private void CountdownComplete()
@@ -1381,12 +1390,18 @@ public class MainUILogic : MonoBehaviour
 				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Jackpot Points Ellipse/" : "Canvas/38 Fields/Jackpot Points Ellipse/";
 				jackpot.transform.localScale = Vector3.one * 0.5f;
 			}
-			jackpot.transform.localPosition = GameObject.Find(chooseEffectPath + refrenceName).transform.localPosition;
+			Transform target = GameObject.Find(chooseEffectPath + refrenceName).transform;
+			jackpot.transform.localPosition = new Vector3((target.localPosition.x + target.parent.localPosition.x) * target.parent.localScale.x,
+														  (target.localPosition.y + target.parent.localPosition.y) * target.parent.localScale.y,
+														  0);
 			if (GameData.GetInstance().displayType == 1)	// 椭圆压分区
 			{
 				GameObject go = Instantiate(jackpot);
 				go.transform.SetParent(root.transform);
-				go.transform.localPosition = GameObject.Find(chooseEffectPath + "e" + refrenceName).transform.localPosition;
+				Transform smallTarget = GameObject.Find(chooseEffectPath + "e" + refrenceName).transform;
+				go.transform.localPosition = new Vector3((smallTarget.localPosition.x + smallTarget.parent.localPosition.x) * smallTarget.parent.localScale.x,
+														 (smallTarget.localPosition.y + smallTarget.parent.localPosition.y) * smallTarget.parent.localScale.y,
+														 0);
 				go.transform.localScale = Vector3.one * 0.7f;
 			}
 		}
@@ -1498,7 +1513,9 @@ public class MainUILogic : MonoBehaviour
 			}
 		}
 		crown.SetActive(true);
-		crown.transform.localPosition = target.localPosition;
+		crown.transform.localPosition = new Vector3((target.localPosition.x + target.parent.localPosition.x) * target.parent.localScale.x, 
+													(target.localPosition.y + target.parent.localPosition.y) * target.parent.localScale.y, 
+													0);
 
 		// 出提示语
 		GameEventManager.OnPrompt(PromptId.Result, result);
@@ -1800,9 +1817,10 @@ public class MainUILogic : MonoBehaviour
 	string[] smallSeries37 = new string[]{ "5-8", "10-11", "13-16", "23-24", "27-30", "33-36" };			// 都1个注
 	string[] orphaline37 = new string[]{ "1", "6-9", "14-17", "17-20", "31-34" };							// 都1个注
 	string[] zeroSpiel37 = new string[]{ "0-3", "12-15", "26", "32-35" };									// 都1个注
-	string[] biSeries37 = new string[]{ "0-2-3", "4-7", "12-15", "18-21", "19-22", "32-35", "25-26-28-29"}; // "0-2-3"和"25-26-28-29"投2个注，其他1个注
-	// 区域押分(大区 小区 5/8区 其他区)
-	public void BetSeries(SeriesName name)
+	string[] bigSeries37 = new string[]{ "0-2-3", "4-7", "12-15", "18-21", "19-22", "32-35", "25-26-28-29"}; // "0-2-3"和"25-26-28-29"投2个注，其他1个注
+
+	// 区域押分(大区)
+	public void BigSeries()
 	{
 		if (gameLogic.isPayingCoin || 
 			IsDlgActived() || 
@@ -1811,24 +1829,7 @@ public class MainUILogic : MonoBehaviour
 			!gameLogic.bCanBet)
 			return;
 
-		string[] series = new string[]{""};
-//		if (GameData.GetInstance().maxNumberOfFields == 37)
-//		{
-//			
-//		}
-//		else
-//		{
-//			
-//		}
-		if (name == SeriesName.BigSeries)
-			series = biSeries37;
-		else if (name == SeriesName.SmallSeries)
-			series = smallSeries37;
-		else if (name == SeriesName.Orphaline)
-			series = orphaline37;
-		else if (name == SeriesName.ZeroSpiel)
-			series = zeroSpiel37;
-		
+		string[] series = bigSeries37;
 		int bet = GameData.GetInstance().betChipValues[curChipIdx];
 		foreach (string key in series)
 		{
@@ -1840,6 +1841,57 @@ public class MainUILogic : MonoBehaviour
 			}
 			GameEventManager.OnFieldClick(key, bet);
 		}
+		SetDisplay();
+	}
+
+	// 区域押分(5/8区)
+	public void SmallSeries()
+	{
+		if (gameLogic.isPayingCoin || 
+			IsDlgActived() || 
+			gameLogic.LogicPhase != GamePhase.Countdown || 
+			gameLogic.IsLock ||
+			!gameLogic.bCanBet)
+			return;
+
+		string[] series = smallSeries37;
+		int bet = GameData.GetInstance().betChipValues[curChipIdx];
+		foreach (string key in series)
+			GameEventManager.OnFieldClick(key, bet);
+		SetDisplay();
+	}
+
+	// 区域押分(0区)
+	public void ZeroSeries()
+	{
+		if (gameLogic.isPayingCoin || 
+			IsDlgActived() || 
+			gameLogic.LogicPhase != GamePhase.Countdown || 
+			gameLogic.IsLock ||
+			!gameLogic.bCanBet)
+			return;
+
+		string[] series = zeroSpiel37;
+		int bet = GameData.GetInstance().betChipValues[curChipIdx];
+		foreach (string key in series)
+			GameEventManager.OnFieldClick(key, bet);
+		SetDisplay();
+	}
+
+	// 区域押分(其他区)
+	public void OrphalineSeries()
+	{
+		if (gameLogic.isPayingCoin || 
+			IsDlgActived() || 
+			gameLogic.LogicPhase != GamePhase.Countdown || 
+			gameLogic.IsLock ||
+			!gameLogic.bCanBet)
+			return;
+
+		string[] series = orphaline37;
+		int bet = GameData.GetInstance().betChipValues[curChipIdx];
+		foreach (string key in series)
+			GameEventManager.OnFieldClick(key, bet);
 		SetDisplay();
 	}
 }

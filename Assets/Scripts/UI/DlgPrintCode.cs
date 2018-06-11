@@ -52,7 +52,7 @@ public class DlgPrintCode : MonoBehaviour
         }
 
         int machineId = GameData.GetInstance().machineId;
-        int currentWin = GameData.GetInstance().currentWin;
+		int currentWin = GameData.GetInstance().totalWin;
         int totalWin = GameData.GetInstance().totalWin;
         int printTimes = GameData.GetInstance().printTimes;
         txtMachineId.text = machineId.ToString();
@@ -114,7 +114,7 @@ public class DlgPrintCode : MonoBehaviour
 		{
 			int lineId = GameData.GetInstance().lineId;
 			int machineId = GameData.GetInstance().machineId;
-			int currentWin = GameData.GetInstance().currentWin;
+			int currentWin = GameData.GetInstance().totalWin;
 			int totalWin = GameData.GetInstance().totalWin;
 			int printTimes = GameData.GetInstance().printTimes;
 			CheckUserInput(lineId, machineId, totalWin, currentWin, printTimes, checkCodeNum, userInput);

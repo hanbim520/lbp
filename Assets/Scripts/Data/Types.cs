@@ -38,6 +38,7 @@ public struct NetInstr
 	public const int BetAbleValue		= 18; // 向主机询问某押分区能押分的值(用于检测分机限注和全台限注)
 	public const int ClearBets			= 19; // 向主机发送清除分机押分的情况
 	public const int CheckRepeatAble	= 20; // 询问主机是否可以重复押分
+	public const int ReportClientProfit	= 21; // 分机主动报告上一局结束后的分机总押 + 总赔
 }
 
 // Use for network

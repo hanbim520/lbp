@@ -367,8 +367,8 @@ public class HIDUtils : MonoBehaviour
 						if (value == 1)
 						{
 							if (int.TryParse(word[1], out days))
-								GameData.GetInstance().remainMins = 24 * 60 * days;
-							GameEventManager.OnPrintCodeSuccess();
+								Debug.Log("打码天数: " + days);
+							GameEventManager.OnPrintCodeSuccess(0);
 						}
 						else
 							GameEventManager.OnPrintCodeFail();

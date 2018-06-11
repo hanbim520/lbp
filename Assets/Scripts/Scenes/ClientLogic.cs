@@ -271,13 +271,14 @@ public class ClientLogic : GameLogic
         AppendLast10(totalCredits, totalCredits + win + luckyWin, currentBet, win, luckyWin, ballValue);
 		win += luckyWin;	// 加上彩金送的分
         GameData.GetInstance().ZongPei += win;
+		SendProfit(currentBet, win);
 		GameData.GetInstance().lotteryCredits += luckyWin;	// 保存送出去的彩金 显示在总账
 		GameData.GetInstance().jackpotDaybook += luckyWin;	// 保存送出去的彩金 显示在流水账
         currentBet = 0;
         totalCredits += win;
         if (totalCredits <= 0)
             ui.DisableCardMode();
-        
+
         yield return new WaitForSeconds(0.2f);
         
         ui.RefreshLblBet("0");
@@ -459,5 +460,12 @@ public class ClientLogic : GameLogic
 		betFields.Clear();
 		ui.RefreshLblCredits(totalCredits.ToString());
 		ui.RefreshLblBet(currentBet.ToString());
+	}
+
+	// 发送分机当前总押 总赔
+	void SendProfit(int zongya, int zongpei)
+	{
+		string msg = string.Format("{0}:{1}:{2}", NetInstr.ReportClientProfit, zongya, zongpei);
+		uclient.SendToServer(msg);
 	}
 }

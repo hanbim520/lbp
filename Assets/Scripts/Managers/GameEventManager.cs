@@ -8,6 +8,8 @@ public static class GameEventManager
     public delegate void GameEvent();
     public delegate void GameEventWithId(int eventId);
     public delegate void GameEventWithString(string text);
+	public delegate void GameEventBoolean(bool enable);
+	public delegate void GameEventIntArray(int[] data);
 	public delegate void FingerEvent(UInt16 x, UInt16 y);
 	public delegate void SerialMouseMoveEvent(sbyte deltaX, sbyte deltaY);
 	public delegate void SerialMouseButtonEvent();
@@ -17,6 +19,7 @@ public static class GameEventManager
 	public delegate void DebugLogEvent(int eventId, string log);
 	public delegate void RakeInitEvent(int type, int lineId, float startX1, float startX2, ref List<Transform> winChips);
 	public delegate void PromptEvent(PromptId promptId, int result);
+	public delegate void StopWatchEvent(int deltaS, int deltaX, int deltaTou, int deltaTui);
 	public static event GameEvent GameStart, GameOver, StartCountdown, EndCountdown;
     public static event GameEvent OpenSerial, CloseSerial;
     public static event GameEvent ClearAll, CleanAll;
@@ -36,7 +39,8 @@ public static class GameEventManager
     public static event GameEventWithId PayCoinCallback;			// 退币机发来的退币数
 	public static event GameEvent OpenKey;							// 旋转物理钥匙 (上下分)
 	public static event GameEventWithString ChangeScene;
-	public static event GameEvent PrintCodeSuccess, PrintCodeFail;
+	public static event GameEvent PrintCodeFail;
+	public static event GameEventWithId PrintCodeSuccess;
 	public static event GameEvent ClientDisconnect;					// 分机通讯断开
     public static event GameEventWithId LotteryChange;
 	public static event ChooseFieldsEvent ChooseFields;	
@@ -55,6 +59,29 @@ public static class GameEventManager
 	public static event GameEventWithId WinLightSignal;				// 中奖信号灯
     public static event GameEvent DetectPayCoinError;
     public static event GameEvent DetectRevCoinError;
+	public static event GameEventIntArray SetChipData, GetChipData;
+	public static event GameEventBoolean TalkChipEnable;
+	public static event StopWatchEvent StopWatch;
+
+	public static void OnStopWatch(int deltaS, int deltaX, int deltaTou, int deltaTui)
+	{
+		if (StopWatch != null) StopWatch(deltaS, deltaX, deltaTou, deltaTui);
+	}
+
+	public static void OnTalkChipEnable(bool enable)
+	{
+		if (TalkChipEnable != null) TalkChipEnable(enable);
+	}
+
+	public static void OnGetChipData(int[] data)
+	{
+		if (GetChipData != null) GetChipData(data);
+	}
+
+	public static void OnSetChipData(int[] data)
+	{
+		if (SetChipData != null) SetChipData(data);
+	}
 
     public static void OnDetectRevCoinError()
     {
@@ -237,9 +264,9 @@ public static class GameEventManager
         if (ChangeScene != null) ChangeScene(sceneName);
     }
 
-	public static void OnPrintCodeSuccess()
+	public static void OnPrintCodeSuccess(int type)
 	{
-		if (PrintCodeSuccess != null) PrintCodeSuccess();
+		if (PrintCodeSuccess != null) PrintCodeSuccess(type);
 	}
 
 	public static void OnPrintCodeFail()
