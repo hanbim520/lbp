@@ -549,10 +549,12 @@ public class ServerLogic : GameLogic
 			
 		if (!GameData.debug)
 		{
-			if (Application.platform == RuntimePlatform.LinuxPlayer)
-				hidUtils.OpenGate();
-			else if (Application.platform == RuntimePlatform.Android)
-				goldfingerUtils.OpenGate();
+			#if UNITY_STANDALONE_LINUX
+			hidUtils.OpenGate();
+			#endif
+			#if UNITY_ANDROID
+			goldfingerUtils.OpenGate();
+			#endif
 		}
 		else
 			StartCoroutine(SimulateCloseGate());

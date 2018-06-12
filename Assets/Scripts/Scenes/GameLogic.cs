@@ -172,10 +172,12 @@ public class GameLogic : MonoBehaviour
     protected virtual void Start()
     {
         ui = GameObject.Find("UILogic").GetComponent<MainUILogic>();
-		if (Application.platform == RuntimePlatform.LinuxPlayer)
-			hidUtils = GameObject.Find("HIDUtils").GetComponent<HIDUtils>();
-		else if (Application.platform == RuntimePlatform.Android)
-			goldfingerUtils = GameObject.Find("AndroidHIDUtils").GetComponent<GoldfingerUtils>();
+		#if UNITY_STANDALONE_LINUX
+		hidUtils = GameObject.Find("HIDUtils").GetComponent<HIDUtils>();
+		#endif
+		#if UNITY_ANDROID
+		goldfingerUtils = GameObject.Find("AndroidHIDUtils").GetComponent<GoldfingerUtils>();
+		#endif
 		FixExitAbnormally();
         RegisterEvents();
     }
@@ -621,48 +623,54 @@ public class GameLogic : MonoBehaviour
 
 	private void OpenGate()
 	{
-		if (Application.platform == RuntimePlatform.LinuxPlayer)
-		{
-			hidUtils.OpenGate();
-		}
-		else if (Application.platform == RuntimePlatform.Android)
-		{
-//			goldfingerUtils.OpenGate();
-            Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
-            int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
-            StartCoroutine(goldfingerUtils.BlowBall(time));
-		}
+		#if UNITY_STANDALONE_LINUX
+		hidUtils.OpenGate();
+		#endif
+		#if UNITY_ANDROID
+//		goldfingerUtils.OpenGate();
+        Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
+        int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
+        StartCoroutine(goldfingerUtils.BlowBall(time));
+		#endif
 	}
 	
 	private void StopPayCoin()
 	{
-		if (Application.platform == RuntimePlatform.LinuxPlayer)
-			hidUtils.StopPayCoin();
-		else if (Application.platform == RuntimePlatform.Android)
-			goldfingerUtils.StopPayCoin();
+		#if UNITY_STANDALONE_LINUX
+		hidUtils.StopPayCoin();
+		#endif
+		#if UNITY_ANDROID
+		goldfingerUtils.StopPayCoin();
+		#endif
 	}
 	
 	private void PayCoin(int coinNum)
 	{
-		if (Application.platform == RuntimePlatform.LinuxPlayer)
-			hidUtils.PayCoin(coinNum);
-		else if (Application.platform == RuntimePlatform.Android)
-            goldfingerUtils.PayCoin(coinNum);
+		#if UNITY_STANDALONE_LINUX
+		hidUtils.PayCoin(coinNum);
+		#endif
+		#if UNITY_ANDROID
+        goldfingerUtils.PayCoin(coinNum);
+		#endif
 	}
 	
 	private void SendCheckInfo()
 	{
-		if (Application.platform == RuntimePlatform.LinuxPlayer)
-			hidUtils.SendCheckInfo();
-		else if (Application.platform == RuntimePlatform.Android)
-			goldfingerUtils.SendCheckInfo();
+		#if UNITY_STANDALONE_LINUX
+		hidUtils.SendCheckInfo();
+		#endif
+		#if UNITY_ANDROID
+		goldfingerUtils.SendCheckInfo();
+		#endif
 	}
 	
 	public void BlowBall(int time)
 	{
-		if (Application.platform == RuntimePlatform.LinuxPlayer)
-			hidUtils.BlowBall(time);
-		else if (Application.platform == RuntimePlatform.Android)
-			StartCoroutine(goldfingerUtils.BlowBall(time));
+		#if UNITY_STANDALONE_LINUX
+		hidUtils.BlowBall(time);
+		#endif
+		#if UNITY_ANDROID
+		StartCoroutine(goldfingerUtils.BlowBall(time));
+		#endif
 	}
 }
