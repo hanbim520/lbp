@@ -84,7 +84,8 @@ public class UClient : MonoBehaviour
 			case NetworkEventType.DataEvent:       
 				if (dataSize > 0)
 				{
-					HandleDataEvent(ref recBuffer);
+					byte[] decompress = Utils.Decompress(recBuffer);
+					HandleDataEvent(ref decompress);
 				}
 				break;
 			case NetworkEventType.DisconnectEvent: 
@@ -215,6 +216,7 @@ public class UClient : MonoBehaviour
 				return;
 
 			byte[] buffer = Utils.StringToBytes(msg);
+			buffer = Utils.Compress(buffer);
 			byte error;
 			NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
 		}

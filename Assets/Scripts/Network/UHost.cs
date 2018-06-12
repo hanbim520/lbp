@@ -104,7 +104,8 @@ public class UHost : MonoBehaviour
 			case NetworkEventType.DataEvent: 
 				if (dataSize > 0)
 				{
-					HandleDataEvent(ref recBuffer, connectionId);
+					byte[] decompress = Utils.Decompress(recBuffer);
+					HandleDataEvent(ref decompress, connectionId);
 				}
 				break;
 			case NetworkEventType.DisconnectEvent: 
@@ -201,6 +202,7 @@ public class UHost : MonoBehaviour
 		try
 		{
 			byte[] buffer = Utils.StringToBytes(msg);
+			buffer = Utils.Compress(buffer);
 			foreach (int connectionId in allConnections)
 			{
 				byte error;
@@ -218,6 +220,7 @@ public class UHost : MonoBehaviour
 		try
 		{
 			byte[] buffer = Utils.StringToBytes(msg);
+			buffer = Utils.Compress(buffer);
 			byte error;
 			NetworkTransport.Send(hostId, connectionId, reliableChannelId, buffer, buffer.Length, out error);
 		}

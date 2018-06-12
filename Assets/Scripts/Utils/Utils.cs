@@ -4,6 +4,8 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Collections;
+using System.IO;
+using System.IO.Compression;
 
 public static class Utils
 {
@@ -20,17 +22,11 @@ public static class Utils
 
 	public static byte[] StringToBytes(string str)
 	{
-//		byte[] bytes = new byte[str.Length * sizeof(char)];
-//		System.Buffer.BlockCopy(str.ToCharArray(), 0, bytes, 0, bytes.Length);
-//		return bytes;
 		return System.Text.ASCIIEncoding.Default.GetBytes(str);
 	}
 	
 	public static string BytesToString(byte[] bytes)
 	{
-//		char[] chars = new char[bytes.Length / sizeof(char)];
-//		System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
-//		return new string(chars);
 		return System.Text.ASCIIEncoding.Default.GetString(bytes);
 	}
 
@@ -439,5 +435,56 @@ public static class Utils
 			num = num / 10;
 		}
 		return ret;
+	}
+
+	public static long CopyTo(this Stream source, Stream destination)
+	{
+		byte[] buffer = new byte[1024];
+		int bytesRead;
+		long totalBytes = 0;
+		while((bytesRead = source.Read(buffer, 0, buffer.Length)) > 0)
+		{
+			destination.Write(buffer, 0, bytesRead);
+			totalBytes += bytesRead;
+		}
+		return totalBytes;
+	}
+
+	/// <summary>
+	/// 解压缩字节数组
+	/// </summary>
+	/// <param name="str"></param>
+	public static byte[] Decompress(byte[] inputBytes)
+	{
+		//System.IO.Compression.DeflateStream
+		using (MemoryStream inputStream = new MemoryStream(inputBytes))
+		{
+			using (MemoryStream outStream = new MemoryStream())
+			{
+				using (DeflateStream zipStream = new DeflateStream(inputStream, CompressionMode.Decompress))
+				{
+					CopyTo(zipStream, outStream);
+					zipStream.Close();
+					return outStream.ToArray();
+				}
+			}
+		}
+	}
+
+	/// <summary>
+	/// 压缩字节数组
+	/// </summary>
+	/// <param name="str"></param>
+	public static byte[] Compress(byte[] inputBytes)
+	{    
+		using (MemoryStream outStream = new MemoryStream())
+		{
+			using (DeflateStream zipStream = new DeflateStream(outStream, CompressionMode.Compress, true))
+			{
+				zipStream.Write(inputBytes, 0, inputBytes.Length);
+				zipStream.Close(); //很重要，必须关闭，否则无法正确解压
+				return outStream.ToArray();
+			}
+		}
 	}
 }
