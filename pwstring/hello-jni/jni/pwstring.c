@@ -281,15 +281,15 @@ jstring Java_com_zxproduct_www_UnityPlayerActivity_GetCheckPWStringValue(JNIEnv*
 	memcpy(buff, point, size);
 	
 	char* day4byte = (char*)malloc(4);
-	char* altstatus4byte = (char*)malloc(4);
-	int flag = GetCheckPWStringValue(buff, day4byte, altstatus4byte);	// 0:错误 1:正确
+	int altstatus4byte = 0;
+	int flag = GetCheckPWStringValue(buff, day4byte, &altstatus4byte);	// 0:错误 1:正确
 	
 	char* result = (char*)malloc(32);
 	char* strDay = (char*)malloc(10);
 	char* strBom = (char*)malloc(10);
 	sprintf(result, "%d", flag);
 	sprintf(strDay, "%d", *day4byte);
-	sprintf(strBom, "%d", *altstatus4byte);
+	sprintf(strBom, "%d", altstatus4byte);
 	strcat(result, ":");
 	strcat(result, strDay);
 	strcat(result, ":");
@@ -298,7 +298,6 @@ jstring Java_com_zxproduct_www_UnityPlayerActivity_GetCheckPWStringValue(JNIEnv*
 	jstring strResult = (*env)->NewStringUTF(env, result);
 	free(buff);
 	free(day4byte);
-	free(altstatus4byte);
 	free(strDay);
 	free(strBom);
 	free(result);
@@ -377,7 +376,7 @@ int   DecryptIODataFromChip( unsigned char *Input, unsigned short int in_len, un
 	return leng;
 }
 
-int  GetCheckPWStringValue( char *pwstring_in, char *day4byte, char *altstatus4byte )
+int  GetCheckPWStringValue( char *pwstring_in, char *day4byte, int *altstatus4byte )
 {
 	//int i;
 	char  decrypt_buff[20];

@@ -88,18 +88,18 @@ public class DlgPrintCode2 : MonoBehaviour
 			}
 
 			DebugConsole.Log("打码成功");
-			if (int.TryParse(word[1], out days))
-			{
-				long ticks = System.DateTime.Now.Ticks + new System.TimeSpan(days, 0, 0, 0).Ticks;
-				PlayerPrefs.SetString("ExpiredDate", ticks.ToString());
-				PlayerPrefs.Save();
-			}
 			if (int.TryParse(word[2], out type)) 	// 40000--清账
 			{
 				DebugConsole.Log("打码类型: " + type);
 				if (type == 40000)
 				{
 					GameData.GetInstance().ClearAccount();
+				}
+				else if (int.TryParse(word[1], out days))
+				{
+					long ticks = System.DateTime.Now.Ticks + new System.TimeSpan(days, 0, 0, 0).Ticks;
+					PlayerPrefs.SetString("ExpiredDate", ticks.ToString());
+					PlayerPrefs.Save();
 				}
 			}
 			GameEventManager.OnPrintCodeSuccess(type);

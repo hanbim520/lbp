@@ -187,7 +187,7 @@ public class GameLogic : MonoBehaviour
         UnregisterEvents();
 		if (revCoinCount > 0)
 		{
-			GameData.GetInstance().AppendKeyinKeoutRecords(revCoinCount, 0, 0, 0, 0);
+			GameData.GetInstance().AppendKeyinKeoutRecords(0, 0, revCoinCount, 0, 0);
 			revCoinCount = 0;
 		}
     }
@@ -250,7 +250,7 @@ public class GameLogic : MonoBehaviour
 
     protected void DetectRevCoinComplete()
     {
-		GameData.GetInstance().AppendKeyinKeoutRecords(revCoinCount, 0, 0, 0, 0);
+		GameData.GetInstance().AppendKeyinKeoutRecords(0, 0, revCoinCount, 0, 0);
 		revCoinCount = 0;
         timerRevCoin = null;
         goldfingerUtils.StopRevCoin();
