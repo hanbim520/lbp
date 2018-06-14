@@ -26,5 +26,5 @@ int GetPWCheckValue4(long LineID, long CilentID, long MaxProfit, long Profit, lo
 void CreateCheckPWString( long LineID, long CilentID,  long  MaxProfit, long Profit, long CheckCount, long crc,  long pwstring_in, char *checkstr_out );
 // recv_buff: 从加密片得到的数据(有效字节12个——去掉指令头和尾部无用字节)
 // day4byte: 4个字节的天数(long型)
-int  GetCheckPWStringValue( char *recv_buff, char *day4byte, int *altstatus4byte );
+int  GetCheckPWStringValue( char *recv_buff, int *day4byte, int *altstatus4byte );
 #endif

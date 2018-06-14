@@ -311,7 +311,8 @@ public class MainUILogic : MonoBehaviour
 					int chipIdx = 0;
 					for (int i = 0; i < count; ++i)
 					{
-						if (item.Value >= GameData.GetInstance().betChipValues[i])
+						if (item.Value >= GameData.GetInstance().betChipValues[i] &&
+							GameData.GetInstance().betChipValues[i] > 0)
 							chipIdx = i;
 					}
 					string prefabPath = "BC" + chipIdx.ToString();
@@ -346,7 +347,8 @@ public class MainUILogic : MonoBehaviour
 				int chipIdx = 0;
 				for (int i = 0; i < count; ++i)
 				{
-					if (item.Value >= GameData.GetInstance().betChipValues[i])
+					if (item.Value >= GameData.GetInstance().betChipValues[i] &&
+						GameData.GetInstance().betChipValues[i] > 0)
 						chipIdx = i;
 				}
 
@@ -637,15 +639,16 @@ public class MainUILogic : MonoBehaviour
 						int chipIdx = 0;
 						for (int i = 0; i < betChipCount; ++i)
 						{
-							if (info.Value >= GameData.GetInstance().betChipValues[i])
+							if (info.Value >= GameData.GetInstance().betChipValues[i] &&
+								GameData.GetInstance().betChipValues[i] > 0)
 								chipIdx = i;
 						}
 						
 						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
 						chip.transform.SetParent(fieldChipsRoot.transform);
 						chip.transform.localScale = Vector3.one;
-						Vector3 targetPos = new Vector3(target.localPosition.x * target.parent.localScale.x,
-						                                target.localPosition.y * target.parent.localScale.y,
+						Vector3 targetPos = new Vector3((target.localPosition.x + target.parent.localPosition.x) * target.parent.localScale.x,
+														(target.localPosition.y + target.parent.localPosition.y) * target.parent.localScale.y,
 						                                0);
 						chip.transform.localPosition = targetPos;
 						chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
@@ -705,15 +708,16 @@ public class MainUILogic : MonoBehaviour
 					{
 						for (int i = 0; i < betChipCount; ++i)
 						{
-							if (info.Value >= GameData.GetInstance().betChipValues[i])
+							if (info.Value >= GameData.GetInstance().betChipValues[i] &&
+								GameData.GetInstance().betChipValues[i] > 0)
 								chipIdx = i;
 						}
 						
 						GameObject chip = PoolManager.Pools["Stuff"].Spawn(prefabPath + chipIdx.ToString()).gameObject;
 						chip.transform.SetParent(fieldChipsRoot.transform);
 						chip.transform.localScale = Vector3.one;
-						Vector3 targetPos = new Vector3(target1.localPosition.x * target1.parent.localScale.x,
-						                                target1.localPosition.y * target1.parent.localScale.y,
+						Vector3 targetPos = new Vector3((target1.localPosition.x + target1.parent.localPosition.x)* target1.parent.localScale.x,
+														(target1.localPosition.y + target1.parent.localPosition.y)* target1.parent.localScale.y,
 						                                0);
 						chip.transform.localPosition = targetPos;
 						chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
@@ -726,8 +730,8 @@ public class MainUILogic : MonoBehaviour
 						GameObject chip = PoolManager.Pools["Stuff"].Spawn("SC" + chipIdx.ToString()).gameObject;
 						chip.transform.SetParent(fieldChipsRoot.transform);
 						chip.transform.localScale = Vector3.one;
-						Vector3 targetPos = new Vector3(target2.localPosition.x * target2.parent.localScale.x,
-						                                target2.localPosition.y * target2.parent.localScale.y,
+						Vector3 targetPos = new Vector3((target2.localPosition.x + target2.parent.localPosition.x) * target2.parent.localScale.x,
+														(target2.localPosition.y + target2.parent.localPosition.y) * target2.parent.localScale.y,
 						                                0);
 						chip.transform.localPosition = targetPos;
 						chip.transform.GetChild(0).GetComponent<Text>().text = info.Value.ToString();
@@ -991,7 +995,8 @@ public class MainUILogic : MonoBehaviour
                 int count = GameData.GetInstance().betChipValues.Count;
                 for (int i = 0; i < count; ++i)
                 {
-                    if (credit >= GameData.GetInstance().betChipValues[i])
+                    if (credit >= GameData.GetInstance().betChipValues[i] &&
+						GameData.GetInstance().betChipValues[i] > 0)
 					{
                         chipIdx = i;
 					}
@@ -1074,7 +1079,8 @@ public class MainUILogic : MonoBehaviour
 				int count = GameData.GetInstance().betChipValues.Count;
 				for (int i = 0; i < count; ++i)
 				{
-					if (credit >= GameData.GetInstance().betChipValues[i])
+					if (credit >= GameData.GetInstance().betChipValues[i] &&
+						GameData.GetInstance().betChipValues[i] > 0)
 					{
 						chipIdx = i;
 					}
@@ -1383,7 +1389,7 @@ public class MainUILogic : MonoBehaviour
 			if (GameData.GetInstance().displayType == 0)	// 传统压分区
 			{
 				chooseEffectPath = GameData.GetInstance().maxNumberOfFields == 37 ? "Canvas/37 Fields/Jackpot Points Classic/" : "Canvas/38 Fields/Jackpot Points Classic/";
-				jackpot.transform.localScale = Vector3.one;
+				jackpot.transform.localScale = Vector3.one * 0.9f;
 			}
 			else
 			{
@@ -1402,7 +1408,7 @@ public class MainUILogic : MonoBehaviour
 				go.transform.localPosition = new Vector3((smallTarget.localPosition.x + smallTarget.parent.localPosition.x) * smallTarget.parent.localScale.x,
 														 (smallTarget.localPosition.y + smallTarget.parent.localPosition.y) * smallTarget.parent.localScale.y,
 														 0);
-				go.transform.localScale = Vector3.one * 0.7f;
+				go.transform.localScale = Vector3.one * 0.6f;
 			}
 		}
 		prefab = null;

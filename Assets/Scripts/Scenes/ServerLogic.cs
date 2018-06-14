@@ -140,6 +140,7 @@ public class ServerLogic : GameLogic
 		
 		if (ui.CurChipIdx != -1)
 			ui.chooseBetEffect.SetActive(true);
+		ui.RefreshLblBet("0");
 		ui.RefreshLblWin("0");
         ui.RefreshLblCredits(totalCredits.ToString());
 		ui.Countdown();
@@ -540,7 +541,6 @@ public class ServerLogic : GameLogic
         host.SendToAll(NetInstr.SyncLottery.ToString() + ":" + totalLottery.ToString());
         GameEventManager.OnLotteryChange(totalLottery);
 
-        ui.RefreshLblBet("0");
 		if (win > 0)
 			ui.RefreshLblWin(win.ToString());
 		else

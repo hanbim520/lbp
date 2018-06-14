@@ -183,6 +183,7 @@ public class ClientLogic : GameLogic
         ClearVariables();
         if (ui.CurChipIdx != -1)
             ui.chooseBetEffect.SetActive(true);
+		ui.RefreshLblBet("0");
         ui.RefreshLblWin("0");
         ui.RefreshLblCredits(totalCredits.ToString());
         ui.ResetCountdown();
@@ -281,7 +282,6 @@ public class ClientLogic : GameLogic
 
         yield return new WaitForSeconds(0.2f);
         
-        ui.RefreshLblBet("0");
         if (win > 0)
             ui.RefreshLblWin(win.ToString());
         else

@@ -492,28 +492,32 @@ public class UnityPlayerActivity extends Activity
     {
         try
         {
-//            filePath += "/udisk0";
-            CallCSLog("getFiles:" + filePath);
+            CallCSLog("getFiles filepath: " + filePath);
+            String[] subpaths = { "", "/udisk0" };
             File root = new File(filePath);
-            if (root.exists())
+            for (int i = 0; i < subpaths.length; ++i)
             {
-                File[] files = root.listFiles();
-                String fileName = "update";
-                String apkName = "update.apk";
-                for(File file:files)
+                String path = filePath + subpaths[i];
+                File tmp = new File(path);
+                if (tmp.exists())
+                    root = tmp;
+            }
+            File[] files = root.listFiles();
+            String fileName = "update";
+            String apkName = "update.apk";
+            for(File file:files)
+            {
+                if(file.isDirectory())
+                    continue;
+                if (file.getName().equals(fileName))
                 {
-                    if(!file.isDirectory())
-                    {
-                        if (file.getName().equals(fileName))
-                        {
-                            CallCSLog("File name:" + file.getName());
-                            decryFile(file);
-                        }
-                        else if (file.getName().equals(apkName))
-                        {
-                            installAPK(filePath + "/" + apkName);
-                        }
-                    }
+                    CallCSLog("File name:" + file.getName());
+                    decryFile(file);
+                }
+                else if (file.getName().equals(apkName))
+                {
+                    CallCSLog("installAPK file.getPath():" + file.getPath());
+                    installAPK(file.getPath());
                 }
             }
         }
