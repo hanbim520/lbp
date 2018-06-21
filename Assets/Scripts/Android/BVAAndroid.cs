@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class BVAAndroid : MonoBehaviour
 {
+	public static string PortName = "ttyS1";
+
 	int type = -1;
 
 	void Start()
 	{
 		DontDestroyOnLoad(this);
-		LoadScript("ttyS3");
+		LoadScript(PortName);
 	}
 
 	public void LoadScript(string port)

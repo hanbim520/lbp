@@ -10,11 +10,11 @@ using System.Collections.Generic;
  */
 public class GameData
 {
-	public static bool debug 		= true;		// 是否模拟出球
+	public static bool debug 		= false;		// 是否模拟出球
 	public static bool controlCode	= true;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
 	public static RouletteType rouletteType = RouletteType.Standard;	// 轮盘数字排列类型
-	public static string version 	= "3.8.0";
+	public static string version 	= "4.2.0";
 
     // Setting menu
     public int betTimeLimit;
@@ -629,7 +629,7 @@ public class GameData
 			couponsKeyinRatio = PlayerPrefs.GetInt("couponsKeyinRatio");
 			couponsKeoutRatio = PlayerPrefs.GetInt("couponsKeoutRatio");
 			beginSessions = PlayerPrefs.GetInt("beginSessions");
-            maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
+			maxNumberOfFields = PlayerPrefs.GetInt("maxNumberOfFields");
             lotteryLv = PlayerPrefs.GetInt("lotteryLv");
 			lotteryCondition = PlayerPrefs.GetInt("lotteryCondition");
 			lotteryBase = PlayerPrefs.GetInt("lotteryBase");

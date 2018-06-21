@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using System.Collections.Generic;
 
 public class StartInfo : MonoBehaviour
 {
@@ -97,7 +98,7 @@ public class StartInfo : MonoBehaviour
 	{
 		LoadUpdateUtils();
 
-		StartCoroutine(NextScene(GameData.controlCode ? 3.0f : 0));
+		StartCoroutine(NextScene(GameData.controlCode ? 1.5f : 0));
 	}
 
 	IEnumerator NextScene(float delay)
@@ -200,9 +201,9 @@ public class StartInfo : MonoBehaviour
 	void LoadBVA()
 	{
 		#if UNITY_ANDROID
-		if (GameObject.Find("BVA") == null)
+		if (GameObject.Find("BVAAndroid") == null)
 		{
-			Object prefab = (Object)Resources.Load("BVA/BVA");
+			Object prefab = (Object)Resources.Load("BVA/BVAAndroid");
 			GameObject go = (GameObject)Instantiate(prefab);
 			go.name = "BVAAndroid";
 			prefab = null;

@@ -61,7 +61,7 @@ public class DlgPrintCode2 : MonoBehaviour
 			IntPtr methodId = AndroidJNIHelper.GetMethodID(jo.GetRawClass(), "GetCheckPWStringValue");
 			// 获取打码结果
 			string result = AndroidJNI.CallStringMethod(jo.GetRawObject(), methodId, blah);
-			DebugConsole.Log("result: " + result);
+//			DebugConsole.Log("result: " + result);
 			char[] split = {':'};
 			string[] word = result.Split(split);
 			if (word.Length < 3)
@@ -74,8 +74,6 @@ public class DlgPrintCode2 : MonoBehaviour
 			GameData.GetInstance().printTimes += 1;
 			if (value != 1)
 			{
-				DebugConsole.Log("打码失败");
-
 				printtimes = GameData.GetInstance().printTimes;
 				inputD.text = printtimes.ToString();
 				checkcode = GetCheckCode(lineId, machineId, profit, profit, printtimes);
@@ -87,10 +85,9 @@ public class DlgPrintCode2 : MonoBehaviour
 				return;
 			}
 
-			DebugConsole.Log("打码成功");
 			if (int.TryParse(word[2], out type)) 	// 40000--清账
 			{
-				DebugConsole.Log("打码类型: " + type);
+//				DebugConsole.Log("打码类型: " + type);
 				if (type == 40000)
 				{
 					GameData.GetInstance().ClearAccount();

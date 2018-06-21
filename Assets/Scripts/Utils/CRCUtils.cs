@@ -20,4 +20,19 @@ public class CRCUtils
 		}
 		return new byte[] { (byte)(crcval & 0x00FF), (byte)((crcval & 0xFF00) >> 8) };
 	}
+
+	public static int[] JCMCRC(int[] data, int length, int seed)
+	{
+		int crcval = seed;
+		int i, q, c;
+		for (i = 0; i < length; ++i)
+		{
+			c = data[i] & 0xFF;
+			q = (crcval ^ c) & 0x0F;
+			crcval = (crcval >> 4) ^ (q * 0x1081);
+			q = (crcval ^ ( c >> 4)) & 0x0F;
+			crcval = (crcval >> 4) ^ (q * 0x1081);
+		}
+		return new int[] { crcval & 0x00FF, (crcval & 0xFF00) >> 8 };
+	}
 }

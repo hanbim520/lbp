@@ -48,10 +48,51 @@ public class GoldfingerUtils : MonoBehaviour
 	private int iStopWatchTou	= 0;		// 码表投币信号 A9
 	private int iStopWatchTui	= 0;		// 码表退币信号 B9
 
-	private int stopwatchSNUM	= 0;		// 码表将要上分量
-	private int stopwatchXNUM	= 0;		// 码表将要下分量
-	private int stopwatchTouNUM	= 0;		// 码表将要投币量
-	private int stopwatchTuiNUM	= 0;		// 码表将要退币量
+	private int _stopwatchSNUM	= 0;		// 码表将要上分量
+	private int _stopwatchXNUM	= 0;		// 码表将要下分量
+	private int _stopwatchTouNUM	= 0;		// 码表将要投币量
+	private int _stopwatchTuiNUM	= 0;		// 码表将要退币量
+
+	int stopwatchSNUM
+	{
+		get { return _stopwatchSNUM; }
+		set
+		{
+			_stopwatchSNUM = value;
+			PlayerPrefs.SetInt("stopwatchSNUM", _stopwatchSNUM);
+			PlayerPrefs.Save();
+		}
+	}
+	int stopwatchXNUM
+	{
+		get { return _stopwatchXNUM; }
+		set
+		{ 
+			_stopwatchXNUM = value;
+			PlayerPrefs.SetInt("stopwatchXNUM", _stopwatchXNUM);
+			PlayerPrefs.Save();
+		}
+	}
+	int stopwatchTouNUM
+	{
+		get { return _stopwatchTouNUM; }
+		set
+		{
+			_stopwatchTouNUM = value;
+			PlayerPrefs.SetInt("stopwatchTouNUM", _stopwatchTouNUM);
+			PlayerPrefs.Save();
+		}
+	}
+	int stopwatchTuiNUM
+	{
+		get { return _stopwatchTuiNUM; }
+		set
+		{
+			_stopwatchTuiNUM = value;
+			PlayerPrefs.SetInt("stopwatchTuiNUM", _stopwatchTuiNUM);
+			PlayerPrefs.Save();
+		}
+	}
 
 	private	int iRevValRound	= 0;		// 第1次收到球号时的圈数
 	private int iRevValCell		= 0;		// 第1次收到球号时的格数
@@ -77,6 +118,10 @@ public class GoldfingerUtils : MonoBehaviour
 	void Start()
 	{
 		DontDestroyOnLoad(this);
+		_stopwatchSNUM = PlayerPrefs.GetInt("stopwatchSNUM");
+		_stopwatchXNUM = PlayerPrefs.GetInt("stopwatchXNUM");
+		_stopwatchTouNUM = PlayerPrefs.GetInt("stopwatchTouNUM");
+		_stopwatchTuiNUM = PlayerPrefs.GetInt("stopwatchTuiNUM");
 		OpenCOM();
 		GameEventManager.WinLightSignal += WinLightSignal;
 		GameEventManager.StartCountdown += StartCountdown;
@@ -419,10 +464,10 @@ public class GoldfingerUtils : MonoBehaviour
 				if (data[25] != Utils.CrcAddXor(temp, 24))
 				{
 					TalkToChip();
-					DebugConsole.Log("校验不通过");
+//					DebugConsole.Log("校验不通过");
 					return;
 				}
-				DebugConsole.Log("芯片回传:" + Utils.ToString(ref data));
+//				DebugConsole.Log("芯片回传:" + Utils.ToString(ref data));
 				GameEventManager.OnGetChipData(data);
 			}
 			else
@@ -436,26 +481,21 @@ public class GoldfingerUtils : MonoBehaviour
 
 	void TalkChipEnable(bool enable)
 	{
-		DebugConsole.Log("TalkChipEnable " + enable);
 		talkToChip = enable;
 	}
 
 	// 发送数据给加密片
 	void TalkToChip()
 	{
-		DebugConsole.Log("TalkToChip1");
 		if (outChipDate == null)
 			return; 
 		
-		DebugConsole.Log("TalkToChip2");
 		sp.WriteData(ref outChipDate);
-		DebugConsole.Log("TalkToChip3");
 		talkToChip = false;
 	}
 
 	void SetChipData(int[] data)
 	{
-		DebugConsole.Log("TalkToChip3");
 		outChipDate = new int[37];
 		outChipDate[0] = 0xD5;
 		outChipDate[1] = 0x66;

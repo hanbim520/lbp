@@ -1078,6 +1078,13 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().blowTiming = page2Val[7];
 			GameData.GetInstance().billAcceptorType = billAcceptorList.value;
 			GameData.GetInstance().SaveSetting();
+
+			GameObject objBVA = GameObject.Find("BVAAndroid");
+			if (objBVA != null)
+			{
+				BVAAndroid bva = objBVA.GetComponent<BVAAndroid>();
+				bva.LoadScript(BVAAndroid.PortName);
+			}
 			
             int idx = GameData.GetInstance().backendLanguage;
             ShowWarning(Notifies.saveSuccess[idx], true);
@@ -1199,7 +1206,7 @@ public class BackendLogic : MonoBehaviour
 		}
 		else if (Utils.StringIsEquals(name, "blow timing"))
 		{
-			value = Mathf.Clamp(value, 0, 5);
+			value = Mathf.Clamp(value, 0, 7);
 		}
     }
 

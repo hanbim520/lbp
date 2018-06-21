@@ -62,6 +62,12 @@ public static class GameEventManager
 	public static event GameEventIntArray SetChipData, GetChipData;
 	public static event GameEventBoolean TalkChipEnable;
 	public static event StopWatchEvent StopWatch;
+	public static event GameEventWithString BVTip;
+
+	public static void OnBVTip(string tip)
+	{
+		if (BVTip != null) BVTip(tip);
+	}
 
 	public static void OnStopWatch(int deltaS, int deltaX, int deltaTou, int deltaTui)
 	{

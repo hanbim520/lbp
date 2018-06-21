@@ -6,10 +6,10 @@ using System.IO.Ports;
 public class ICTBVAndroid : MonoBehaviour
 {
 	private AndroidSerialPort sp;	// 纸钞机通讯
-	private const float kRevBillAcceptorDataInterval	= 1.0f;
-	private float revBillAcceptorDataElapsed			= 0f;
-	private const float kParseDataInterval				= 0.1f;
-	private float parseDataElapsed						= 0f;
+	private const float kRequestStatusInterval	= 1.0f;
+	private float requestStatusElapsed			= 0f;
+	private const float kParseDataInterval		= 0.1f;
+	private float parseDataElapsed				= 0f;
 
 	private int powerUpPhase	= 0;	// 启动阶段
 	private int verifyPhase 	= 0;	// 验钞阶段
@@ -26,7 +26,7 @@ public class ICTBVAndroid : MonoBehaviour
 	{
 		try
 		{
-			if (!bOpen)
+			if (bOpen)
 				return;
 			
 			sp = new AndroidSerialPort("/dev/" + port, 9600, Parity.Even, 8, StopBits.One);
@@ -35,38 +35,51 @@ public class ICTBVAndroid : MonoBehaviour
 		}
 		catch(System.Exception ex)
 		{
-			Debug.Log(ex.ToString());
+			Debug.Log("OpenCOM: " + ex.ToString());
 		}
 	}
 
 	public void CloseCOM()
 	{
-		if (sp != null)
+		try
 		{
-			sp.Close();
 			bOpen = false;
+			if (sp != null)
+				sp.Close();
+			sp = null;
 		}
-		sp = null;
+		catch(System.Exception ex)
+		{
+			Debug.Log("CloseCOM: " + ex.ToString());
+		}
 	}
 	
 	void Update()
 	{
 		if (!bOpen)
 			return;
-		
-		parseDataElapsed += Time.deltaTime;
-		if (parseDataElapsed > kParseDataInterval)
+
+		try
 		{
-			ParseBillAcceptorData();
-			parseDataElapsed = 0;
+			parseDataElapsed += Time.deltaTime;
+			if (parseDataElapsed > kParseDataInterval)
+			{
+				ParseBillAcceptorData();
+				parseDataElapsed = 0;
+			}
+
+			requestStatusElapsed += Time.deltaTime;
+			if (requestStatusElapsed > kRequestStatusInterval)
+			{
+				RevBillAcceptorData();
+				requestStatusElapsed = 0;
+			}
 		}
-		
-		revBillAcceptorDataElapsed += Time.deltaTime;
-		if (revBillAcceptorDataElapsed > kRevBillAcceptorDataInterval)
+		catch(System.Exception ex)
 		{
-			RevBillAcceptorData();
-			revBillAcceptorDataElapsed = 0;
+			Debug.Log("update: " + ex.ToString());
 		}
+
 	}
 
 	private void ParseBillAcceptorData()
@@ -100,7 +113,7 @@ public class ICTBVAndroid : MonoBehaviour
 				sp.WriteData(ref outData);
 			}
 			// 记录币值
-			else if (data[i] >= 0x40 && verifyPhase == 0)
+			else if (data[i] >= 0x40 && data[i] <= 0x45 && verifyPhase == 0)
 			{
 				verifyPhase = 1;
 				billValue = data[i];
@@ -132,10 +145,10 @@ public class ICTBVAndroid : MonoBehaviour
 				verifyPhase  = 0;
 				billValue    = 0;
 				powerUpPhase = 0;
-//				PrintLog(string.Format("Bill Acceptor Exception Code:{0:X}", data[i]));
+//				DebugConsole.Log(string.Format("Bill Acceptor Exception Code:{0:X}", data[i]));
 			}
 		}
-//		PrintData(ref data);
+		PrintData(ref data);
 	}
 
 	// 检测纸钞机的状态
@@ -145,21 +158,15 @@ public class ICTBVAndroid : MonoBehaviour
 		sp.WriteData(ref outData);
 	}
 
-	private void PrintLog(string content)
+	void PrintData(ref int[] data)
 	{
-		if (GameData.debug)
-			DebugConsole.Log(content);
-	}
-
-	private void PrintData(ref int[] data)
-	{
-		string log = "data.Length:" + data.Length + "--";
-		for (int i = 0; i < data.Length; ++i)
-		{
-			if (i > 0 && i % 20 == 0)
-				log += "\n";
-			log += string.Format("{0:X}", data[i]) + ", ";
-		}
-		DebugConsole.Log(log);
+//		string log = "data.Length:" + data.Length + "--";
+//		for (int i = 0; i < data.Length; ++i)
+//		{
+//			if (i > 0 && i % 20 == 0)
+//				log += "\n";
+//			log += string.Format("{0:X}", data[i]) + ", ";
+//		}
+//		DebugConsole.Log(log);
 	}
 }

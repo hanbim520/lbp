@@ -23,6 +23,7 @@ public class MainUILogic : MonoBehaviour
 	public GameObject[] objCNs;
 	public GameObject[] objClassic;
 	public GameObject[] objEllipse;
+	public GameObject	objBVTip;
 
 	public int CurChipIdx
 	{
@@ -106,6 +107,7 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.BreakdownTip += BreakdownTip;
 		GameEventManager.SyncUI += SyncUI;
 		GameEventManager.EnterBackend += EnterBackend;
+		GameEventManager.BVTip += BVTip;
     }
 
     private void UnregisterEvents()
@@ -116,6 +118,7 @@ public class MainUILogic : MonoBehaviour
 		GameEventManager.BreakdownTip -= BreakdownTip;
 		GameEventManager.SyncUI -= SyncUI;
 		GameEventManager.EnterBackend -= EnterBackend;
+		GameEventManager.BVTip -= BVTip;
     }
 
 	private void Init()
@@ -1197,7 +1200,7 @@ public class MainUILogic : MonoBehaviour
 			DetectInputEvents();
 		UpdateTimer();
 
-//		if (GameData.debug)
+		if (GameData.debug)
 		{
 			if (Input.GetKeyDown(KeyCode.UpArrow))
 			{
@@ -1899,5 +1902,17 @@ public class MainUILogic : MonoBehaviour
 		foreach (string key in series)
 			GameEventManager.OnFieldClick(key, bet);
 		SetDisplay();
+	}
+
+	void BVTip(string tip)
+	{
+		if (string.IsNullOrEmpty(tip))
+		{
+			objBVTip.SetActive(false);
+			return;
+		}
+		objBVTip.SetActive(true);
+		Text txtTip = objBVTip.transform.Find("Text").GetComponent<Text>();
+		txtTip.text = tip;
 	}
 }
