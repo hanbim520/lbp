@@ -17,8 +17,11 @@ public class StartInfo : MonoBehaviour
 	void Start()
 	{
 		GameData.GetInstance().ReadDataFromDisk();
-		LoadNetwork();
-		LoadHIDUtils();
+		if (GameData.GetInstance().deviceIndex < GameData.GetInstance().monitorDeviceIndex)
+		{
+			LoadNetwork();
+			LoadHIDUtils();
+		}
 
 		GameEventManager.PrintCodeSuccess += PrintCodeSuccess;
 		GameEventManager.PrintCodeFail += PrintCodeFail;
