@@ -220,11 +220,7 @@ public class StartInfo : MonoBehaviour
 		string date = PlayerPrefs.GetString("ExpiredDate", string.Empty);
 		if (string.IsNullOrEmpty(date))
 		{
-			System.TimeSpan ts = new System.TimeSpan(7, 0, 0, 0);
-			long next = System.DateTime.Now.Ticks + ts.Ticks;
-			PlayerPrefs.SetString("ExpiredDate", next.ToString());
-			PlayerPrefs.Save();
-			return ts.Ticks;
+			return 0;
 		}
 
 		return long.Parse(date) - System.DateTime.Now.Ticks;

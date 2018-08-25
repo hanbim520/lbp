@@ -142,8 +142,6 @@ public class ICTBVAndroid : MonoBehaviour
 			}
 			else if (data[i] >= 0x20 && data[i] <= 0x2f)
 			{
-				verifyPhase  = 0;
-				billValue    = 0;
 				powerUpPhase = 0;
 //				DebugConsole.Log(string.Format("Bill Acceptor Exception Code:{0:X}", data[i]));
 			}

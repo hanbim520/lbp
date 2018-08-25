@@ -192,7 +192,8 @@ public class BackendLogic : MonoBehaviour
         else if (string.Equals(hitObject.name, "save"))
         {
 			if (menuSetting.activeSelf)
-            	SaveSetting();
+//				SaveSetting();
+				StartCoroutine(SaveSetting());
 			else if (menuLottery.activeSelf)
 				SaveLottery();
 			GameEventManager.OnSyncData();
@@ -997,7 +998,8 @@ public class BackendLogic : MonoBehaviour
 		}
 	}
 
-    private void SaveSetting()
+//	private void SaveSetting()
+	private IEnumerator SaveSetting()
     {
         List<int> page1Val = new List<int>();
         List<int> page2Val = new List<int>();
@@ -1021,8 +1023,25 @@ public class BackendLogic : MonoBehaviour
                 }
             }
 
+			int idx = GameData.GetInstance().backendLanguage;
+			bool bChangeCoinToScore = true;		// 能否直接修改‘币代分’
+			if (GameData.GetInstance().coinToScore != page1Val[1])
+			{
+				host.SendToAll(NetInstr.CheckAccount.ToString());
+				float duration = 2.5f;
+				ShowWarning(Notifies.waiting[idx], true, duration);
+				yield return new WaitForSeconds(duration);
+				UpdateHostAccount();
+				foreach (KeyValuePair<int, AccountItem> kvp in otherDevice)
+				{
+					if (kvp.Value.keout > 0 || kvp.Value.keyin > 0 || kvp.Value.payCoin > 0 || kvp.Value.receiveCoin > 0)
+						bChangeCoinToScore = false;
+				}
+			}
+
             GameData.GetInstance().betTimeLimit = page1Val[0];
-            GameData.GetInstance().coinToScore = page1Val[1];
+			if (bChangeCoinToScore)
+            	GameData.GetInstance().coinToScore = page1Val[1];
             GameData.GetInstance().baoji = page1Val[2];
             GameData.GetInstance().gameDifficulty = page1Val[3];
             GameData.GetInstance().betChipValues[0] = page1Val[4];
@@ -1086,8 +1105,13 @@ public class BackendLogic : MonoBehaviour
 				bva.LoadScript(BVAAndroid.PortName);
 			}
 			
-            int idx = GameData.GetInstance().backendLanguage;
-            ShowWarning(Notifies.saveSuccess[idx], true);
+			if (bChangeCoinToScore)
+				ShowWarning(Notifies.saveSuccess[idx], true);
+			else
+			{
+				ShowWarning(Notifies.saveSuccess2[idx], true);
+				InitSetting();
+			}
         }
     }
 
@@ -1223,7 +1247,7 @@ public class BackendLogic : MonoBehaviour
 			{
 				AccountItem item = otherDevice.ContainsKey(deviceIndex) ? otherDevice[deviceIndex] : new AccountItem();
 				item.deviceIndex = deviceIndex;
-				int zongShang, zongXia, zongTou, zongTui, winnings, totalWinnings, card;
+				int zongShang, zongXia, zongTou, zongTui, winnings, totalWinnings, card, jackpot;
 				if (int.TryParse(words[2], out zongShang))
 					item.keyin = zongShang;
 				if (int.TryParse(words[3], out zongXia))
@@ -1238,6 +1262,8 @@ public class BackendLogic : MonoBehaviour
 					item.totalWinnings = totalWinnings;
 				if (int.TryParse(words[8], out card))
 					item.card = card;
+				if (int.TryParse(words[9], out jackpot))
+					item.jackpot = jackpot;
 				if (!otherDevice.ContainsKey(deviceIndex))
 					otherDevice.Add(deviceIndex, item);
 			}
@@ -1308,6 +1334,7 @@ public class BackendLogic : MonoBehaviour
 		item.winnings = GameData.GetInstance().totalWin;
 		item.totalWinnings = GameData.GetInstance().totalWin;
 		item.card = GameData.GetInstance().cardCredits;
+		item.jackpot = GameData.GetInstance().lotteryCredits;
 		if (!otherDevice.ContainsKey(deviceIndex))
 			otherDevice.Add(deviceIndex, item);
 	}
@@ -1328,7 +1355,7 @@ public class BackendLogic : MonoBehaviour
 			prefab = null;
 			totalNum = go.transform;
 		}
-		int keyin = 0, keout = 0, tou = 0, tui = 0, winnings = 0, totalWin = 0, card = 0;
+		int keyin = 0, keout = 0, tou = 0, tui = 0, winnings = 0, totalWin = 0, card = 0, jackpot = 0;
 		foreach (AccountItem item in otherDevice.Values)
 		{
 			keyin += item.keyin;
@@ -1338,6 +1365,7 @@ public class BackendLogic : MonoBehaviour
 			winnings += item.winnings;
 			totalWin += item.totalWinnings;
 			card += item.card;
+			jackpot += item.jackpot;
 		}
 		totalNum.Find("keyin").GetComponent<Text>().text = keyin.ToString();
 		totalNum.Find("keout").GetComponent<Text>().text = keout.ToString();
@@ -1345,6 +1373,7 @@ public class BackendLogic : MonoBehaviour
 		totalNum.Find("tui").GetComponent<Text>().text = tui.ToString();
 		totalNum.Find("total winnings").GetComponent<Text>().text = totalWin.ToString();
 		totalNum.Find("card").GetComponent<Text>().text = card.ToString();
+		totalNum.Find("total jackpot").GetComponent<Text>().text = jackpot.ToString();
 	}
 
 	private void SetBackendLanguage()

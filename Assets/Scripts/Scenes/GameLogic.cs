@@ -337,7 +337,7 @@ public class GameLogic : MonoBehaviour
         
 		GameEventManager.OnStopWatch(0, 0, 0, count);
         GameData.GetInstance().zongTui += count;
-		GameData.GetInstance().totalWin = GameData.GetInstance().zongShang + GameData.GetInstance().zongTou - GameData.GetInstance().zongXia - GameData.GetInstance().zongTui;
+		GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang - GameData.GetInstance().zongXia) + (GameData.GetInstance().zongTou - GameData.GetInstance().zongTui) * GameData.GetInstance().coinToScore;
         GameData.GetInstance().SaveAccount();
         
         ui.RefreshLblCredits(totalCredits.ToString());
@@ -368,7 +368,7 @@ public class GameLogic : MonoBehaviour
 		GameData.GetInstance().AppendKeyinKeoutRecords(0, totalCredits, 0, 0, 0);
 		GameEventManager.OnStopWatch(0, totalCredits, 0, 0);
 		GameData.GetInstance().zongXia += totalCredits;
-		GameData.GetInstance().totalWin = GameData.GetInstance().zongShang + GameData.GetInstance().zongTou - GameData.GetInstance().zongTui - GameData.GetInstance().zongXia;
+		GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang - GameData.GetInstance().zongXia) + (GameData.GetInstance().zongTou - GameData.GetInstance().zongTui) * GameData.GetInstance().coinToScore;
 		GameData.GetInstance().SaveAccount();
 
 		totalCredits = 0;
@@ -422,7 +422,7 @@ public class GameLogic : MonoBehaviour
 					GameEventManager.OnStopWatch(delta, 0, 0, 0);
 				}
 				GameData.GetInstance().cardCredits += giveCredits;
-				GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang + GameData.GetInstance().zongTou) - (GameData.GetInstance().zongXia + GameData.GetInstance().zongTui);
+				GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang - GameData.GetInstance().zongXia) + (GameData.GetInstance().zongTou - GameData.GetInstance().zongTui) * GameData.GetInstance().coinToScore;
 				GameData.GetInstance().SaveAccount();
 			}
 			else
@@ -441,7 +441,7 @@ public class GameLogic : MonoBehaviour
 					GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, 0);
 					GameEventManager.OnStopWatch(delta, 0, 0, 0);
 				}
-				GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang + GameData.GetInstance().zongTou) - (GameData.GetInstance().zongXia + GameData.GetInstance().zongTui);
+				GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang - GameData.GetInstance().zongXia) + (GameData.GetInstance().zongTou - GameData.GetInstance().zongTui) * GameData.GetInstance().coinToScore;
 				GameData.GetInstance().SaveAccount();
 			}
 			ui.RefreshLblCredits(totalCredits.ToString());
@@ -466,7 +466,7 @@ public class GameLogic : MonoBehaviour
 				GameEventManager.OnStopWatch(delta, 0, 0, 0);
 			}
 			GameData.GetInstance().cardCredits += giveCredits;
-			GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang + GameData.GetInstance().zongTou) - (GameData.GetInstance().zongXia + GameData.GetInstance().zongTui);
+			GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang - GameData.GetInstance().zongXia) + (GameData.GetInstance().zongTou - GameData.GetInstance().zongTui) * GameData.GetInstance().coinToScore;
 			GameData.GetInstance().SaveAccount();
 
 			ui.RefreshLblCredits(totalCredits.ToString());
@@ -488,7 +488,7 @@ public class GameLogic : MonoBehaviour
 				GameData.GetInstance().AppendKeyinKeoutRecords(delta, 0, 0, 0, 0);
 				GameEventManager.OnStopWatch(delta, 0, 0, 0);
 			}
-			GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang + GameData.GetInstance().zongTou) - (GameData.GetInstance().zongXia + GameData.GetInstance().zongTui);
+			GameData.GetInstance().totalWin = (GameData.GetInstance().zongShang - GameData.GetInstance().zongXia) + (GameData.GetInstance().zongTou - GameData.GetInstance().zongTui) * GameData.GetInstance().coinToScore;
 			GameData.GetInstance().SaveAccount();
 
 			ui.RefreshLblCredits(totalCredits.ToString());

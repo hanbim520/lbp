@@ -1323,6 +1323,11 @@ public class MainUILogic : MonoBehaviour
 	private void CountdownTick()
 	{
 		--timeLimit;
+		if (timeLimit < 0)
+		{
+			timeLimit = 0;
+			timerCountdown.Stop();
+		}
 		countdown.transform.Find("Text").GetComponent<Text>().text = timeLimit.ToString();
 		if (GameData.GetInstance().deviceIndex == 1 &&
 			GameData.GetInstance().blowTiming == timeLimit)

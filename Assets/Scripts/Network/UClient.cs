@@ -340,12 +340,12 @@ public class UClient : MonoBehaviour
 
 	private void SendAccountToHost()
 	{
-		string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}", 
+		string msg = string.Format("{0}:{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8}:{9}", 
 		                           NetInstr.CheckAccount, GameData.GetInstance().deviceIndex, 
 		                           GameData.GetInstance().zongShang, GameData.GetInstance().zongXia,
 		                           GameData.GetInstance().zongTou, GameData.GetInstance().zongTui,
 								   GameData.GetInstance().totalWin, GameData.GetInstance().totalWin,
-		                           GameData.GetInstance().cardCredits);
+								   GameData.GetInstance().cardCredits, GameData.GetInstance().lotteryCredits);
 		SendToServer(msg);
 	}
 

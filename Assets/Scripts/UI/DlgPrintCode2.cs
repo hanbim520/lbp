@@ -94,6 +94,8 @@ public class DlgPrintCode2 : MonoBehaviour
 				}
 				else if (int.TryParse(word[1], out days))
 				{
+					if (days == 1)					// 1天表示不限时间打码
+						days = 7300;
 					long ticks = System.DateTime.Now.Ticks + new System.TimeSpan(days, 0, 0, 0).Ticks;
 					PlayerPrefs.SetString("ExpiredDate", ticks.ToString());
 					PlayerPrefs.Save();

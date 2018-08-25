@@ -330,8 +330,8 @@ public class GoldfingerUtils : MonoBehaviour
 				{
 					int deltaCell = data[8] - iRevValCell;
                     int deltaRound = Mathf.Abs(data[7] - iRevValRound);
-                    if ((deltaRound >= 1 && deltaCell >= 0) ||
-                        (deltaRound >= 2))
+					if ((deltaRound >= 1 && deltaCell >= 0 && data[9] > 0) ||
+						(deltaRound >= 2 && data[9] > 0))
 					{
 						int idx = data[6];
 						if (idx > 0)
@@ -352,7 +352,7 @@ public class GoldfingerUtils : MonoBehaviour
 							}
 							else
 							{
-                                GameEventManager.OnDebugLog(1, string.Format("K2 {0}: {1}", idx, secondBallVal));
+								GameEventManager.OnDebugLog(1, string.Format("K2 {0}: {1}", data[9], secondBallVal));
 								GameEventManager.OnBreakdownTip(BreakdownType.RecognizeBall);
 							}
 						}
@@ -492,6 +492,7 @@ public class GoldfingerUtils : MonoBehaviour
 		
 		sp.WriteData(ref outChipDate);
 		talkToChip = false;
+		Print(ref outChipDate);
 	}
 
 	void SetChipData(int[] data)
@@ -506,6 +507,7 @@ public class GoldfingerUtils : MonoBehaviour
 		System.Array.Copy(outChipDate, 1, tmp, 0, 35);
 		int crc = Utils.CrcAddXor(tmp, 35);
 		outChipDate[36] = crc;
+		Print(ref outChipDate);
 	}
 
 	void StopWatchEvent(int deltaS, int deltaX, int deltaTou, int deltaTui)
@@ -697,4 +699,16 @@ public class GoldfingerUtils : MonoBehaviour
     {
         iRevCoin = 1;
     }
+
+	void Print(ref int[] data)
+	{
+//		string log = "data.Length:" + data.Length + "--";
+//		for (int i = 0; i < data.Length; ++i)
+//		{
+//			if (i > 0 && i % 20 == 0)
+//				log += "\n";
+//			log += string.Format("{0:X}", data[i]) + ", ";
+//		}
+//		DebugConsole.Log(log);
+	}
 }

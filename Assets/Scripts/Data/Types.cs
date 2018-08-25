@@ -57,7 +57,9 @@ public struct Notifies
 {
 	public static string[] LimitBet = new string[]{"限红不能押注"};
 	public static string[] usbDisconnected = new string[]{"Disconnect from the usb.\nCheck usb port please.", "Usb断开连接。\n请检查Usb接口。"};
-    public static string[] saveSuccess = new string[]{"Saved successfully.", "保存成功。"};
+	public static string[] saveSuccess = new string[]{"Saved successfully.", "保存成功。"};//Howmany\Coin
+	public static string[] saveSuccess2 = new string[]{"Can't modify 'Howmany\\Coin', you need clear account firtly!", "修改'投币代分'失败，须要先把账目清零。"};
+	public static string[] waiting = new string[]{"Please Wait...", "请等待..."};
 }
 
 public enum ResultType
@@ -131,6 +133,7 @@ public class AccountItem
 	public int winnings;
 	public int totalWinnings;
 	public int card;
+	public int jackpot;		// 各个分机派出的彩金
 }
 
 public enum PromptId
