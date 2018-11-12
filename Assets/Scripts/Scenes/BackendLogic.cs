@@ -541,6 +541,12 @@ public class BackendLogic : MonoBehaviour
 			root.GetChild(pageIdx).GetChild(11).Find("Text").GetComponent<Text>().text = ga.FourthBill.ToString();
 			root.GetChild(pageIdx).GetChild(12).Find("Text").GetComponent<Text>().text = ga.FifthBill.ToString();
 			root.GetChild(pageIdx).GetChild(13).Find("Text").GetComponent<Text>().text = ga.SixthBill.ToString();
+			root.GetChild(pageIdx).GetChild(14).Find("Text").GetComponent<Text>().text = ga.SeventhBill.ToString();
+			root.GetChild(pageIdx).GetChild(15).Find("Text").GetComponent<Text>().text = ga.EighthBill.ToString();
+			root.GetChild(pageIdx).GetChild(16).Find("Text").GetComponent<Text>().text = ga.NinthBill.ToString();
+			root.GetChild(pageIdx).GetChild(17).Find("Text").GetComponent<Text>().text = ga.TeenthBill.ToString();
+			root.GetChild(pageIdx).GetChild(18).Find("Text").GetComponent<Text>().text = ga.EleventhBill.ToString();
+			root.GetChild(pageIdx).GetChild(19).Find("Text").GetComponent<Text>().text = ga.TwelfthBill.ToString();
         }
 		billAcceptorList.value = GameData.GetInstance().billAcceptorType;
     }
@@ -1108,6 +1114,12 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().FourthBill = page2Val[11];
 			GameData.GetInstance().FifthBill = page2Val[12];
 			GameData.GetInstance().SixthBill = page2Val[13];
+			GameData.GetInstance().SeventhBill = page2Val[14];
+			GameData.GetInstance().EighthBill = page2Val[15];
+			GameData.GetInstance().NinthBill = page2Val[16];
+			GameData.GetInstance().TeenthBill = page2Val[17];
+			GameData.GetInstance().EleventhBill = page2Val[18];
+			GameData.GetInstance().TwelfthBill = page2Val[19];
 			GameData.GetInstance().SaveSetting();
 
 			GameObject objBVA = GameObject.Find("BVAAndroid");

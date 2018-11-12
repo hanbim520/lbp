@@ -137,6 +137,18 @@ public class ICTBVAndroid : MonoBehaviour
 					coin = GameData.GetInstance().FifthBill;
 				else if (billValue == 0x45)
 					coin = GameData.GetInstance().SixthBill;
+				else if (billValue == 0x46)
+					coin = GameData.GetInstance().SeventhBill;
+				else if (billValue == 0x47)
+					coin = GameData.GetInstance().EighthBill;
+				else if (billValue == 0x48)
+					coin = GameData.GetInstance().NinthBill;
+				else if (billValue == 0x49)
+					coin = GameData.GetInstance().TeenthBill;
+				else if (billValue == 0x4A)
+					coin = GameData.GetInstance().EleventhBill;
+				else if (billValue == 0x4B)
+					coin = GameData.GetInstance().TwelfthBill;
 				billValue = 0;
 				GameEventManager.OnReceiveCoin(coin);
 			}

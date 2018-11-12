@@ -12,6 +12,7 @@ public class PageControl : MonoBehaviour
 	public Text txtPage;
 	public GameObject btnRight;
 	public GameObject btnLeft;
+	public Transform objCalc;
 
 	public int curPage {get;set;}
 	private int lastPage;
@@ -57,6 +58,14 @@ public class PageControl : MonoBehaviour
 		}
 		SetLanguage();
 		txtPage.text = string.Format("{0}/{1}", curPage + 1, pageCount);
+		if (curPage == 0)
+		{
+			objCalc.localPosition = new Vector3(0, -26, 0);
+		}
+		else if (curPage == 1)
+		{
+			objCalc.localPosition = new Vector3(-526, -26, 0);
+		}
 	}
 
 	void SetLanguage()

@@ -14,7 +14,7 @@ public class GameData
 	public static bool controlCode	= false;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
 	public static RouletteType rouletteType = RouletteType.Standard;	// 轮盘数字排列类型
-	public static string version 	= "4.3.2";
+	public static string version 	= "4.3.3";
 
     // Setting menu
     public int betTimeLimit;
@@ -59,6 +59,12 @@ public class GameData
 	public int FourthBill;
 	public int FifthBill;
 	public int SixthBill;
+	public int SeventhBill;
+	public int EighthBill;
+	public int NinthBill;
+	public int TeenthBill;
+	public int EleventhBill;
+	public int TwelfthBill;
 
     // Account
     public int zongShang;	// 总上分
@@ -467,6 +473,12 @@ public class GameData
 		PlayerPrefs.SetInt("FourthBill", FourthBill);
 		PlayerPrefs.SetInt("FifthBill", FifthBill);
 		PlayerPrefs.SetInt("SixthBill", SixthBill);
+		PlayerPrefs.SetInt("SeventhBill", SeventhBill);
+		PlayerPrefs.SetInt("EighthBill", EighthBill);
+		PlayerPrefs.SetInt("NinthBill", NinthBill);
+		PlayerPrefs.SetInt("TeenthBill", TeenthBill);
+		PlayerPrefs.SetInt("EleventhBill", EleventhBill);
+		PlayerPrefs.SetInt("TwelfthBill", TwelfthBill);
         PlayerPrefs.Save();
     }
 
@@ -518,6 +530,12 @@ public class GameData
 		FourthBill = 20;
 		FifthBill = 50;
 		SixthBill = 100;
+		SeventhBill = 200;
+		EighthBill = 250;
+		NinthBill = 300;
+		TeenthBill = 500;
+		EleventhBill = 1000;
+		TwelfthBill = 2000;
     }
 
 	public void DefaultCustom()
@@ -663,6 +681,12 @@ public class GameData
 			FourthBill = PlayerPrefs.GetInt("FourthBill", 20);
 			FifthBill = PlayerPrefs.GetInt("FifthBill", 50);
 			SixthBill = PlayerPrefs.GetInt("SixthBill", 100);
+			SeventhBill = PlayerPrefs.GetInt("SeventhBill", 200);
+			EighthBill = PlayerPrefs.GetInt("EighthBill", 250);
+			NinthBill = PlayerPrefs.GetInt("NinthBill", 300);
+			TeenthBill = PlayerPrefs.GetInt("TeenthBill", 500);
+			EleventhBill = PlayerPrefs.GetInt("EleventhBill", 1000);
+			TwelfthBill = PlayerPrefs.GetInt("TwelfthBill", 2000);
 
             // Check account menu 
             zongShang = CryptoPrefs.GetInt("zongShang");

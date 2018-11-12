@@ -239,6 +239,7 @@ public class UClient : MonoBehaviour
 		int topScreenLanguage;
 		int billAcceptorType;
 		int firstBill, secondBill, thirdBill, fourBill, fifthBill, sixthBill;
+		int seventhBill, eighthBill, ninthBill, teenthBill, eleventhBill, twelfthBill;
 		
 		if(int.TryParse(words[1], out betTimeLimit))
 			GameData.GetInstance().betTimeLimit = betTimeLimit;
@@ -346,6 +347,18 @@ public class UClient : MonoBehaviour
 			GameData.GetInstance().FifthBill = fifthBill;
 		if (int.TryParse(words[46], out sixthBill))
 			GameData.GetInstance().SixthBill = sixthBill;
+		if (int.TryParse(words[47], out seventhBill))
+			GameData.GetInstance().SeventhBill = seventhBill;
+		if (int.TryParse(words[48], out eighthBill))
+			GameData.GetInstance().EighthBill = eighthBill;
+		if (int.TryParse(words[49], out ninthBill))
+			GameData.GetInstance().NinthBill = ninthBill;
+		if (int.TryParse(words[50], out teenthBill))
+			GameData.GetInstance().TeenthBill = teenthBill;
+		if (int.TryParse(words[51], out eleventhBill))
+			GameData.GetInstance().EleventhBill = eleventhBill;
+		if (int.TryParse(words[52], out twelfthBill))
+			GameData.GetInstance().TwelfthBill = twelfthBill;
 
 		GameData.GetInstance().SaveSetting();
 		GameEventManager.OnSyncUI();
