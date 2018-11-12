@@ -535,6 +535,12 @@ public class BackendLogic : MonoBehaviour
 			root.GetChild(pageIdx).GetChild(5).Find("Text").GetComponent<Text>().text = ga.allMax3Val.ToString();
 			root.GetChild(pageIdx).GetChild(6).Find("Text").GetComponent<Text>().text = ga.allMax2Val.ToString();
 			root.GetChild(pageIdx).GetChild(7).Find("Text").GetComponent<Text>().text = ga.blowTiming.ToString();
+			root.GetChild(pageIdx).GetChild(8).Find("Text").GetComponent<Text>().text = ga.FirstBill.ToString();
+			root.GetChild(pageIdx).GetChild(9).Find("Text").GetComponent<Text>().text = ga.SecondBill.ToString();
+			root.GetChild(pageIdx).GetChild(10).Find("Text").GetComponent<Text>().text = ga.ThirdBill.ToString();
+			root.GetChild(pageIdx).GetChild(11).Find("Text").GetComponent<Text>().text = ga.FourthBill.ToString();
+			root.GetChild(pageIdx).GetChild(12).Find("Text").GetComponent<Text>().text = ga.FifthBill.ToString();
+			root.GetChild(pageIdx).GetChild(13).Find("Text").GetComponent<Text>().text = ga.SixthBill.ToString();
         }
 		billAcceptorList.value = GameData.GetInstance().billAcceptorType;
     }
@@ -1096,6 +1102,12 @@ public class BackendLogic : MonoBehaviour
 			GameData.GetInstance().allMax2Val = page2Val[6];
 			GameData.GetInstance().blowTiming = page2Val[7];
 			GameData.GetInstance().billAcceptorType = billAcceptorList.value;
+			GameData.GetInstance().FirstBill = page2Val[8];
+			GameData.GetInstance().SecondBill = page2Val[9];
+			GameData.GetInstance().ThirdBill = page2Val[10];
+			GameData.GetInstance().FourthBill = page2Val[11];
+			GameData.GetInstance().FifthBill = page2Val[12];
+			GameData.GetInstance().SixthBill = page2Val[13];
 			GameData.GetInstance().SaveSetting();
 
 			GameObject objBVA = GameObject.Find("BVAAndroid");

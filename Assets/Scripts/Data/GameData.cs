@@ -11,10 +11,10 @@ using System.Collections.Generic;
 public class GameData
 {
 	public static bool debug 		= false;		// 是否模拟出球
-	public static bool controlCode	= true;		// 是否打码
+	public static bool controlCode	= false;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
-	public static RouletteType rouletteType = RouletteType.Special1;	// 轮盘数字排列类型
-	public static string version 	= "4.2.9";
+	public static RouletteType rouletteType = RouletteType.Standard;	// 轮盘数字排列类型
+	public static string version 	= "4.3.2";
 
     // Setting menu
     public int betTimeLimit;
@@ -51,7 +51,14 @@ public class GameData
 	public int lotteryRate;			// 彩金累计千分比(1-100)
 	public int lotteryAllocation; 	// 彩金分配(可设置范围0-100)
 	public int topScreenLanguage;	// 顶部路单屏的语言  0:EN 1:CN
-	public int billAcceptorType;	// 0:JCM 1:ICT
+	public int billAcceptorType;	// 0:JCM 1:ICT002 2:ICT104 3:ICT106
+	// 纸币值
+	public int FirstBill;
+	public int SecondBill;
+	public int ThirdBill;
+	public int FourthBill;
+	public int FifthBill;
+	public int SixthBill;
 
     // Account
     public int zongShang;	// 总上分
@@ -309,7 +316,7 @@ public class GameData
 		get { return connectClientsTime; }
 	}
 
-	private const int maxNumOfPlayers = 8;
+	private const int maxNumOfPlayers = 9;
 	public int MaxNumOfPlayers
 	{
 		get { return maxNumOfPlayers; }
@@ -454,6 +461,12 @@ public class GameData
 		PlayerPrefs.SetInt("powerOffCompensate", powerOffCompensate);
 		PlayerPrefs.SetInt("topScreenLanguage", topScreenLanguage);
 		PlayerPrefs.SetInt("billAcceptorType", billAcceptorType);
+		PlayerPrefs.SetInt("FirstBill", FirstBill);
+		PlayerPrefs.SetInt("SecondBill", SecondBill);
+		PlayerPrefs.SetInt("ThirdBill", ThirdBill);
+		PlayerPrefs.SetInt("FourthBill", FourthBill);
+		PlayerPrefs.SetInt("FifthBill", FifthBill);
+		PlayerPrefs.SetInt("SixthBill", SixthBill);
         PlayerPrefs.Save();
     }
 
@@ -499,6 +512,12 @@ public class GameData
 		powerOffCompensate = 1;
 		topScreenLanguage = 0;
 		billAcceptorType = 0;
+		FirstBill = 1;
+		SecondBill = 5;
+		ThirdBill = 10;
+		FourthBill = 20;
+		FifthBill = 50;
+		SixthBill = 100;
     }
 
 	public void DefaultCustom()
@@ -638,6 +657,12 @@ public class GameData
 			powerOffCompensate = PlayerPrefs.GetInt("powerOffCompensate", 1);
 			topScreenLanguage = PlayerPrefs.GetInt("topScreenLanguage", 0);
 			billAcceptorType = PlayerPrefs.GetInt("billAcceptorType", 0);
+			FirstBill = PlayerPrefs.GetInt("FirstBill", 1);
+			SecondBill = PlayerPrefs.GetInt("SecondBill", 5);
+			ThirdBill = PlayerPrefs.GetInt("ThirdBill", 10);
+			FourthBill = PlayerPrefs.GetInt("FourthBill", 20);
+			FifthBill = PlayerPrefs.GetInt("FifthBill", 50);
+			SixthBill = PlayerPrefs.GetInt("SixthBill", 100);
 
             // Check account menu 
             zongShang = CryptoPrefs.GetInt("zongShang");

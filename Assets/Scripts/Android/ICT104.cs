@@ -1,9 +1,10 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.IO.Ports;
+using UnityEngine;
 
-// android上与ICT002纸钞机通过com口通讯 
-public class ICTBVAndroid : MonoBehaviour
+// android上与ICT104纸钞机通过com口通讯 
+public class ICT104 : MonoBehaviour
 {
 	private AndroidSerialPort sp;	// 纸钞机通讯
 	private const float kRequestStatusInterval	= 1.0f;
@@ -28,7 +29,7 @@ public class ICTBVAndroid : MonoBehaviour
 		{
 			if (bOpen)
 				return;
-			
+
 			sp = new AndroidSerialPort("/dev/" + port, 9600, Parity.Even, 8, StopBits.One);
 			sp.Open();
 			bOpen = true;
@@ -53,7 +54,7 @@ public class ICTBVAndroid : MonoBehaviour
 			Debug.Log("CloseCOM: " + ex.ToString());
 		}
 	}
-	
+
 	void Update()
 	{
 		if (!bOpen)
@@ -100,12 +101,6 @@ public class ICTBVAndroid : MonoBehaviour
 				sp.WriteData(ref outData);
 				powerUpPhase = 0;
 			}
-			// 没有及时回复纸钞机启动
-			else if (data[0] == 0x26)
-			{
-				int[] outData = new int[] { 0x02 };
-				sp.WriteData(ref outData);
-			}
 			// 纸钞机处于抑制状态
 			else if (data[i] == 0x5E)
 			{
@@ -140,11 +135,6 @@ public class ICTBVAndroid : MonoBehaviour
 				billValue = 0;
 				GameEventManager.OnReceiveCoin(coin);
 			}
-			else if (data[i] >= 0x20 && data[i] <= 0x2f)
-			{
-				powerUpPhase = 0;
-//				DebugConsole.Log(string.Format("Bill Acceptor Exception Code:{0:X}", data[i]));
-			}
 		}
 		PrintData(ref data);
 	}
@@ -158,13 +148,13 @@ public class ICTBVAndroid : MonoBehaviour
 
 	void PrintData(ref int[] data)
 	{
-//		string log = "data.Length:" + data.Length + "--";
-//		for (int i = 0; i < data.Length; ++i)
-//		{
-//			if (i > 0 && i % 20 == 0)
-//				log += "\n";
-//			log += string.Format("{0:X}", data[i]) + ", ";
-//		}
-//		DebugConsole.Log(log);
+		//		string log = "data.Length:" + data.Length + "--";
+		//		for (int i = 0; i < data.Length; ++i)
+		//		{
+		//			if (i > 0 && i % 20 == 0)
+		//				log += "\n";
+		//			log += string.Format("{0:X}", data[i]) + ", ";
+		//		}
+		//		DebugConsole.Log(log);
 	}
 }

@@ -238,6 +238,7 @@ public class UClient : MonoBehaviour
 		int powerOffCompensate;
 		int topScreenLanguage;
 		int billAcceptorType;
+		int firstBill, secondBill, thirdBill, fourBill, fifthBill, sixthBill;
 		
 		if(int.TryParse(words[1], out betTimeLimit))
 			GameData.GetInstance().betTimeLimit = betTimeLimit;
@@ -333,6 +334,18 @@ public class UClient : MonoBehaviour
 		if (int.TryParse(words[39], out billAcceptorType))
 			GameData.GetInstance().billAcceptorType = billAcceptorType;
 		PlayerPrefs.SetString("ExpiredDate", words[40]);
+		if (int.TryParse(words[41], out firstBill))
+			GameData.GetInstance().FirstBill = firstBill;
+		if (int.TryParse(words[42], out secondBill))
+			GameData.GetInstance().SecondBill = secondBill;
+		if (int.TryParse(words[43], out thirdBill))
+			GameData.GetInstance().ThirdBill = thirdBill;
+		if (int.TryParse(words[44], out fourBill))
+			GameData.GetInstance().FourthBill = fourBill;
+		if (int.TryParse(words[45], out fifthBill))
+			GameData.GetInstance().FifthBill = fifthBill;
+		if (int.TryParse(words[46], out sixthBill))
+			GameData.GetInstance().SixthBill = sixthBill;
 
 		GameData.GetInstance().SaveSetting();
 		GameEventManager.OnSyncUI();

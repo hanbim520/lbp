@@ -27,10 +27,22 @@ public class BVAAndroid : MonoBehaviour
 			JCMBVAndroid bva = gameObject.GetComponent<JCMBVAndroid>();
 			bva.OpenCOM(port);
 		}
-		else if (type == 1)		// ICT
+		else if (type == 1)		// ICT002
 		{
 			gameObject.AddComponent<ICTBVAndroid>();
 			ICTBVAndroid bva = gameObject.GetComponent<ICTBVAndroid>();
+			bva.OpenCOM(port);
+		}
+		else if (type == 2)		// ICT104
+		{
+			gameObject.AddComponent<ICT104>();
+			ICT104 bva = gameObject.GetComponent<ICT104>();
+			bva.OpenCOM(port);
+		}
+		else if (type == 3)		// ICT106
+		{
+			gameObject.AddComponent<ICT106>();
+			ICT106 bva = gameObject.GetComponent<ICT106>();
 			bva.OpenCOM(port);
 		}
 	}
@@ -45,13 +57,29 @@ public class BVAAndroid : MonoBehaviour
 			bva.CloseCOM();
 			Destroy(gameObject.GetComponent<JCMBVAndroid>());
 		}
-		else if (type == 1)		// ICT
+		else if (type == 1)		// ICT002
 		{
 			ICTBVAndroid bva = gameObject.GetComponent<ICTBVAndroid>();
 			if (bva == null)
 				return;
 			bva.CloseCOM();
 			Destroy(gameObject.GetComponent<ICTBVAndroid>());
+		}
+		else if (type == 2)		// ICT104
+		{
+			ICT104 bva = gameObject.GetComponent<ICT104>();
+			if (bva == null)
+				return;
+			bva.CloseCOM();
+			Destroy(gameObject.GetComponent<ICT104>());
+		}
+		else if (type == 3)		// ICT106
+		{
+			ICT106 bva = gameObject.GetComponent<ICT106>();
+			if (bva == null)
+				return;
+			bva.CloseCOM();
+			Destroy(gameObject.GetComponent<ICT106>());
 		}
 	}
 }

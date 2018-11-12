@@ -542,9 +542,14 @@ public class ServerLogic : GameLogic
         GameEventManager.OnLotteryChange(totalLottery);
 
 		if (win > 0)
+		{
 			ui.RefreshLblWin(win.ToString());
+			AudioController.Play("win");
+		}
 		else
+		{
 			ui.RefreshLblWin("0");
+		}
 		ui.ClearLoseChips();
 			
 		if (!GameData.debug)

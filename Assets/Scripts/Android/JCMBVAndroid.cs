@@ -179,17 +179,17 @@ public class JCMBVAndroid : MonoBehaviour
 				AcceptBill();
 				int val = data[3];
 				if (val == 0x61)
-					billValue = 1;
+					billValue = GameData.GetInstance().FirstBill;
 				else if (val == 0x63)
-					billValue = 5;
+					billValue = GameData.GetInstance().SecondBill;
 				else if (val == 0x64)
-					billValue = 10;
+					billValue = GameData.GetInstance().ThirdBill;
 				else if (val == 0x65)
-					billValue = 20;
+					billValue = GameData.GetInstance().FourthBill;
 				else if (val == 0x66)
-					billValue = 50;
+					billValue = GameData.GetInstance().FifthBill;
 				else if (val == 0x67)
-					billValue = 100;
+					billValue = GameData.GetInstance().SixthBill;
 			}
 			else if (cmd == 0x14)
 				GameEventManager.OnBVTip("Stacking");

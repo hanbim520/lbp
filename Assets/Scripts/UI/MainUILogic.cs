@@ -47,6 +47,7 @@ public class MainUILogic : MonoBehaviour
 	private int timeLimit;
     private GameObject downHitObject;
 	private bool hitDownOpt = false;
+	private bool bPlayNoMoreBet = false;
 //    private List<Transform> lightEffects = new List<Transform>();	// 选中的压分区域(亮色)
 	// 改版后：鼠标只要移到边或角 所有关联压分区显示亮色
 	Dictionary<string, List<Transform>> lightEffects = new Dictionary<string, List<Transform>>();
@@ -1299,6 +1300,7 @@ public class MainUILogic : MonoBehaviour
 		timerCountdown.OnComplete += CountdownComplete;
 		iTween.ValueTo(gameObject, iTween.Hash("from", 1, "to", 0, "time", timeLimit,
 		                                       "onupdate", "UpdateProgress", "onupdatetarget", gameObject));
+		bPlayNoMoreBet = false;
 		timerCountdown.Start();
 		AudioController.Play("makeyourbets");
 		GameEventManager.OnPrompt(PromptId.PleaseBet, -1);
@@ -1313,7 +1315,7 @@ public class MainUILogic : MonoBehaviour
 		if (Application.platform != RuntimePlatform.OSXEditor)
 		{
 			if (!gameLogic.IsPause() &&
-				gameLogic.goldfingerUtils.GetRealtimeBallVal() > 0)
+				gameLogic.goldfingerUtils.GetRealtimeBallVal() == 1)
 			{
 				GameEventManager.OnBreakdownTip(BreakdownType.BallHaventFall);
 			}
@@ -1323,6 +1325,10 @@ public class MainUILogic : MonoBehaviour
 	private void CountdownTick()
 	{
 		--timeLimit;
+		if (timeLimit <= 5 && timeLimit > 0)
+			AudioController.Play("last_five_sec");
+		else if (timeLimit == 0)
+			AudioController.Play("last_sec");
 		if (timeLimit < 0)
 		{
 			timeLimit = 0;
@@ -1335,6 +1341,7 @@ public class MainUILogic : MonoBehaviour
 			Utils.Seed(System.DateTime.Now.Millisecond + System.DateTime.Now.Second + System.DateTime.Now.Minute + System.DateTime.Now.Hour);
 			int time = GameData.GetInstance().gameDifficulty + Utils.GetRandom(1200, 3000);
 			gameLogic.BlowBall(time);
+			AudioController.PlayMusic("blowing");
 		}
 	}
 
@@ -1347,7 +1354,11 @@ public class MainUILogic : MonoBehaviour
             mouseIcon.gameObject.SetActive(true);
         }
 		GameEventManager.OnEndCountdown();
-		AudioController.Play("nomorebets");
+		if (!bPlayNoMoreBet)
+		{
+			bPlayNoMoreBet = true;
+			AudioController.Play("nomorebets");
+		}
         if (GameData.GetInstance().deviceIndex == 1)
 		    AudioController.StopMusic(0.5f);
 		GameEventManager.OnPrompt(PromptId.NoMoreBet, -1);

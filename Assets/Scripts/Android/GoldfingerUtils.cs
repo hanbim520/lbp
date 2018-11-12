@@ -673,6 +673,7 @@ public class GoldfingerUtils : MonoBehaviour
 	private void StartCountdown()
 	{
 		bCheckBallFall = true;
+		realtimeBallVal = 0;
 	}
 
 	private void EndCountdown()
