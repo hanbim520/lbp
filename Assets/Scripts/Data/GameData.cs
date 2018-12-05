@@ -11,10 +11,10 @@ using System.Collections.Generic;
 public class GameData
 {
 	public static bool debug 		= false;		// 是否模拟出球
-	public static bool controlCode	= false;		// 是否打码
+	public static bool controlCode	= true;		// 是否打码
 	public static bool isDemo		= false;		// 演示版本(总出彩金)
 	public static RouletteType rouletteType = RouletteType.Standard;	// 轮盘数字排列类型
-	public static string version 	= "4.3.3";
+	public static string version 	= "4.3.7";
 
     // Setting menu
     public int betTimeLimit;
@@ -917,6 +917,11 @@ public class GameData
 
 	public void AppendKeyinKeoutRecords(int keyin, int keout, int receiveCoin, int payCoin, int card)
 	{
+		if (keyin == 0 && keout == 0 && 
+			receiveCoin == 0 && payCoin == 0 && 
+			card == 0)
+			return;
+		
 		KeyinKeoutRecord record = new KeyinKeoutRecord();
 		record.time = Utils.GetSystemTime();
 		record.keyin = keyin;
